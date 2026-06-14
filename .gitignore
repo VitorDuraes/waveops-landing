@@ -8,3 +8,6 @@ uploads/
 
 # Prototype host preview artifact
 .thumbnail
+
+# Internal roadmap/specs (local only, importados no Notion)
+docs/specs/

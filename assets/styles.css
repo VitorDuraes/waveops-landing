@@ -519,6 +519,19 @@ p { text-wrap: pretty; }
 .form-success .ok svg { width: 30px; height: 30px; }
 .form-success h3 { font-size: 23px; }
 .form-success p { color: var(--muted); margin-top: 10px; }
+.form-success p a { color: var(--accent-strong); font-weight: 600; }
+
+/* Lead magnet (checklist) */
+.lm-box {
+  position: relative; overflow: hidden; border: 1px solid var(--border-2); border-radius: var(--radius-lg);
+  background: linear-gradient(150deg, var(--surface-2), var(--surface));
+  display: grid; grid-template-columns: 1.15fr .85fr; gap: 0;
+}
+.lm-box::before { content: ""; position: absolute; width: 340px; height: 340px; top: -130px; right: -70px; border-radius: 50%; background: radial-gradient(circle, rgba(var(--glow), .16), transparent 65%); pointer-events: none; }
+.lm-left { padding: 44px 48px; position: relative; min-width: 0; }
+.lm-left h2 { font-size: clamp(24px, 2.8vw, 32px); }
+.lm-left p { color: var(--muted); margin-top: 14px; font-size: 16px; max-width: 440px; }
+.lm-form { padding: 40px 44px; background: var(--surface); border-left: 1px solid var(--border); min-width: 0; display: flex; flex-direction: column; justify-content: center; }
 
 /* ============================================================
    Footer
@@ -564,8 +577,9 @@ p { text-wrap: pretty; }
   .steps { grid-template-columns: repeat(3, 1fr); row-gap: 30px; }
   .step::before { display: none; }
   .audience { grid-template-columns: 1fr; gap: 28px; }
-  .cta-box { grid-template-columns: 1fr; }
+  .cta-box, .lm-box { grid-template-columns: 1fr; }
   .cta-form { border-left: none; border-top: 1px solid var(--border); }
+  .lm-form { border-left: none; border-top: 1px solid var(--border); }
   .foot-grid { grid-template-columns: 1fr 1fr; gap: 30px; }
   .foot-brand { grid-column: 1 / -1; }
 }
@@ -579,6 +593,7 @@ p { text-wrap: pretty; }
   .plans { grid-template-columns: 1fr; }
   .steps { grid-template-columns: 1fr 1fr; }
   .cta-left, .cta-form { padding: 30px 24px; }
+  .lm-left, .lm-form { padding: 30px 24px; }
   .form-row.two { grid-template-columns: 1fr; }
   .foot-grid { grid-template-columns: 1fr; }
   .section { padding-block: calc(70px * var(--dscale)); }

@@ -2,12 +2,55 @@
 (function () {
   'use strict';
 
+  /* ---- Anti-bot: tempo de preenchimento (SPEC-09 / hardening item 2) ----
+     Bots que renderizam a página costumam enviar quase instantaneamente.
+     Submits abaixo do limiar são tratados como bot: mostram sucesso, mas
+     não disparam o POST (mesma lógica silenciosa do honeypot). Bots que
+     batem direto no webhook ignoram isto: a defesa real é no n8n.
+     Ver docs/specs/SECURITY-n8n-hardening.md. */
+  const pageLoadedAt = Date.now();
+  const MIN_FILL_MS = 1200;
+  const fillTimeMs = () => Date.now() - pageLoadedAt;
+
   /* ---- Analytics helper (SPEC-02). No-op até você ativar Plausible/GA no <head>. ---- */
   function track(event, props) {
     try {
       if (window.plausible) window.plausible(event, { props: props || {} });
       if (typeof window.gtag === 'function') window.gtag('event', event, props || {});
     } catch (e) {}
+  }
+
+  // ===================================================================
+  // PONTO DE INTEGRAÇÃO COM O BACK-END (SPEC-01)
+  // Webhook n8n compartilhado pelos dois formulários (lead principal e
+  // checklist). O campo "origem" diferencia de onde veio o lead.
+  // Enquanto LEAD_ENDPOINT estiver vazio, nada é enviado: avisa no
+  // console e segue o fluxo de sucesso, sem quebrar a página.
+  // ===================================================================
+  const LEAD_ENDPOINT = 'https://cowboyhouse.app.n8n.cloud/webhook/flowops-lead';
+
+  function readUTM() {
+    const p = new URLSearchParams(window.location.search);
+    const g = (k) => p.get(k) || '';
+    return {
+      utm_source: g('utm_source'), utm_medium: g('utm_medium'), utm_campaign: g('utm_campaign'),
+      utm_content: g('utm_content'), utm_term: g('utm_term'),
+      referrer: document.referrer || '', landingUrl: window.location.href,
+    };
+  }
+
+  async function submitLead(data) {
+    if (!LEAD_ENDPOINT) {
+      console.warn('[WaveOps] LEAD_ENDPOINT não configurado: o lead NÃO foi enviado. Configure em assets/main.js (SPEC-01).', data);
+      return;
+    }
+    const res = await fetch(LEAD_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error('Falha ao enviar lead: ' + res.status);
+    return res.json().catch(() => ({}));
   }
 
   /* ---- Nav scrolled state ---- */
@@ -155,45 +198,13 @@
     });
     const submitBtn = form.querySelector('button[type="submit"]');
 
-    // ===================================================================
-    // PONTO DE INTEGRAÇÃO COM O BACK-END (SPEC-01)
-    // 1. Crie um webhook no n8n (ou um form no Formspree / Web3Forms).
-    // 2. Cole a URL em LEAD_ENDPOINT abaixo.
-    // Enquanto LEAD_ENDPOINT estiver vazio, o formulário NÃO captura de
-    // verdade: ele avisa no console e mostra sucesso, sem quebrar a página.
-    // ===================================================================
-    const LEAD_ENDPOINT = 'https://cowboyhouse.app.n8n.cloud/webhook/flowops-lead'; // webhook n8n (SPEC-01)
-
-    function readUTM() {
-      const p = new URLSearchParams(window.location.search);
-      const g = (k) => p.get(k) || '';
-      return {
-        utm_source: g('utm_source'), utm_medium: g('utm_medium'), utm_campaign: g('utm_campaign'),
-        utm_content: g('utm_content'), utm_term: g('utm_term'),
-        referrer: document.referrer || '', landingUrl: window.location.href,
-      };
-    }
-
-    async function submitLead(data) {
-      if (!LEAD_ENDPOINT) {
-        console.warn('[WaveOps] LEAD_ENDPOINT não configurado: o lead NÃO foi enviado. Configure em assets/main.js (SPEC-01).', data);
-        return;
-      }
-      const res = await fetch(LEAD_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error('Falha ao enviar lead: ' + res.status);
-      return res.json().catch(() => ({}));
-    }
-
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       // Honeypot anti-spam (SPEC-01): humano não vê o campo, bot preenche.
       const hp = form.querySelector('#f-website');
-      if (hp && hp.value.trim() !== '') {
+      const elapsed = fillTimeMs();
+      if ((hp && hp.value.trim() !== '') || elapsed < MIN_FILL_MS) {
         form.style.display = 'none';
         document.getElementById('form-success').classList.add('show');
         return;
@@ -214,6 +225,7 @@
         mensagem: form.querySelector('#f-msg').value.trim(),
         origem: 'landing',
         enviadoEm: new Date().toISOString(),
+        preenchidoEmMs: elapsed,
       };
       Object.assign(data, readUTM());
 
@@ -233,6 +245,78 @@
         submitBtn.disabled = false;
         submitBtn.textContent = originalLabel;
         alert('Não consegui enviar agora. Tente de novo em instantes.');
+      }
+    });
+  }
+
+  /* ---- Lead magnet: baixar checklist (SPEC-09) ---- */
+  const clForm = document.getElementById('checklist-form');
+  if (clForm) {
+    const CHECKLIST_PDF = 'assets/waveops-checklist.pdf';
+    const emailEl = document.getElementById('cl-email');
+    const nomeEl = document.getElementById('cl-nome');
+    const clBtn = clForm.querySelector('button[type="submit"]');
+    const clOk = document.getElementById('checklist-success');
+    const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+
+    function downloadChecklist() {
+      const a = document.createElement('a');
+      a.href = CHECKLIST_PDF;
+      a.download = 'waveops-checklist.pdf';
+      a.target = '_blank';
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    clForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Honeypot anti-spam + tempo de preenchimento.
+      const hp = clForm.querySelector('#cl-website');
+      const elapsed = fillTimeMs();
+      if ((hp && hp.value.trim() !== '') || elapsed < MIN_FILL_MS) {
+        clForm.style.display = 'none';
+        clOk.classList.add('show');
+        return;
+      }
+
+      const email = (emailEl.value || '').trim();
+      const okEmail = isEmail(email);
+      emailEl.closest('.field').classList.toggle('invalid', !okEmail);
+      if (!okEmail) { emailEl.focus(); return; }
+
+      const data = {
+        nome: (nomeEl?.value || '').trim(),
+        empresa: '',
+        whatsapp: '',
+        email: email,
+        dor: 'Baixou o checklist',
+        mensagem: 'Lead do material: 7 sinais de operação manual',
+        origem: 'lead-magnet-checklist',
+        enviadoEm: new Date().toISOString(),
+        preenchidoEmMs: elapsed,
+      };
+      Object.assign(data, readUTM());
+
+      const original = clBtn.textContent;
+      clBtn.disabled = true;
+      clBtn.textContent = 'Liberando...';
+
+      try {
+        await submitLead(data);
+        track('checklist_download', { email_dominio: email.split('@')[1] || '' });
+        downloadChecklist();
+        clForm.style.display = 'none';
+        clOk.classList.add('show');
+      } catch (err) {
+        console.error('[WaveOps] erro ao registrar download do checklist:', err);
+        // Não trava o usuário: entrega o material mesmo se o registro falhar.
+        downloadChecklist();
+        track('checklist_download', { email_dominio: email.split('@')[1] || '', registro: 'falhou' });
+        clForm.style.display = 'none';
+        clOk.classList.add('show');
       }
     });
   }

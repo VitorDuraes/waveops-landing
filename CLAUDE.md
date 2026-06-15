@@ -15,11 +15,26 @@ The entry file is `index.html` (renamed from `FlowOps Landing.html` so GitHub Pa
 ## Architecture
 
 ### Script load order (intentional, do not reorder)
-The production page loads exactly two scripts:
-1. `assets/theme-store.js` in `<head>` so it applies the theme attributes before paint (prevents a flash of the wrong theme).
-2. `assets/main.js` at the end of `<body>` wires all DOM interactions.
+In `<head>`, in order: the CSP `<meta>` (must come first, before any resource), then `assets/fonts.css` + `assets/styles.css`, then the async Plausible script (`plausible.io`), then `assets/analytics.js` (Plausible bootstrap), then `assets/theme-store.js`. At the end of `<body>`: `assets/main.js`.
+1. `assets/theme-store.js` in `<head>` applies the theme attributes before paint (prevents a flash of the wrong theme).
+2. `assets/analytics.js` holds the Plausible queue stub + `init()` (moved out of an inline `<script>` so the CSP can use `script-src 'self'` without `'unsafe-inline'`). Do not re-inline it.
+3. `assets/main.js` at the end of `<body>` wires all DOM interactions.
 
-That is the entire production runtime. No React, no Babel, no CDN dependencies. The Tweaks panel and its React/Babel CDN scripts were removed from the page; the sources now live in `dev/`.
+No React, no Babel, no build step. The only remaining third-party request is the async Plausible script; everything else (fonts, CSS, JS) is self-hosted. The Tweaks panel and its React/Babel CDN scripts were removed from the page; the sources now live in `dev/`.
+
+### Security hardening (HTTP/CSP, fonts, anti-bot)
+- **CSP** is a `<meta http-equiv="Content-Security-Policy">` at the very top of `<head>`. If you add a third-party origin (script, font, image, or a `fetch`/`connect` target), you must add it to the matching directive or the browser blocks it. `connect-src` currently allows the n8n webhook host and `plausible.io`; `script-src` allows `plausible.io`. `style-src` keeps `'unsafe-inline'` because the HTML uses inline `style=` attributes (low risk; not worth a full refactor). `frame-ancestors`/`X-Frame-Options` only work as HTTP headers, which GitHub Pages can't set, so clickjacking protection is pending a host that allows headers.
+- **Fonts are self-hosted** in `assets/fonts/` (woff2) with `@font-face` in `assets/fonts.css`. Regenerate with `python _fetch_fonts.py` (downloads only the weights used; Sora was dropped as unused). Do not re-add the Google Fonts `<link>`.
+- **Anti-bot** on both lead forms: a hidden honeypot field (`website`/`#f-website`/`#cl-website`) plus a minimum fill-time gate (`MIN_FILL_MS` in `main.js`). Both only stop bots that render the page; bots posting straight to the webhook need server-side defense. See `docs/specs/SECURITY-n8n-hardening.md`.
+
+### Brand / logo (single canonical mark)
+The official WaveOps mark is "onda + nó" (wave + node). The full kit lives in `assets/brand/` (symbol, symbol-white, symbol-mono via `currentColor`, favicon, lockup, lockup-white) with its own `README.md`. The canonical geometry, inside a `viewBox="0 0 48 48"`:
+```
+<path d="M7 30 Q 15 15 24 23 Q 31 30 34 18.6" stroke-width="3.6" stroke-linecap="round"/>  <!-- wave -->
+<circle cx="7" cy="30" r="3.5"/>                                                            <!-- input node (solid) -->
+<path fill-rule="evenodd" d="M34 18 a6 6 0 1 1 12 0 a6 6 0 1 1 -12 0 Z M37.6 18 a2.4 2.4 0 1 0 4.8 0 a2.4 2.4 0 1 0 -4.8 0 Z"/>  <!-- output node: a TRUE hollow ring -->
+```
+The output node is a hollow ring (the `evenodd` path), so the background shows through the hole and it works on any background. Do NOT regress to the old fakes: the green FlowOps node-graph (`#03140d`, `viewBox 0 0 24 24`), or the fake ring (`<circle r="6">` + a background-colored `<circle r="2.5">` inside) with the old `T 40 18` wave. Fill is `#fff` on a violet chip / dark / violet bg, `#8b5cf6` on a light bg. The same mark is inlined in the nav and footer of `index.html`, and is the source for `assets/favicon.svg`, `assets/apple-touch-icon.png` (full-bleed violet), `assets/favicon-32.png`, the `assets/og-image.*` card, and the `assets/checklist.*` PDF. If you change the mark, update every one of those in lockstep and regenerate the PNG/PDF (Chrome headless `--screenshot` / `--print-to-pdf`).
 
 ### Theme system — single source of truth
 `assets/theme-store.js` owns all theme state and exposes `window.FlowTheme`:

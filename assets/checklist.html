@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --violet: #8b5cf6;
+        --violet-strong: #7c3aed;
+        --violet-soft: #a78bfa;
+        --ink: #15131c;
+        --muted: #6b6878;
+        --line: #ece9f3;
+        --soft: #f6f4fb;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      @page {
+        size: A4;
+        margin: 0;
+      }
+      html,
+      body {
+        width: 210mm;
+      }
+      body {
+        font-family: "Space Grotesk", system-ui, sans-serif;
+        color: var(--ink);
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .page {
+        width: 210mm;
+        height: 297mm;
+        overflow: hidden;
+        padding: 15mm 16mm 12mm;
+        display: flex;
+        flex-direction: column;
+      }
+      /* Header */
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+      }
+      .mark {
+        width: 40px;
+        height: 40px;
+        border-radius: 11px;
+        background: var(--violet-strong);
+        display: grid;
+        place-items: center;
+      }
+      .mark svg {
+        width: 26px;
+        height: 26px;
+      }
+      .brand b {
+        font-size: 22px;
+        font-weight: 500;
+        letter-spacing: -0.03em;
+      }
+      .brand b span {
+        color: var(--violet-strong);
+        font-weight: 700;
+      }
+      .eyebrow {
+        font-family: "Space Mono", monospace;
+        font-size: 10.5px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--violet-strong);
+        margin: 20px 0 8px;
+      }
+      h1 {
+        font-size: 28px;
+        line-height: 1.12;
+        letter-spacing: -0.02em;
+        font-weight: 700;
+        max-width: 150mm;
+      }
+      h1 span {
+        color: var(--violet-strong);
+      }
+      .lead {
+        margin-top: 11px;
+        font-size: 12.5px;
+        line-height: 1.5;
+        color: var(--muted);
+        max-width: 165mm;
+      }
+      .lead b {
+        color: var(--ink);
+      }
+      /* Items */
+      .items {
+        margin-top: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .item {
+        display: grid;
+        grid-template-columns: 30px 1fr;
+        gap: 13px;
+        padding: 11px 14px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #fff;
+      }
+      .num {
+        width: 30px;
+        height: 30px;
+        border-radius: 9px;
+        background: var(--soft);
+        color: var(--violet-strong);
+        font-weight: 700;
+        font-size: 15px;
+        display: grid;
+        place-items: center;
+      }
+      .item h3 {
+        font-size: 13.5px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        margin-bottom: 4px;
+      }
+      .item p {
+        font-size: 11px;
+        line-height: 1.45;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .item p b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .tag {
+        display: inline-block;
+        font-family: "Space Mono", monospace;
+        font-size: 8.5px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--violet-strong);
+        background: var(--soft);
+        border-radius: 5px;
+        padding: 1.5px 6px;
+        margin-right: 6px;
+        vertical-align: 1.5px;
+      }
+      /* CTA footer */
+      .cta {
+        margin-top: 14px;
+        background: linear-gradient(150deg, var(--violet-soft), var(--violet-strong));
+        border-radius: 14px;
+        padding: 18px 20px;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+      }
+      .cta h2 {
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+      }
+      .cta p {
+        font-size: 11px;
+        line-height: 1.45;
+        color: #efe7ff;
+        margin-top: 5px;
+        max-width: 110mm;
+      }
+      .cta .go {
+        flex-shrink: 0;
+        text-align: right;
+        font-family: "Space Mono", monospace;
+      }
+      .cta .go .url {
+        font-size: 14px;
+        font-weight: 700;
+        color: #fff;
+      }
+      .cta .go .zap {
+        font-size: 10.5px;
+        color: #efe7ff;
+        margin-top: 3px;
+      }
+      .foot {
+        margin-top: auto;
+        padding-top: 13px;
+        font-family: "Space Mono", monospace;
+        font-size: 9px;
+        color: var(--muted);
+        display: flex;
+        justify-content: space-between;
+        border-top: 1px solid var(--line);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="brand">
+        <span class="mark"
+          ><svg viewBox="0 0 48 48" fill="none">
+            <path
+              d="M7 30 Q 15 15 24 23 Q 31 30 34 18.6"
+              stroke="#fff"
+              stroke-width="3.6"
+              stroke-linecap="round"
+            />
+            <circle cx="7" cy="30" r="3.5" fill="#fff" />
+            <path
+              fill-rule="evenodd"
+              fill="#fff"
+              d="M34 18 a6 6 0 1 1 12 0 a6 6 0 1 1 -12 0 Z M37.6 18 a2.4 2.4 0 1 0 4.8 0 a2.4 2.4 0 1 0 -4.8 0 Z"
+            /></svg
+        ></span>
+        <b>Wave<span>Ops</span></b>
+      </div>
+
+      <div class="eyebrow">Material gratuito</div>
+      <h1>
+        7 sinais de que sua operação perde tempo com trabalho manual
+        <span>(e o que automatizar primeiro)</span>
+      </h1>
+      <p class="lead">
+        Marque os sinais que acontecem na sua operação. <b>Se você marcar 3 ou mais</b>,
+        tem tempo e dinheiro escapando em processo manual, e dá para resolver.
+      </p>
+
+      <div class="items">
+        <div class="item">
+          <span class="num">1</span>
+          <div>
+            <h3>Lead chega e demora a ser respondido</h3>
+            <p><span class="tag">Sinal</span>O cliente manda mensagem e fica esperando, ainda mais fora do horário comercial.</p>
+            <p><span class="tag">Automatizar</span><b>Resposta automática de primeiro contato</b>, alerta na hora pro time e registro do lead no CRM sem ninguém digitar.</p>
+          </div>
+        </div>
+        <div class="item">
+          <span class="num">2</span>
+          <div>
+            <h3>Seu time copia e cola dado o dia todo</h3>
+            <p><span class="tag">Sinal</span>A mesma informação é digitada de novo em planilha, CRM e sistema financeiro.</p>
+            <p><span class="tag">Automatizar</span><b>Integração entre as ferramentas</b> pra o dado entrar uma vez e aparecer em todos os lugares certos.</p>
+          </div>
+        </div>
+        <div class="item">
+          <span class="num">3</span>
+          <div>
+            <h3>Follow-up depende de alguém lembrar</h3>
+            <p><span class="tag">Sinal</span>Proposta enviada e ninguém volta a falar com o cliente.</p>
+            <p><span class="tag">Automatizar</span><b>Sequência de follow-up automática</b> por email ou WhatsApp, que para sozinha quando o cliente responde.</p>
+          </div>
+        </div>
+        <div class="item">
+          <span class="num">4</span>
+          <div>
+            <h3>Relatório montado na mão toda semana</h3>
+            <p><span class="tag">Sinal</span>Alguém perde horas juntando número de várias fontes pra entregar sempre o mesmo relatório.</p>
+            <p><span class="tag">Automatizar</span><b>Um painel que se atualiza sozinho</b>, puxando os dados direto da fonte.</p>
+          </div>
+        </div>
+        <div class="item">
+          <span class="num">5</span>
+          <div>
+            <h3>Cadastro e onboarding manual e repetitivo</h3>
+            <p><span class="tag">Sinal</span>Todo cliente novo passa pelo mesmo processo na mão de cadastro, contrato e acesso.</p>
+            <p><span class="tag">Automatizar</span><b>Um fluxo que dispara as etapas sozinho</b> a partir de um gatilho: venda fechada, formulário, pagamento.</p>
+          </div>
+        </div>
+        <div class="item">
+          <span class="num">6</span>
+          <div>
+            <h3>Cobrança e conferência no olho</h3>
+            <p><span class="tag">Sinal</span>Emitir cobrança, conferir pagamento e dar baixa é tudo manual.</p>
+            <p><span class="tag">Automatizar</span><b>Emissão e baixa automáticas</b>, com aviso só quando algo foge do esperado.</p>
+          </div>
+        </div>
+        <div class="item">
+          <span class="num">7</span>
+          <div>
+            <h3>Ferramentas que não conversam</h3>
+            <p><span class="tag">Sinal</span>Você usa WhatsApp, planilha, CRM e checkout, mas cada um é uma ilha.</p>
+            <p><span class="tag">Automatizar</span><b>Integrações que ligam tudo</b>, pra a operação rodar como um sistema só, não como peças soltas.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="cta">
+        <div>
+          <h2>Marcou 3 ou mais?</h2>
+          <p>
+            A WaveOps faz um diagnóstico que mapeia esses pontos na sua operação e mostra
+            o que dá mais retorno automatizar primeiro. A partir de R$300, abatido se você
+            fechar o projeto.
+          </p>
+        </div>
+        <div class="go">
+          <div class="url">waveops.com.br</div>
+          <div class="zap">WhatsApp (34) 99177-5784</div>
+        </div>
+      </div>
+
+      <div class="foot">
+        <span>WaveOps · Automação, sistemas e IA</span>
+        <span>waveops.com.br</span>
+      </div>
+    </div>
+  </body>
+</html>

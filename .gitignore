@@ -11,3 +11,6 @@ uploads/
 
 # Internal roadmap/specs (local only, importados no Notion)
 docs/specs/
+
+# Workflows n8n (locais, nao publicar)
+n8n/

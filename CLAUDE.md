@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-FlowOps is a single institutional landing page (startup aesthetic, light theme by default with a dark toggle, PT-BR) for an automation/dev/AI consultancy. All copy is Brazilian Portuguese.
+WaveOps is a single institutional landing page (startup aesthetic, light theme by default with a dark toggle, PT-BR) for an automation/dev/AI consultancy. All copy is Brazilian Portuguese. (The repo and GitHub Pages path are still named `flowops-landing` from the old name; the live brand is WaveOps.)
 
 There is **no build step, no package manager, no test suite, no framework bundling**. The production page is plain HTML + CSS + vanilla JS, with zero runtime dependencies. There is React in the repo (the Tweaks panel under `dev/`), but it is a development-only tool that the production page does not load. See "Tweaks panel" below.
 
@@ -56,8 +56,9 @@ The page is frontend-only today. Three places connect to a backend:
 
 ## Known pending items (from README)
 
-- The brand name **"FlowOps AI"** is provisional and will be replaced (candidates: Nodo / Operon / Trama). When it changes, update the logo and copy.
-- The footer email is a `mailto:contato@flowops.ai` placeholder (restored from a Cloudflare-obfuscated `__cf_email__` link that only rendered behind Cloudflare). Replace with the real address.
+- The brand is **WaveOps**, domain **waveops.com.br** (decided after FlowOps / Nodo / Operon / Trama were all taken). Two internal identifiers were intentionally NOT renamed: the `localStorage` key `flowops:tweaks:v1` (renaming resets visitors' saved theme) and the n8n webhook path `flowops-lead` (renaming breaks the live lead integration).
+- The footer email is `mailto:contato@waveops.com.br` (set up this mailbox; it is the intended address).
+- Custom domain is pending: the `CNAME` file and the canonical/OG/sitemap URLs still point at `vitorduraes.github.io/flowops-landing/`. Switch them to `https://waveops.com.br` only AFTER the domain's DNS points at GitHub Pages, otherwise the live site goes down.
 
 ## Writing rules for this repo
 

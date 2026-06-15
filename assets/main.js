@@ -1,4 +1,4 @@
-/* FlowOps — interactions */
+/* WaveOps — interactions */
 (function () {
   'use strict';
 
@@ -155,7 +155,7 @@
 
     async function submitLead(data) {
       if (!LEAD_ENDPOINT) {
-        console.warn('[FlowOps] LEAD_ENDPOINT não configurado: o lead NÃO foi enviado. Configure em assets/main.js (SPEC-01).', data);
+        console.warn('[WaveOps] LEAD_ENDPOINT não configurado: o lead NÃO foi enviado. Configure em assets/main.js (SPEC-01).', data);
         return;
       }
       const res = await fetch(LEAD_ENDPOINT, {
@@ -208,7 +208,7 @@
         form.style.display = 'none';
         document.getElementById('form-success').classList.add('show');
       } catch (err) {
-        console.error('[FlowOps] erro ao enviar lead:', err);
+        console.error('[WaveOps] erro ao enviar lead:', err);
         submitBtn.disabled = false;
         submitBtn.textContent = originalLabel;
         alert('Não consegui enviar agora. Tente de novo em instantes.');

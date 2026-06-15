@@ -1,4 +1,4 @@
-# FlowOps — Landing Page
+# WaveOps — Landing Page
 
 Landing page institucional (dark / startup), em PT-BR, com tema claro/escuro,
 canvas de fluxo animado, validação de formulário de lead e painel de Tweaks.
@@ -83,6 +83,6 @@ O botão de sol/lua no topo e o painel de Tweaks usam a mesma fonte de verdade.
 ---
 
 ## Pendências de marca
-- O nome **FlowOps AI** ainda será trocado (já existe no mercado). Candidatos:
-  Nodo / Operon / Trama. Ao definir, atualizar logo + textos.
-- Substituir e-mail `contato@flowops.ai` (rodapé) pelo real.
+- Marca definida: **WaveOps**, domínio **waveops.com.br** (FlowOps / Nodo / Operon / Trama estavam ocupados).
+- E-mail do rodapé: `contato@waveops.com.br` (configurar essa caixa de entrada).
+- Domínio próprio pendente: o `CNAME` e as URLs canônicas só mudam para `waveops.com.br` depois que o DNS apontar para o GitHub Pages.

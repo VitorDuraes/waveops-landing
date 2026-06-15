@@ -84,7 +84,7 @@
 </header>
 
 <!-- Mobile menu -->
-<div class="mobile-menu" id="mobile-menu">
+<div class="mobile-menu" id="mobile-menu" aria-hidden="true">
   <button class="icon-btn mobile-close" id="mobile-close" aria-label="Fechar menu">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
   </button>
@@ -546,7 +546,7 @@
           </div>
         </form>
 
-        <div class="form-success" id="form-success">
+        <div class="form-success" id="form-success" role="status" aria-live="polite">
           <div class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
           <h3>Recebido! 🎯</h3>
           <p>Obrigado, <b id="success-name">pessoa</b>. Já anotamos sua dor e vamos voltar com os pontos de maior impacto em até 1 dia útil.</p>

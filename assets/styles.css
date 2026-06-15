@@ -59,6 +59,10 @@
 [data-accent="violet"]  { --accent:#8b5cf6; --accent-strong:#a78bfa; --accent-soft:#c4b5fd; --accent-ink:#120b22; --glow:139,92,246; }
 [data-accent="amber"]   { --accent:#f59e0b; --accent-strong:#fbbf24; --accent-soft:#fcd34d; --accent-ink:#1c1203; --glow:245,158,11; }
 
+/* A11y (SPEC-11): no tema claro o violeta claro falha no contraste AA para texto.
+   Escurece o accent-strong (usado em textos de destaque) para passar AA (>= 4.5:1). */
+[data-theme="light"][data-accent="violet"] { --accent-strong: #6d28d9; }
+
 /* ---------- Fonts ---------- */
 [data-font="a"] { --font-display:'Space Grotesk', system-ui, sans-serif; }
 [data-font="b"] { --font-display:'Sora', system-ui, sans-serif; }
@@ -535,6 +539,17 @@ p { text-wrap: pretty; }
   html.anim .reveal.d1 { transition-delay: .07s; }
   html.anim .reveal.d2 { transition-delay: .14s; }
   html.anim .reveal.d3 { transition-delay: .21s; }
+}
+
+/* A11y (SPEC-11): respeita "reduzir movimento" desligando as animações decorativas infinitas. */
+@media (prefers-reduced-motion: reduce) {
+  .flow-canvas,
+  .hero-visual,
+  .flow-bar .live i,
+  .flow-wires path.flow,
+  .toast,
+  .flow-toast { animation: none !important; }
+  html.anim .reveal { opacity: 1 !important; transform: none !important; }
 }
 
 /* ============================================================

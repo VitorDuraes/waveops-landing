@@ -27,26 +27,47 @@
 
   /* ---- Mobile menu ---- */
   const menu = document.getElementById('mobile-menu');
-  const open = () => menu.classList.add('open');
-  const close = () => menu.classList.remove('open');
-  document.getElementById('hamburger')?.addEventListener('click', open);
-  document.getElementById('mobile-close')?.addEventListener('click', close);
+  const hamburger = document.getElementById('hamburger');
+  const mobileClose = document.getElementById('mobile-close');
+  const open = () => {
+    menu.classList.add('open');
+    menu.setAttribute('aria-hidden', 'false');
+    mobileClose?.focus();
+  };
+  const close = () => {
+    menu.classList.remove('open');
+    menu.setAttribute('aria-hidden', 'true');
+    hamburger?.focus();
+  };
+  hamburger?.addEventListener('click', open);
+  mobileClose?.addEventListener('click', close);
   menu?.querySelectorAll('a').forEach((a) => a.addEventListener('click', close));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && menu && menu.classList.contains('open')) close();
+  });
+
+  /* ---- Respeita "reduzir movimento": pausa os beads SVG (SMIL) do canvas ---- */
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll('svg.flow-wires').forEach((svg) => { try { svg.pauseAnimations(); } catch (e) {} });
+  }
 
   /* ---- FAQ accordion (single open) ---- */
   const items = document.querySelectorAll('.faq-item');
   items.forEach((item) => {
     const q = item.querySelector('.faq-q');
     const a = item.querySelector('.faq-a');
+    q.setAttribute('aria-expanded', 'false');
     q.addEventListener('click', () => {
       const isOpen = item.classList.contains('open');
       items.forEach((other) => {
         other.classList.remove('open');
         other.querySelector('.faq-a').style.maxHeight = null;
+        other.querySelector('.faq-q').setAttribute('aria-expanded', 'false');
       });
       if (!isOpen) {
         item.classList.add('open');
         a.style.maxHeight = a.scrollHeight + 'px';
+        q.setAttribute('aria-expanded', 'true');
       }
     });
   });

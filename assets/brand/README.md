@@ -1,66 +1,44 @@
-# WaveOps — Logo (SVG)
+# WaveOps — Logo
 
-Direção **Onda + nó**: a onda é o fluxo, o nó com anel é a operação entregue.
-Cor da marca: **#8B5CF6** (mesma do site). Tipografia: **Space Grotesk**.
+Marca **Sine Nodes**: uma onda contínua que atravessa o **hub central** (anel),
+com nós de entrada e saída. A onda é o fluxo; o hub é a operação; os nós são os
+pontos conectados. Cor da marca **#7C3AED**. Tipografia **Space Grotesk**.
 
-Abra `preview.html` para ver todos os arquivos renderizados.
+Abra `preview.html` para ver tudo renderizado.
 
 ## Arquivos
 
-| Arquivo | Quando usar |
+| Arquivo | Uso |
 |---|---|
-| `waveops-symbol.svg` | Símbolo violeta. Uso geral em fundo claro. O nó é vazado, então funciona sobre qualquer fundo. |
-| `waveops-symbol-white.svg` | Símbolo branco. Para fundo escuro ou violeta. |
-| `waveops-symbol-mono.svg` | Uma cor só, via `currentColor` — herda a cor do texto (CSS `color`). Bom para fundos coloridos/impressão. |
-| `waveops-favicon.svg` | Ícone quadrado (squircle violeta + onda branca). Favicon e ícone de app. |
-| `waveops-lockup.svg` | Símbolo + nome "WaveOps". Uso principal (header, e-mail, documentos) em fundo claro. |
-| `waveops-lockup-white.svg` | Lockup para fundo escuro. |
+| `waveops-icon.svg` | App icon / favicon — squircle roxo com a marca branca. |
+| `waveops-symbol.svg` | Símbolo roxo, fundo transparente. Para fundo claro. |
+| `waveops-symbol-mono.svg` | Uma cor via `currentColor` (herda o `color` do CSS). |
+| `waveops-lockup.svg` | Símbolo + nome "WaveOps". |
+| `png/waveops-icon.png` | 1000×1000, fundo transparente fora do squircle. |
+| `png/waveops-icon-512.png` | 512×512 — ideal para app icon / redes. |
+| `png/waveops-symbol.png` | Símbolo roxo, transparente, 1000×1000. |
+| `png/waveops-symbol-white.png` | Símbolo branco, transparente — para fundo escuro. |
 
-## Favicon (no site)
+## Favicon no site
 ```html
-<link rel="icon" type="image/svg+xml" href="logo/waveops-favicon.svg" />
-```
-Para navegadores antigos, gere também um `favicon.ico` 32×32 a partir do SVG
-(qualquer conversor online serve) e adicione:
-```html
-<link rel="icon" href="favicon.ico" sizes="any" />
+<link rel="icon" type="image/svg+xml" href="logo/waveops-icon.svg" />
 ```
 
-## Recolorir o monocromático
+## Símbolo no header (inline, sem dependência de fonte)
 ```html
-<span style="color:#7c3aed">
-  <img src="logo/waveops-symbol-mono.svg" width="40" alt="WaveOps">
-</span>
-<!-- ou inline o SVG e controle por CSS: a cor vem de `color` -->
-```
-
-## Observação sobre os lockups (texto)
-Os `*-lockup.svg` trazem a fonte **Space Grotesk embutida** (em base64), então
-renderizam certo quando você **inserir o SVG inline no HTML** ou **abrir o arquivo
-direto no navegador**. ⚠️ Quando um SVG com texto é usado dentro de uma tag
-`<img>`, o navegador ignora a fonte e cai num serifado — é limitação do próprio
-navegador, não do arquivo.
-
-**Regra prática:**
-- **No site (header):** use o lockup **inline** (cole o conteúdo do .svg direto no
-  HTML) — veja o snippet abaixo. Ou, melhor ainda, use o **símbolo** + o nome em
-  texto HTML real (é assim que a landing já faz).
-- **Para `<img>`, e-mail, impressão ou vídeo:** use o **símbolo** (`waveops-symbol*.svg`,
-  vetor puro, sem dependência de fonte) ou exporte o lockup como **PNG** (abra o
-  .svg no navegador e tire um print, ou peça que eu gere).
-
-### Snippet pronto para o header (lockup inline)
-```html
-<a href="#top" style="display:inline-flex;align-items:center;gap:10px;font-family:'Space Grotesk',sans-serif;font-size:24px;letter-spacing:-.02em;text-decoration:none">
-  <svg width="34" height="34" viewBox="0 0 48 48" fill="none">
-    <path d="M7 30 Q 15 15 24 23 Q 31 30 34 18.6" stroke="#8b5cf6" stroke-width="3.6" stroke-linecap="round"/>
-    <circle cx="7" cy="30" r="3.5" fill="#8b5cf6"/>
-    <path fill-rule="evenodd" fill="#8b5cf6" d="M34 18 a6 6 0 1 1 12 0 a6 6 0 1 1 -12 0 Z M37.6 18 a2.4 2.4 0 1 0 4.8 0 a2.4 2.4 0 1 0 -4.8 0 Z"/>
+<a href="#top" style="display:inline-flex;align-items:center;gap:11px;font-family:'Space Grotesk',sans-serif;font-size:22px;letter-spacing:-.02em;text-decoration:none">
+  <svg width="34" height="34" viewBox="0 0 100 100" fill="none">
+    <rect x="2" y="2" width="96" height="96" rx="24" fill="#7c3aed"/>
+    <g stroke="#fff" stroke-width="5" stroke-linecap="round">
+      <path d="M18,50 Q30,33 41,50"/><path d="M59,50 Q70,67 82,50"/>
+    </g>
+    <circle cx="50" cy="50" r="9" fill="none" stroke="#fff" stroke-width="5"/>
+    <circle cx="18" cy="50" r="7.5" fill="#fff"/><circle cx="82" cy="50" r="7.5" fill="#fff"/>
   </svg>
   <span style="color:#15131c">Wave<b style="color:#7c3aed">Ops</b></span>
 </a>
 ```
 
 ## Espaçamento mínimo
-Deixe ao redor da marca uma margem livre de pelo menos a **altura do nó** (o
-círculo maior). Não aperte texto ou outros elementos contra a logo.
+Deixe ao redor da marca uma margem livre de pelo menos o diâmetro de um nó.
+Não comprima outros elementos contra o ícone.

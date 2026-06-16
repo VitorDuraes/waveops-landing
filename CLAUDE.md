@@ -28,13 +28,15 @@ No React, no Babel, no build step. The only remaining third-party request is the
 - **Anti-bot** on both lead forms: a hidden honeypot field (`website`/`#f-website`/`#cl-website`) plus a minimum fill-time gate (`MIN_FILL_MS` in `main.js`). Both only stop bots that render the page; bots posting straight to the webhook need server-side defense. See `docs/specs/SECURITY-n8n-hardening.md`.
 
 ### Brand / logo (single canonical mark)
-The official WaveOps mark is "onda + nó" (wave + node). The full kit lives in `assets/brand/` (symbol, symbol-white, symbol-mono via `currentColor`, favicon, lockup, lockup-white) with its own `README.md`. The canonical geometry, inside a `viewBox="0 0 48 48"`:
+The official WaveOps mark is "Sine Nodes": a symmetric sine wave (two humps) crossing a central hollow hub (a stroked ring), with two solid round nodes at the ends. The wave is the flow, the hub is the operation, the end nodes are the connected points. The full kit lives in `assets/brand/`: `waveops-icon.svg` (squircle app icon/favicon, gradient `#8b5cf6`→`#6d28d9`), `waveops-symbol.svg` (violet on transparent), `waveops-symbol-mono.svg` (`currentColor`), `waveops-lockup.svg` (mark + "WaveOps"), plus `png/` exports (icon-512, icon, symbol, symbol-white) and its own `README.md`. Canonical geometry, `viewBox="0 0 100 100"`, `stroke-width="5"`, round caps:
 ```
-<path d="M7 30 Q 15 15 24 23 Q 31 30 34 18.6" stroke-width="3.6" stroke-linecap="round"/>  <!-- wave -->
-<circle cx="7" cy="30" r="3.5"/>                                                            <!-- input node (solid) -->
-<path fill-rule="evenodd" d="M34 18 a6 6 0 1 1 12 0 a6 6 0 1 1 -12 0 Z M37.6 18 a2.4 2.4 0 1 0 4.8 0 a2.4 2.4 0 1 0 -4.8 0 Z"/>  <!-- output node: a TRUE hollow ring -->
+<g stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M18 50 Q 30 33 41 50"/><path d="M59 50 Q 70 67 82 50"/>   <!-- the two wave humps -->
+</g>
+<circle cx="50" cy="50" r="9" fill="none" stroke="#fff" stroke-width="5"/>  <!-- central hollow hub -->
+<circle cx="18" cy="50" r="7.5" fill="#fff"/><circle cx="82" cy="50" r="7.5" fill="#fff"/>  <!-- solid end nodes -->
 ```
-The output node is a hollow ring (the `evenodd` path), so the background shows through the hole and it works on any background. Do NOT regress to the old fakes: the green FlowOps node-graph (`#03140d`, `viewBox 0 0 24 24`), or the fake ring (`<circle r="6">` + a background-colored `<circle r="2.5">` inside) with the old `T 40 18` wave. Fill is `#fff` on a violet chip / dark / violet bg, `#8b5cf6` on a light bg. The same mark is inlined in the nav and footer of `index.html`, and is the source for `assets/favicon.svg`, `assets/apple-touch-icon.png` (full-bleed violet), `assets/favicon-32.png`, the `assets/og-image.*` card, and the `assets/checklist.*` PDF. If you change the mark, update every one of those in lockstep and regenerate the PNG/PDF (Chrome headless `--screenshot` / `--print-to-pdf`).
+Stroke is `#fff` on a violet chip / dark / violet bg (shown above), `#7c3aed` on a light bg. The hub is `fill="none"`, so the background shows through its centre. The white variant is inlined in the nav and footer of `index.html` (inside the `.brand .mark` violet chip), and is the source for `assets/favicon.svg` (= the kit `waveops-icon.svg`), `assets/apple-touch-icon.png` (full-bleed gradient, regenerated via `assets/_appicon.html`), `assets/favicon-32.png`, the `assets/og-image.*` card, and the `assets/checklist.*` PDF. If you change the mark, update every one of those in lockstep and regenerate the PNG/PDF (Chrome headless `--screenshot` / `--print-to-pdf`). Do NOT regress to either retired mark: the earlier "onda + nó" single-hollow-ring (path `Q 31 30 34 18.6`, `viewBox 0 0 48 48`) or the green FlowOps node-graph (`#03140d`, `viewBox 0 0 24 24`, path `M7 7l9 4`).
 
 ### Theme system — single source of truth
 `assets/theme-store.js` owns all theme state and exposes `window.FlowTheme`:

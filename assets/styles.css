@@ -180,7 +180,7 @@ p { text-wrap: pretty; }
   background: linear-gradient(150deg, var(--accent-strong), var(--accent));
   box-shadow: 0 6px 18px -6px rgba(var(--glow), .7), 0 0 0 1px rgba(var(--glow), .3) inset;
 }
-.brand .mark svg { width: 19px; height: 19px; }
+.brand .mark svg { width: 23px; height: 23px; }
 .brand b { font-weight: 700; }
 .brand .ai { color: var(--accent-strong); }
 

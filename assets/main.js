@@ -131,18 +131,61 @@
     });
   });
 
-  /* ---- Pricing tabs ---- */
-  const tabs = document.querySelectorAll('.tab');
-  tabs.forEach((tab) => {
-    tab.addEventListener('click', () => {
-      tabs.forEach((t) => t.classList.remove('active'));
-      tab.classList.add('active');
-      const key = tab.dataset.tab;
-      document.querySelectorAll('.pricing-panel').forEach((p) => p.classList.remove('active'));
-      document.getElementById('panel-' + key)?.classList.add('active');
-      track('pricing_tab', { plano: key });
+  /* ---- Calculadora de ROI (SPEC-12). Ancora no valor perdido, não no preço.
+     Perda = leads perdidos x ticket + horas manuais x custo/hora. ---- */
+  const roi = document.getElementById('roi');
+  if (roi) {
+    const lossEl = document.getElementById('roi-loss');
+    const fmt = new Intl.NumberFormat('pt-BR', {
+      style: 'currency', currency: 'BRL', maximumFractionDigits: 0,
     });
-  });
+    const val = (id) => {
+      const el = document.getElementById(id);
+      const n = el ? parseFloat(el.value) : 0;
+      return Number.isFinite(n) && n > 0 ? n : 0;
+    };
+    const calcRoi = () => {
+      const perdaLeads = val('roi-leads') * val('roi-ticket');
+      const perdaHoras = val('roi-horas') * val('roi-custo');
+      lossEl.textContent = fmt.format(perdaLeads + perdaHoras);
+    };
+    roi.querySelectorAll('input').forEach((i) => i.addEventListener('input', calcRoi));
+    calcRoi();
+  }
+
+  /* ---- Toggle de cobrança Mensal / Anual (anual pré-selecionado).
+     Troca o preço exibido em cada plano via data-attributes. ---- */
+  const billing = document.querySelector('.billing');
+  if (billing) {
+    const opts = billing.querySelectorAll('.tab[data-billing]');
+    const planCards = document.querySelectorAll('.plan[data-m]');
+    const status = document.getElementById('billing-status');
+    const applyBilling = (mode, announce) => {
+      opts.forEach((o) => {
+        const on = o.dataset.billing === mode;
+        o.classList.toggle('active', on);
+        o.setAttribute('aria-pressed', String(on));
+      });
+      planCards.forEach((card) => {
+        const v = card.querySelector('.pprice .v');
+        const note = card.querySelector('[data-bill-note]');
+        if (mode === 'anual') {
+          if (v) v.textContent = 'R$' + card.dataset.a;
+          if (note) note.textContent = 'cobrado R$' + card.dataset.at + '/ano';
+        } else {
+          if (v) v.textContent = 'R$' + card.dataset.m;
+          if (note) note.textContent = 'no plano mensal';
+        }
+      });
+      // announce = troca feita pelo usuário (clique). No load não anuncia nem registra evento.
+      if (announce) {
+        if (status) status.textContent = mode === 'anual' ? 'Mostrando preços anuais.' : 'Mostrando preços mensais.';
+        track('billing_toggle', { modo: mode });
+      }
+    };
+    opts.forEach((o) => o.addEventListener('click', () => applyBilling(o.dataset.billing, true)));
+    applyBilling('anual', false); // anual pré-selecionado, sem anúncio no load
+  }
 
   /* ---- WhatsApp click tracking (SPEC-02) ---- */
   document.querySelectorAll('a[href*="wa.me"]').forEach((a) => {

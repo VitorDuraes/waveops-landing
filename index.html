@@ -100,7 +100,7 @@
       }
     </script>
 
-    <!-- ===== Analytics: Plausible (SPEC-02). Eventos custom (lead_form_submit, whatsapp_click, pricing_tab) no main.js. ===== -->
+    <!-- ===== Analytics: Plausible (SPEC-02). Eventos custom (lead_form_submit, whatsapp_click, billing_toggle, checklist_download) no main.js. ===== -->
     <!-- Privacy-friendly analytics by Plausible -->
     <script
       async
@@ -284,7 +284,7 @@
                   display: inline-block;
                 "
               ></span>
-              Diagnóstico a partir de <b>R$300</b>, abatido se você fechar o
+              Diagnóstico a partir de <b>R$297</b>, abatido se você fechar o
               projeto.
             </p>
           </div>
@@ -789,422 +789,487 @@
         </div>
       </section>
 
-      <!-- ===== PROVA SOCIAL (SPEC-07): PRE-MONTADO, DESLIGADO =====
-           Quando tiver a FOTO e pelo menos 1 NUMERO real de resultado:
-           1. apague esta linha de abertura do comentario e a linha de
-              fechamento (a que termina com o sinal de maior) no fim do bloco;
-           2. preencha tudo que estiver entre [colchetes];
-           3. troque o monograma por <img src="assets/fundador.jpg" alt="Seu nome">.
-           O CSS ja esta pronto no styles.css.
 
-      <section class="section" id="prova" data-screen-label="Prova">
-        <div class="wrap">
-          <div class="section-head center reveal">
-            <span class="eyebrow">Quem está por trás</span>
-            <h2>Feito por quem vive de automação.</h2>
-          </div>
-          <div class="founder reveal">
-            <div class="founder-photo"><span>V</span></div>
-            <div class="founder-info">
-              <h3>[Seu nome]</h3>
-              <p class="founder-role">
-                [Sua credencial. Ex: engenheiro de automação, foco em operação comercial]
-              </p>
-              <p>
-                [1 ou 2 frases de autoridade: o que você faz, há quanto tempo e
-                com que tipo de operação.]
-              </p>
-            </div>
-          </div>
-          <div class="cases reveal d1">
-            <article class="case-card">
-              <div class="case-num">[número]</div>
-              <p class="case-label">[o que significa. Ex: horas por semana economizadas]</p>
-              <p class="case-desc">[contexto curto, sem dado sensível]</p>
-            </article>
-            <article class="case-card">
-              <div class="case-num">[número]</div>
-              <p class="case-label">[ex: leads recuperados por mês]</p>
-              <p class="case-desc">[contexto]</p>
-            </article>
-            <article class="case-card">
-              <div class="case-num">[número]</div>
-              <p class="case-label">[ex: tempo de resposta, de X para Y]</p>
-              <p class="case-desc">[contexto]</p>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      ===== fim do bloco PROVA SOCIAL ===== -->
 
       <!-- ============== PACOTES ============== -->
       <section class="section" id="pacotes" data-screen-label="Pacotes">
         <div class="wrap">
           <div class="section-head center reveal">
-            <span class="eyebrow">Pacotes &amp; investimento</span>
-            <h2>Comece pequeno. Cresça quando fizer sentido.</h2>
+            <span class="eyebrow">Preços &amp; investimento</span>
+            <h2>Primeiro a gente coloca no ar. Depois mantém rodando.</h2>
             <p>
-              Você pode contratar um projeto pontual ou ter a WaveOps como
-              parceira mensal da sua operação.
+              Todo projeto vira uma operação que a WaveOps cuida todo mês.
+              O setup é uma vez. O plano mantém tudo de pé.
             </p>
           </div>
 
-          <div style="text-align: center">
-            <div class="tabs reveal" role="tablist">
-              <button class="tab active" data-tab="proj" role="tab">
-                Projetos
-              </button>
-              <button class="tab" data-tab="mensal" role="tab">
-                Mensal (parceria)
-              </button>
+          <!-- ===== (a) CALCULADORA DE ROI ===== -->
+          <div class="roi reveal" id="roi">
+            <div class="roi-head">
+              <span class="eyebrow">Quanto a operação manual custa</span>
+              <h3>Faça a conta antes de olhar o preço.</h3>
+              <p class="lead">
+                Ajuste os números do seu mês. A conta é a sua, não a do
+                concorrente.
+              </p>
+            </div>
+            <div class="roi-grid">
+              <div class="roi-field">
+                <label for="roi-leads">Leads perdidos por mês</label>
+                <input
+                  type="number"
+                  id="roi-leads"
+                  inputmode="numeric"
+                  min="0"
+                  step="1"
+                  value="20"
+                />
+              </div>
+              <div class="roi-field">
+                <label for="roi-ticket">Ticket médio (R$)</label>
+                <input
+                  type="number"
+                  id="roi-ticket"
+                  inputmode="numeric"
+                  min="0"
+                  step="1"
+                  value="500"
+                />
+              </div>
+              <div class="roi-field">
+                <label for="roi-horas">Horas manuais por mês</label>
+                <input
+                  type="number"
+                  id="roi-horas"
+                  inputmode="numeric"
+                  min="0"
+                  step="1"
+                  value="20"
+                />
+              </div>
+              <div class="roi-field">
+                <label for="roi-custo">Custo por hora (R$)</label>
+                <input
+                  type="number"
+                  id="roi-custo"
+                  inputmode="numeric"
+                  min="0"
+                  step="1"
+                  value="50"
+                />
+              </div>
+            </div>
+            <div class="roi-out">
+              <p class="roi-cap">Você está perdendo cerca de</p>
+              <p class="roi-loss" id="roi-loss" role="status" aria-live="polite" aria-atomic="true">
+                R$&nbsp;11.000
+              </p>
+              <p class="roi-cap">por mês com o que ainda é manual.</p>
+              <p class="roi-compare">
+                O plano de operação começa em
+                <strong class="roi-price">R$397/mês</strong>.
+              </p>
             </div>
           </div>
 
-          <!-- Projetos -->
-          <div class="pricing-panel active" id="panel-proj">
-            <div class="proj-grid">
+          <!-- ===== (b) SETUP: a gente coloca no ar ===== -->
+          <div class="setup-block reveal">
+            <div class="block-head">
+              <span class="eyebrow">Setup · uma vez, à vista</span>
+              <h3>A gente coloca no ar.</h3>
+              <p class="lead">
+                O projeto é a porta de entrada. A gente entende a operação,
+                constrói e entrega rodando.
+              </p>
+            </div>
+            <div class="proj-grid setup-grid">
               <article class="price-card reveal">
                 <span class="tag">Porta de entrada</span>
-                <h3>Diagnóstico de Automação</h3>
+                <h4>Diagnóstico de Operação</h4>
                 <p class="desc">
                   Mapeamos sua operação e entregamos um plano com as melhores
                   oportunidades, priorizadas por impacto.
                 </p>
                 <div class="price">
-                  <span class="from">a partir de</span
-                  ><span class="val">R$300</span>
+                  <span class="val">R$297</span>
                 </div>
-                <p class="meta">abatível se você fechar o projeto</p>
+                <p class="meta">abatível no setup ao assinar um plano</p>
               </article>
               <article class="price-card reveal d1">
                 <span class="tag">Rápido</span>
-                <h3>Automação Simples</h3>
+                <h4>Automação Simples</h4>
                 <p class="desc">
                   Uma automação pontual para resolver uma dor específica: enviar
                   lead, criar tarefa, integrar duas ferramentas.
                 </p>
                 <div class="price">
                   <span class="from">a partir de</span
-                  ><span class="val">R$800</span>
+                  ><span class="val">R$897</span>
                 </div>
                 <p class="meta">entrega em 3 a 7 dias úteis</p>
               </article>
-              <article
-                class="price-card reveal d2"
-                style="
-                  background: linear-gradient(
-                    160deg,
-                    color-mix(in srgb, var(--accent) 10%, var(--surface)),
-                    var(--surface)
-                  );
-                  border-color: var(--accent);
-                "
-              >
-                <span class="tag" style="color: var(--accent-strong)"
-                  >Mais procurado</span
-                >
-                <h3>Automação Comercial</h3>
+              <article class="price-card reveal d2">
+                <span class="tag">Funil no automático</span>
+                <h4>Automação Comercial</h4>
                 <p class="desc">
                   Entrada de leads, qualificação, distribuição, follow-up e
-                  recuperação. O funil rodando no automático.
+                  recuperação. O funil rodando sozinho.
                 </p>
                 <div class="price">
                   <span class="from">a partir de</span
-                  ><span class="val">R$2.500</span>
+                  ><span class="val">R$2.497</span>
                 </div>
-                <p class="meta">mensalidade opcional de manutenção</p>
+                <p class="meta">o comercial que mais economiza tempo</p>
               </article>
-              <article class="price-card reveal">
+              <article class="price-card reveal d1">
                 <span class="tag">IA aplicada</span>
-                <h3>Agente de IA</h3>
+                <h4>Agente de IA</h4>
                 <p class="desc">
                   Um agente de IA para uma tarefa específica: atendimento,
                   qualificação ou consulta de documentos.
                 </p>
                 <div class="price">
                   <span class="from">a partir de</span
-                  ><span class="val">R$2.000</span>
+                  ><span class="val">R$1.997</span>
                 </div>
                 <p class="meta">com logs, limites e revisão humana</p>
               </article>
-              <article class="price-card reveal d1">
+              <article class="price-card reveal d2">
                 <span class="tag">Sob medida</span>
-                <h3>Sistema Web</h3>
+                <h4>Sistema Web</h4>
                 <p class="desc">
                   Dashboard, CRM interno, portal do cliente ou sistema de gestão
                   feito do zero para a sua necessidade.
                 </p>
                 <div class="price">
                   <span class="from">a partir de</span
-                  ><span class="val">R$5.000</span>
+                  ><span class="val">R$4.997</span>
                 </div>
-                <p class="meta">hospedagem e evolução opcionais</p>
-              </article>
-              <article
-                class="price-card reveal d2"
-                style="
-                  background: linear-gradient(
-                    160deg,
-                    color-mix(in srgb, var(--accent) 10%, var(--surface)),
-                    var(--surface)
-                  );
-                  border-color: var(--accent);
-                "
-              >
-                <span class="tag" style="color: var(--accent-strong)"
-                  >Não sabe por onde começar?</span
-                >
-                <h3>Vamos descobrir juntos</h3>
-                <p class="desc">
-                  No diagnóstico a gente acha o ponto de maior impacto e monta o
-                  primeiro projeto do seu jeito.
-                </p>
-                <a
-                  href="#contato"
-                  class="btn btn-primary"
-                  style="margin-top: 18px"
-                  >Agendar diagnóstico</a
-                >
+                <p class="meta">vira operação com o plano mensal</p>
               </article>
             </div>
+            <p class="setup-note">
+              Todo projeto entra com um plano de operação para manter tudo
+              rodando.
+            </p>
           </div>
 
-          <!-- Mensal -->
-          <div class="pricing-panel" id="panel-mensal">
-            <div class="plans">
-              <article class="plan reveal">
-                <div class="pname">Essencial</div>
+          <!-- ===== (c) PLANO DE OPERAÇÃO: a gente mantém rodando ===== -->
+          <div class="plans-block reveal">
+            <div class="block-head">
+              <span class="eyebrow">Plano de operação · mensal</span>
+              <h3>A gente mantém rodando.</h3>
+              <p class="lead">
+                Sua operação no ar todo mês, monitorada, consertada e evoluindo.
+              </p>
+            </div>
+
+            <div style="text-align: center">
+              <!-- Toggle Mensal / Anual (anual pré-selecionado).
+                   Anual: paga 10, leva 12. Valores anuais por mês são charm (terminam em 7)
+                   e equivalem a ~2 meses grátis sobre o mensal. -->
+              <div
+                class="tabs billing"
+                role="group"
+                aria-label="Forma de cobrança do plano"
+              >
+                <button
+                  class="tab"
+                  type="button"
+                  data-billing="mensal"
+                  aria-pressed="false"
+                >
+                  Mensal
+                </button>
+                <button
+                  class="tab active"
+                  type="button"
+                  data-billing="anual"
+                  aria-pressed="true"
+                >
+                  Anual <span class="save">até 2 meses grátis</span>
+                </button>
+              </div>
+              <p class="sr-only" role="status" aria-live="polite" id="billing-status"></p>
+            </div>
+
+            <div class="plans four">
+              <!-- Operação (piso) -->
+              <article
+                class="plan reveal"
+                data-m="397"
+                data-a="327"
+                data-at="3.924"
+              >
+                <h4 class="pname">Operação</h4>
                 <div class="pprice">
-                  <span class="v">R$1.000</span><span class="u">/mês</span>
+                  <span class="v">R$327</span><span class="u">/mês</span>
                 </div>
-                <p class="lead" style="font-size: 14px">
-                  Para manter o que já roda funcionando e ajustado.
-                </p>
+                <p class="bill-note" data-bill-note>cobrado R$3.924/ano</p>
+                <p class="plan-frame">Menos que o custo de 1 contratação para a mesma tarefa.</p>
                 <ul>
-                  <li>
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.4"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
-                    Até 5 horas mensais
+                  <li class="hot">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+                    Até 2 automações ativas
                   </li>
                   <li>
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.4"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
-                    Suporte assíncrono
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+                    Infra hospedada e gerida pela WaveOps
                   </li>
                   <li>
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.4"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
-                    Pequenos ajustes
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+                    Monitoramento dos fluxos
                   </li>
                   <li>
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.4"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
-                    Monitoramento básico
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+                    Conserto quando a API quebra
+                  </li>
+                  <li>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+                    Relatório mensal de valor em R$
                   </li>
                 </ul>
-                <a href="#contato" class="btn btn-ghost btn-block"
-                  >Começar no Essencial</a
-                >
+                <a href="#contato" class="btn btn-ghost btn-block">Começar no Operação</a>
               </article>
 
-              <article class="plan featured reveal d1">
+              <!-- Essencial -->
+              <article
+                class="plan reveal d1"
+                data-m="497"
+                data-a="417"
+                data-at="5.004"
+              >
+                <h4 class="pname">Essencial</h4>
+                <div class="pprice">
+                  <span class="v">R$417</span><span class="u">/mês</span>
+                </div>
+                <p class="bill-note" data-bill-note>cobrado R$5.004/ano</p>
+                <p class="plan-frame">Menos que o custo de 1 contratação para a mesma tarefa.</p>
+                <ul>
+                  <li class="inherit">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+                    Tudo do Operação
+                  </li>
+                  <li class="hot">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+                    Até 5 automações ativas
+                  </li>
+                  <li class="hot">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+                    1 evolução por mês
+                  </li>
+                  <li>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+                    Suporte prioritário
+                  </li>
+                </ul>
+                <a href="#contato" class="btn btn-ghost btn-block">Começar no Essencial</a>
+              </article>
+
+              <!-- Pro (único com selo) -->
+              <article
+                class="plan featured reveal d2"
+                data-m="997"
+                data-a="827"
+                data-at="9.924"
+              >
                 <span class="ribbon">Mais escolhido</span>
-                <div class="pname">Pro</div>
+                <h4 class="pname">Pro</h4>
                 <div class="pprice">
-                  <span class="v">R$2.500</span><span class="u">/mês</span>
+                  <span class="v">R$827</span><span class="u">/mês</span>
                 </div>
-                <p class="lead" style="font-size: 14px">
-                  Para evoluir a operação com novas automações todo mês.
-                </p>
+                <p class="bill-note" data-bill-note>cobrado R$9.924/ano</p>
+                <p class="plan-frame">Menos que o custo de 1 contratação para a mesma tarefa.</p>
                 <ul>
-                  <li>
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.4"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
-                    Até 15 horas mensais
+                  <li class="inherit">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+                    Tudo do Essencial
                   </li>
-                  <li>
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.4"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
-                    Criação de automações
+                  <li class="hot">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+                    Até 12 automações ativas
                   </li>
-                  <li>
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.4"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
-                    Ajustes em integrações
+                  <li class="hot">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+                    1 sistema, dashboard ou agente de IA hospedado
                   </li>
-                  <li>
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.4"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
-                    Reunião quinzenal
+                  <li class="hot">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+                    Evolução contínua
                   </li>
-                  <li>
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.4"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
-                    Relatório mensal
+                  <li class="hot">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+                    Revisão mensal de resultados
                   </li>
                 </ul>
-                <a href="#contato" class="btn btn-primary btn-block"
-                  >Quero o Pro</a
-                >
+                <a href="#contato" class="btn btn-primary btn-block">Quero o Pro</a>
               </article>
 
-              <article class="plan reveal d2">
-                <div class="pname">Business</div>
+              <!-- Business -->
+              <article
+                class="plan reveal d1"
+                data-m="1.997"
+                data-a="1.667"
+                data-at="20.004"
+              >
+                <h4 class="pname">Business</h4>
                 <div class="pprice">
-                  <span class="v">R$5.000</span><span class="u">/mês</span>
+                  <span class="v">R$1.667</span><span class="u">/mês</span>
                 </div>
-                <p class="lead" style="font-size: 14px">
-                  Para quem trata automação como parte central do negócio.
-                </p>
+                <p class="bill-note" data-bill-note>cobrado R$20.004/ano</p>
+                <p class="plan-frame">Menos que o custo de 1 contratação para a mesma tarefa.</p>
                 <ul>
-                  <li>
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.4"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
-                    Até 35 horas mensais
+                  <li class="inherit">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+                    Tudo do Pro
                   </li>
-                  <li>
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.4"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
-                    Projetos contínuos
+                  <li class="hot">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+                    Automações, sistemas e agentes ilimitados
                   </li>
-                  <li>
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.4"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
-                    Prioridade no atendimento
+                  <li class="hot">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+                    SLA de resposta
                   </li>
-                  <li>
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.4"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
-                    Reunião semanal
-                  </li>
-                  <li>
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.4"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
-                    Monitoramento avançado
+                  <li class="hot">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+                    Ponto de contato dedicado
                   </li>
                 </ul>
-                <a href="#contato" class="btn btn-ghost btn-block"
-                  >Falar sobre o Business</a
-                >
+                <a href="#contato" class="btn btn-ghost btn-block">Falar sobre o Business</a>
               </article>
             </div>
-            <p class="pricing-note">
-              Todos os planos incluem monitoramento e suporte técnico. Sem
-              fidelidade: você fica porque funciona.
+
+            <p class="plans-custom">
+              Operação maior que isso?
+              <a href="#contato">Falar com a gente</a>
             </p>
+          </div>
+
+          <!-- ===== (d) O QUE ENTRA NO SEU PLANO TODO MÊS ===== -->
+          <div class="included reveal">
+            <div class="block-head center">
+              <span class="eyebrow">Recorrência que se paga</span>
+              <h3>O que entra no seu plano todo mês.</h3>
+            </div>
+            <ul class="included-list">
+              <li class="included-item">
+                <span class="ic" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="6" rx="1" /><rect x="3" y="14" width="18" height="6" rx="1" /><path d="M7 7h.01M7 17h.01" /></svg>
+                </span>
+                <div>
+                  <h4>Infra rodando</h4>
+                  <p>A gente hospeda e mantém de pé. Você não cuida de servidor nem credencial.</p>
+                </div>
+              </li>
+              <li class="included-item">
+                <span class="ic" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3 8 4-16 3 8h4" /></svg>
+                </span>
+                <div>
+                  <h4>Monitoramento</h4>
+                  <p>A gente vê se um fluxo parou antes de você ver.</p>
+                </div>
+              </li>
+              <li class="included-item">
+                <span class="ic" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4l-6 6 3 3 6-6a4 4 0 0 0 5.4-5.4l-2.3 2.3-2.1-.6-.6-2.1z" /></svg>
+                </span>
+                <div>
+                  <h4>Conserto incluso</h4>
+                  <p>Quando o WhatsApp, o CRM ou o pagamento mudam e quebram a integração, a gente arruma. Sem orçamento novo.</p>
+                </div>
+              </li>
+              <li class="included-item">
+                <span class="ic" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8" /><path d="M21 7v5h-5" /></svg>
+                </span>
+                <div>
+                  <h4>Evolução contínua</h4>
+                  <p>Sua operação não congela na entrega. A gente ajusta conforme o negócio muda.</p>
+                </div>
+              </li>
+              <li class="included-item">
+                <span class="ic" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v18l-7-4-7 4z" /><path d="M9 8h6M9 12h6" /></svg>
+                </span>
+                <div>
+                  <h4>Relatório mensal de valor</h4>
+                  <p>Todo mês você recebe, em R$, quanto a operação economizou e recuperou.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== PROVA SOCIAL (SPEC-07) ==============
+           PLACEHOLDER: pré-montado e DESLIGADO pela flag `hidden` no <section>.
+           Para ativar quando tiver os 3 primeiros cases reais:
+           1. remova o atributo `hidden` da tag <section id="prova" ...>;
+           2. preencha tudo que estiver entre [colchetes] (foto, nome, nicho, frase);
+           3. troque cada monograma .tcard-photo por <img src="assets/cliente-1.jpg" alt="Nome">;
+           4. preencha os números reais da faixa (.stats-band).
+           NÃO invente depoimento nem número. Sem dado real, deixe `hidden`. -->
+      <section
+        class="section"
+        id="prova"
+        data-screen-label="Prova"
+        hidden
+        data-flag="prova-social"
+      >
+        <div class="wrap">
+          <div class="section-head center reveal">
+            <span class="eyebrow">Quem já colocou no automático</span>
+            <h2>Operações reais rodando todo dia.</h2>
+          </div>
+
+          <div class="testi-grid reveal">
+            <!-- PLACEHOLDER: depoimento 1 (foto / nome / nicho / frase) -->
+            <figure class="tcard">
+              <blockquote>[Depoimento curto e específico do cliente. Sem exagero.]</blockquote>
+              <figcaption>
+                <span class="tcard-photo" aria-hidden="true">[I]</span>
+                <span class="tcard-id">
+                  <strong>[Nome do cliente]</strong>
+                  <span class="tcard-niche">[Nicho ou empresa]</span>
+                </span>
+              </figcaption>
+            </figure>
+            <!-- PLACEHOLDER: depoimento 2 -->
+            <figure class="tcard">
+              <blockquote>[Depoimento curto e específico do cliente. Sem exagero.]</blockquote>
+              <figcaption>
+                <span class="tcard-photo" aria-hidden="true">[I]</span>
+                <span class="tcard-id">
+                  <strong>[Nome do cliente]</strong>
+                  <span class="tcard-niche">[Nicho ou empresa]</span>
+                </span>
+              </figcaption>
+            </figure>
+            <!-- PLACEHOLDER: depoimento 3 -->
+            <figure class="tcard">
+              <blockquote>[Depoimento curto e específico do cliente. Sem exagero.]</blockquote>
+              <figcaption>
+                <span class="tcard-photo" aria-hidden="true">[I]</span>
+                <span class="tcard-id">
+                  <strong>[Nome do cliente]</strong>
+                  <span class="tcard-niche">[Nicho ou empresa]</span>
+                </span>
+              </figcaption>
+            </figure>
+          </div>
+
+          <!-- PLACEHOLDER: faixa de números. Preencher com dados reais. -->
+          <div class="stats-band reveal d1">
+            <div class="stat">
+              <div class="stat-num">[X]</div>
+              <div class="stat-label">automações rodando</div>
+            </div>
+            <div class="stat">
+              <div class="stat-num">[Y]</div>
+              <div class="stat-label">horas economizadas por mês</div>
+            </div>
           </div>
         </div>
       </section>
@@ -1568,7 +1633,7 @@
               </button>
               <div class="faq-a">
                 <p>
-                  Pelo diagnóstico, a partir de R$300, e esse valor é abatido
+                  Pelo diagnóstico, a partir de R$297, e esse valor é abatido
                   se você fechar o projeto. Em uma conversa a gente já
                   identifica onde dá para ganhar tempo e dinheiro primeiro.
                 </p>

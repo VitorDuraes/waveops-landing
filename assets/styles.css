@@ -462,26 +462,9 @@ section[id] { scroll-margin-top: 84px; }
 .block-head.center .eyebrow { justify-content: center; }
 .block-head h3 { font-size: clamp(24px, 2.8vw, 32px); margin-top: 12px; }
 .block-head .lead { margin-top: 10px; font-size: 16px; }
-.setup-block, .plans-block, .included { margin-top: calc(56px * var(--dscale)); }
+.plans-block, .included { margin-top: calc(56px * var(--dscale)); }
 
-/* ---- (b) Setup (reaproveita .price-card) ---- */
-.proj-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-.setup-grid { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
-.price-card {
-  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 26px; display: flex; flex-direction: column; transition: border-color .25s ease, transform .25s ease;
-}
-.price-card:hover { border-color: var(--border-2); transform: translateY(-3px); }
-.price-card .tag { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); }
-.price-card h4 { font-size: 19px; margin: 12px 0 0; }
-.price-card .desc { color: var(--muted); font-size: 14px; margin-top: 8px; flex: 1; }
-.price-card .price { margin-top: 18px; display: flex; align-items: baseline; gap: 7px; }
-.price-card .price .from { font-family: var(--font-mono); font-size: 12px; color: var(--dim); }
-.price-card .price .val { font-family: var(--font-display); font-weight: 700; font-size: 26px; letter-spacing: -0.02em; }
-.price-card .meta { font-size: 12.5px; color: var(--dim); margin-top: 8px; font-family: var(--font-mono); }
-.setup-note { text-align: center; margin-top: 26px; font-size: 14.5px; color: var(--text); font-weight: 600; }
-
-/* ---- (c) Planos de operação (reaproveita .plan) ---- */
+/* ---- Planos de operação (reaproveita .plan) ---- */
 .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: stretch; }
 .plans.four { grid-template-columns: repeat(4, 1fr); gap: 14px; }
 .plan {
@@ -661,7 +644,6 @@ section[id] { scroll-margin-top: 84px; }
   .hamburger { display: grid; }
   .nav-actions .btn-primary.desktop { display: none; }
   .pains-grid { grid-template-columns: 1fr; }
-  .proj-grid { grid-template-columns: 1fr; }
   .plans, .plans.four { grid-template-columns: 1fr; }
   .roi-grid { grid-template-columns: 1fr; }
   .steps { grid-template-columns: 1fr 1fr; }

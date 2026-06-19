@@ -187,6 +187,76 @@
     applyBilling('anual', false); // anual pré-selecionado, sem anúncio no load
   }
 
+  /* ---- Carrossel de casos de uso (coverflow). Um card no centro, dois nas
+     laterais em perspectiva, um escondido atrás. Gira sozinho: o ativo avança
+     a cada DELAY ms, o card da direita assume o centro e assim por diante.
+     Pausa no hover/foco, clique numa lateral a traz pro centro, setas e dots
+     controlam à mão. Em "reduzir movimento" não gira sozinho. ---- */
+  const cv = document.getElementById('cases-coverflow');
+  if (cv) {
+    const cvCards = Array.prototype.slice.call(cv.querySelectorAll('.case-card'));
+    const cvN = cvCards.length;
+    const cvDotsWrap = cv.querySelector('.cases-dots');
+    const cvReduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const CV_DELAY = 3000;
+    let cvActive = 0;
+    let cvTimer = null;
+
+    // o CSS usa --cv-delay para sincronizar a barra de progresso do dot ativo.
+    cv.style.setProperty('--cv-delay', CV_DELAY + 'ms');
+
+    const cvDots = cvCards.map((_, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'cases-dot';
+      b.setAttribute('role', 'tab');
+      b.setAttribute('aria-label', 'Ir para o caso ' + (i + 1));
+      b.innerHTML = '<span class="cases-dot-fill"></span>';
+      b.addEventListener('click', () => cvGo(i));
+      cvDotsWrap.appendChild(b);
+      return b;
+    });
+
+    function cvRender() {
+      cvCards.forEach((card, i) => {
+        // distância até o ativo, normalizada para o caminho mais curto (wrap).
+        let off = i - cvActive;
+        if (off > cvN / 2) off -= cvN;
+        if (off < -cvN / 2) off += cvN;
+        card.classList.remove('is-center', 'is-left', 'is-right', 'is-back');
+        if (off === 0) card.classList.add('is-center');
+        else if (off === 1) card.classList.add('is-right');
+        else if (off === -1) card.classList.add('is-left');
+        else card.classList.add('is-back');
+        const isCenter = off === 0;
+        card.setAttribute('aria-hidden', String(!isCenter));
+        const link = card.querySelector('.case-cta');
+        if (link) link.setAttribute('tabindex', isCenter ? '0' : '-1');
+      });
+      cvDots.forEach((d, i) => {
+        const on = i === cvActive;
+        d.classList.toggle('active', on);
+        d.setAttribute('aria-selected', String(on));
+      });
+    }
+
+    const cvAdvance = () => { cvActive = (cvActive + 1) % cvN; cvRender(); };
+    function cvStart() { if (!cvReduce && !cvTimer) cvTimer = window.setInterval(cvAdvance, CV_DELAY); }
+    function cvStop() { if (cvTimer) { clearInterval(cvTimer); cvTimer = null; } }
+    function cvGo(i) { cvActive = ((i % cvN) + cvN) % cvN; cvRender(); cvStop(); cvStart(); }
+
+    cvCards.forEach((card, i) => card.addEventListener('click', (e) => {
+      if (!card.classList.contains('is-center')) { e.preventDefault(); cvGo(i); }
+    }));
+    cv.addEventListener('mouseenter', cvStop);
+    cv.addEventListener('mouseleave', cvStart);
+    cv.addEventListener('focusin', cvStop);
+    cv.addEventListener('focusout', cvStart);
+
+    cvRender();
+    cvStart();
+  }
+
   /* ---- WhatsApp click tracking (SPEC-02) ---- */
   document.querySelectorAll('a[href*="wa.me"]').forEach((a) => {
     a.addEventListener('click', () => {

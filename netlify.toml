@@ -6,6 +6,10 @@
 [build]
   base = "portal"
   command = "npm run build"
+  # O Next Runtime publica a pasta .next. O publish e relativo a RAIZ do repo
+  # (por isso "portal/.next"), e nao pode ser igual ao base ("portal"), senao o
+  # plugin falha com "publish directory cannot be the same as the base directory".
+  publish = "portal/.next"
 
 [build.environment]
   NODE_VERSION = "20"

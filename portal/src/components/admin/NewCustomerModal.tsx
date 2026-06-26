@@ -2,15 +2,10 @@
 import { useState } from "react";
 import { Icon } from "@/components/icons";
 import { useModal, useToast } from "@/components/providers";
+import { plans } from "@/lib/data";
 
-// Planos oferecidos no cadastro -> id do plano (a landing tem os mesmos).
-const PLAN_OPTIONS: [string, string][] = [
-  ["operacao", "Operação Mensal"],
-  ["operacao", "Operação Anual"],
-  ["essencial", "Essencial"],
-  ["pro", "Pro"],
-  ["business", "Business"],
-];
+// Planos reais (mesma fonte da landing): id -> nome (Operação, Essencial, Pro, Empresarial).
+const PLAN_OPTIONS: [string, string][] = plans.map((p) => [p.id, p.name]);
 
 // Modal "Novo cliente": cria via API e recarrega a lista (onCreated).
 export function NewCustomerModalContent({ onCreated }: { onCreated?: () => void }) {

@@ -2,16 +2,18 @@
 // 16 . Configuracoes (/admin/configuracoes)
 import { Icon, type IconName } from "@/components/icons";
 import { initials } from "@/lib/format";
+import { useApi } from "@/lib/useApi";
+import { Loading, LoadError } from "@/components/ui/Loading";
 
-// Discord substitui o Slack; o WaveOps CRM (Twenty) substitui o Trello/ClickUp.
-const INTEGRATIONS: [IconName, string, string, "ok" | "warn", string][] = [
-  ["money", "Mercado Pago", "Gateway de pagamento: checkout, cobranças e webhooks", "ok", "Conectado"],
-  ["whatsapp", "WhatsApp (Z-API)", "Envio de follow-ups e avisos de cobrança", "ok", "Conectado"],
-  ["mail", "Resend", "E-mails transacionais e login por código", "ok", "Conectado"],
-  ["discord", "Discord", "Alertas internos de pagamento e inadimplência", "ok", "Conectado"],
-  ["users", "WaveOps CRM (Twenty)", "Empresas, contatos, pipeline (oportunidades) e chamados", "warn", "Configurar"],
-];
+interface Integration {
+  key: IconName;
+  name: string;
+  desc: string;
+  connected: boolean;
+}
 
+// Endereços da equipe (estrutura intencional). Discord substitui o Slack; o
+// WaveOps CRM (Twenty) substitui o Trello/ClickUp.
 const TEAM: [string, string, string][] = [
   ["Equipe WaveOps", "financeiro@waveops.com.br", "Admin"],
   ["Suporte", "suporte@waveops.com.br", "Suporte"],
@@ -19,6 +21,8 @@ const TEAM: [string, string, string][] = [
 ];
 
 export default function ConfiguracoesPage() {
+  const req = useApi<Integration[]>("/api/integrations");
+
   return (
     <>
       <div className="page-head">
@@ -30,22 +34,21 @@ export default function ConfiguracoesPage() {
       <div className="grid cols-2">
         <div className="card">
           <div className="section-title">Integrações</div>
-          {INTEGRATIONS.map(([ic, nm, ds, tone, lbl]) => (
-            <div className="lrow" key={nm}>
-              <div className="ic" style={ic === "whatsapp" ? { color: "#22c55e" } : undefined}>
-                <Icon name={ic} />
+          {req.loading && <Loading />}
+          {req.error && <LoadError message={req.error} onRetry={req.reload} />}
+          {req.data?.map((it) => (
+            <div className="lrow" key={it.name}>
+              <div className="ic">
+                <Icon name={it.key} />
               </div>
               <div className="gr">
-                <div className="t">{nm}</div>
-                <div className="s">{ds}</div>
+                <div className="t">{it.name}</div>
+                <div className="s">{it.desc}</div>
               </div>
-              <span className={"badge " + tone}>
+              <span className={"badge " + (it.connected ? "ok" : "warn")}>
                 <span className="d" />
-                {lbl}
+                {it.connected ? "Conectado" : "Não configurado"}
               </span>
-              <button className="btn btn-ghost btn-sm" style={{ marginLeft: 10 }}>
-                {tone === "ok" ? "Gerenciar" : "Conectar"}
-              </button>
             </div>
           ))}
         </div>
@@ -67,9 +70,6 @@ export default function ConfiguracoesPage() {
                 <span className="badge accent">{r}</span>
               </div>
             ))}
-            <button className="btn btn-ghost btn-sm" style={{ marginTop: 14 }}>
-              <Icon name="plus" /> Convidar membro
-            </button>
           </div>
           <div className="card">
             <div className="section-title">Régua de cobrança</div>
@@ -78,16 +78,13 @@ export default function ConfiguracoesPage() {
               <span className="cell-strong">7 dias</span>
             </div>
             <div className="flex between" style={{ padding: "8px 0" }}>
-              <span>Canal principal</span>
-              <span className="cell-strong">WhatsApp</span>
+              <span>Lembretes de cobrança</span>
+              <span className="cell-strong">Por e-mail</span>
             </div>
             <div className="flex between" style={{ padding: "8px 0" }}>
-              <span>Horário de envio</span>
-              <span className="cell-strong">08:00</span>
+              <span>Execução do job</span>
+              <span className="cell-strong">Diária</span>
             </div>
-            <button className="btn btn-ghost btn-sm" style={{ marginTop: 12 }}>
-              <Icon name="edit" /> Editar régua
-            </button>
           </div>
         </div>
       </div>

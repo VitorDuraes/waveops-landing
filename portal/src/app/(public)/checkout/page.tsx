@@ -77,26 +77,26 @@ function CheckoutInner() {
             <div className="field-row">
               <div className="field">
                 <label>Nome completo</label>
-                <input name="name" placeholder="Seu nome" required defaultValue="João Silva" />
+                <input name="name" placeholder="Seu nome" required />
               </div>
               <div className="field">
                 <label>Empresa</label>
-                <input name="company" placeholder="Nome da empresa" required defaultValue="JS Consultoria" />
+                <input name="company" placeholder="Nome da empresa" required />
               </div>
             </div>
             <div className="field-row">
               <div className="field">
                 <label>E-mail</label>
-                <input name="email" type="email" placeholder="voce@empresa.com.br" required defaultValue="joao@jsconsultoria.com.br" />
+                <input name="email" type="email" placeholder="voce@empresa.com.br" required />
               </div>
               <div className="field">
                 <label>WhatsApp</label>
-                <input name="phone" placeholder="(00) 00000-0000" required defaultValue="(11) 99876-5432" />
+                <input name="phone" placeholder="(00) 00000-0000" required />
               </div>
             </div>
             <div className="field">
               <label>CPF / CNPJ</label>
-              <input name="document" placeholder="000.000.000-00" required defaultValue="12.345.678/0001-90" />
+              <input name="document" placeholder="000.000.000-00" required />
             </div>
 
             <div className="section-title" style={{ marginTop: 24 }}>

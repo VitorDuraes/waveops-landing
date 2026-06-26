@@ -21,8 +21,8 @@ export const CLIENT_NAV: NavEntry[] = [
 export const ADMIN_NAV: NavEntry[] = [
   { sec: "Operação" },
   { id: "/admin", label: "Dashboard", icon: "grid", href: "/admin" },
-  { id: "/admin/clientes", label: "Clientes", icon: "users", href: "/admin/clientes", count: "12" },
-  { id: "/admin/faturas", label: "Faturas", icon: "invoice", href: "/admin/faturas", count: "3" },
+  { id: "/admin/clientes", label: "Clientes", icon: "users", href: "/admin/clientes" },
+  { id: "/admin/faturas", label: "Faturas", icon: "invoice", href: "/admin/faturas" },
   { id: "/admin/followups", label: "Follow-ups", icon: "bell", href: "/admin/followups" },
   { sec: "Configuração" },
   { id: "/admin/planos", label: "Planos", icon: "layers", href: "/admin/planos" },

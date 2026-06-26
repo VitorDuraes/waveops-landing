@@ -15,7 +15,7 @@ export function AppShell({ kind, children }: { kind: "client" | "admin"; childre
       <div className="layout">
         <Sidebar nav={nav} foot={foot} open={open} onNavigate={() => setOpen(false)} />
         <div className="main">
-          <Topbar onHamb={() => setOpen(true)} bell={kind === "admin"} search={kind === "admin"} />
+          <Topbar onHamb={() => setOpen(true)} bell={false} search={false} />
           <div className="page">{children}</div>
         </div>
       </div>

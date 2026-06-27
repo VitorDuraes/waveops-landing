@@ -36,6 +36,47 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pro
     log.warn("webhook.nao_resolvido", { paymentId: event.gatewayPaymentId });
     return err("Pagamento não resolvido, tente novamente", 503);
   }
+
+  // Reembolso ou chargeback iniciado no painel do gateway: estorna a fatura e
+  // cancela a assinatura/cliente (idempotente). Retorna antes do fluxo de baixa.
+  const REFUND_STATUSES = ["refunded", "charged_back", "chargeback"];
+  if (event.kind === "payment" && REFUND_STATUSES.includes(event.status.toLowerCase())) {
+    const refund = await getRepo().applyGatewayRefund({
+      gatewayPaymentId: event.gatewayPaymentId,
+      gatewaySubscriptionId: event.gatewaySubscriptionId,
+    });
+    if (refund.applied) {
+      log.info("webhook.reembolso_aplicado", {
+        invoiceId: refund.invoiceId,
+        customerId: refund.customerId,
+        paymentId: event.gatewayPaymentId,
+        status: event.status,
+      });
+      await notifyDiscord(
+        `Reembolso/chargeback (${event.status}) · fatura ${refund.invoiceId} estornada e assinatura cancelada.`
+      );
+    } else {
+      log.info("webhook.reembolso_nao_aplicado", {
+        status: event.status,
+        paymentId: event.gatewayPaymentId,
+        alreadyRefunded: refund.alreadyRefunded,
+      });
+    }
+    return ok({ received: true, kind: event.kind, status: event.status, refunded: refund.applied });
+  }
+
+  // Reembolso PARCIAL no MP mantém o pagamento "approved" com um array refunds[] (não
+  // cai no branch acima). O MVP só trata reembolso total, mas registramos o parcial
+  // para conciliação, senão passaria sem rastro com a fatura ainda "paga".
+  const raw = event.raw as { refunds?: unknown[] } | null;
+  if (event.kind === "payment" && raw && Array.isArray(raw.refunds) && raw.refunds.length > 0) {
+    log.warn("webhook.reembolso_parcial_nao_tratado", {
+      paymentId: event.gatewayPaymentId,
+      status: event.status,
+      refunds: raw.refunds.length,
+    });
+  }
+
   await notifyDiscord(`Webhook ${event.provider}: ${event.kind} · ${event.status}`);
 
   // Aplica o pagamento no banco (idempotente): marca a fatura paga e reativa o

@@ -28,7 +28,7 @@ const TABS: [Tab, string][] = [
 export default function ClienteDetalhePage() {
   const params = useParams<{ id: string }>();
   const toast = useToast();
-  const { resendInvoice, wa, setStatus } = useAdminActions();
+  const { resendInvoice, wa, setStatus, refund } = useAdminActions();
   const [tab, setTab] = useState<Tab>("resumo");
   const req = useApi<{
     customer: Customer;
@@ -276,6 +276,9 @@ export default function ClienteDetalhePage() {
               </button>
               <button className="btn btn-danger btn-sm" onClick={() => setStatus(c.id, "cancelado", req.reload)}>
                 Cancelar assinatura
+              </button>
+              <button className="btn btn-danger btn-sm" onClick={() => refund(c.id, req.reload)}>
+                <Icon name="refresh" /> Reembolsar
               </button>
             </div>
           </div>

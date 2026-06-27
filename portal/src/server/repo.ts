@@ -75,6 +75,22 @@ export interface PaymentApplyResult {
   invoiceId?: string;
   customerId?: string;
 }
+export interface GatewayRefundInput {
+  gatewayPaymentId?: string;
+  gatewaySubscriptionId?: string;
+}
+export interface RefundApplyResult {
+  applied: boolean;
+  invoiceId?: string;
+  customerId?: string;
+  alreadyRefunded?: boolean;
+}
+// Pagamento elegivel a reembolso: ultima fatura paga do cliente com id no gateway.
+export interface RefundablePayment {
+  gatewayPaymentId: string;
+  invoiceId: string;
+  amountCents: number;
+}
 export interface InvoiceContact {
   id: string;
   amount: number;
@@ -106,6 +122,11 @@ export interface Repo {
   createTicket(input: NewTicketInput): Promise<Ticket>;
   recordCheckout(input: CheckoutRecordInput): Promise<void>;
   applyGatewayPayment(event: GatewayPaymentInput): Promise<PaymentApplyResult>;
+  // Reembolso/chargeback: estorna a fatura e cancela a assinatura e o cliente.
+  // Idempotente (fatura ja estornada -> no-op).
+  applyGatewayRefund(event: GatewayRefundInput): Promise<RefundApplyResult>;
+  // Ultima fatura paga do cliente com pagamento no gateway (alvo do reembolso).
+  getRefundablePayment(customerId: string): Promise<RefundablePayment | null>;
   setCustomerStatus(id: string, status: CustomerStatus): Promise<void>;
   getInvoiceWithCustomer(id: string): Promise<InvoiceContact | null>;
   // Login por e-mail OU documento (CPF/CNPJ) + senha.
@@ -224,6 +245,12 @@ const mockRepo: Repo = {
   },
   async applyGatewayPayment() {
     return { applied: false };
+  },
+  async applyGatewayRefund() {
+    return { applied: false };
+  },
+  async getRefundablePayment() {
+    return null;
   },
   async setCustomerStatus() {
     /* no-op no mock */
@@ -620,6 +647,65 @@ function prismaRepoFactory(): Repo {
         return { applied: true, invoiceId: inv.id, customerId: r.customerId };
       }
       return { applied: false };
+    },
+    async applyGatewayRefund(event) {
+      // Acha a fatura paga pelo id do pagamento (caminho do webhook e do botao do
+      // admin) ou, na falta dele, pela ref da assinatura (ultima fatura paga).
+      let inv = event.gatewayPaymentId
+        ? await db.invoice.findFirst({ where: { gatewayPaymentId: event.gatewayPaymentId } })
+        : null;
+      if (!inv && event.gatewaySubscriptionId) {
+        const sub = await db.subscription.findFirst({
+          where: { gatewaySubscriptionId: event.gatewaySubscriptionId },
+        });
+        if (sub) {
+          inv = await db.invoice.findFirst({
+            where: { subscriptionId: sub.id, status: "paga" },
+            orderBy: { paidAt: "desc" },
+          });
+        }
+      }
+      if (!inv) return { applied: false };
+      // Idempotencia REAL contra corrida (webhook 'refunded' + botao do admin, ou
+      // retries do MP): a transicao para "reembolsada" e condicional ao status atual
+      // e atomica (updateMany com guard). Quem ganha a corrida aplica os efeitos; o
+      // outro recebe count 0 e vira no-op. So a checagem de status (read-then-write)
+      // nao cobriria duas execucoes concorrentes.
+      const claimed = await db.invoice.updateMany({
+        where: { id: inv.id, status: { notIn: ["reembolsada", "estornada"] } },
+        data: { status: "reembolsada" },
+      });
+      if (claimed.count === 0) {
+        return { applied: false, alreadyRefunded: true, invoiceId: inv.id, customerId: inv.customerId };
+      }
+      if (inv.subscriptionId) {
+        await db.subscription.update({
+          where: { id: inv.subscriptionId },
+          data: { status: "cancelado", canceledAt: new Date() },
+        });
+      }
+      // So cancela o CLIENTE se nao restar assinatura ativa nem fatura em aberto: um
+      // cliente pode ter mais de uma assinatura, e derrubar o cliente inteiro por um
+      // reembolso distorceria churn/MRR e o autopause da regua. Mesma logica do
+      // payInvoice (open === 0).
+      const [activeSubs, openInvoices] = await Promise.all([
+        db.subscription.count({ where: { customerId: inv.customerId, status: "ativo" } }),
+        db.invoice.count({ where: { customerId: inv.customerId, status: { in: ["em_aberto", "vencida"] } } }),
+      ]);
+      if (activeSubs === 0 && openInvoices === 0) {
+        const c = await db.customer.update({ where: { id: inv.customerId }, data: { status: "cancelado" } });
+        // Espelha o cancelamento no Twenty (best-effort, nao bloqueante).
+        fireAndForget("applyGatewayRefund", updateEmpresaStatus(c.gatewayCustomerId, "cancelado"));
+      }
+      return { applied: true, invoiceId: inv.id, customerId: inv.customerId };
+    },
+    async getRefundablePayment(customerId) {
+      const inv = await db.invoice.findFirst({
+        where: { customerId, status: "paga", gatewayPaymentId: { not: null } },
+        orderBy: { paidAt: "desc" },
+      });
+      if (!inv || !inv.gatewayPaymentId) return null;
+      return { gatewayPaymentId: inv.gatewayPaymentId, invoiceId: inv.id, amountCents: inv.amount };
     },
     async setCustomerStatus(id, status) {
       const c = await db.customer.update({ where: { id }, data: { status } });

@@ -48,6 +48,9 @@ export interface PaymentGateway {
   // Opcional: lista os pagamentos aprovados recentes para reconciliacao. Rede de
   // seguranca para quando o webhook nao chega (banco pausado, app dormindo, 5xx).
   searchRecentApproved?(sinceDays?: number): Promise<NormalizedWebhookEvent[]>;
+  // Opcional: reembolso TOTAL de um pagamento. Usado pelo botao "Reembolsar" do
+  // admin. Quando ausente, o reembolso so pode ser feito no painel do gateway.
+  refundPayment?(gatewayPaymentId: string): Promise<{ ok: boolean; detail?: string }>;
 }
 
 /* ------------------------------------------------------------------ */
@@ -170,6 +173,9 @@ const mercadoPagoGateway: PaymentGateway = {
       /* ignora */
     }
     const type = payload.type || payload.action || "unknown";
+    // Chargeback: o caso real e coberto pelo topico "payment", cujo GET retorna status
+    // "charged_back" (tratado no webhook como reembolso). O topico DEDICADO "chargebacks"
+    // (type sem "payment") cairia em "unknown" e seria ignorado; nao o assinamos hoje.
     const kind: NormalizedWebhookEvent["kind"] = type.includes("payment")
       ? "payment"
       : type.includes("preapproval") || type.includes("subscription")
@@ -268,6 +274,36 @@ const mercadoPagoGateway: PaymentGateway = {
         amountCents: p.transaction_amount != null ? Math.round(p.transaction_amount * 100) : undefined,
         raw: p,
       }));
+  },
+  // Reembolso TOTAL via API do MP (POST /v1/payments/{id}/refunds, corpo vazio).
+  // X-Idempotency-Key evita reembolso duplicado se a chamada for repetida.
+  async refundPayment(gatewayPaymentId) {
+    if (!env.mercadopago.accessToken) return { ok: false, detail: "Mercado Pago sem token configurado" };
+    try {
+      const res = await fetch(`https://api.mercadopago.com/v1/payments/${gatewayPaymentId}/refunds`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${env.mercadopago.accessToken}`,
+          "X-Idempotency-Key": `refund-${gatewayPaymentId}`,
+        },
+        body: "{}",
+      });
+      if (!res.ok) {
+        const detail = await res.text().catch(() => "");
+        log.error("mercadopago.refund_falhou", {
+          httpStatus: res.status,
+          detail: detail.slice(0, 300),
+          paymentId: gatewayPaymentId,
+        });
+        return { ok: false, detail: `Mercado Pago retornou ${res.status}` };
+      }
+      log.info("mercadopago.refund_ok", { paymentId: gatewayPaymentId });
+      return { ok: true };
+    } catch (e) {
+      log.error("mercadopago.refund_erro", { paymentId: gatewayPaymentId, erro: (e as Error).message });
+      return { ok: false, detail: "Erro de rede ao reembolsar" };
+    }
   },
 };
 

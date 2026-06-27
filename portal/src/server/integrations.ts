@@ -77,12 +77,35 @@ export async function sendEmail(to: string, subject: string, html: string): Prom
     return;
   }
   try {
-    await fetch("https://api.resend.com/emails", {
+    const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${env.resendKey}` },
-      body: JSON.stringify({ from: env.emailFrom, to, subject, html }),
+      // Envia tambem em texto puro: melhora entregabilidade e cobre clientes sem HTML.
+      body: JSON.stringify({ from: env.emailFrom, to, subject, html, text: htmlToText(html) }),
     });
+    // Resend devolve 200/201 no sucesso. Erro comum: 403 (dominio nao verificado) ou
+    // 422 (from fora do dominio). Antes isso era engolido; agora loga o motivo para
+    // o problema aparecer no painel do Netlify em vez de "e-mail sumiu".
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "");
+      console.error(`[email] Resend recusou (${res.status}) para ${to}: ${detail.slice(0, 300)}`);
+    }
   } catch (e) {
-    console.error("[email] erro", e);
+    console.error("[email] erro de rede", e);
   }
+}
+
+// Versao texto puro do corpo HTML (fallback de entregabilidade). Remove tags e
+// normaliza espacos; suficiente para os e-mails simples do portal.
+function htmlToText(html: string): string {
+  return html
+    .replace(/<\s*br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|h\d|div)>/gi, "\n")
+    // Preserva o link dos botoes <a href="URL">TEXTO</a> como "TEXTO: URL" antes de
+    // remover as tags (senao a URL sumiria no fallback de texto puro).
+    .replace(/<a\b[^>]*?href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, "$2: $1")
+    .replace(/<[^>]+>/g, "")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }

@@ -93,25 +93,34 @@ Atenção: hoje o `CNAME` da raiz do repo e as URLs canônicas da landing aponta
 
 ## Passo 6: e-mail no Resend
 
-1. Crie a API key e coloque em `RESEND_API_KEY`.
-2. Verifique o domínio waveops.com.br no Resend (registros DKIM e SPF no DNS) ANTES de enviar a clientes. Sem isso, só envia para o seu próprio e-mail.
-3. `EMAIL_FROM` = `WaveOps <nao-responder@waveops.com.br>`. Limite free: 3.000/mês, 100/dia. Sobra para o volume de códigos de login e ativação.
+Sem isto, o cliente paga e não recebe o código de ativação: o e-mail é o que destrava o acesso à conta. É bloqueio, não item opcional.
+
+1. Crie a conta no Resend e a API key. Coloque em `RESEND_API_KEY` no Netlify.
+2. Em Domains, adicione `waveops.com.br`. O Resend mostra os registros DNS a criar (DKIM `resend._domainkey`, SPF e o MX de bounce). Eles ficam em subdomínio (`send.waveops.com.br`) e na chave DKIM, então NÃO conflitam com o e-mail que já usa o domínio (o MX principal continua intacto). Adicione esses registros no DNS da Hostinger e aguarde o Resend marcar "Verified".
+3. `EMAIL_FROM` = `WaveOps <nao-responder@waveops.com.br>`. O remetente tem que ser do domínio verificado, senão o Resend recusa o envio (403/422). Limite free: 3.000/mês, 100/dia. Sobra para códigos de login e ativação.
+4. Se um envio falhar, o motivo agora aparece no log do Netlify (`[email] Resend recusou (...)`). Antes era engolido em silêncio.
 
 ## Passo 7: cron (cobrança e reconciliação)
 
 Dois caminhos redundantes, para o banco nunca pausar e nenhum pagamento se perder.
 
-**A) Supabase pg_cron + pg_net** (também mantém o banco acordado, porque roda dentro do Postgres). No SQL Editor do Supabase:
+**A) Supabase pg_cron + pg_net** (também mantém o banco acordado, porque a execução do próprio cron dentro do Postgres já conta como atividade de banco: nenhum keep-alive separado é preciso). No SQL Editor do Supabase:
 
 ```sql
 create extension if not exists pg_cron;
 create extension if not exists pg_net;
 
--- Régua de cobrança, todo dia 09:00 BRT (12:00 UTC)
+-- Se estiver reexecutando, remova os jobs antigos antes (evita duplicar). Não dá
+-- erro se ainda não existirem: o SELECT só não retorna linhas.
+select cron.unschedule(jobid) from cron.job where jobname in ('waveops-dunning', 'waveops-reconcile');
+
+-- Régua de cobrança, todo dia 09:00 BRT (12:00 UTC).
+-- timeout_milliseconds alto tolera o cold start do app (1 a 3s) sem perder a chamada.
 select cron.schedule('waveops-dunning', '0 12 * * *', $$
   select net.http_post(
     url := 'https://waveops.com.br/api/jobs/dunning',
-    headers := jsonb_build_object('Authorization', 'Bearer SEU_CRON_SECRET')
+    headers := jsonb_build_object('Content-Type', 'application/json', 'Authorization', 'Bearer SEU_CRON_SECRET'),
+    timeout_milliseconds := 15000
   );
 $$);
 
@@ -119,7 +128,8 @@ $$);
 select cron.schedule('waveops-reconcile', '30 12 * * *', $$
   select net.http_post(
     url := 'https://waveops.com.br/api/jobs/reconcile',
-    headers := jsonb_build_object('Authorization', 'Bearer SEU_CRON_SECRET')
+    headers := jsonb_build_object('Content-Type', 'application/json', 'Authorization', 'Bearer SEU_CRON_SECRET'),
+    timeout_milliseconds := 15000
   );
 $$);
 ```
@@ -131,8 +141,10 @@ Não use GitHub Actions sozinho para isso: o schedule é desabilitado após 60 d
 ## Passo 8: validação
 
 - [ ] `https://waveops.com.br/` abre a landing com os planos novos.
+- [ ] `/termos` e `/privacidade` abrem, e os links do checkbox do checkout e do rodapé da landing levam até elas.
 - [ ] `/checkout?plano=pro` gera um link de pagamento real do Mercado Pago.
-- [ ] Pagar (valor baixo real) baixa a fatura e dispara o e-mail de ativação. Confirme no log do Netlify (`webhook.fatura_baixada`).
+- [ ] Pagar (valor baixo real) baixa a fatura e dispara o e-mail de ativação. Confirme no log do Netlify (`webhook.fatura_baixada`) e que o código de ativação chega na caixa de entrada.
+- [ ] Reembolso: no detalhe do cliente, "Reembolsar" estorna no MP, marca a fatura como reembolsada e cancela a assinatura (e o webhook de estorno faz o mesmo se você reembolsar pelo painel do MP).
 - [ ] `/admin` exige login (não está em modo demo).
 - [ ] Os dois crons aparecem rodando (Supabase: `select * from cron.job;`).
 - [ ] Forçar o reconcile manual: `POST https://waveops.com.br/api/jobs/reconcile?secret=SEU_CRON_SECRET` retorna `{ applied, checked }`.

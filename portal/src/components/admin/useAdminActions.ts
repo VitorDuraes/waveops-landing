@@ -46,6 +46,21 @@ export function useAdminActions() {
         toast((e as Error).message, "info");
       }
     },
+    // Reembolso TOTAL do ultimo pagamento no gateway + cancelamento da assinatura.
+    // Envolve dinheiro real e nao tem desfazer: confirma antes de chamar a API.
+    refund: async (customerId: string, onDone?: () => void) => {
+      const okToGo = window.confirm(
+        "Reembolsar o último pagamento deste cliente no Mercado Pago e cancelar a assinatura? Esta ação não pode ser desfeita."
+      );
+      if (!okToGo) return;
+      try {
+        const r = await post(`/api/customers/${customerId}/refund`);
+        toast(r.alreadyRefunded ? "Este pagamento já estava reembolsado" : "Reembolso emitido e assinatura cancelada", "info");
+        onDone?.();
+      } catch (e) {
+        toast((e as Error).message, "info");
+      }
+    },
     // Roda a regua de cobranca pelo endpoint admin (followups/send -> runDunning).
     runDunning: async (onDone?: () => void) => {
       try {

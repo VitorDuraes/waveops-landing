@@ -673,6 +673,9 @@ section[id] { scroll-margin-top: 84px; }
 .foot-col a:hover { color: var(--accent-strong); }
 .foot-bottom { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 44px; padding-top: 24px; border-top: 1px solid var(--border); flex-wrap: wrap; }
 .foot-bottom small { color: var(--dim); font-size: 13px; }
+.foot-legal { display: flex; gap: 18px; flex-wrap: wrap; }
+.foot-legal a { color: var(--dim); font-size: 13px; transition: color .2s ease; }
+.foot-legal a:hover { color: var(--accent-strong); }
 
 /* ============================================================
    Micro-interações (hover / active)

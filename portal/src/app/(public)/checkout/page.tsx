@@ -119,8 +119,18 @@ function CheckoutInner() {
               className="flex gap8"
               style={{ marginTop: 22, fontSize: 13.5, color: "var(--text-2)", cursor: "pointer" }}
             >
-              <input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} style={{ width: "auto" }} /> Li e
-              aceito os termos de serviço da WaveOps.
+              <input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} style={{ width: "auto" }} />{" "}
+              <span>
+                Li e aceito os{" "}
+                <Link href="/termos" target="_blank" style={{ color: "var(--accent-strong)" }}>
+                  Termos de Uso
+                </Link>{" "}
+                e a{" "}
+                <Link href="/privacidade" target="_blank" style={{ color: "var(--accent-strong)" }}>
+                  Política de Privacidade
+                </Link>{" "}
+                da WaveOps.
+              </span>
             </label>
             <button type="submit" className="btn btn-primary btn-lg btn-block" style={{ marginTop: 20 }} disabled={loading}>
               {loading ? "Processando..." : "Ir para o pagamento"} <Icon name="arrowRight" />

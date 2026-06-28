@@ -1,0 +1,58 @@
+name: CI
+
+# Esteira de integracao do portal. Roda a cada push nas branches de trabalho e em
+# todo PR para a main. Pega regressao de tipo, quebra de build e CVE de severidade
+# alta/critica antes do deploy (o portal e self-hosted na Railway, sem o filtro de
+# borda da Vercel/Netlify, entao a esteira aqui e a rede de seguranca). [audit 2026-06-28]
+
+on:
+  push:
+    branches: [main, portal-backend]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  portal:
+    name: Portal (typecheck, build, audit)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: portal
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: portal/package-lock.json
+      - name: Install
+        run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+          # Dummy: o build nao conecta no banco (rotas sao dinamicas e assertProdEnv e
+          # pulado na fase de build), mas garante o formato caso algo leia a env no build.
+          DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
+      - name: Audit de dependencias (falha em high/critical)
+        run: npm audit --audit-level=high
+
+  secrets:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITLEAKS_CONFIG: .gitleaks.toml

@@ -1,0 +1,12 @@
+# Hooks locais OPCIONAIS (defesa na origem, antes do commit sair da maquina).
+# Instalacao uma unica vez:
+#   pipx install pre-commit   (ou: pip install pre-commit)
+#   pre-commit install
+# Depois disso, cada commit roda o gitleaks contra o staged diff e bloqueia se achar
+# segredo. O CI (.github/workflows/ci.yml) roda o mesmo scan no servidor, entao isto
+# e uma camada extra, nao a unica. [audit 2026-06-28]
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks

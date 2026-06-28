@@ -1,0 +1,33 @@
+title = "WaveOps gitleaks config"
+
+# Estende as regras padrao do gitleaks (cobrem AWS, GitHub, Stripe, JWT, etc.) e
+# adiciona os tokens especificos do projeto: Mercado Pago e Resend. Roda no CI
+# (.github/workflows/ci.yml) e, opcionalmente, no pre-commit local. [audit 2026-06-28]
+[extend]
+useDefault = true
+
+[[rules]]
+id = "mercadopago-token"
+description = "Mercado Pago access token / public key (producao APP_USR ou teste TEST)"
+regex = '''\b(APP_USR|TEST)-[A-Za-z0-9-]{20,}\b'''
+keywords = ["APP_USR-", "TEST-"]
+
+[[rules]]
+id = "resend-api-key"
+description = "Resend API key"
+regex = '''\bre_[A-Za-z0-9_-]{20,}\b'''
+keywords = ["re_"]
+
+[allowlist]
+description = "Placeholders, exemplos e artefatos que nao sao segredo real"
+regexes = [
+  # Placeholders obvios em docs/exemplos (APP_USR-xxx, TEST-seu-token, etc.)
+  '''(APP_USR|TEST)-(x{3,}|X{3,}|\.\.\.|seu|sua|your|token|exemplo|example|aqui|here)''',
+  '''re_(x{3,}|seu|sua|your|exemplo|example)''',
+]
+paths = [
+  # Lockfiles e build artifacts nao guardam segredo do projeto.
+  '''package-lock\.json$''',
+  '''(^|/)\.next/''',
+  '''(^|/)node_modules/''',
+]

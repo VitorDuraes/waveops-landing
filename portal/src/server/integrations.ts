@@ -31,6 +31,17 @@ export function waLink(phone: string, text: string): string {
   return `https://wa.me/${withCountry}?text=${encodeURIComponent(text)}`;
 }
 
+// Escapa HTML para interpolar dado do cliente (nome, empresa, e-mail, telefone) em
+// e-mail sem permitir injecao de tag/script no e-mail do time. [CodeQL alto, audit 2026-06-28]
+function escapeHtml(s: string): string {
+  return String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 // Alerta interno disparado quando um cliente paga e ativa pela primeira vez. O time
 // recebe os dados e um link wa.me ja pronto para abrir a conversa e falar do projeto.
 // Estrategia atual: contato MANUAL (sem disparo automatico ao cliente).
@@ -63,12 +74,13 @@ export async function notifyTeamNewCustomer(c: {
   const btn = link
     ? `<p><a href="${link}" style="background:#7c3aed;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none;display:inline-block">Falar no WhatsApp</a></p>`
     : "<p>WhatsApp inválido. Fale com o cliente por e-mail.</p>";
+  // Dado do cliente (input do usuario) entra ESCAPADO no HTML; o resto e template fixo.
   const html =
     `<h2>Novo cliente pagou e ativou</h2>` +
-    `<p><strong>${c.company}</strong> (${c.name})<br>` +
-    `Plano: ${c.plan} · ${valor}<br>` +
-    `WhatsApp: ${c.phone || "não informado"}<br>` +
-    `E-mail: ${c.email}</p>` +
+    `<p><strong>${escapeHtml(c.company)}</strong> (${escapeHtml(c.name)})<br>` +
+    `Plano: ${escapeHtml(c.plan)} · ${valor}<br>` +
+    `WhatsApp: ${escapeHtml(c.phone) || "não informado"}<br>` +
+    `E-mail: ${escapeHtml(c.email)}</p>` +
     btn;
   await sendEmail(env.teamNotifyEmail, `Novo cliente WaveOps: ${c.company}`, html);
 }
@@ -100,13 +112,20 @@ export async function sendEmail(to: string, subject: string, html: string): Prom
 // Versao texto puro do corpo HTML (fallback de entregabilidade). Remove tags e
 // normaliza espacos; suficiente para os e-mails simples do portal.
 function htmlToText(html: string): string {
-  return html
+  let out = html
     .replace(/<\s*br\s*\/?>/gi, "\n")
     .replace(/<\/(p|h\d|div)>/gi, "\n")
     // Preserva o link dos botoes <a href="URL">TEXTO</a> como "TEXTO: URL" antes de
     // remover as tags (senao a URL sumiria no fallback de texto puro).
-    .replace(/<a\b[^>]*?href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, "$2: $1")
-    .replace(/<[^>]+>/g, "")
+    .replace(/<a\b[^>]*?href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, "$2: $1");
+  // Remove as tags restantes repetidamente ate estabilizar: uma unica passada de regex
+  // poderia deixar uma tag remontada (sanitizacao incompleta). [CodeQL alto, audit 2026-06-28]
+  let prev: string;
+  do {
+    prev = out;
+    out = out.replace(/<[^>]*>/g, "");
+  } while (out !== prev);
+  return out
     .replace(/[ \t]+/g, " ")
     .replace(/\n{3,}/g, "\n\n")
     .trim();

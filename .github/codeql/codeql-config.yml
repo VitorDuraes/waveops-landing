@@ -1,0 +1,10 @@
+name: "WaveOps CodeQL config"
+
+# Escaneia o codigo de PRODUCAO. Exclui:
+# - dev/  : painel Tweaks (React, prototipagem dev-only, vendado, NAO vai no bundle
+#           de producao; o index.html nao carrega esses scripts). Ver CLAUDE.md.
+# - e2e/  : testes Playwright, nao sao codigo de runtime.
+paths-ignore:
+  - dev
+  - portal/dev
+  - portal/e2e

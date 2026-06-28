@@ -33,7 +33,7 @@
     "@vercel/otel": "^1.10.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.40.0",
-    "jose": "^5.10.0",
+    "jose": "^6.2.3",
     "lucide-react": "^0.469.0",
     "next": "^15.5.19",
     "react": "19.0.0",

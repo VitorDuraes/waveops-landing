@@ -339,6 +339,12 @@ const methodToDto = (m: string | null): string =>
 const channelToDto = (c: string): "WhatsApp" | "E-mail" | "Discord" =>
   c === "whatsapp" ? "WhatsApp" : c === "discord" ? "Discord" : "E-mail";
 
+// Estados de fatura COBRAVEIS. So a partir deles uma fatura pode virar "paga".
+// Estado terminal (paga, reembolsada, estornada, cancelada) nao reabre: blinda
+// contra mark-as-paid e link de pagamento antigo reverterem um estorno. Formato
+// do banco (underscore), nao o do DTO (hifen). [A1/M1 do audit 2026-06-28]
+const PAYABLE_INVOICE_STATUSES: string[] = ["criada", "em_aberto", "vencida"];
+
 function prismaRepoFactory(): Repo {
   const db = getPrisma();
   const addMonth = (d: Date): Date => new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate()));
@@ -349,6 +355,12 @@ function prismaRepoFactory(): Repo {
   async function payInvoice(id: string, gatewayPaymentId?: string): Promise<{ customerId: string } | null> {
     const inv = await db.invoice.findUnique({ where: { id } });
     if (!inv) return null;
+    // Estado terminal (reembolsada, estornada, cancelada): NAO reabrir. So "paga"
+    // (reaplicacao idempotente) ou um estado cobravel seguem em frente.
+    if (inv.status !== "paga" && !PAYABLE_INVOICE_STATUSES.includes(inv.status)) {
+      log.warn("pagamento.fatura_estado_terminal", { invoiceId: inv.id, status: inv.status });
+      return null;
+    }
     if (inv.status !== "paga") {
       try {
         await db.invoice.update({
@@ -645,6 +657,13 @@ function prismaRepoFactory(): Repo {
         const invoiceId = event.gatewaySubscriptionId.slice(INVOICE_REF_PREFIX.length);
         const inv = await db.invoice.findUnique({ where: { id: invoiceId } });
         if (!inv) return { applied: false };
+        // Paridade com o ramo wo_ (que filtra status na query): so baixa fatura cobravel.
+        // Um PIX/boleto emitido antes de um estorno continua pagavel no MP, e cada cobranca
+        // tem gatewayPaymentId distinto (a idempotencia nao cobre): aqui barramos a reabertura.
+        if (!PAYABLE_INVOICE_STATUSES.includes(inv.status)) {
+          log.warn("pagamento.fatura_nao_cobravel", { invoiceId: inv.id, status: inv.status, ref: event.gatewaySubscriptionId });
+          return { applied: false, invoiceId: inv.id, customerId: inv.customerId };
+        }
         if (event.amountCents != null && event.amountCents !== inv.amount) {
           log.warn("pagamento.valor_divergente", {
             invoiceId: inv.id,

@@ -3,13 +3,28 @@ import { ok, err } from "@/server/http";
 import { getRepo } from "@/server/repo";
 import { getGateway } from "@/server/payments";
 import { notifyDiscord } from "@/server/integrations";
+import { rateLimit, clientIp } from "@/server/ratelimit";
 import { log } from "@/server/log";
 
 // Publica: inicia a assinatura no gateway e devolve a URL de pagamento.
 export async function POST(req: NextRequest) {
+  const ip = clientIp(req.headers);
   const body = await req.json().catch(() => ({}) as Record<string, string>);
   const { planId, name, company, email, phone, document, method } = body;
+  // Honeypot: campo oculto que so um bot preenche. Se vier preenchido, recusa.
+  if (body.website) {
+    log.warn("checkout.honeypot", { ip });
+    return err("Requisição inválida");
+  }
   if (!email || !name) return err("Nome e e-mail são obrigatórios");
+  // Rate limit ANTES de tocar o gateway de producao e o banco (rota publica). Por IP
+  // e por e-mail, para um loop nao poluir a base nem floodar o MP/Discord. [A2 do audit]
+  if (
+    !rateLimit(`checkout:ip:${ip}`, 5, 60_000) ||
+    !rateLimit(`checkout:email:${String(email).toLowerCase()}`, 3, 60_000)
+  ) {
+    return err("Muitas tentativas. Aguarde um instante e tente de novo.", 429);
+  }
 
   const plans = await getRepo().listPlans();
   const plan = plans.find((p) => p.id === planId) || plans[0];

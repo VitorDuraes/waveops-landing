@@ -1,5 +1,6 @@
 import "server-only";
 import { env } from "./env";
+import { maskEmail } from "./log";
 
 // Todas as integracoes degradam para "mock" (apenas log) quando nao ha credencial,
 // para o app rodar sem nenhum servico externo configurado.
@@ -48,13 +49,14 @@ export async function notifyTeamNewCustomer(c: {
   const link = waLink(c.phone, welcome);
   const valor = `R$ ${c.amountReais.toLocaleString("pt-BR")}/mês`;
 
+  // Discord e canal de TERCEIRO com retencao indefinida: nao mandar PII completa.
+  // Telefone, e-mail completo e o link wa.me vao no e-mail interno ao time (abaixo) e
+  // no painel admin autenticado, nao no canal. [M2 do audit 2026-06-28]
   const linhas = [
     "Novo cliente pagou e ativou.",
-    `${c.company} (${c.name})`,
+    `${c.company} (${firstName})`,
     `Plano: ${c.plan} · ${valor}`,
-    `WhatsApp: ${c.phone || "não informado"}`,
-    `E-mail: ${c.email}`,
-    link ? `Falar agora: ${link}` : "WhatsApp inválido: contate por e-mail.",
+    `Contato: ${maskEmail(c.email)} (dados completos no e-mail interno e no painel)`,
   ];
   await notifyDiscord(linhas.join("\n"));
 

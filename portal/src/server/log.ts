@@ -28,12 +28,14 @@ const EMAIL_KEY = /email|e-mail/i;
 const PHONE_KEY = /phone|telefone|whatsapp|celular/i;
 const DOC_KEY = /document|documento|cpf|cnpj/i;
 
-function maskEmail(v: string): string {
+// Exportadas para mascarar PII tambem nos canais que nao passam pelo logger
+// (alertas no Discord, etc.), nao so nos logs estruturados. [M2 do audit 2026-06-28]
+export function maskEmail(v: string): string {
   const [user, domain] = v.split("@");
   if (!domain) return "***";
   return `${user.slice(0, 2)}***@${domain}`;
 }
-function maskTail(v: string, keep = 4): string {
+export function maskTail(v: string, keep = 4): string {
   const digits = v.replace(/\D/g, "");
   if (digits.length <= keep) return "***";
   return `***${digits.slice(-keep)}`;

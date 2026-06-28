@@ -31,8 +31,14 @@ test.describe("documentos legais", () => {
   });
 
   test("rodape da landing tem os links legais", async ({ page }) => {
+    // A landing e o portal vivem em origens diferentes (waveops.com.br vs
+    // portal.waveops.com.br), entao os links legais do rodape sao ABSOLUTOS.
     await page.goto("/");
-    await expect(page.locator('.foot-legal a[href="/termos"]')).toHaveText(/Termos de Uso/);
-    await expect(page.locator('.foot-legal a[href="/privacidade"]')).toHaveText(/Política de Privacidade/);
+    await expect(
+      page.locator('.foot-legal a[href="https://portal.waveops.com.br/termos"]')
+    ).toHaveText(/Termos de Uso/);
+    await expect(
+      page.locator('.foot-legal a[href="https://portal.waveops.com.br/privacidade"]')
+    ).toHaveText(/Política de Privacidade/);
   });
 });

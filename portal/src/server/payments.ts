@@ -398,10 +398,12 @@ const mercadoPagoGateway: PaymentGateway = {
 
     // Para pagamentos, busca o pagamento no MP: a notificacao so traz o id; precisamos
     // do status real e do external_reference (= a referencia do checkout) para casar
-    // com a assinatura/fatura.
-    if (kind === "payment" && paymentId && env.mercadopago.accessToken) {
+    // com a assinatura/fatura. O id de pagamento do MP e sempre NUMERICO: validamos
+    // antes de interpolar na URL (fecha SSRF / path-injection). Defesa em profundidade:
+    // o webhook ja exige HMAC valido antes daqui. [CodeQL critico, audit 2026-06-28]
+    if (kind === "payment" && paymentId && /^\d+$/.test(paymentId) && env.mercadopago.accessToken) {
       try {
-        const r = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+        const r = await fetch(`https://api.mercadopago.com/v1/payments/${encodeURIComponent(paymentId)}`, {
           headers: { Authorization: `Bearer ${env.mercadopago.accessToken}` },
         });
         if (r.ok) {

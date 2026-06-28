@@ -26,6 +26,15 @@ updates:
         patterns:
           - "prisma"
           - "@prisma/client"
+    ignore:
+      # Prisma 7 e uma migracao MAJOR (url/directUrl saem do schema.prisma para um
+      # prisma.config.ts + adapter no PrismaClient): esforco dedicado com teste, nao
+      # bump automatico numa base de pagamento ao vivo. Mantem o Prisma 6 (estavel,
+      # sem CVE). Para fazer o 7 no futuro, remova estas duas linhas.
+      - dependency-name: "prisma"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@prisma/client"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "github-actions"
     directory: "/"

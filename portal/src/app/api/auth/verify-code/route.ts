@@ -13,10 +13,13 @@ export async function POST(req: NextRequest) {
   }
   if (!(await verifyOtp(email, code))) return err("Código inválido ou expirado", 401);
   const customer = await getRepo().getCustomerByEmail(email);
-  // So emite sessao para cliente existente. Mesma mensagem do OTP invalido para nao
-  // revelar quais e-mails sao clientes. Evita conta-fantasma (sub = e-mail) que
-  // abria IDOR cross-tenant e quebrava FKs.
-  if (!customer) return err("Código inválido ou expirado", 401);
+  // So emite sessao para cliente existente. A mensagem aqui pode ser clara (e nao a
+  // generica do OTP invalido) sem abrir enumeracao: chegar neste ponto exige um codigo
+  // VALIDO, que em producao (sem devCode) so o dono do e-mail tem. O `reason` deixa o
+  // front mostrar o CTA (ver planos / ativar) em vez de um erro seco.
+  if (!customer) {
+    return err("Não encontramos uma assinatura ativa para este e-mail.", 404, { reason: "no_customer" });
+  }
   await createSession({ sub: customer.id, role: "customer", email });
   return ok({ ok: true });
 }

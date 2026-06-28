@@ -8,6 +8,7 @@
     "dev": "next dev",
     "prebuild": "node scripts/sync-landing.mjs",
     "build": "next build",
+    "vercel-build": "prisma generate && npm run build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",

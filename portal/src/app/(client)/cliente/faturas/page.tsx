@@ -2,7 +2,7 @@
 // 06 . Faturas do cliente (/cliente/faturas)
 import { Icon } from "@/components/icons";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { useModal, useToast } from "@/components/providers";
+import { useModal } from "@/components/providers";
 import { useClientCtx } from "@/components/client/useClientCtx";
 import { PayModalContent } from "@/components/client/PayModalContent";
 import { Loading, LoadError } from "@/components/ui/Loading";
@@ -12,22 +12,12 @@ import type { ClientInvoice } from "@/lib/types";
 export default function FaturasClientePage() {
   const c = useClientCtx();
   const { openModal, closeModal } = useModal();
-  const toast = useToast();
 
   if (c.loading) return <Loading />;
   if (c.error) return <LoadError message={c.error} onRetry={c.reload} />;
 
   function pay(inv: ClientInvoice) {
-    openModal(
-      <PayModalContent
-        inv={inv}
-        onClose={closeModal}
-        onCopy={() => {
-          closeModal();
-          toast("Código PIX copiado");
-        }}
-      />
-    );
+    openModal(<PayModalContent inv={inv} onClose={closeModal} />);
   }
 
   return (

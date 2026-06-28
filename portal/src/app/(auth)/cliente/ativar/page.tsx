@@ -6,6 +6,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AuthAside } from "@/components/shell/AuthAside";
+import { CodeInput } from "@/components/ui/CodeInput";
 import { useToast } from "@/components/providers";
 
 type Step = "email" | "codigo" | "senha";
@@ -20,11 +21,6 @@ export default function AtivarPage() {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-
-  function setDigit(i: number, v: string) {
-    const d = v.replace(/\D/g, "").slice(-1);
-    setCode((prev) => prev.map((c, idx) => (idx === i ? d : c)));
-  }
 
   async function onEmail(e: React.FormEvent) {
     e.preventDefault();
@@ -136,19 +132,28 @@ export default function AtivarPage() {
           )}
 
           {step === "codigo" && (
-            <form onSubmit={onCode}>
-              <div className="field">
-                <label>Código enviado por e-mail</label>
-                <div className="code-inputs">
-                  {code.map((d, i) => (
-                    <input key={i} maxLength={1} inputMode="numeric" value={d} onChange={(e) => setDigit(i, e.target.value)} />
-                  ))}
+            <>
+              <form onSubmit={onCode}>
+                <div className="field">
+                  <label>Código enviado por e-mail</label>
+                  <CodeInput value={code} onChange={setCode} autoFocus disabled={loading} />
                 </div>
-              </div>
-              <button type="submit" className="btn btn-primary btn-lg btn-block" style={{ marginTop: 6 }} disabled={loading}>
-                {loading ? "Confirmando..." : "Confirmar código"}
+                <button type="submit" className="btn btn-primary btn-lg btn-block" style={{ marginTop: 6 }} disabled={loading}>
+                  {loading ? "Confirmando..." : "Confirmar código"}
+                </button>
+              </form>
+              <button
+                type="button"
+                className="btn btn-quiet btn-sm btn-block"
+                style={{ marginTop: 10 }}
+                onClick={() => {
+                  setStep("email");
+                  setCode(["", "", "", "", "", ""]);
+                }}
+              >
+                Usar outro e-mail
               </button>
-            </form>
+            </>
           )}
 
           {step === "senha" && (

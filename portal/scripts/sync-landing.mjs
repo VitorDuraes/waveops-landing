@@ -17,8 +17,12 @@ const outHtml = resolve(publicDir, "landing.html");
 const outAssets = resolve(publicDir, "assets");
 
 if (!existsSync(srcHtml)) {
-  console.error("[sync-landing] index.html nao encontrado em " + srcHtml);
-  process.exit(1);
+  // Build do portal isolado (ex.: Railway com Root Directory = portal): a raiz do
+  // repo (index.html + assets) nao esta no contexto. Nao e erro: pula o sync. O
+  // portal nao depende desses assets e "/" redireciona para /cliente/login
+  // (next.config so serve a landing em "/" quando o landing.html existe).
+  console.warn("[sync-landing] index.html nao encontrado em " + srcHtml + " -> pulando o sync da landing.");
+  process.exit(0);
 }
 
 mkdirSync(publicDir, { recursive: true });

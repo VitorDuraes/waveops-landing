@@ -1,32 +1,113 @@
 "use client";
-// Conteudo do modal de pagamento. O conteudo e o botao mudam conforme a forma:
-// PIX (QR + copia codigo), Cartao (vai pro gateway, portal nao guarda cartao),
-// Boleto (gera e envia por e-mail). No MVP e visual/mock; o pagamento real passa
-// pelo gateway (Mercado Pago).
-import { useState } from "react";
+// Conteudo do modal de pagamento de UMA fatura. Cada forma chama a API real:
+// PIX gera QR + copia-e-cola inline; Cartao e Boleto redirecionam ao ambiente
+// seguro do gateway (Checkout Pro), que coleta o que falta (ex.: endereco do
+// boleto). A confirmacao do pagamento chega depois, pelo webhook do gateway.
+import { useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/icons";
 import { useToast } from "@/components/providers";
 import { fmtFull } from "@/lib/format";
 import type { ClientInvoice } from "@/lib/types";
 
 type Method = "pix" | "card" | "boleto";
+interface PixData {
+  qrCodeBase64: string;
+  copyPaste: string;
+}
 
-export function PayModalContent({
-  inv,
-  onClose,
-  onCopy,
-}: {
-  inv: ClientInvoice;
-  onClose: () => void;
-  onCopy: () => void;
-}) {
+export function PayModalContent({ inv, onClose }: { inv: ClientInvoice; onClose: () => void }) {
   const [m, setM] = useState<Method>("pix");
+  const [pix, setPix] = useState<PixData | null>(null);
+  const [pixLoading, setPixLoading] = useState(false);
+  const [pixError, setPixError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
   const toast = useToast();
+
   const methods: { m: Method; icon: "pix" | "card" | "barcode"; label: string }[] = [
     { m: "pix", icon: "pix", label: "PIX" },
     { m: "card", icon: "card", label: "Cartão" },
     { m: "boleto", icon: "barcode", label: "Boleto" },
   ];
+
+  // Gera o PIX ao abrir/selecionar PIX. O ref dedupe por fatura: o StrictMode (dev)
+  // monta 2x e dispararia 2 POSTs com a MESMA idempotency key, e o Mercado Pago
+  // responde "resource is locked: 423". O ref e setado de forma sincrona, antes do
+  // estado atualizar, entao barra o segundo disparo.
+  const pixReqRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (m !== "pix" || pix || pixError) return;
+    // Dedupe por fatura: o ref e setado de forma SINCRONA, antes do await, entao o
+    // StrictMode (monta 2x em dev) nao dispara 2 POSTs (que dariam "resource is
+    // locked: 423" no MP). Sem flag de cancelamento de proposito: como so um request
+    // roda, ele PRECISA atualizar o estado; uma flag zerada pelo cleanup do 1o ciclo
+    // do StrictMode bloquearia o setPix do unico request e prenderia o "Gerando...".
+    if (pixReqRef.current === inv.id) return;
+    pixReqRef.current = inv.id;
+    setPixLoading(true);
+    (async () => {
+      try {
+        const res = await fetch(`/api/invoices/${inv.id}/pix`, { method: "POST" });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Falha ao gerar o PIX");
+        setPix({ qrCodeBase64: data.qrCodeBase64 || "", copyPaste: data.copyPaste || "" });
+      } catch (e) {
+        setPixError((e as Error).message);
+      } finally {
+        setPixLoading(false);
+      }
+    })();
+  }, [m, pix, pixError, inv.id]);
+
+  // Se a MESMA instancia do modal for reusada para outra fatura (troca de prop sem
+  // remontar), zera o PIX anterior e libera novo fetch. O guard por prevInv evita
+  // rodar no mount (e no double-mount do StrictMode), so na troca real de fatura.
+  const prevInvRef = useRef(inv.id);
+  useEffect(() => {
+    if (prevInvRef.current === inv.id) return;
+    prevInvRef.current = inv.id;
+    pixReqRef.current = null;
+    setPix(null);
+    setPixError(null);
+    setPixLoading(false);
+  }, [inv.id]);
+
+  async function copyPix() {
+    if (!pix?.copyPaste) return;
+    try {
+      await navigator.clipboard.writeText(pix.copyPaste);
+      toast("Código PIX copiado");
+    } catch {
+      toast("Não foi possível copiar. Copie o código manualmente.", "info");
+    }
+  }
+
+  async function payCard() {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const res = await fetch(`/api/invoices/${inv.id}/checkout`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok || !data.checkoutUrl) throw new Error(data.error || "Falha ao iniciar o pagamento");
+      window.location.assign(data.checkoutUrl);
+    } catch (e) {
+      toast((e as Error).message, "info");
+      setBusy(false);
+    }
+  }
+
+  async function genBoleto() {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const res = await fetch(`/api/invoices/${inv.id}/boleto`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok || !data.checkoutUrl) throw new Error(data.error || "Falha ao gerar o boleto");
+      window.location.assign(data.checkoutUrl);
+    } catch (e) {
+      toast((e as Error).message, "info");
+      setBusy(false);
+    }
+  }
 
   return (
     <>
@@ -68,13 +149,20 @@ export function PayModalContent({
                 placeItems: "center",
               }}
             >
-              <div
-                style={{
-                  width: 108,
-                  height: 108,
-                  background: "repeating-conic-gradient(#15131c 0 25%, #fff 0 50%) 50%/16px 16px",
-                }}
-              />
+              {pix?.qrCodeBase64 ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={`data:image/png;base64,${pix.qrCodeBase64}`}
+                  alt="QR Code PIX"
+                  width={120}
+                  height={120}
+                  style={{ display: "block" }}
+                />
+              ) : (
+                <div className="hint" style={{ color: "#15131c", padding: 8, fontSize: 12 }}>
+                  {pixLoading ? "Gerando PIX..." : pixError ? "Não foi possível gerar o QR" : "QR indisponível. Use o copia-e-cola."}
+                </div>
+              )}
             </div>
             <div className="hint">Aponte a câmera ou copie o código PIX</div>
           </div>
@@ -102,7 +190,7 @@ export function PayModalContent({
                 Pagamento por boleto
               </div>
               <div className="as">
-                Geramos o boleto e enviamos para o seu e-mail. A compensação leva de 1 a 3 dias úteis.
+                Você vai para o ambiente seguro do gateway para gerar o boleto. A compensação leva de 1 a 3 dias úteis.
               </div>
             </div>
           </div>
@@ -113,30 +201,18 @@ export function PayModalContent({
           Cancelar
         </button>
         {m === "pix" && (
-          <button className="btn btn-primary" onClick={onCopy}>
+          <button className="btn btn-primary" onClick={copyPix} disabled={!pix?.copyPaste}>
             <Icon name="copy" /> Copiar código PIX
           </button>
         )}
         {m === "card" && (
-          <button
-            className="btn btn-primary"
-            onClick={() => {
-              onClose();
-              toast("Abrindo o ambiente seguro do gateway...", "info");
-            }}
-          >
-            <Icon name="card" /> Ir para o pagamento
+          <button className="btn btn-primary" onClick={payCard} disabled={busy}>
+            <Icon name="card" /> {busy ? "Abrindo..." : "Ir para o pagamento"}
           </button>
         )}
         {m === "boleto" && (
-          <button
-            className="btn btn-primary"
-            onClick={() => {
-              onClose();
-              toast("Boleto gerado e enviado para o seu e-mail");
-            }}
-          >
-            <Icon name="barcode" /> Gerar boleto
+          <button className="btn btn-primary" onClick={genBoleto} disabled={busy}>
+            <Icon name="barcode" /> {busy ? "Abrindo..." : "Ir para o boleto"}
           </button>
         )}
       </div>

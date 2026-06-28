@@ -185,12 +185,13 @@
               <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
             </svg>
           </button>
-          <!-- Integracao com o portal. "Assinar agora" rola ate a secao de planos
-               (#pacotes) desta pagina; os CTAs dos planos vao para o checkout do
-               portal (/checkout?plano=ID) e "Ja sou cliente" para /cliente/login.
-               Links raiz-relativos (mesma origem). Para subdominio, troque por
-               https://portal.waveops.com.br/checkout e /cliente/login. -->
-          <a href="/cliente/login" class="btn btn-ghost desktop">Já sou cliente</a>
+          <!-- Integracao com o portal (portal.waveops.com.br, no Railway). "Assinar
+               agora" rola ate a secao de planos (#pacotes) desta pagina; os CTAs dos
+               planos e "Ja sou cliente" vao para o portal por URL ABSOLUTA, porque a
+               landing (waveops.com.br) e o portal vivem em origens diferentes. Link
+               raiz-relativo aqui cairia no proprio host da landing (404 ou portal
+               duplicado). Mesma regra para /termos e /privacidade (paginas do portal). -->
+          <a href="https://portal.waveops.com.br/cliente/login" class="btn btn-ghost desktop">Já sou cliente</a>
           <a href="#pacotes" class="btn btn-primary desktop">Assinar agora</a>
           <button
             class="icon-btn hamburger"
@@ -234,7 +235,7 @@
       <a href="#publicos">Para quem é</a>
       <a href="#faq">FAQ</a>
       <a href="#pacotes" class="btn btn-primary btn-block btn-lg">Assinar agora</a>
-      <a href="/cliente/login" class="btn btn-ghost btn-block">Já sou cliente</a>
+      <a href="https://portal.waveops.com.br/cliente/login" class="btn btn-ghost btn-block">Já sou cliente</a>
       <a href="#contato" class="btn btn-ghost btn-block">Falar com a gente</a>
     </div>
 
@@ -930,7 +931,7 @@
                   </li>
                 </ul>
                 <p class="plan-note">Agente de IA a partir do Pro.</p>
-                <a href="/checkout?plano=operacao" class="btn btn-ghost btn-block">Assinar Operação</a>
+                <a href="https://portal.waveops.com.br/checkout?plano=operacao" class="btn btn-ghost btn-block">Assinar Operação</a>
               </article>
 
               <!-- Essencial -->
@@ -965,7 +966,7 @@
                   </li>
                 </ul>
                 <p class="plan-note">Agente de IA a partir do Pro.</p>
-                <a href="/checkout?plano=essencial" class="btn btn-ghost btn-block">Assinar Essencial</a>
+                <a href="https://portal.waveops.com.br/checkout?plano=essencial" class="btn btn-ghost btn-block">Assinar Essencial</a>
               </article>
 
               <!-- Pro (único com selo) -->
@@ -1008,7 +1009,7 @@
                     Revisão mensal de resultados
                   </li>
                 </ul>
-                <a href="/checkout?plano=pro" class="btn btn-primary btn-block">Assinar Pro</a>
+                <a href="https://portal.waveops.com.br/checkout?plano=pro" class="btn btn-primary btn-block">Assinar Pro</a>
               </article>
 
               <!-- Empresarial -->
@@ -1702,8 +1703,8 @@
         <div class="foot-bottom">
           <small>© 2026 WaveOps. Todos os direitos reservados.</small>
           <nav class="foot-legal" aria-label="Documentos legais">
-            <a href="/termos">Termos de Uso</a>
-            <a href="/privacidade">Política de Privacidade</a>
+            <a href="https://portal.waveops.com.br/termos">Termos de Uso</a>
+            <a href="https://portal.waveops.com.br/privacidade">Política de Privacidade</a>
           </nav>
           <small
             >Transformamos processos manuais em sistemas, automações e agentes

@@ -23,3 +23,6 @@ node_modules/
 # as deps reais ficam em portal/). Nao publicar.
 /package.json
 /package-lock.json
+
+# Artefato do build estatico da landing no Netlify (montado pelo netlify.toml).
+/_site/

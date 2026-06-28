@@ -2,6 +2,7 @@ import "server-only";
 import { env } from "./env";
 import { getPrisma } from "./db";
 import { log } from "./log";
+import { INVOICE_REF_PREFIX } from "./payments";
 import {
   fireAndForget,
   upsertEmpresa,
@@ -97,6 +98,10 @@ export interface InvoiceContact {
   email: string;
   companyName: string;
   paymentLink: string | null;
+  // Documento do cliente (CPF/CNPJ), exigido pelo MP no boleto. null quando ausente.
+  document: string | null;
+  // Status atual da fatura: a rota so cobra fatura aberta (evita pagar 2x).
+  status: InvoiceStatus;
 }
 export interface BriefInput {
   goal: string;
@@ -128,6 +133,8 @@ export interface Repo {
   // Ultima fatura paga do cliente com pagamento no gateway (alvo do reembolso).
   getRefundablePayment(customerId: string): Promise<RefundablePayment | null>;
   setCustomerStatus(id: string, status: CustomerStatus): Promise<void>;
+  // Troca a forma de pagamento preferida do cliente (acao do proprio cliente).
+  setPaymentMethod(id: string, method: "pix" | "cartao" | "boleto"): Promise<void>;
   getInvoiceWithCustomer(id: string): Promise<InvoiceContact | null>;
   // Login por e-mail OU documento (CPF/CNPJ) + senha.
   findCustomerForLogin(identifier: string): Promise<{ id: string; email: string; passwordHash: string | null } | null>;
@@ -150,6 +157,8 @@ const normalizeDoc = (s: string) => s.replace(/\D/g, "");
 const mockPasswords = new Map<string, string>();
 // Briefings em memoria para o modo mock (a persistencia real e no Prisma).
 const mockBriefs = new Map<string, ProjectBrief>();
+// Forma de pagamento trocada pelo cliente, em memoria (persistencia real no Prisma).
+const mockPaymentMethods = new Map<string, "pix" | "cartao" | "boleto">();
 
 /* ------------------------------------------------------------------ */
 /* Repositorio mock (padrao, em memoria a partir de src/lib/data)      */
@@ -171,22 +180,31 @@ const mockRepo: Repo = {
     return mockCustomers;
   },
   async getMe(email) {
-    if (email.toLowerCase() === mockMe.email.toLowerCase()) return mockMe;
-    const c = mockCustomers.find((x) => x.email.toLowerCase() === email.toLowerCase());
-    if (!c) return null;
-    return {
-      ...mockMe,
-      id: c.id,
-      name: c.name,
-      firstName: c.name.split(" ")[0],
-      company: c.company,
-      email: c.email,
-      phone: c.phone,
-      plan: c.plan,
-      amount: c.amount,
-      nextDue: c.nextDue,
-      status: c.status,
-    };
+    let me: Me | null;
+    if (email.toLowerCase() === mockMe.email.toLowerCase()) {
+      me = mockMe;
+    } else {
+      const c = mockCustomers.find((x) => x.email.toLowerCase() === email.toLowerCase());
+      me = c
+        ? {
+            ...mockMe,
+            id: c.id,
+            name: c.name,
+            firstName: c.name.split(" ")[0],
+            company: c.company,
+            email: c.email,
+            phone: c.phone,
+            plan: c.plan,
+            amount: c.amount,
+            nextDue: c.nextDue,
+            status: c.status,
+          }
+        : null;
+    }
+    if (!me) return null;
+    // Aplica a troca de metodo feita em /cliente/pagamento (em memoria no mock).
+    const override = mockPaymentMethods.get(me.id);
+    return override ? { ...me, paymentMethod: methodToDto(override) as Me["paymentMethod"] } : me;
   },
   async listInvoicesForCustomer(customerId) {
     if (customerId === mockMe.id) return invoicesForClient("em-dia");
@@ -255,8 +273,19 @@ const mockRepo: Repo = {
   async setCustomerStatus() {
     /* no-op no mock */
   },
+  async setPaymentMethod(id, method) {
+    mockPaymentMethods.set(id, method);
+  },
   async getInvoiceWithCustomer(id) {
-    return { id, amount: mockMe.amount, email: mockMe.email, companyName: mockMe.company, paymentLink: null };
+    return {
+      id,
+      amount: mockMe.amount,
+      email: mockMe.email,
+      companyName: mockMe.company,
+      paymentLink: null,
+      document: mockMe.document || null,
+      status: "em-aberto",
+    };
   },
   async findCustomerForLogin(identifier) {
     const idLower = identifier.toLowerCase();
@@ -610,6 +639,30 @@ function prismaRepoFactory(): Repo {
       }
       if (!isApproved) return { applied: false };
 
+      // Pagamento de UMA fatura (ref woinv_<invoiceId>): da baixa direto naquela fatura,
+      // sem depender da assinatura. Reusa payInvoice (idempotente) e a checagem de valor.
+      if (event.gatewaySubscriptionId?.startsWith(INVOICE_REF_PREFIX)) {
+        const invoiceId = event.gatewaySubscriptionId.slice(INVOICE_REF_PREFIX.length);
+        const inv = await db.invoice.findUnique({ where: { id: invoiceId } });
+        if (!inv) return { applied: false };
+        if (event.amountCents != null && event.amountCents !== inv.amount) {
+          log.warn("pagamento.valor_divergente", {
+            invoiceId: inv.id,
+            esperadoCents: inv.amount,
+            pagoCents: event.amountCents,
+            ref: event.gatewaySubscriptionId,
+          });
+          return { applied: false, invoiceId: inv.id, customerId: inv.customerId };
+        }
+        const r = await payInvoice(inv.id, event.gatewayPaymentId);
+        if (!r) return { applied: false, invoiceId: inv.id, customerId: inv.customerId };
+        if (inv.subscriptionId) {
+          await db.subscription.update({ where: { id: inv.subscriptionId }, data: { status: "ativo" } }).catch(() => {});
+          fireAndForget("applyGatewayPayment", syncOpportunityToTwenty(db, r.customerId, inv.subscriptionId));
+        }
+        return { applied: true, invoiceId: inv.id, customerId: r.customerId };
+      }
+
       // Correlacao pela ref wo_: baixa a fatura DAQUELA assinatura (nao a mais antiga
       // de qualquer assinatura do cliente).
       if (event.gatewaySubscriptionId) {
@@ -712,6 +765,9 @@ function prismaRepoFactory(): Repo {
       // Espelha o status do cliente no Twenty (best-effort, nao bloqueante).
       fireAndForget("setCustomerStatus", updateEmpresaStatus(c.gatewayCustomerId, status));
     },
+    async setPaymentMethod(id, method) {
+      await db.customer.update({ where: { id }, data: { paymentMethod: method } });
+    },
     async getInvoiceWithCustomer(id) {
       const inv = await db.invoice.findUnique({ where: { id }, include: { customer: true } });
       if (!inv) return null;
@@ -721,6 +777,8 @@ function prismaRepoFactory(): Repo {
         email: inv.customer.email,
         companyName: inv.customer.companyName,
         paymentLink: inv.paymentLink,
+        document: inv.customer.document,
+        status: invStatusToDto(inv.status),
       };
     },
     async findCustomerForLogin(identifier) {

@@ -1,29 +1,52 @@
-# Deploy do WaveOps Portal (Next.js 15) no Netlify free.
-# O app vive em portal/. A landing (index.html + assets/ na raiz do repo) e copiada
-# para portal/public/ pelo prebuild (scripts/sync-landing.mjs) e servida em "/" via
-# rewrite do next.config.mjs. Mesma origem para landing, checkout, /cliente, /admin
-# e os webhooks. Runbook completo em docs/deploy-netlify-supabase.md.
+# waveops.com.br = LANDING ESTATICA. O portal (checkout, /cliente, /admin, /api,
+# /termos, /privacidade) vive em portal.waveops.com.br (Railway), com banco e
+# Mercado Pago unicos. Aqui NAO se roda o Next: publicamos so a landing.
+#
+# Decisao 2026-06-27: consolidar tudo no Railway. Antes, Netlify e Railway rodavam
+# o portal EM PARALELO, com bancos diferentes: o cliente assinava em waveops.com.br
+# (banco do Netlify) e o webhook do MP batia em portal.waveops.com.br (banco do
+# Railway), entao a fatura nunca baixava. Agora ha UM portal e UM banco.
+
 [build]
-  base = "portal"
-  command = "npm run build"
-  # O Next Runtime publica a pasta .next. No netlify.toml o publish e relativo ao
-  # BASE ("portal"), entao o valor correto e ".next" (resolve para portal/.next).
-  # Nao pode ser igual ao base, nem "portal/.next" (viraria portal/portal/.next).
-  publish = ".next"
+  # Monta um site estatico so com a landing (nao serve o codigo-fonte do repo).
+  command = "rm -rf _site && mkdir -p _site && cp index.html robots.txt sitemap.xml _site/ && cp -r assets _site/"
+  publish = "_site"
 
-[build.environment]
-  NODE_VERSION = "20"
-
-# Runtime oficial do Next no Netlify (App Router + funcoes Node, runtime Node).
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
-
-# A landing estatica (public/landing.html, sincronizada da raiz pelo prebuild) e
-# servida em "/". O rewrite do next.config funciona no `next start` (dev), mas no
-# runtime do Netlify o "/" cai no app Next e da 404. Forcamos aqui com um rewrite
-# nativo (status 200 = serve sem mudar a URL; force = vence a rota do Next).
+# Rede de seguranca: qualquer rota de portal que caia aqui (bookmark antigo, link
+# indexado, URL digitada) salta pro Railway, pra nunca existir um 2o portal/banco
+# em waveops.com.br. Os botoes da landing ja apontam direto pro portal (absolutos).
 [[redirects]]
-  from = "/"
-  to = "/landing.html"
-  status = 200
+  from = "/cliente/*"
+  to = "https://portal.waveops.com.br/cliente/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/admin/*"
+  to = "https://portal.waveops.com.br/admin/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/checkout"
+  to = "https://portal.waveops.com.br/checkout"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/api/*"
+  to = "https://portal.waveops.com.br/api/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/termos"
+  to = "https://portal.waveops.com.br/termos"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/privacidade"
+  to = "https://portal.waveops.com.br/privacidade"
+  status = 301
   force = true

@@ -40,17 +40,61 @@ export interface WebhookRequest {
   url: string;
 }
 
+// Prefixo do external_reference de pagamento de UMA fatura (one-off). O webhook usa
+// para reconciliar a fatura certa em applyGatewayPayment (ramo woinv_), separado do
+// fluxo de assinatura (ref "wo_..."). Fonte unica, importada tambem pelo repo.
+export const INVOICE_REF_PREFIX = "woinv_";
+
+// Cobranca de UMA fatura existente (pagar fatura na area do cliente), distinta da
+// criacao de assinatura. Reune o que os tres metodos one-off precisam.
+export interface CreateInvoiceChargeInput {
+  invoiceId: string;
+  amount: number; // em reais
+  payer: GatewayCustomer;
+  description: string;
+  // Restringe o Checkout Pro a uma forma (hoje so "boleto"): a pagina hospedada do
+  // gateway coleta o que falta (ex.: endereco do pagador, exigido no boleto).
+  restrictTo?: "boleto";
+}
+export interface PixChargeResult {
+  qrCodeBase64: string; // PNG do QR em base64 (sem o prefixo data:); "" quando indisponivel
+  copyPaste: string; // PIX copia-e-cola
+  gatewayPaymentId: string;
+  provider: string;
+}
+export interface BoletoChargeResult {
+  url: string; // link do boleto (PDF/HTML)
+  barcode: string; // linha digitavel
+  gatewayPaymentId: string;
+  provider: string;
+}
+export interface InvoiceCheckoutResult {
+  checkoutUrl: string;
+  provider: string;
+}
+
 export interface PaymentGateway {
   readonly id: string;
   createSubscription(input: CreateSubscriptionInput): Promise<CreateSubscriptionResult>;
   verifyWebhook(req: WebhookRequest): Promise<boolean>;
   parseWebhook(req: WebhookRequest): Promise<NormalizedWebhookEvent>;
+  // Pagamento one-off de uma fatura. external_reference = INVOICE_REF_PREFIX + invoiceId,
+  // para o webhook dar baixa na fatura certa.
+  createPixCharge(input: CreateInvoiceChargeInput): Promise<PixChargeResult>;
+  createBoleto(input: CreateInvoiceChargeInput): Promise<BoletoChargeResult>;
+  createInvoiceCheckout(input: CreateInvoiceChargeInput): Promise<InvoiceCheckoutResult>;
   // Opcional: lista os pagamentos aprovados recentes para reconciliacao. Rede de
   // seguranca para quando o webhook nao chega (banco pausado, app dormindo, 5xx).
   searchRecentApproved?(sinceDays?: number): Promise<NormalizedWebhookEvent[]>;
   // Opcional: reembolso TOTAL de um pagamento. Usado pelo botao "Reembolsar" do
   // admin. Quando ausente, o reembolso so pode ser feito no painel do gateway.
   refundPayment?(gatewayPaymentId: string): Promise<{ ok: boolean; detail?: string }>;
+}
+
+// Quebra "Nome Sobrenome" em first/last (o MP exige os dois no pagador).
+function splitName(name?: string): { first: string; last: string } {
+  const parts = (name || "").trim().split(/\s+/).filter(Boolean);
+  return { first: parts[0] || "Cliente", last: parts.slice(1).join(" ") || "WaveOps" };
 }
 
 /* ------------------------------------------------------------------ */
@@ -69,6 +113,32 @@ const mockGateway: PaymentGateway = {
       gatewayCustomerId: "mock_cus_" + Date.now(),
       gatewaySubscriptionId: "mock_sub_" + Date.now(),
     };
+  },
+  async createPixCharge(input) {
+    // Sem QR real no mock (nao ha gateway). copia-e-cola fake para a UI ter o que copiar.
+    return {
+      provider: "mock",
+      qrCodeBase64: "",
+      copyPaste: `00020126-mock-pix-${input.invoiceId}-${Math.round(input.amount * 100)}`,
+      gatewayPaymentId: "mock_pay_" + Date.now(),
+    };
+  },
+  async createBoleto(input) {
+    const url = new URL("/checkout/sucesso", env.appUrl);
+    url.searchParams.set("boleto", "1");
+    url.searchParams.set("inv", input.invoiceId);
+    return {
+      provider: "mock",
+      url: url.toString(),
+      barcode: "00000.00000 00000.000000 00000.000000 0 00000000000000",
+      gatewayPaymentId: "mock_pay_" + Date.now(),
+    };
+  },
+  async createInvoiceCheckout(input) {
+    const url = new URL("/checkout/sucesso", env.appUrl);
+    url.searchParams.set("inv", input.invoiceId);
+    url.searchParams.set("mock", "1");
+    return { provider: "mock", checkoutUrl: url.toString() };
   },
   async verifyWebhook() {
     return true;
@@ -148,6 +218,147 @@ const mercadoPagoGateway: PaymentGateway = {
     // gatewaySubscriptionId = ref (nao o id da preferencia): e o que o webhook casa
     // contra o external_reference do pagamento.
     return { provider: "mercadopago", checkoutUrl, gatewaySubscriptionId: ref };
+  },
+  // PIX de UMA fatura via /v1/payments. Devolve o QR (base64) e o copia-e-cola.
+  async createPixCharge(input) {
+    if (!env.mercadopago.accessToken) {
+      log.warn("mercadopago.sem_token", { fluxo: "pix", invoiceId: input.invoiceId });
+      return { provider: "mercadopago", qrCodeBase64: "", copyPaste: "", gatewayPaymentId: "" };
+    }
+    const isHttps = env.appUrl.startsWith("https://");
+    const { first, last } = splitName(input.payer.name);
+    const body: Record<string, unknown> = {
+      transaction_amount: input.amount,
+      description: input.description,
+      payment_method_id: "pix",
+      external_reference: INVOICE_REF_PREFIX + input.invoiceId,
+      payer: { email: input.payer.email, first_name: first, last_name: last },
+    };
+    if (isHttps) body.notification_url = new URL("/api/webhooks/mercadopago", env.appUrl).toString();
+    const res = await fetch("https://api.mercadopago.com/v1/payments", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${env.mercadopago.accessToken}`,
+        "X-Idempotency-Key": `pix-${input.invoiceId}`,
+      },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "");
+      log.error("mercadopago.pix_falhou", { httpStatus: res.status, detail: detail.slice(0, 300), invoiceId: input.invoiceId });
+      throw new Error("Mercado Pago: falha ao gerar PIX (" + res.status + ")");
+    }
+    const p = (await res.json()) as {
+      id?: number | string;
+      point_of_interaction?: { transaction_data?: { qr_code?: string; qr_code_base64?: string } };
+    };
+    const td = p.point_of_interaction?.transaction_data;
+    return {
+      provider: "mercadopago",
+      qrCodeBase64: td?.qr_code_base64 || "",
+      copyPaste: td?.qr_code || "",
+      gatewayPaymentId: p.id != null ? String(p.id) : "",
+    };
+  },
+  // Boleto de UMA fatura via /v1/payments (bolbradesco). MP exige identificacao do
+  // pagador (CPF/CNPJ); enviada quando o cliente tem documento no cadastro.
+  async createBoleto(input) {
+    if (!env.mercadopago.accessToken) {
+      log.warn("mercadopago.sem_token", { fluxo: "boleto", invoiceId: input.invoiceId });
+      throw new Error("Mercado Pago sem token: boleto indisponível.");
+    }
+    const isHttps = env.appUrl.startsWith("https://");
+    const { first, last } = splitName(input.payer.name);
+    const payer: Record<string, unknown> = { email: input.payer.email, first_name: first, last_name: last };
+    if (input.payer.document) {
+      const doc = input.payer.document.replace(/\D/g, "");
+      payer.identification = { type: doc.length > 11 ? "CNPJ" : "CPF", number: doc };
+    }
+    const body: Record<string, unknown> = {
+      transaction_amount: input.amount,
+      description: input.description,
+      payment_method_id: "bolbradesco",
+      external_reference: INVOICE_REF_PREFIX + input.invoiceId,
+      payer,
+    };
+    if (isHttps) body.notification_url = new URL("/api/webhooks/mercadopago", env.appUrl).toString();
+    const res = await fetch("https://api.mercadopago.com/v1/payments", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${env.mercadopago.accessToken}`,
+        "X-Idempotency-Key": `boleto-${input.invoiceId}`,
+      },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "");
+      log.error("mercadopago.boleto_falhou", { httpStatus: res.status, detail: detail.slice(0, 300), invoiceId: input.invoiceId });
+      throw new Error("Mercado Pago: falha ao gerar boleto (" + res.status + ")");
+    }
+    const p = (await res.json()) as {
+      id?: number | string;
+      transaction_details?: { external_resource_url?: string };
+      barcode?: { content?: string };
+    };
+    return {
+      provider: "mercadopago",
+      url: p.transaction_details?.external_resource_url || "",
+      barcode: p.barcode?.content || "",
+      gatewayPaymentId: p.id != null ? String(p.id) : "",
+    };
+  },
+  // Cartao: Checkout Pro (preferencia) com o valor da fatura. Mesma escolha de URL
+  // sandbox/producao do createSubscription.
+  async createInvoiceCheckout(input) {
+    if (!env.mercadopago.accessToken) {
+      log.warn("mercadopago.sem_token", { fluxo: "checkout_fatura", invoiceId: input.invoiceId });
+      const url = new URL("/cliente/faturas", env.appUrl);
+      url.searchParams.set("mp", "simulado");
+      return { provider: "mercadopago", checkoutUrl: url.toString() };
+    }
+    const isHttps = env.appUrl.startsWith("https://");
+    const body: Record<string, unknown> = {
+      items: [{ title: input.description, quantity: 1, unit_price: input.amount, currency_id: "BRL" }],
+      external_reference: INVOICE_REF_PREFIX + input.invoiceId,
+      back_urls: { success: new URL("/cliente/faturas", env.appUrl).toString() },
+    };
+    if (input.restrictTo === "boleto") {
+      // Deixa so boleto (ticket) disponivel na pagina, excluindo os demais tipos.
+      body.payment_methods = {
+        excluded_payment_types: [
+          { id: "credit_card" },
+          { id: "debit_card" },
+          { id: "bank_transfer" },
+          { id: "atm" },
+          { id: "digital_wallet" },
+          { id: "prepaid_card" },
+          { id: "digital_currency" },
+          { id: "voucher_card" },
+          { id: "crypto_transfer" },
+        ],
+      };
+    }
+    if (isHttps) body.notification_url = new URL("/api/webhooks/mercadopago", env.appUrl).toString();
+    const res = await fetch("https://api.mercadopago.com/checkout/preferences", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${env.mercadopago.accessToken}` },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "");
+      log.error("mercadopago.checkout_fatura_falhou", { httpStatus: res.status, detail: detail.slice(0, 300), invoiceId: input.invoiceId });
+      throw new Error("Mercado Pago: falha ao criar checkout da fatura (" + res.status + ")");
+    }
+    const data = (await res.json()) as { init_point?: string; sandbox_init_point?: string };
+    const useSandboxUrl = env.mercadopago.accessToken.startsWith("TEST-");
+    const checkoutUrl =
+      (useSandboxUrl ? data.sandbox_init_point : data.init_point) ||
+      data.init_point ||
+      data.sandbox_init_point ||
+      new URL("/cliente/faturas", env.appUrl).toString();
+    return { provider: "mercadopago", checkoutUrl };
   },
   async verifyWebhook(req) {
     const secret = env.mercadopago.webhookSecret;
@@ -357,6 +568,17 @@ const asaasGateway: PaymentGateway = {
       checkoutUrl = pays.data?.[0]?.invoiceUrl || checkoutUrl;
     }
     return { provider: "asaas", checkoutUrl, gatewayCustomerId: customer.id, gatewaySubscriptionId: sub.id };
+  },
+  // Pagamento de fatura avulsa nao implementado no Asaas neste MVP (o gateway ativo
+  // e o Mercado Pago). Mantem a interface satisfeita; a rota trata o erro como 502.
+  async createPixCharge() {
+    throw new Error("Asaas: PIX de fatura avulsa não implementado neste MVP.");
+  },
+  async createBoleto() {
+    throw new Error("Asaas: boleto de fatura avulsa não implementado neste MVP.");
+  },
+  async createInvoiceCheckout() {
+    throw new Error("Asaas: checkout de fatura avulsa não implementado neste MVP.");
   },
   async verifyWebhook(req) {
     const expected = env.asaas.webhookToken;

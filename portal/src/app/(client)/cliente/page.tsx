@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Icon } from "@/components/icons";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { useModal, useToast } from "@/components/providers";
+import { useModal } from "@/components/providers";
 import { useClientCtx } from "@/components/client/useClientCtx";
 import { PayModalContent } from "@/components/client/PayModalContent";
 import { BriefingCard } from "@/components/client/BriefingCard";
@@ -15,7 +15,6 @@ import { fmt } from "@/lib/format";
 export default function ClienteDashboard() {
   const c = useClientCtx();
   const { openModal, closeModal } = useModal();
-  const toast = useToast();
 
   if (c.loading) return <Loading />;
   if (c.error || !c.me)
@@ -26,16 +25,7 @@ export default function ClienteDashboard() {
 
   function pay() {
     if (!c.open) return;
-    openModal(
-      <PayModalContent
-        inv={c.open}
-        onClose={closeModal}
-        onCopy={() => {
-          closeModal();
-          toast("Código PIX copiado");
-        }}
-      />
-    );
+    openModal(<PayModalContent inv={c.open} onClose={closeModal} />);
   }
 
   return (

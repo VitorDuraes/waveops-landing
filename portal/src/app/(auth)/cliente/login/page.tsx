@@ -5,6 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AuthAside } from "@/components/shell/AuthAside";
+import { CodeInput } from "@/components/ui/CodeInput";
 import { useToast } from "@/components/providers";
 
 type Mode = "senha" | "codigo";
@@ -23,10 +24,13 @@ export default function ClienteLoginPage() {
   const [step, setStep] = useState<1 | 2>(1);
   const [email, setEmail] = useState("");
   const [code, setCode] = useState(["", "", "", "", "", ""]);
+  // E-mail com codigo valido mas sem assinatura: mostra CTA em vez de erro generico.
+  const [noCustomer, setNoCustomer] = useState(false);
 
-  function setDigit(i: number, v: string) {
-    const d = v.replace(/\D/g, "").slice(-1);
-    setCode((prev) => prev.map((c, idx) => (idx === i ? d : c)));
+  function backToEmail() {
+    setStep(1);
+    setCode(["", "", "", "", "", ""]);
+    setNoCustomer(false);
   }
 
   async function onPassword(e: React.FormEvent) {
@@ -55,6 +59,7 @@ export default function ClienteLoginPage() {
     setLoading(true);
     try {
       if (step === 1) {
+        setNoCustomer(false);
         const res = await fetch("/api/auth/request-code", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -72,7 +77,14 @@ export default function ClienteLoginPage() {
           body: JSON.stringify({ email, code: code.join("") }),
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Código inválido");
+        if (!res.ok) {
+          // Codigo valido mas e-mail sem assinatura: mostra o CTA, nao o erro generico.
+          if (data.reason === "no_customer") {
+            setNoCustomer(true);
+            return;
+          }
+          throw new Error(data.error || "Código inválido");
+        }
         toast("Bem-vindo de volta!");
         router.push("/cliente");
       }
@@ -150,30 +162,36 @@ export default function ClienteLoginPage() {
                 {step === 2 && (
                   <div className="field">
                     <label>Código enviado por e-mail</label>
-                    <div className="code-inputs">
-                      {code.map((d, i) => (
-                        <input
-                          key={i}
-                          maxLength={1}
-                          inputMode="numeric"
-                          value={d}
-                          onChange={(e) => setDigit(i, e.target.value)}
-                        />
-                      ))}
-                    </div>
+                    <CodeInput value={code} onChange={setCode} autoFocus disabled={loading} />
                   </div>
                 )}
                 <button type="submit" className="btn btn-primary btn-lg btn-block" style={{ marginTop: 6 }} disabled={loading}>
                   {loading ? "Aguarde..." : step === 1 ? "Receber código por e-mail" : "Entrar"}
                 </button>
               </form>
+              {noCustomer && (
+                <div className="auth-alt" style={{ marginTop: 12 }}>
+                  Não encontramos uma assinatura ativa para este e-mail.{" "}
+                  <Link href="/#pacotes">Ver planos</Link> ou <Link href="/cliente/ativar">Ativar conta</Link>.
+                </div>
+              )}
+              {step === 2 && (
+                <button
+                  type="button"
+                  className="btn btn-quiet btn-sm btn-block"
+                  style={{ marginTop: 10 }}
+                  onClick={backToEmail}
+                >
+                  Usar outro e-mail
+                </button>
+              )}
               <button
                 type="button"
                 className="btn btn-quiet btn-sm btn-block"
                 style={{ marginTop: 10 }}
                 onClick={() => {
                   setMode("senha");
-                  setStep(1);
+                  backToEmail();
                 }}
               >
                 Entrar com senha

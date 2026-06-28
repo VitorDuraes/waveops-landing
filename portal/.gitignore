@@ -10,9 +10,9 @@
 next-env.d.ts
 *.tsbuildinfo
 
-# ambiente
-.env
-.env*.local
+# ambiente (NUNCA commitar segredo de prod)
+.env*
+!.env.example
 
 # prisma (cliente gerado, quando conectar)
 /src/generated

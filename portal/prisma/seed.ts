@@ -98,6 +98,18 @@ function invoicePlan(id: string, status: string): InvSpec[] {
 }
 
 async function main() {
+  // Trava anti-prod: este seed cria clientes ficticios (demonstracao/dev). Rodar
+  // contra o banco de producao recontamina o admin com dados falsos. So roda em
+  // host local; para forcar de proposito (nunca em producao), use SEED_FORCE=1.
+  const host = (process.env.DATABASE_URL?.match(/@([^:/?]+)/)?.[1] || "").toLowerCase();
+  const localHosts = new Set(["localhost", "127.0.0.1", "db", "postgres"]);
+  if (!localHosts.has(host) && process.env.SEED_FORCE !== "1") {
+    throw new Error(
+      `Seed abortado: DATABASE_URL aponta para "${host || "?"}", que nao e um banco local. ` +
+        "Este seed cria dados ficticios e nao deve rodar em producao. Para forcar, use SEED_FORCE=1."
+    );
+  }
+
   // planos
   for (const p of plans) {
     await db.plan.upsert({

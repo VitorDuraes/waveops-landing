@@ -35,6 +35,12 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "@prisma/client"
         update-types: ["version-update:semver-major"]
+      # Tailwind 4 e uma migracao MAJOR (novo engine, config em CSS, @tailwind vira
+      # @import "tailwindcss", plugin do PostCSS vira @tailwindcss/postcss): esforco
+      # dedicado com validacao visual das telas, nao bump automatico. Mantem o
+      # Tailwind 3.x (suportado, estavel). Para fazer o 4 no futuro, remova estas linhas.
+      - dependency-name: "tailwindcss"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "github-actions"
     directory: "/"

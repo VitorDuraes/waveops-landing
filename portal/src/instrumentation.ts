@@ -26,11 +26,15 @@ async function initOtelLogs(serviceName: string) {
     const { resourceFromAttributes } = await import("@opentelemetry/resources");
     // OTLPLogExporter le OTEL_EXPORTER_OTLP_ENDPOINT/HEADERS do ambiente (posta em /v1/logs).
     // OTel SDK 2.x: o resource vem de resourceFromAttributes() (a classe Resource saiu) e
-    // os processors vao no construtor do LoggerProvider (addLogRecordProcessor saiu). O
-    // flush a cada ~2s faz os logs aparecerem quase em tempo real no Grafana. [Dependabot #16 / M6]
+    // os processors vao no construtor do LoggerProvider (addLogRecordProcessor saiu). Desde
+    // o sdk-logs 0.220 o BatchLogRecordProcessor recebe um unico objeto de options com o
+    // exporter dentro (antes era (exporter, config)). O flush a cada ~2s faz os logs
+    // aparecerem quase em tempo real no Grafana. [Dependabot #16 e #28 / M6]
     const provider = new LoggerProvider({
       resource: resourceFromAttributes({ "service.name": serviceName }),
-      processors: [new BatchLogRecordProcessor(new OTLPLogExporter(), { scheduledDelayMillis: 2000 })],
+      processors: [
+        new BatchLogRecordProcessor({ exporter: new OTLPLogExporter(), scheduledDelayMillis: 2000 }),
+      ],
     });
     logs.setGlobalLoggerProvider(provider);
     console.log("[otel] export de logs OTLP ligado para", serviceName);

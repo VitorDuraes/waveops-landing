@@ -38,7 +38,13 @@ export default function AdminDashboard() {
   const customers = cReq.data;
   const M = mReq.data;
   const overdue = customers.filter((c) => c.status === "vencido" || c.status === "pendente");
-  const pct = Math.round((M.receivedMonth / (M.receivedMonth + M.expected)) * 100);
+  // Contadores das acoes rapidas derivam dos clientes reais (nada fixo na tela).
+  const vencidos = customers.filter((c) => c.status === "vencido").length;
+  const pendentes = customers.filter((c) => c.status === "pendente" || c.status === "aguardando").length;
+  const pausados = customers.filter((c) => c.status === "pausado").length;
+  const ticketMedio = M.active ? Math.round(M.mrr / M.active) : 0;
+  const previsto = M.receivedMonth + M.expected;
+  const pct = previsto > 0 ? Math.round((M.receivedMonth / previsto) * 100) : 0;
 
   return (
     <>
@@ -59,16 +65,22 @@ export default function AdminDashboard() {
 
       <Stagger className="grid cols-4">
         <StaggerItem>
-          <Metric icon="money" label="MRR atual" value={fmt(M.mrr)} delta="+8,2% vs. mês anterior" tone="up" />
+          <Metric icon="money" label="MRR atual" value={fmt(M.mrr)} />
         </StaggerItem>
         <StaggerItem>
-          <Metric icon="users" label="Clientes ativos" value={M.active} delta="2 novos no mês" tone="up" />
+          <Metric icon="users" label="Clientes ativos" value={M.active} />
         </StaggerItem>
         <StaggerItem>
-          <Metric icon="alert" label="Em atraso" value={M.overdue} delta="precisa de follow-up" tone="down" />
+          <Metric
+            icon="alert"
+            label="Em atraso"
+            value={M.overdue}
+            delta={M.overdue > 0 ? "precisa de follow-up" : undefined}
+            tone="down"
+          />
         </StaggerItem>
         <StaggerItem>
-          <Metric icon="pause" label="Pausados" value={M.paused} delta="1 cliente" tone="flat" />
+          <Metric icon="pause" label="Pausados" value={M.paused} />
         </StaggerItem>
       </Stagger>
 
@@ -118,7 +130,7 @@ export default function AdminDashboard() {
             <div className="dl" style={{ gridTemplateColumns: "1fr" }}>
               <div className="di">
                 <div className="dt">Ticket médio</div>
-                <div className="dd">{fmt(386)}</div>
+                <div className="dd">{fmt(ticketMedio)}</div>
               </div>
             </div>
           </div>
@@ -130,7 +142,9 @@ export default function AdminDashboard() {
               <Icon name="alert" />
             </div>
             <div className="gr">
-              <div className="t">2 clientes vencidos</div>
+              <div className="t">
+                {vencidos} cliente{vencidos === 1 ? "" : "s"} vencido{vencidos === 1 ? "" : "s"}
+              </div>
               <div className="s">Aguardando pagamento</div>
             </div>
             <Link className="act" href="/admin/faturas">
@@ -142,7 +156,9 @@ export default function AdminDashboard() {
               <Icon name="clock" />
             </div>
             <div className="gr">
-              <div className="t">1 vence em 3 dias</div>
+              <div className="t">
+                {pendentes} pagamento{pendentes === 1 ? "" : "s"} pendente{pendentes === 1 ? "" : "s"}
+              </div>
               <div className="s">Follow-up agendado</div>
             </div>
             <Link className="act" href="/admin/followups">
@@ -154,7 +170,9 @@ export default function AdminDashboard() {
               <Icon name="pause" />
             </div>
             <div className="gr">
-              <div className="t">1 para pausar</div>
+              <div className="t">
+                {pausados} cliente{pausados === 1 ? "" : "s"} pausado{pausados === 1 ? "" : "s"}
+              </div>
               <div className="s">Atraso acima de 7 dias</div>
             </div>
             <Link className="act" href="/admin/clientes">

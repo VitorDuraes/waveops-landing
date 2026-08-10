@@ -24,8 +24,9 @@ const SECURITY_HEADERS = [
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // No MVP nao bloqueamos o build por lint. Erros de tipo continuam barrando.
-  eslint: { ignoreDuringBuilds: true },
+  // A raiz do workspace e a pasta do portal. Sem isto o Turbopack acha o
+  // package-lock.json da raiz do repo (da landing) e avisa a cada boot.
+  turbopack: { root: __dir },
   async headers() {
     return [{ source: "/:path*", headers: SECURITY_HEADERS }];
   },

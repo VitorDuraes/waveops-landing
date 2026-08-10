@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-// Middleware (edge): protege /cliente e /admin checando a sessao JWT.
+// Proxy (edge, ex-middleware do Next 15): protege /cliente e /admin checando a
+// sessao JWT. Checagem OTIMISTA: a barreira real e o guard() nas rotas de API.
 // Mantido leve e independente do restante do servidor (sem Prisma/node:crypto).
 const SECRET = new TextEncoder().encode(
   process.env.SESSION_SECRET || "dev-insecure-session-secret-troque-em-producao-min-32"
@@ -27,7 +28,7 @@ function toLogin(req: NextRequest, path: string) {
   return NextResponse.redirect(url);
 }
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   // paginas de login/ativacao sempre liberadas (evita loop de redirecionamento)
   if (pathname === "/cliente/login" || pathname === "/admin/login" || pathname === "/cliente/ativar") {

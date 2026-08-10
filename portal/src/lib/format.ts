@@ -18,10 +18,19 @@ export function fmtFull(n: number): string {
   );
 }
 
-// Iniciais a partir do nome ("João Silva" -> "JS")
-export function initials(name: string): string {
-  return name
-    .split(" ")
+// "Agosto 2026": mes e ano correntes, primeira letra maiuscula (pt-BR devolve minuscula).
+export function mesAno(d = new Date()): string {
+  const s = d.toLocaleDateString("pt-BR", { month: "long", year: "numeric" }).replace(" de ", " ");
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+// Iniciais a partir do nome ("João Silva" -> "JS"). Tolera nome ausente ou vazio:
+// um avatar sem letra nao pode derrubar a tela inteira. [varredura 2026-08-10]
+export function initials(name?: string | null): string {
+  return String(name ?? "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
     .map((w) => w[0])
     .slice(0, 2)
     .join("")

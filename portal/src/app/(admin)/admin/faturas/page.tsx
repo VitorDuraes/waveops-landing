@@ -21,7 +21,9 @@ const FILTERS: [string, string][] = [
 export default function FaturasAdminPage() {
   const { resendInvoice, wa, markPaid } = useAdminActions();
   const [filter, setFilter] = useState("todas");
-  const req = useApi<AdminInvoice[]>("/api/invoices");
+  // scope=admin: no modo demo (sem login) a rota nao tem papel para consultar e
+  // devolveria as faturas do cliente, quebrando esta tela.
+  const req = useApi<AdminInvoice[]>("/api/invoices?scope=admin");
 
   if (req.loading) return <Loading />;
   if (req.error || !req.data)

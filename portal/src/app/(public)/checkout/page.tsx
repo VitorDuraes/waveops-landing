@@ -7,6 +7,7 @@ import { Icon } from "@/components/icons";
 import { PublicNav } from "@/components/shell/PublicNav";
 import { useToast } from "@/components/providers";
 import { plans } from "@/lib/data";
+import { whatsappUrl } from "@/lib/contact";
 import { fmt, fmtFull } from "@/lib/format";
 
 type Method = "pix" | "card" | "boleto";
@@ -16,9 +17,14 @@ function CheckoutInner() {
   const params = useSearchParams();
   const chosen = params.get("plano") || "operacao";
   const plan = plans.find((p) => p.id === chosen) || plans[0];
+  // Plano sob proposta acessado direto pela URL: a página não pode cobrar um preço de
+  // tabela por ele. Mostra o caminho da proposta em vez do formulário de pagamento.
+  const sobProposta = !plan.selfService;
 
   const [method, setMethod] = useState<Method>("pix");
-  const [terms, setTerms] = useState(true);
+  // LGPD: consentimento e ato do titular. Caixa pre-marcada nao serve como aceite,
+  // entao o padrao e desmarcado. [varredura 2026-08-10]
+  const [terms, setTerms] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -67,6 +73,43 @@ function CheckoutInner() {
         <Link className="btn btn-quiet btn-sm" href="/#pacotes" style={{ marginBottom: 18 }}>
           <Icon name="chevronLeft" /> Voltar aos planos
         </Link>
+        {sobProposta ? (
+          <div style={{ maxWidth: 560 }}>
+            <h1 style={{ fontSize: 30, marginBottom: 6 }}>Plano {plan.name}</h1>
+            <p className="muted" style={{ marginBottom: 24 }}>
+              Este plano é fechado por proposta. Escopo, volume e valor saem de um diagnóstico rápido da sua
+              operação, então não faz sentido cobrar um preço de tabela antes de conversar.
+            </p>
+            <div className="card">
+              <div className="section-title">O que está incluso</div>
+              <ul className="feature-list">
+                {plan.benefits.map((b, i) => (
+                  <li key={i}>
+                    <Icon name="checkCircle" />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+              <a
+                className="btn btn-primary btn-lg btn-block"
+                style={{ marginTop: 22 }}
+                href={whatsappUrl(`Olá! Quero uma proposta do plano ${plan.name} da WaveOps.`)}
+                target="_blank"
+                rel="noopener"
+              >
+                <Icon name="whatsapp" /> Pedir proposta no WhatsApp
+              </a>
+              <p className="hint center" style={{ marginTop: 12 }}>
+                Prefere começar sozinho?{" "}
+                <Link href="/checkout?plano=operacao" style={{ color: "var(--accent-strong)" }}>
+                  Assine o plano de entrada
+                </Link>
+                .
+              </p>
+            </div>
+          </div>
+        ) : (
+          <>
         <h1 style={{ fontSize: 30, marginBottom: 6 }}>Finalizar assinatura</h1>
         <p className="muted" style={{ marginBottom: 28 }}>
           Preencha seus dados para iniciar o pagamento.
@@ -76,27 +119,27 @@ function CheckoutInner() {
             <div className="section-title">Seus dados</div>
             <div className="field-row">
               <div className="field">
-                <label>Nome completo</label>
-                <input name="name" placeholder="Seu nome" required />
+                <label htmlFor="co-nome-completo">Nome completo</label>
+                <input id="co-nome-completo" name="name" placeholder="Seu nome" required />
               </div>
               <div className="field">
-                <label>Empresa</label>
-                <input name="company" placeholder="Nome da empresa" required />
+                <label htmlFor="co-empresa">Empresa</label>
+                <input id="co-empresa" name="company" placeholder="Nome da empresa" required />
               </div>
             </div>
             <div className="field-row">
               <div className="field">
-                <label>E-mail</label>
-                <input name="email" type="email" placeholder="voce@empresa.com.br" required />
+                <label htmlFor="co-e-mail">E-mail</label>
+                <input id="co-e-mail" name="email" type="email" placeholder="voce@empresa.com.br" required />
               </div>
               <div className="field">
-                <label>WhatsApp</label>
-                <input name="phone" placeholder="(00) 00000-0000" required />
+                <label htmlFor="co-whatsapp">WhatsApp</label>
+                <input id="co-whatsapp" name="phone" placeholder="(00) 00000-0000" required />
               </div>
             </div>
             <div className="field">
-              <label>CPF / CNPJ</label>
-              <input name="document" placeholder="000.000.000-00" required />
+              <label htmlFor="co-cpf-cnpj">CPF / CNPJ</label>
+              <input id="co-cpf-cnpj" name="document" placeholder="000.000.000-00" required />
             </div>
 
             <div className="section-title" style={{ marginTop: 24 }}>
@@ -176,6 +219,8 @@ function CheckoutInner() {
             </div>
           </div>
         </div>
+          </>
+        )}
       </div>
     </>
   );

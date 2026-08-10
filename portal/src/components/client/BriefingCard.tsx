@@ -71,8 +71,8 @@ export function BriefingCard() {
         Pra já começar, descreva o que você quer automatizar. A gente usa isso pra montar seu projeto e te chamar no WhatsApp.
       </p>
       <div className="field">
-        <label>O que você quer automatizar ou construir?</label>
-        <textarea
+        <label htmlFor="brief-o-que-voce-quer-automatizar-ou-construir">O que você quer automatizar ou construir?</label>
+        <textarea id="brief-o-que-voce-quer-automatizar-ou-construir"
           name="goal"
           required
           minLength={10}
@@ -81,17 +81,17 @@ export function BriefingCard() {
       </div>
       <div className="field-row">
         <div className="field">
-          <label>Ferramenta que usa hoje</label>
-          <input name="currentTool" placeholder="Ex.: planilha, n8n, Bling, nenhuma" />
+          <label htmlFor="brief-ferramenta-que-usa-hoje">Ferramenta que usa hoje</label>
+          <input id="brief-ferramenta-que-usa-hoje" name="currentTool" placeholder="Ex.: planilha, n8n, Bling, nenhuma" />
         </div>
         <div className="field">
-          <label>Volume por mês (aprox.)</label>
-          <input name="volume" placeholder="Ex.: 300 pedidos/mês" />
+          <label htmlFor="brief-volume-por-mes-aprox">Volume por mês (aprox.)</label>
+          <input id="brief-volume-por-mes-aprox" name="volume" placeholder="Ex.: 300 pedidos/mês" />
         </div>
       </div>
       <div className="field">
-        <label>Qual a maior dor hoje?</label>
-        <input name="pain" placeholder="Ex.: perco tempo copiando dados entre sistemas." />
+        <label htmlFor="brief-qual-a-maior-dor-hoje">Qual a maior dor hoje?</label>
+        <input id="brief-qual-a-maior-dor-hoje" name="pain" placeholder="Ex.: perco tempo copiando dados entre sistemas." />
       </div>
       <button type="submit" className="btn btn-primary" disabled={sending}>
         {sending ? "Enviando..." : "Enviar briefing"}

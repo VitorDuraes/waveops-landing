@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 // encarregado (DPO) antes de considerar definitiva.
 export default function PrivacidadePage() {
   return (
-    <LegalDoc title="Política de Privacidade" updatedAt="26 de junho de 2026">
+    <LegalDoc title="Política de Privacidade" updatedAt="10 de agosto de 2026">
       <p>
         Esta Política descreve como a <strong>{EMPRESA.razaoSocial}</strong> (CNPJ {EMPRESA.cnpj}), que opera a
         marca {EMPRESA.marca}, coleta, usa, compartilha e protege dados pessoais, em conformidade com a Lei
@@ -41,12 +41,25 @@ export default function PrivacidadePage() {
           <strong>Dados de navegação:</strong> métricas agregadas e anônimas de visita ao site, via Plausible
           Analytics, que não usa cookies nem identifica pessoas.
         </li>
+        <li>
+          <strong>Dados de publicidade:</strong> no site institucional (waveops.com.br), o Meta Pixel registra
+          páginas vistas e ações como envio do formulário e clique no WhatsApp. O Meta recebe endereço IP,
+          identificador de navegador e o evento realizado, e usa esses dados para medir e otimizar nossos
+          anúncios no Facebook e no Instagram. Não enviamos ao Meta seu nome, e-mail ou telefone. O portal do
+          cliente (portal.waveops.com.br) não carrega o Meta Pixel.
+        </li>
       </ul>
 
       <h2>2. Cookies</h2>
       <p>
         O portal usa apenas um cookie de sessão estritamente necessário, para manter o cliente autenticado após
-        o login. Não usamos cookies de publicidade ou de rastreamento entre sites.
+        o login. Não usamos cookies de publicidade dentro do portal.
+      </p>
+      <p>
+        O site institucional usa o Meta Pixel, que grava cookies de terceiro do domínio facebook.com e permite
+        rastreamento entre sites para fins de publicidade. Para bloquear, ajuste as preferências de anúncio na
+        sua conta do Meta, bloqueie cookies de terceiros no navegador ou use uma extensão de bloqueio de
+        rastreadores. Bloquear não afeta o uso do site nem do portal.
       </p>
 
       <h2>3. Para que usamos os dados e com qual base legal</h2>
@@ -64,6 +77,11 @@ export default function PrivacidadePage() {
         <li>
           <strong>Prevenir fraudes e melhorar o serviço</strong> com métricas agregadas: legítimo interesse
           (art. 7º, IX).
+        </li>
+        <li>
+          <strong>Medir e otimizar nossos anúncios</strong> com o Meta Pixel: legítimo interesse (art. 7º, IX).
+          Você pode se opor a esse tratamento a qualquer momento, pelos meios descritos no item 2 ou escrevendo
+          para <a href="mailto:contato@waveops.com.br">contato@waveops.com.br</a>.
         </li>
       </ul>
 
@@ -89,6 +107,10 @@ export default function PrivacidadePage() {
           <strong>WaveOps CRM (Twenty)</strong>: gestão de clientes, quando ativo.
         </li>
         <li>
+          <strong>Meta Platforms</strong>: medição e otimização de anúncios, apenas com os dados de navegação
+          coletados pelo Meta Pixel no site institucional.
+        </li>
+        <li>
           <strong>Ferramentas internas da equipe</strong> (Discord): alertas operacionais sobre novos clientes
           e cobrança.
         </li>
@@ -97,7 +119,7 @@ export default function PrivacidadePage() {
 
       <h2>5. Transferência internacional</h2>
       <p>
-        Alguns prestadores (como Resend e Netlify) operam servidores fora do Brasil. Nesses casos, a
+        Alguns prestadores (como Resend, Netlify e Meta) operam servidores fora do Brasil. Nesses casos, a
         transferência observa o art. 33 da LGPD e adota garantias contratuais e técnicas adequadas de proteção.
       </p>
 

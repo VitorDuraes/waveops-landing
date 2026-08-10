@@ -12,10 +12,22 @@
   const MIN_FILL_MS = 1200;
   const fillTimeMs = () => Date.now() - pageLoadedAt;
 
-  /* ---- Analytics helper (SPEC-02). No-op até o Plausible carregar no <head>. ---- */
+  /* ---- Analytics helper (SPEC-02). No-op até o Plausible carregar no <head>. ----
+     O mesmo evento vai para o Plausible (métrica interna) e para o Meta Pixel
+     (otimização de campanha). Só os eventos mapeados aqui viram conversão no Meta:
+     evento sem mapeamento segue apenas para o Plausible. Ver assets/meta-pixel.js. */
+  const FB_EVENTS = {
+    lead_form_submit: 'Lead',
+    whatsapp_click: 'Contact',
+  };
+
   function track(event, props) {
     try {
       if (window.plausible) window.plausible(event, { props: props || {} });
+    } catch (e) {}
+    try {
+      const fbEvent = FB_EVENTS[event];
+      if (fbEvent && window.fbq) window.fbq('track', fbEvent, props || {});
     } catch (e) {}
   }
 

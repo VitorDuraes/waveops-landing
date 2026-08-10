@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Icon } from "@/components/icons";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { useModal } from "@/components/providers";
 import { useClientCtx } from "@/components/client/useClientCtx";
 import { PayModalContent } from "@/components/client/PayModalContent";
@@ -10,6 +11,8 @@ import { BriefingCard } from "@/components/client/BriefingCard";
 import { whatsappUrl } from "@/lib/contact";
 import { Loading, LoadError } from "@/components/ui/Loading";
 import { Stagger, StaggerItem } from "@/components/motion";
+import { SpotlightCard } from "@/components/reactbits/SpotlightCard";
+import { CountUp } from "@/components/reactbits/CountUp";
 import { fmt } from "@/lib/format";
 
 export default function ClienteDashboard() {
@@ -32,7 +35,7 @@ export default function ClienteDashboard() {
     <>
       <div className="page-head">
         <div>
-          <h2>Olá, {m.firstName} 👋</h2>
+          <h2>Olá, {m.firstName}</h2>
           <div className="lead">Aqui está o resumo da sua conta WaveOps.</div>
         </div>
         {canPay && c.open && (
@@ -53,59 +56,67 @@ export default function ClienteDashboard() {
       <BriefingCard />
 
       <Stagger className="grid cols-4">
-        <StaggerItem className="metric">
-          <div className="mlab">
-            <span className="mi">
-              <Icon name="plan" />
-            </span>{" "}
-            Plano atual
-          </div>
-          <div className="mval" style={{ fontSize: 24 }}>
-            {m.plan}
-          </div>
-          <div className="mdelta flat">
-            {fmt(m.amount)}/{m.cycle}
-          </div>
+        <StaggerItem>
+          <SpotlightCard className="metric">
+            <div className="mlab">
+              <span className="mi">
+                <Icon name="plan" />
+              </span>{" "}
+              Plano atual
+            </div>
+            <div className="mval" style={{ fontSize: 24 }}>
+              {m.plan}
+            </div>
+            <div className="mdelta flat">
+              {fmt(m.amount)}/{m.cycle}
+            </div>
+          </SpotlightCard>
         </StaggerItem>
-        <StaggerItem className="metric">
-          <div className="mlab">
-            <span className="mi">
-              <Icon name="checkCircle" />
-            </span>{" "}
-            Status
-          </div>
-          <div style={{ marginTop: 14 }}>
-            <StatusBadge status={c.statusKey} />
-          </div>
-          <div className="mdelta flat" style={{ marginTop: 10 }}>
-            desde {m.startDate}
-          </div>
+        <StaggerItem>
+          <SpotlightCard className="metric">
+            <div className="mlab">
+              <span className="mi">
+                <Icon name="checkCircle" />
+              </span>{" "}
+              Status
+            </div>
+            <div style={{ marginTop: 14 }}>
+              <StatusBadge status={c.statusKey} />
+            </div>
+            <div className="mdelta flat" style={{ marginTop: 10 }}>
+              desde {m.startDate}
+            </div>
+          </SpotlightCard>
         </StaggerItem>
-        <StaggerItem className="metric">
-          <div className="mlab">
-            <span className="mi">
-              <Icon name="clock" />
-            </span>{" "}
-            Próximo vencimento
-          </div>
-          <div className="mval" style={{ fontSize: 24 }}>
-            {c.nextDue}
-          </div>
-          <div className="mdelta flat">{m.paymentMethod}</div>
+        <StaggerItem>
+          <SpotlightCard className="metric">
+            <div className="mlab">
+              <span className="mi">
+                <Icon name="clock" />
+              </span>{" "}
+              Próximo vencimento
+            </div>
+            <div className="mval" style={{ fontSize: 24 }}>
+              {c.nextDue}
+            </div>
+            <div className="mdelta flat">{m.paymentMethod}</div>
+          </SpotlightCard>
         </StaggerItem>
-        <StaggerItem className="metric">
-          <div className="mlab">
-            <span className="mi">
-              <Icon name="invoice" />
-            </span>{" "}
-            Fatura em aberto
-          </div>
-          <div className="mval" style={{ fontSize: 24 }}>
-            {canPay && c.open ? fmt(c.open.amount) : "R$ 0"}
-          </div>
-          <div className={"mdelta " + (canPay ? "down" : "up")}>
-            {canPay && c.open ? <StatusBadge status={c.open.status} /> : "nenhuma"}
-          </div>
+        <StaggerItem>
+          <SpotlightCard className="metric">
+            <div className="mlab">
+              <span className="mi">
+                <Icon name="invoice" />
+              </span>{" "}
+              Fatura em aberto
+            </div>
+            <div className="mval" style={{ fontSize: 24 }}>
+              <CountUp to={canPay && c.open ? c.open.amount : 0} prefix="R$ " />
+            </div>
+            <div className={"mdelta " + (canPay ? "down" : "up")}>
+              {canPay && c.open ? <StatusBadge status={c.open.status} /> : "nenhuma"}
+            </div>
+          </SpotlightCard>
         </StaggerItem>
       </Stagger>
 
@@ -117,23 +128,32 @@ export default function ClienteDashboard() {
               Ver todas <Icon name="chevronRight" />
             </Link>
           </div>
-          {c.invoices.slice(0, 4).map((inv) => (
-            <div className="lrow" key={inv.id}>
-              <div className="ic">
-                <Icon name="invoice" />
-              </div>
-              <div className="gr">
-                <div className="t">
-                  {inv.id} · {fmt(inv.amount)}
+          {c.invoices.length ? (
+            c.invoices.slice(0, 4).map((inv) => (
+              <div className="lrow" key={inv.id}>
+                <div className="ic">
+                  <Icon name="invoice" />
                 </div>
-                <div className="s">
-                  Venc. {inv.due}
-                  {inv.paidAt ? " · pago " + inv.paidAt : ""}
+                <div className="gr">
+                  <div className="t">
+                    {inv.id} · {fmt(inv.amount)}
+                  </div>
+                  <div className="s">
+                    Venc. {inv.due}
+                    {inv.paidAt ? " · pago " + inv.paidAt : ""}
+                  </div>
                 </div>
+                <StatusBadge status={inv.status} />
               </div>
-              <StatusBadge status={inv.status} />
-            </div>
-          ))}
+            ))
+          ) : (
+            /* Conta nova ainda nao tem fatura: cartao vazio parecia erro de carregamento. */
+            <EmptyState
+              icon="invoice"
+              title="Nenhuma fatura ainda"
+              desc="Assim que a primeira cobrança for gerada, ela aparece aqui."
+            />
+          )}
         </div>
         <div className="card">
           <div className="section-title">Atalhos</div>

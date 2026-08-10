@@ -132,11 +132,16 @@ h1, h2, h3, h4, h5 { font-family: var(--font-display); font-weight: 600; letter-
 .layout.no-side { grid-template-columns: 1fr; }
 
 /* ---------- Sidebar ---------- */
+/* height: 100dvh (nao 100vh): no mobile o 100vh conta a barra do navegador e cortava
+   o rodape com o nome do usuario. O fundo da coluna vem do .layout, entao a barra
+   acompanha paginas mais altas que a tela em vez de terminar no meio. */
+.layout { background: linear-gradient(to right, var(--bg-2) 0 var(--sidebar-w), transparent var(--sidebar-w)); }
+.layout.no-side { background: none; }
 .sidebar {
   background: var(--bg-2);
   border-right: 1px solid var(--border);
   display: flex; flex-direction: column;
-  position: sticky; top: 0; height: 100vh;
+  position: sticky; top: 0; height: 100dvh;
 }
 .side-brand { display: flex; align-items: center; gap: 11px; padding: 20px 20px 18px; font-family: var(--font-display); font-weight: 700; font-size: 19px; letter-spacing: -0.02em; }
 .side-brand .mk { width: 34px; height: 34px; flex-shrink: 0; }
@@ -249,10 +254,17 @@ h1, h2, h3, h4, h5 { font-family: var(--font-display); font-weight: 600; letter-
 .badge.accent { color: var(--accent-strong); background: var(--accent-soft); border-color: var(--border-2); }
 
 /* Tables */
-.table-wrap { width: 100%; overflow-x: auto; }
-table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+/* min-width + overflow-x: abaixo de ~1100px a tabela rolava DENTRO do card em vez de
+   espremer as colunas. Sem isso, nome de cliente quebrava em 3 linhas e "R$ 397" em 2.
+   O scroll horizontal fica no wrapper, o body da pagina nunca rola de lado. */
+.table-wrap { width: 100%; overflow-x: auto; overscroll-behavior-x: contain; }
+table.tbl { width: 100%; min-width: 780px; border-collapse: collapse; font-size: 14px; }
 table.tbl th { text-align: left; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 700; padding: 13px 16px; border-bottom: 1px solid var(--border); white-space: nowrap; background: var(--surface-2); }
-table.tbl td { padding: var(--row-py) 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+table.tbl td { padding: var(--row-py) 16px; border-bottom: 1px solid var(--border); vertical-align: middle; white-space: nowrap; }
+/* Celula de texto longo (descricao, motivo) volta a quebrar linha. */
+table.tbl td.cell-wrap { white-space: normal; }
+table.tbl td .cell-user .cell-strong, table.tbl td .cell-user .cell-sub { overflow: hidden; text-overflow: ellipsis; }
+table.tbl td .cell-user > div { min-width: 0; }
 table.tbl tbody tr { transition: background 0.12s; }
 table.tbl tbody tr:hover { background: var(--hover); cursor: pointer; }
 table.tbl tbody tr:last-child td { border-bottom: none; }
@@ -302,6 +314,13 @@ table.tbl tbody tr:last-child td { border-bottom: none; }
 .lrow .gr { flex: 1; min-width: 0; }
 .lrow .t { font-weight: 600; font-size: 14.5px; }
 .lrow .s { font-size: 12.5px; color: var(--muted); }
+
+/* Lista de beneficios ("o que esta incluso"). O SVG do Icon nao tem tamanho
+   proprio: sem uma regra de width/height ele colapsa em 0x0 e o item aparece sem
+   o check. Era o caso em Meu Plano e no checkout sob proposta. [varredura 2026-08-10] */
+.feature-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.feature-list li { display: flex; align-items: flex-start; gap: 11px; font-size: 14.5px; color: var(--text-2); }
+.feature-list li svg { width: 17px; height: 17px; flex-shrink: 0; margin-top: 3px; color: var(--accent-strong); }
 
 /* Definition list */
 .dl { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
@@ -360,6 +379,21 @@ table.tbl tbody tr:last-child td { border-bottom: none; }
 .metric:hover { transform: translateY(-2px); border-color: var(--border-2); box-shadow: var(--shadow); }
 .plan:hover { transform: translateY(-4px); border-color: var(--accent); }
 .btn:hover { transform: translateY(-1px); }
+
+/* SpotlightCard (React Bits, adaptado): brilho que segue o cursor. Sem CSS proprio
+   da biblioteca, so os tokens daqui, entao funciona nos dois temas. */
+.spotlight { position: relative; isolation: isolate; --mouse-x: 50%; --mouse-y: 50%; --spotlight-color: rgba(var(--accent-glow), 0.16); }
+.spotlight > * { position: relative; z-index: 1; }
+.spotlight::before {
+  content: ""; position: absolute; inset: 0; z-index: 0; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(220px circle at var(--mouse-x) var(--mouse-y), var(--spotlight-color), transparent 72%);
+  opacity: 0; transition: opacity 0.32s ease;
+}
+.spotlight:hover::before, .spotlight:focus-within::before { opacity: 1; }
+@media (hover: none) { .spotlight::before { display: none; } }
+
+/* Numero da metrica: tabular-nums evita o valor "dancar" enquanto o CountUp conta. */
+.metric .mval { font-variant-numeric: tabular-nums; }
 
 /* Misc utilities */
 .cell-ch { display: inline-flex; align-items: center; gap: 8px; }
@@ -484,7 +518,8 @@ table.tbl tbody tr:last-child td { border-bottom: none; }
   .plans.four { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 900px) {
-  .layout { grid-template-columns: 1fr; }
+  /* Sem coluna fixa no mobile: a faixa de fundo da sidebar sai junto. */
+  .layout { grid-template-columns: 1fr; background: none; }
   .sidebar { position: fixed; left: 0; top: 0; z-index: 90; width: 280px; transform: translateX(-100%); transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1); }
   .sidebar.open { transform: none; }
   .topbar .hamb { display: grid; }

@@ -72,7 +72,9 @@ export async function runDunning(): Promise<DunningResult> {
 
       const link = inv.paymentLink || new URL("/cliente/faturas", env.appUrl).toString();
       const msg = `Olá, ${inv.customer.companyName}. Lembrete da sua mensalidade WaveOps (${w.label}). Pague aqui: ${link}`;
-      await sendEmail(inv.customer.email, "WaveOps · lembrete de cobrança", msg);
+      const mail = await sendEmail(inv.customer.email, "WaveOps · lembrete de cobrança", msg);
+      // O follow-up so e "enviado" se o e-mail saiu. Gravar "enviado" sem envio real
+      // fazia a regua parecer rodada e ninguem ser cobrado. [varredura 2026-08-10]
       const followup = await db.followup.create({
         data: {
           customerId: inv.customerId,
@@ -80,8 +82,9 @@ export async function runDunning(): Promise<DunningResult> {
           type: w.key as never,
           channel: "email",
           message: msg,
-          status: "enviado",
-          sentAt: new Date(),
+          status: mail.ok ? "enviado" : "falhou",
+          errorMessage: mail.ok ? null : (mail.error || "Falha no envio do e-mail").slice(0, 200),
+          sentAt: mail.ok ? new Date() : null,
         },
       });
       // Espelha o follow-up no Twenty (one-way, nao bloqueante). Garante a Empresa

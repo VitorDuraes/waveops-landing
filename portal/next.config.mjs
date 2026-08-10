@@ -24,8 +24,14 @@ const SECURITY_HEADERS = [
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // No MVP nao bloqueamos o build por lint. Erros de tipo continuam barrando.
-  eslint: { ignoreDuringBuilds: true },
+  // A raiz do workspace e a pasta do portal. Sem isto o Turbopack acha o
+  // package-lock.json da raiz do repo (da landing) e avisa a cada boot.
+  turbopack: { root: __dir },
+  // O Next 16.3 gera portal/AGENTS.md + portal/CLAUDE.md sozinho a cada boot. O
+  // projeto ja tem o proprio CLAUDE.md (raiz, importando .claude/waveops-base.md)
+  // e um teto declarado de contexto carregado por sessao. Instrucao que entra sem
+  // decisao escrita nao entra: desligado.
+  agentRules: false,
   async headers() {
     return [{ source: "/:path*", headers: SECURITY_HEADERS }];
   },

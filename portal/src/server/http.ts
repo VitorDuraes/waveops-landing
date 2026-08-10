@@ -14,9 +14,12 @@ export function err(message: string, status = 400, extra?: Record<string, unknow
 
 // Usuario sintetizado para o modo demo (AUTH_ENFORCED=false), escolhido conforme
 // o papel exigido pela rota. Permite que os dashboards busquem dados sem login.
-function demoUser(roles: Role[]): SessionUser {
+// `prefer` desempata as rotas que atendem os dois papeis (ex.: /api/invoices), onde
+// escolher "customer" por padrao entregava dado de cliente para a tela do admin.
+function demoUser(roles: Role[], prefer?: Role): SessionUser {
   const adminOnly = roles.length > 0 && roles.every((r) => r === "admin");
-  return adminOnly
+  const asAdmin = adminOnly || (prefer === "admin" && (roles.length === 0 || roles.includes("admin")));
+  return asAdmin
     ? { sub: "admin", role: "admin", email: env.adminEmail }
     : { sub: "c-001", role: "customer", email: env.demoCustomerEmail };
 }
@@ -24,12 +27,14 @@ function demoUser(roles: Role[]): SessionUser {
 // Guarda de rota: retorna o usuario da sessao OU uma NextResponse de erro.
 // Uso: const u = await guard(["admin"]); if (u instanceof NextResponse) return u;
 // Com AUTH_ENFORCED=false, sem sessao, devolve um usuario-padrao (demo) em vez de 401.
-export async function guard(roles: Role[] = []): Promise<NextResponse | SessionUser> {
+// `prefer` NAO tem efeito quando existe sessao: o papel da sessao sempre vence, entao
+// nao da para escalar privilegio passando um parametro na URL.
+export async function guard(roles: Role[] = [], prefer?: Role): Promise<NextResponse | SessionUser> {
   const user = await readSession();
   if (user) {
     if (roles.length && !roles.includes(user.role)) return err("Sem permissão", 403);
     return user;
   }
-  if (!env.authEnforced) return demoUser(roles);
+  if (!env.authEnforced) return demoUser(roles, prefer);
   return err("Não autenticado", 401);
 }

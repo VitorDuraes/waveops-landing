@@ -25,12 +25,19 @@ export async function onPaymentApplied(result: AppliedPayment, source: "webhook"
 
   // Fluxo: cliente acessa a ativacao, informa o e-mail, recebe o codigo e cria a senha.
   const link = new URL("/cliente/ativar", env.appUrl).toString();
-  await sendEmail(
+  const mail = await sendEmail(
     target.email,
     "Pagamento confirmado · ative sua conta WaveOps",
-    `Recebemos seu pagamento. Crie sua senha de acesso em: ${link}`
+    `<p>Recebemos seu pagamento.</p><p>Crie sua senha de acesso em: <a href="${link}">${link}</a></p>`
   );
-  log.info("ativacao.email_enviado", { customerId: result.customerId, email: target.email, source });
+  // O e-mail de ativacao e o unico caminho automatico do cliente entrar. Quando ele
+  // falha, o time precisa ver no log e no Discord para acionar o cliente na mao.
+  if (mail.ok) {
+    log.info("ativacao.email_enviado", { customerId: result.customerId, email: target.email, source });
+  } else {
+    log.error("ativacao.email_falhou", { customerId: result.customerId, email: target.email, erro: mail.error });
+    await notifyDiscord(`Falha ao enviar o e-mail de ativação de um cliente novo. Acione manualmente. Motivo: ${mail.error}`);
+  }
 
   const cust = await getRepo().getCustomerById(result.customerId);
   if (cust) {

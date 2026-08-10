@@ -192,7 +192,7 @@
                raiz-relativo aqui cairia no proprio host da landing (404 ou portal
                duplicado). Mesma regra para /termos e /privacidade (paginas do portal). -->
           <a href="https://portal.waveops.com.br/cliente/login" class="btn btn-ghost desktop">Já sou cliente</a>
-          <a href="#pacotes" class="btn btn-primary desktop">Assinar agora</a>
+          <a href="#pacotes" class="btn btn-primary desktop">Ver planos</a>
           <button
             class="icon-btn hamburger"
             id="hamburger"
@@ -234,7 +234,7 @@
       <a href="#pacotes">Pacotes</a>
       <a href="#publicos">Para quem é</a>
       <a href="#faq">FAQ</a>
-      <a href="#pacotes" class="btn btn-primary btn-block btn-lg">Assinar agora</a>
+      <a href="#pacotes" class="btn btn-primary btn-block btn-lg">Ver planos</a>
       <a href="https://portal.waveops.com.br/cliente/login" class="btn btn-ghost btn-block">Já sou cliente</a>
       <a href="#contato" class="btn btn-ghost btn-block">Falar com a gente</a>
     </div>
@@ -856,15 +856,17 @@
               <span class="eyebrow">Planos · sem fidelidade</span>
               <h3>A gente mantém rodando.</h3>
               <p class="lead">
-                Escolha pelo tamanho da operação. Sem fidelidade: você fica
-                porque funciona.
+                Comece pelo plano de entrada ou monte o seu. Acima do Operação, o
+                valor sai de um diagnóstico da sua operação: você paga pelo que roda,
+                não por um pacote de tabela. Sem fidelidade em nenhum deles.
               </p>
             </div>
 
             <div style="text-align: center">
-              <!-- Toggle Mensal / Anual (anual pré-selecionado).
-                   Anual: paga 10, leva 12. Valores anuais por mês são charm (terminam em 7)
-                   e equivalem a ~2 meses grátis sobre o mensal. -->
+              <!-- Toggle Mensal / Anual (anual pré-selecionado). Depois que os planos
+                   acima do Operação passaram a ser fechados por proposta, o toggle mexe
+                   só no card do plano de entrada (o único com data-m/data-a). O desconto
+                   anual continua valendo nas propostas, e a nota abaixo diz isso. -->
               <div
                 class="tabs billing"
                 role="group"
@@ -888,6 +890,7 @@
                 </button>
               </div>
               <p class="sr-only" role="status" aria-live="polite" id="billing-status"></p>
+              <p class="billing-note">Vale para o plano de entrada. No anual das propostas o desconto é o mesmo.</p>
             </div>
 
             <div class="plans four">
@@ -900,7 +903,7 @@
               >
                 <h4 class="pname">Operação</h4>
                 <div class="pprice">
-                  <span class="v">R$327</span><span class="u">/mês</span>
+                  <span class="from">a partir de </span><span class="v">R$327</span><span class="u">/mês</span>
                 </div>
                 <p class="bill-note" data-bill-note>cobrado R$3.924/ano</p>
                 <p class="plan-frame">Custa menos que manter essa tarefa no manual.</p>
@@ -935,17 +938,12 @@
               </article>
 
               <!-- Essencial -->
-              <article
-                class="plan reveal d1"
-                data-m="697"
-                data-a="577"
-                data-at="6.924"
-              >
+              <article class="plan reveal d1">
                 <h4 class="pname">Essencial</h4>
-                <div class="pprice">
-                  <span class="v">R$577</span><span class="u">/mês</span>
+                <div class="pprice quote">
+                  <span class="v">Sob proposta</span>
                 </div>
-                <p class="bill-note" data-bill-note>cobrado R$6.924/ano</p>
+                <p class="bill-note">Valor fechado no diagnóstico.</p>
                 <p class="plan-frame">Custa menos que manter essa tarefa no manual.</p>
                 <ul>
                   <li class="inherit">
@@ -966,22 +964,17 @@
                   </li>
                 </ul>
                 <p class="plan-note">Agente de IA a partir do Pro.</p>
-                <a href="https://portal.waveops.com.br/checkout?plano=essencial" class="btn btn-ghost btn-block">Assinar Essencial</a>
+                <a href="https://wa.me/5534991775784?text=Ol%C3%A1%21%20Vim%20pela%20landing%20da%20WaveOps%20e%20quero%20uma%20proposta%20do%20plano%20Essencial." target="_blank" rel="noopener" class="btn btn-ghost btn-block">Pedir proposta</a>
               </article>
 
               <!-- Pro (único com selo) -->
-              <article
-                class="plan featured reveal d2"
-                data-m="1.297"
-                data-a="1.067"
-                data-at="12.804"
-              >
+              <article class="plan featured reveal d2">
                 <span class="ribbon">Mais escolhido</span>
                 <h4 class="pname">Pro</h4>
-                <div class="pprice">
-                  <span class="v">R$1.067</span><span class="u">/mês</span>
+                <div class="pprice quote">
+                  <span class="v">Sob proposta</span>
                 </div>
-                <p class="bill-note" data-bill-note>cobrado R$12.804/ano</p>
+                <p class="bill-note">Valor fechado no diagnóstico.</p>
                 <p class="plan-frame">Custa menos que manter essa tarefa no manual.</p>
                 <ul>
                   <li class="inherit">
@@ -1009,21 +1002,16 @@
                     Revisão mensal de resultados
                   </li>
                 </ul>
-                <a href="https://portal.waveops.com.br/checkout?plano=pro" class="btn btn-primary btn-block">Assinar Pro</a>
+                <a href="https://wa.me/5534991775784?text=Ol%C3%A1%21%20Vim%20pela%20landing%20da%20WaveOps%20e%20quero%20uma%20proposta%20do%20plano%20Pro." target="_blank" rel="noopener" class="btn btn-primary btn-block">Pedir proposta</a>
               </article>
 
               <!-- Empresarial -->
-              <article
-                class="plan reveal d1"
-                data-m="2.497"
-                data-a="2.097"
-                data-at="25.164"
-              >
+              <article class="plan reveal d1">
                 <h4 class="pname">Empresarial</h4>
-                <div class="pprice">
-                  <span class="from">a partir de </span><span class="v">R$2.097</span><span class="u">/mês</span>
+                <div class="pprice quote">
+                  <span class="v">Sob proposta</span>
                 </div>
-                <p class="bill-note">Valor fechado na ativação.</p>
+                <p class="bill-note">Valor fechado no diagnóstico.</p>
                 <p class="plan-frame">Custa menos que manter essa tarefa no manual.</p>
                 <ul>
                   <li class="inherit">
@@ -1047,16 +1035,16 @@
                     Ponto de contato dedicado
                   </li>
                 </ul>
-                <a href="https://wa.me/5534991775784?text=Ol%C3%A1!%20Vim%20pela%20landing%20da%20WaveOps%20e%20quero%20falar%20sobre%20o%20plano%20Empresarial." target="_blank" rel="noopener" class="btn btn-ghost btn-block">Falar com a gente</a>
+                <a href="https://wa.me/5534991775784?text=Ol%C3%A1!%20Vim%20pela%20landing%20da%20WaveOps%20e%20quero%20falar%20sobre%20o%20plano%20Empresarial." target="_blank" rel="noopener" class="btn btn-ghost btn-block">Pedir proposta</a>
               </article>
             </div>
 
             <p class="plans-custom">
-              Operação maior que isso?
-              <a href="#contato">Falar com a gente</a>
+              Não sabe qual é o seu tamanho?
+              <a href="#contato">A gente descobre junto</a>
             </p>
             <p class="plans-fineprint">
-              Escopo, volume e prazos de cada plano são combinados na ativação.
+              Escopo, volume e valor são fechados no diagnóstico, antes de qualquer cobrança.
             </p>
 
             <!-- ===== Add-ons sob demanda (a la carte) ===== -->

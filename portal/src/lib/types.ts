@@ -47,6 +47,8 @@ export type Tone = "ok" | "warn" | "danger" | "info" | "paused" | "neutral" | "a
 export interface Plan {
   id: string;
   name: string;
+  // Valor de REFERENCIA do plano. Vira o padrao sugerido na proposta, nao o preco
+  // final: o valor que vale e o contratado, gravado no cliente (Customer.amount).
   monthly: number;
   annual: number;
   annualTotal: number;
@@ -54,6 +56,9 @@ export interface Plan {
   featured: boolean;
   desc: string;
   benefits: string[];
+  // Plano de entrada, assinavel sozinho pelo checkout publico. Os demais sao
+  // fechados por proposta: escopo e valor combinados no diagnostico.
+  selfService: boolean;
 }
 
 export interface Me {

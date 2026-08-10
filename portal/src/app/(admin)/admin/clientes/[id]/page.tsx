@@ -30,6 +30,8 @@ export default function ClienteDetalhePage() {
   const toast = useToast();
   const { resendInvoice, wa, setStatus, refund } = useAdminActions();
   const [tab, setTab] = useState<Tab>("resumo");
+  const [gerando, setGerando] = useState(false);
+  const [novaSenha, setNovaSenha] = useState<string | null>(null);
   const req = useApi<{
     customer: Customer;
     invoices: ClientInvoice[];
@@ -48,10 +50,43 @@ export default function ClienteDetalhePage() {
   const brief = req.data.brief;
   const tickets = req.data.tickets;
   const plan = plans.find((p) => c.plan.startsWith(p.name)) || plans[0];
-  const inAberto = c.status === "vencido" || c.status === "pendente" || c.status === "pausado";
   const openInv = invoices.find((i) => i.status === "em-aberto" || i.status === "vencida");
+  // Financeiro sai das faturas reais do cliente, nao de uma estimativa pelo status.
+  // Antes "Em aberto" mostrava R$ 0 com fatura em aberto na tela. [varredura 2026-08-10]
+  const totalPago = invoices.filter((i) => i.status === "paga").reduce((s, i) => s + i.amount, 0);
+  const totalAberto = invoices
+    .filter((i) => i.status === "em-aberto" || i.status === "vencida")
+    .reduce((s, i) => s + i.amount, 0);
   const resendOpen = () =>
     openInv ? resendInvoice(openInv.id) : toast("Nenhuma fatura em aberto para reenviar", "info");
+
+  // Acesso manual do cliente: a senha volta uma vez do servidor, so para o time
+  // repassar. Nao fica salva em lugar nenhum em texto puro.
+  async function gerarAcesso() {
+    if (gerando) return;
+    setGerando(true);
+    try {
+      const res = await fetch(`/api/customers/${c.id}/set-password`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Falha ao gerar o acesso");
+      setNovaSenha(data.password);
+      toast("Senha temporária gerada");
+    } catch (e) {
+      toast((e as Error).message, "info");
+    } finally {
+      setGerando(false);
+    }
+  }
+
+  async function copiarAcesso() {
+    if (!novaSenha) return;
+    try {
+      await navigator.clipboard.writeText(`Portal WaveOps\nLogin: ${c.email}\nSenha: ${novaSenha}`);
+      toast("Acesso copiado");
+    } catch {
+      toast("Não foi possível copiar. Copie manualmente.", "info");
+    }
+  }
 
   // O admin abre chamado em nome do cliente (o cliente nao abre pelo portal).
   async function openTicket(e: React.FormEvent<HTMLFormElement>) {
@@ -164,13 +199,13 @@ export default function ClienteDetalhePage() {
           <div className="card">
             <div className="section-title">Financeiro</div>
             <div className="flex between" style={{ padding: "8px 0" }}>
-              <span className="muted">Total pago (6 meses)</span>
-              <span className="cell-strong">{fmt(c.amount * 5)}</span>
+              <span className="muted">Total pago</span>
+              <span className="cell-strong">{fmt(totalPago)}</span>
             </div>
             <div className="flex between" style={{ padding: "8px 0" }}>
               <span className="muted">Em aberto</span>
-              <span className="cell-strong" style={{ color: c.status === "vencido" ? "var(--danger)" : "inherit" }}>
-                {inAberto ? fmt(c.amount) : "R$ 0"}
+              <span className="cell-strong" style={{ color: totalAberto > 0 ? "var(--danger)" : "inherit" }}>
+                {fmt(totalAberto)}
               </span>
             </div>
             <div className="flex between" style={{ padding: "8px 0" }}>
@@ -185,6 +220,38 @@ export default function ClienteDetalhePage() {
                 <Icon name="whatsapp" /> WhatsApp
               </button>
             </div>
+          </div>
+          <div className="card">
+            <div className="section-title">Acesso ao portal</div>
+            <p className="hint" style={{ marginTop: 0 }}>
+              Gere uma senha temporária quando o cliente não conseguir ativar pelo e-mail. Ela aparece uma única vez
+              aqui: copie e passe pelo WhatsApp. Peça para o cliente trocar depois em Minha conta.
+            </p>
+            <div className="flex gap8 wrap" style={{ marginTop: 14 }}>
+              <button className="btn btn-ghost btn-sm" onClick={gerarAcesso} disabled={gerando}>
+                <Icon name="lock" /> {gerando ? "Gerando..." : "Gerar senha de acesso"}
+              </button>
+              {novaSenha && (
+                <button className="btn btn-quiet btn-sm" onClick={copiarAcesso}>
+                  <Icon name="copy" /> Copiar acesso
+                </button>
+              )}
+            </div>
+            {novaSenha && (
+              <div className="alert ok" style={{ marginTop: 12 }}>
+                <Icon name="lock" />
+                <div className="body">
+                  <div className="at" style={{ fontSize: 13.5 }}>
+                    Senha temporária gerada
+                  </div>
+                  <div className="as">
+                    Login: {c.email}
+                    <br />
+                    Senha: <span className="mono">{novaSenha}</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -362,13 +429,13 @@ export default function ClienteDetalhePage() {
               O cliente fala com a gente pelo WhatsApp. Registre o chamado aqui para acompanhar internamente.
             </p>
             <div className="field">
-              <label>Título</label>
-              <input name="title" placeholder="Resuma o que o cliente precisa" required />
+              <label htmlFor="chamado-titulo">Título</label>
+              <input id="chamado-titulo" name="title" placeholder="Resuma o que o cliente precisa" required />
             </div>
             <div className="field-row">
               <div className="field">
-                <label>Tipo</label>
-                <select name="type">
+                <label htmlFor="chamado-tipo">Tipo</label>
+                <select id="chamado-tipo" name="type">
                   <option>Dúvida sobre plano</option>
                   <option>Dúvida sobre pagamento</option>
                   <option>Problema em automação</option>
@@ -378,8 +445,8 @@ export default function ClienteDetalhePage() {
                 </select>
               </div>
               <div className="field">
-                <label>Prioridade</label>
-                <select name="priority" defaultValue="Média">
+                <label htmlFor="chamado-prioridade">Prioridade</label>
+                <select id="chamado-prioridade" name="priority" defaultValue="Média">
                   <option>Baixa</option>
                   <option>Média</option>
                   <option>Alta</option>
@@ -387,8 +454,8 @@ export default function ClienteDetalhePage() {
               </div>
             </div>
             <div className="field">
-              <label>Descrição</label>
-              <textarea name="description" placeholder="Contexto do atendimento (ex.: resumo da conversa no WhatsApp)." />
+              <label htmlFor="chamado-descricao">Descrição</label>
+              <textarea id="chamado-descricao" name="description" placeholder="Contexto do atendimento (ex.: resumo da conversa no WhatsApp)." />
             </div>
             <button type="submit" className="btn btn-primary">
               Abrir chamado

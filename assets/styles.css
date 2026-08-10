@@ -559,6 +559,13 @@ section[id] { scroll-margin-top: 84px; }
 .plans-custom a:hover { border-bottom-color: var(--accent); }
 .plans-fineprint { text-align: center; margin-top: 10px; font-size: 12.5px; color: var(--dim); }
 .plan .pprice .from { font-family: var(--font-mono); font-size: 12px; color: var(--dim); align-self: center; }
+/* "Sob proposta" ocupa o lugar do numero. Menor que o preco (34px seria gritante) e
+   sem o /mes, porque nao ha valor a exibir ate o diagnostico. */
+.plan .pprice.quote .v { font-size: 22px; color: var(--text-2); letter-spacing: -0.01em; }
+/* Nota do toggle: o desconto anual vale no plano de entrada e nas propostas.
+   A margem de baixo abre espaco para o selo "Mais escolhido", que sobe alem do topo
+   do card do Pro e cobria a nota. */
+.billing-note { margin: 10px 0 22px; font-size: 12.5px; color: var(--dim); }
 .plan .plan-note { font-size: 12px; color: var(--dim); margin: -10px 0 14px; }
 
 /* ---- Add-ons sob demanda ---- */

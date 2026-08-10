@@ -1,15 +1,23 @@
 "use client";
 // 16 . Configuracoes (/admin/configuracoes)
+import { useState } from "react";
 import { Icon, type IconName } from "@/components/icons";
 import { initials } from "@/lib/format";
 import { useApi } from "@/lib/useApi";
 import { Loading, LoadError } from "@/components/ui/Loading";
+import { useToast } from "@/components/providers";
 
 interface Integration {
   key: IconName;
   name: string;
   desc: string;
   connected: boolean;
+}
+
+interface EmailTest {
+  ok: boolean;
+  to: string;
+  detail: string;
 }
 
 // Endereços da equipe (estrutura intencional). Discord substitui o Slack; o
@@ -22,6 +30,28 @@ const TEAM: [string, string, string][] = [
 
 export default function ConfiguracoesPage() {
   const req = useApi<Integration[]>("/api/integrations");
+  const toast = useToast();
+  const [testing, setTesting] = useState(false);
+  const [emailTest, setEmailTest] = useState<EmailTest | null>(null);
+
+  // Dispara um envio real e mostra o motivo da recusa. "Chave configurada" nao prova
+  // que o e-mail sai: o Resend recusa tudo enquanto o dominio nao estiver verificado.
+  async function testarEmail() {
+    if (testing) return;
+    setTesting(true);
+    setEmailTest(null);
+    try {
+      const res = await fetch("/api/integrations/test-email", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Falha ao testar o envio");
+      setEmailTest(data as EmailTest);
+      toast(data.ok ? "E-mail de teste enviado" : "O envio falhou. Veja o motivo abaixo.", data.ok ? "ok" : "info");
+    } catch (e) {
+      toast((e as Error).message, "info");
+    } finally {
+      setTesting(false);
+    }
+  }
 
   return (
     <>
@@ -45,12 +75,30 @@ export default function ConfiguracoesPage() {
                 <div className="t">{it.name}</div>
                 <div className="s">{it.desc}</div>
               </div>
+              {/* "Configurado" e nao "Conectado": o painel so sabe que a credencial
+                  existe. Prova de que funciona e o teste de envio abaixo. */}
               <span className={"badge " + (it.connected ? "ok" : "warn")}>
                 <span className="d" />
-                {it.connected ? "Conectado" : "Não configurado"}
+                {it.connected ? "Configurado" : "Não configurado"}
               </span>
             </div>
           ))}
+          <div className="flex gap8 wrap" style={{ marginTop: 16 }}>
+            <button className="btn btn-ghost btn-sm" onClick={testarEmail} disabled={testing}>
+              <Icon name="mail" /> {testing ? "Enviando..." : "Testar envio de e-mail"}
+            </button>
+          </div>
+          {emailTest && (
+            <div className={"alert " + (emailTest.ok ? "ok" : "danger")} style={{ marginTop: 12 }}>
+              <Icon name={emailTest.ok ? "check" : "alert"} />
+              <div className="body">
+                <div className="at" style={{ fontSize: 13.5 }}>
+                  {emailTest.ok ? "Envio funcionando" : "Envio bloqueado"}
+                </div>
+                <div className="as">{emailTest.detail}</div>
+              </div>
+            </div>
+          )}
         </div>
         <div>
           <div className="card" style={{ marginBottom: 18 }}>

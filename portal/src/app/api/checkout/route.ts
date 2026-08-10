@@ -28,6 +28,17 @@ export async function POST(req: NextRequest) {
 
   const plans = await getRepo().listPlans();
   const plan = plans.find((p) => p.id === planId) || plans[0];
+  // Só o plano de entrada tem valor fixo e é assinável sozinho. Nos demais o escopo
+  // e o valor saem do diagnóstico, então o checkout público não pode cobrar um preço
+  // de tabela por eles. A landing já manda esses planos para a conversa.
+  if (!plan.selfService) {
+    log.info("checkout.plano_sob_proposta", { plano: plan.id, email });
+    return err(
+      `O plano ${plan.name} é fechado por proposta. Fale com a gente para combinar escopo e valor.`,
+      409,
+      { reason: "plan_requires_quote", planId: plan.id, planName: plan.name }
+    );
+  }
   const gateway = getGateway();
 
   // A UI usa "card"; o gateway e o enum do banco usam "cartao". Normaliza aqui.

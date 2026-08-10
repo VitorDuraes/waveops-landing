@@ -21,6 +21,11 @@ export default function PlanosAdminPage() {
   // checkout). Sem cliente, os contadores ficam em zero, sem numero de exemplo.
   const countFor = (name: string) => customers.filter((c) => c.plan === name).length;
   const totalSubs = plans.reduce((a, p) => a + countFor(p.name), 0);
+  // Receita por plano = soma do valor COMBINADO de cada cliente, nao "preco de tabela
+  // x quantidade". Com o valor por proposta, multiplicar pela tabela mentiria o MRR.
+  const mrrFor = (name: string) =>
+    customers.filter((c) => c.plan === name).reduce((s, c) => s + (c.amount || 0), 0);
+  const mrrTotal = plans.reduce((a, p) => a + mrrFor(p.name), 0);
 
   return (
     <>
@@ -52,10 +57,19 @@ export default function PlanosAdminPage() {
                 {p.desc}
               </div>
               <div className="big-amount" style={{ fontSize: 28, margin: "14px 0 0" }}>
+                {p.selfService ? "" : "a partir de "}
                 {fmt(p.monthly)}
                 <span style={{ fontSize: 14, color: "var(--muted)", fontFamily: "var(--font-mono)" }}>/mês</span>
               </div>
-              <div className="cell-sub mono">ou {fmt(p.annual)}/mês no anual</div>
+              <div className="cell-sub mono">
+                {p.selfService ? `ou ${fmt(p.annual)}/mês no anual` : "referência para montar a proposta"}
+              </div>
+              <div style={{ marginTop: 12 }}>
+                <span className={"badge " + (p.selfService ? "ok" : "info")}>
+                  <span className="d" />
+                  {p.selfService ? "Assinatura direta" : "Sob proposta"}
+                </span>
+              </div>
               <div
                 className="flex between"
                 style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid var(--border)" }}
@@ -79,17 +93,25 @@ export default function PlanosAdminPage() {
       </div>
 
       <div className="card" style={{ marginTop: 22 }}>
-        <div className="section-title">Distribuição por plano</div>
+        <div className="section-title">
+          Receita por plano
+          <span className="muted" style={{ fontSize: 13, fontWeight: 400 }}>
+            {fmt(mrrTotal)}/mês no total
+          </span>
+        </div>
         {plans.map((p) => {
           const n = countFor(p.name);
-          const w = totalSubs ? Math.round((n / totalSubs) * 100) : 0;
+          const receita = mrrFor(p.name);
+          // Barra proporcional a RECEITA, nao a contagem: um cliente Empresarial pesa
+          // mais que tres do plano de entrada.
+          const w = mrrTotal ? Math.round((receita / mrrTotal) * 100) : 0;
           return (
             <div key={p.id}>
               <div className="flex between" style={{ padding: "6px 0" }}>
                 <span>
                   {p.name} · {n} cliente{n === 1 ? "" : "s"}
                 </span>
-                <span className="cell-strong">{fmt(p.monthly * n)}/mês</span>
+                <span className="cell-strong">{fmt(receita)}/mês</span>
               </div>
               <div className="bar" style={{ margin: "6px 0 12px" }}>
                 <i style={{ width: w + "%", ...(p.featured ? { background: "var(--accent-strong)" } : {}) }} />

@@ -44,14 +44,15 @@ export default function MeuPlanoPage() {
               <div className="dd">{m.plan}</div>
             </div>
             <div className="di">
-              <div className="dt">Valor</div>
+              {/* Valor CONTRATADO deste cliente, nao o de tabela do plano. */}
+              <div className="dt">Valor combinado</div>
               <div className="dd">
                 {fmt(m.amount)}/{m.cycle}
               </div>
             </div>
             <div className="di">
               <div className="dt">Ciclo</div>
-              <div className="dd">Mensal recorrente</div>
+              <div className="dd">Mensal, sem fidelidade</div>
             </div>
             <div className="di">
               <div className="dt">Início</div>
@@ -83,25 +84,19 @@ export default function MeuPlanoPage() {
         </div>
         <div className="card">
           <div className="section-title">O que está incluso</div>
-          <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 13 }}>
+          <ul className="feature-list">
             {plan.benefits.map((b, i) => (
-              <li className="flex gap12" key={i}>
-                <span style={{ color: "var(--accent-strong)", flexShrink: 0 }}>
-                  <Icon name="checkCircle" />
-                </span>
+              <li key={i}>
+                <Icon name="checkCircle" />
                 <span>{b}</span>
               </li>
             ))}
           </ul>
-          <div className="alert ok" style={{ marginTop: 20 }}>
-            <Icon name="flow" />
-            <div className="body">
-              <div className="at" style={{ fontSize: 13.5 }}>
-                2 de 2 automações ativas
-              </div>
-              <div className="as">Distribuição de leads + follow-up de cobrança rodando.</div>
-            </div>
-          </div>
+          {/* O contador "2 de 2 automações ativas" era exemplo cravado: o portal não
+              tem essa contagem hoje. Sai até existir a fonte real. */}
+          <p className="hint" style={{ marginTop: 18 }}>
+            Escopo e volume deste plano foram combinados na ativação. Para mudar, fale com a gente.
+          </p>
         </div>
       </div>
     </>

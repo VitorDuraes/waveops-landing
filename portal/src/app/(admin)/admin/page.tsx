@@ -11,7 +11,7 @@ import { Stagger, StaggerItem } from "@/components/motion";
 import { useApi } from "@/lib/useApi";
 import { useAdminActions } from "@/components/admin/useAdminActions";
 import type { Customer, Metrics } from "@/lib/types";
-import { fmt, initials } from "@/lib/format";
+import { fmt, initials, mesAno } from "@/lib/format";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -42,6 +42,8 @@ export default function AdminDashboard() {
   const vencidos = customers.filter((c) => c.status === "vencido").length;
   const pendentes = customers.filter((c) => c.status === "pendente" || c.status === "aguardando").length;
   const pausados = customers.filter((c) => c.status === "pausado").length;
+  // Mes corrente de verdade. Estava cravado "Junho 2026" no HTML. [varredura 2026-08-10]
+  const mesAtual = mesAno();
   const ticketMedio = M.active ? Math.round(M.mrr / M.active) : 0;
   const previsto = M.receivedMonth + M.expected;
   const pct = previsto > 0 ? Math.round((M.receivedMonth / previsto) * 100) : 0;
@@ -51,7 +53,7 @@ export default function AdminDashboard() {
       <div className="page-head">
         <div>
           <h2>Visão geral</h2>
-          <div className="lead">Junho 2026 · receita recorrente e cobrança em tempo real.</div>
+          <div className="lead">{mesAtual} · receita recorrente e cobrança em tempo real.</div>
         </div>
         <div className="flex gap8">
           <button className="btn btn-ghost" onClick={() => runDunning(reloadAll)}>
@@ -65,22 +67,22 @@ export default function AdminDashboard() {
 
       <Stagger className="grid cols-4">
         <StaggerItem>
-          <Metric icon="money" label="MRR atual" value={fmt(M.mrr)} />
+          <Metric icon="money" label="MRR atual" count={M.mrr} prefix="R$ " />
         </StaggerItem>
         <StaggerItem>
-          <Metric icon="users" label="Clientes ativos" value={M.active} />
+          <Metric icon="users" label="Clientes ativos" count={M.active} />
         </StaggerItem>
         <StaggerItem>
           <Metric
             icon="alert"
             label="Em atraso"
-            value={M.overdue}
-            delta={M.overdue > 0 ? "precisa de follow-up" : undefined}
-            tone="down"
+            count={M.overdue}
+            delta={M.overdue > 0 ? "precisa de follow-up" : "nenhum cliente em atraso"}
+            tone={M.overdue > 0 ? "down" : "up"}
           />
         </StaggerItem>
         <StaggerItem>
-          <Metric icon="pause" label="Pausados" value={M.paused} />
+          <Metric icon="pause" label="Pausados" count={M.paused} />
         </StaggerItem>
       </Stagger>
 

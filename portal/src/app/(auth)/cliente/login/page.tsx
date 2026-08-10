@@ -69,7 +69,10 @@ export default function ClienteLoginPage() {
         if (!res.ok) throw new Error(data.error || "Falha ao enviar o código");
         if (data.devCode) setCode(String(data.devCode).padStart(6, "0").slice(0, 6).split(""));
         setStep(2);
-        toast(data.devCode ? `Código (demo): ${data.devCode}` : "Código enviado para seu e-mail", "info");
+        // `sent: false` com devCode = o provedor recusou o envio (so acontece fora de
+        // producao). Avisa em vez de dizer "enviado" para um e-mail que nao saiu.
+        if (data.warning) toast(`Código (dev): ${data.devCode}. E-mail não saiu: ${data.warning}`, "info");
+        else toast(data.devCode ? `Código (demo): ${data.devCode}` : "Código enviado para seu e-mail", "info");
       } else {
         const res = await fetch("/api/auth/verify-code", {
           method: "POST",
@@ -115,8 +118,8 @@ export default function ClienteLoginPage() {
             <>
               <form onSubmit={onPassword}>
                 <div className="field">
-                  <label>E-mail ou CPF/CNPJ</label>
-                  <input
+                  <label htmlFor="login-e-mail-ou-cpf-cnpj">E-mail ou CPF/CNPJ</label>
+                  <input id="login-e-mail-ou-cpf-cnpj"
                     placeholder="voce@empresa.com.br ou seu documento"
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
@@ -124,8 +127,8 @@ export default function ClienteLoginPage() {
                   />
                 </div>
                 <div className="field">
-                  <label>Senha</label>
-                  <input
+                  <label htmlFor="login-senha">Senha</label>
+                  <input id="login-senha"
                     type="password"
                     placeholder="Sua senha"
                     value={password}
@@ -150,8 +153,8 @@ export default function ClienteLoginPage() {
             <>
               <form onSubmit={onOtp}>
                 <div className="field">
-                  <label>E-mail</label>
-                  <input
+                  <label htmlFor="login-e-mail">E-mail</label>
+                  <input id="login-e-mail"
                     type="email"
                     placeholder="voce@empresa.com.br"
                     value={email}

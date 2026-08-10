@@ -5,12 +5,23 @@
    metricas por mes, status vencido/pausado e "vence em X dias" fiquem coerentes
    independentemente de quando o seed roda. O cliente c-001 (Joao) recebe um
    historico completo de faturas (5 pagas + 1 em aberto). */
+import crypto from "node:crypto";
 import { PrismaClient } from "@prisma/client";
 import { plans, customers, followups, tickets, me } from "../src/lib/data";
 
 const db = new PrismaClient();
 
 const reais = (n: number) => Math.round(n * 100);
+
+// Senha de DESENVOLVIMENTO do cliente de demonstracao (c-001). Existe para dar um
+// login testavel com AUTH_ENFORCED=true, sem depender do e-mail. Vale so no banco
+// local semeado; produção nunca roda o seed. Mesmo formato de src/server/auth.ts.
+const SENHA_DEMO = "waveops-demo";
+function hashPassword(password: string): string {
+  const salt = crypto.randomBytes(16).toString("hex");
+  const hash = crypto.scryptSync(password, salt, 64).toString("hex");
+  return `scrypt$${salt}$${hash}`;
+}
 
 // --- ancoragem temporal (UTC, para casar com a formatacao das telas) ---
 const now = new Date();
@@ -148,6 +159,8 @@ async function main() {
       nextDueDate: nextDue,
       lastPaymentDate: lastPay,
       paymentMethod: method(c.method),
+      // So o cliente de demonstracao nasce com senha, para o login de dev funcionar.
+      ...(c.id === me.id ? { passwordHash: hashPassword(SENHA_DEMO) } : {}),
     };
     await db.customer.upsert({ where: { id: c.id }, update: data, create: { id: c.id, ...data } });
   }
@@ -205,6 +218,7 @@ async function main() {
   }
 
   console.log("Seed concluido.");
+  console.log(`Login de cliente para teste: ${me.email} / ${SENHA_DEMO}`);
 }
 
 main()

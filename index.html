@@ -15,7 +15,7 @@
          não deixa configurar. Ver docs/specs/SECURITY-n8n-hardening.md. -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' https://plausible.io; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self' https://plausible.io https://cowboyhouse.app.n8n.cloud; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+      content="default-src 'self'; script-src 'self' https://plausible.io https://connect.facebook.net; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://www.facebook.com; connect-src 'self' https://plausible.io https://cowboyhouse.app.n8n.cloud https://www.facebook.com; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
     />
 
     <title>WaveOps · Automação, Sistemas e IA para sua operação</title>
@@ -112,9 +112,22 @@
     ></script>
     <script src="assets/analytics.js"></script>
 
+    <!-- ===== Meta Pixel (Facebook/Instagram Ads). Bootstrap em arquivo proprio por causa da CSP. ===== -->
+    <script src="assets/meta-pixel.js"></script>
+
     <script src="assets/theme-store.js"></script>
   </head>
   <body>
+    <!-- Meta Pixel: fallback sem JavaScript -->
+    <noscript
+      ><img
+        height="1"
+        width="1"
+        style="display: none"
+        alt=""
+        src="https://www.facebook.com/tr?id=2432999197227570&amp;ev=PageView&amp;noscript=1"
+    /></noscript>
+
     <a class="skip-link" href="#top">Pular para o conteúdo</a>
     <div class="bg-deco" aria-hidden="true">
       <div class="grid"></div>

@@ -2,8 +2,9 @@ import Link from "next/link";
 import { BrandMark } from "@/components/icons";
 
 // Nav das paginas publicas do portal (hoje so o checkout).
-// Os planos ficam na landing (index.html, secao #pacotes). A marca volta para a
-// home do site; "Ver planos" leva a secao de planos da landing.
+// A landing nao tem mais grade de planos: escopo e valor saem do diagnostico.
+// A marca volta para a home do site; "Como funciona o preco" leva a secao de
+// precos da landing (o id #pacotes ficou, para nao quebrar link antigo).
 export function PublicNav() {
   return (
     <nav className="pub-nav">
@@ -15,7 +16,7 @@ export function PublicNav() {
       </Link>
       <div className="sp" />
       <Link className="btn btn-quiet" href="/#pacotes">
-        Ver planos
+        Como funciona o preço
       </Link>
       <Link className="btn btn-primary" href="/cliente/login">
         Já sou cliente

@@ -1,5 +1,6 @@
 // Grupo publico (/checkout): sem shell, a propria tela traz a nav.
-// Os planos ficam na landing (index.html, secao #pacotes), nao no portal.
+// A pagina publica de preco fica na landing (index.html), nao no portal. O
+// checkout aqui atende so o plano de entrada, por link direto.
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }

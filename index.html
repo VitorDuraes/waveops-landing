@@ -148,7 +148,7 @@
         <nav class="nav-links" aria-label="Principal">
           <a href="#servicos">Serviços</a>
           <a href="#como">Como funciona</a>
-          <a href="#pacotes">Pacotes</a>
+          <a href="#pacotes">Preços</a>
           <a href="#publicos">Para quem é</a>
           <a href="#faq">FAQ</a>
         </nav>
@@ -192,7 +192,7 @@
                raiz-relativo aqui cairia no proprio host da landing (404 ou portal
                duplicado). Mesma regra para /termos e /privacidade (paginas do portal). -->
           <a href="https://portal.waveops.com.br/cliente/login" class="btn btn-ghost desktop">Já sou cliente</a>
-          <a href="#pacotes" class="btn btn-primary desktop">Ver planos</a>
+          <a href="#contato" class="btn btn-primary desktop">Pedir diagnóstico</a>
           <button
             class="icon-btn hamburger"
             id="hamburger"
@@ -231,10 +231,10 @@
       </button>
       <a href="#servicos">Serviços</a>
       <a href="#como">Como funciona</a>
-      <a href="#pacotes">Pacotes</a>
+      <a href="#pacotes">Preços</a>
       <a href="#publicos">Para quem é</a>
       <a href="#faq">FAQ</a>
-      <a href="#pacotes" class="btn btn-primary btn-block btn-lg">Ver planos</a>
+      <a href="#contato" class="btn btn-primary btn-block btn-lg">Pedir diagnóstico</a>
       <a href="https://portal.waveops.com.br/cliente/login" class="btn btn-ghost btn-block">Já sou cliente</a>
       <a href="#contato" class="btn btn-ghost btn-block">Falar com a gente</a>
     </div>
@@ -770,7 +770,7 @@
 
 
       <!-- ============== PACOTES ============== -->
-      <section class="section" id="pacotes" data-screen-label="Pacotes">
+      <section class="section" id="pacotes" data-screen-label="Preços">
         <div class="wrap">
           <div class="section-head center reveal">
             <span class="eyebrow">Preços &amp; investimento</span>
@@ -844,218 +844,80 @@
               </p>
               <p class="roi-cap">por mês com o que ainda é manual.</p>
               <p class="roi-compare">
-                O plano de operação começa em
+                Manter isso no automático começa em
                 <strong class="roi-price">R$397/mês</strong>.
               </p>
             </div>
           </div>
 
           <!-- ===== (c) PLANO DE OPERAÇÃO: a gente mantém rodando ===== -->
-          <div class="plans-block reveal">
-            <div class="block-head">
-              <span class="eyebrow">Planos · sem fidelidade</span>
-              <h3>A gente mantém rodando.</h3>
+          <!-- ===== (c) COMO A GENTE COBRA: construir + manter =====
+               Os cards de plano sairam: escopo de automacao, site, dashboard e agente
+               nao cabem numa mesma escada de "N automacoes", e o cliente que queria so
+               um site nao se via em nenhum card. O valor sai do diagnostico. O piso
+               continua visivel em texto: ele qualifica o lead antes da conversa. -->
+          <div class="pricing-model reveal">
+            <div class="block-head center">
+              <span class="eyebrow">Como a gente cobra</span>
+              <h3>Duas linhas, sem pacote fechado.</h3>
               <p class="lead">
-                Comece pelo plano de entrada ou monte o seu. Acima do Operação, o
-                valor sai de um diagnóstico da sua operação: você paga pelo que roda,
-                não por um pacote de tabela. Sem fidelidade em nenhum deles.
+                Cada operação tem um tamanho. Em vez de encaixar a sua num pacote de
+                tabela, a gente separa o que é obra do que é manutenção.
               </p>
             </div>
 
-            <div style="text-align: center">
-              <!-- Toggle Mensal / Anual (anual pré-selecionado). Depois que os planos
-                   acima do Operação passaram a ser fechados por proposta, o toggle mexe
-                   só no card do plano de entrada (o único com data-m/data-a). O desconto
-                   anual continua valendo nas propostas, e a nota abaixo diz isso. -->
-              <div
-                class="tabs billing"
-                role="group"
-                aria-label="Forma de cobrança do plano"
-              >
-                <button
-                  class="tab"
-                  type="button"
-                  data-billing="mensal"
-                  aria-pressed="false"
-                >
-                  Mensal
-                </button>
-                <button
-                  class="tab active"
-                  type="button"
-                  data-billing="anual"
-                  aria-pressed="true"
-                >
-                  Anual <span class="save">até 2 meses grátis</span>
-                </button>
-              </div>
-              <p class="sr-only" role="status" aria-live="polite" id="billing-status"></p>
-              <p class="billing-note">Vale para o plano de entrada. No anual das propostas o desconto é o mesmo.</p>
-            </div>
-
-            <div class="plans four">
-              <!-- Operação (piso) -->
-              <article
-                class="plan reveal"
-                data-m="397"
-                data-a="327"
-                data-at="3.924"
-              >
-                <h4 class="pname">Operação</h4>
-                <div class="pprice">
-                  <span class="from">a partir de </span><span class="v">R$327</span><span class="u">/mês</span>
-                </div>
-                <p class="bill-note" data-bill-note>cobrado R$3.924/ano</p>
-                <p class="plan-frame">Custa menos que manter essa tarefa no manual.</p>
+            <div class="model-grid">
+              <article class="model-card">
+                <span class="model-tag">Uma vez</span>
+                <h4>Construir</h4>
+                <p class="model-lead">
+                  A automação, o site, o dashboard ou o agente que você precisa. Valor
+                  fechado por escopo, antes de começar.
+                </p>
                 <ul>
-                  <li class="hot">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Até 2 automações ativas
-                  </li>
-                  <li>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    1 número de WhatsApp incluso
-                  </li>
-                  <li>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Infra hospedada e gerida pela WaveOps
-                  </li>
-                  <li>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Monitoramento dos fluxos
-                  </li>
-                  <li>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Conserto das integrações ativas
-                  </li>
-                  <li>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Relatório mensal de valor em R$
-                  </li>
+                  <li>Escopo escrito e aprovado por você</li>
+                  <li>Preço fechado, sem hora extra na fatura</li>
+                  <li>Você aprova antes de qualquer linha de código</li>
+                  <li>R$ 0 quando é só assumir o que já existe</li>
                 </ul>
-                <p class="plan-note">Agente de IA a partir do Pro.</p>
-                <a href="https://portal.waveops.com.br/checkout?plano=operacao" class="btn btn-ghost btn-block">Assinar Operação</a>
+                <p class="model-floor">A partir de <strong>R$697</strong>, uma vez, conforme o escopo.</p>
               </article>
 
-              <!-- Essencial -->
-              <article class="plan reveal d1">
-                <h4 class="pname">Essencial</h4>
-                <div class="pprice quote">
-                  <span class="v">Sob proposta</span>
-                </div>
-                <p class="bill-note">Valor fechado no diagnóstico.</p>
-                <p class="plan-frame">Custa menos que manter essa tarefa no manual.</p>
+              <article class="model-card feat">
+                <span class="model-tag">Todo mês</span>
+                <h4>Manter no ar</h4>
+                <p class="model-lead">
+                  O que a gente construiu fica hospedado, monitorado, consertado e
+                  evoluindo. É aqui que a assinatura se paga.
+                </p>
                 <ul>
-                  <li class="inherit">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Tudo do Operação
-                  </li>
-                  <li class="hot">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Até 5 automações ativas
-                  </li>
-                  <li class="hot">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    1 evolução por mês
-                  </li>
-                  <li>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Suporte prioritário
-                  </li>
+                  <li>Infra e credenciais por nossa conta</li>
+                  <li>A gente vê o fluxo parar antes de você</li>
+                  <li>Correção das integrações inclusa</li>
+                  <li>Sem fidelidade: você fica porque funciona</li>
                 </ul>
-                <p class="plan-note">Agente de IA a partir do Pro.</p>
-                <a href="https://wa.me/5534991775784?text=Ol%C3%A1%21%20Vim%20pela%20landing%20da%20WaveOps%20e%20quero%20uma%20proposta%20do%20plano%20Essencial." target="_blank" rel="noopener" class="btn btn-ghost btn-block">Pedir proposta</a>
-              </article>
-
-              <!-- Pro (único com selo) -->
-              <article class="plan featured reveal d2">
-                <span class="ribbon">Mais escolhido</span>
-                <h4 class="pname">Pro</h4>
-                <div class="pprice quote">
-                  <span class="v">Sob proposta</span>
-                </div>
-                <p class="bill-note">Valor fechado no diagnóstico.</p>
-                <p class="plan-frame">Custa menos que manter essa tarefa no manual.</p>
-                <ul>
-                  <li class="inherit">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Tudo do Essencial
-                  </li>
-                  <li class="hot">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Até 12 automações ativas
-                  </li>
-                  <li class="hot">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    1 sistema, dashboard ou agente de IA hospedado
-                  </li>
-                  <li class="hot">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Agente de IA com LLM econômico incluso (até 10 mil chamadas por mês)
-                  </li>
-                  <li class="hot">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Evolução contínua do que está no ar
-                  </li>
-                  <li class="hot">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Revisão mensal de resultados
-                  </li>
-                </ul>
-                <a href="https://wa.me/5534991775784?text=Ol%C3%A1%21%20Vim%20pela%20landing%20da%20WaveOps%20e%20quero%20uma%20proposta%20do%20plano%20Pro." target="_blank" rel="noopener" class="btn btn-primary btn-block">Pedir proposta</a>
-              </article>
-
-              <!-- Empresarial -->
-              <article class="plan reveal d1">
-                <h4 class="pname">Empresarial</h4>
-                <div class="pprice quote">
-                  <span class="v">Sob proposta</span>
-                </div>
-                <p class="bill-note">Valor fechado no diagnóstico.</p>
-                <p class="plan-frame">Custa menos que manter essa tarefa no manual.</p>
-                <ul>
-                  <li class="inherit">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Tudo do Pro
-                  </li>
-                  <li class="hot">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Automações, sistemas e agentes dimensionados com você
-                  </li>
-                  <li class="hot">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Múltiplos números de WhatsApp como canal dedicado
-                  </li>
-                  <li class="hot">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    SLA de resposta
-                  </li>
-                  <li class="hot">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Ponto de contato dedicado
-                  </li>
-                </ul>
-                <a href="https://wa.me/5534991775784?text=Ol%C3%A1!%20Vim%20pela%20landing%20da%20WaveOps%20e%20quero%20falar%20sobre%20o%20plano%20Empresarial." target="_blank" rel="noopener" class="btn btn-ghost btn-block">Pedir proposta</a>
+                <p class="model-floor">A partir de <strong>R$397/mês</strong>, dimensionado no diagnóstico.</p>
               </article>
             </div>
 
-            <p class="plans-custom">
-              Não sabe qual é o seu tamanho?
-              <a href="#contato">A gente descobre junto</a>
-            </p>
-            <p class="plans-fineprint">
-              Escopo, volume e valor são fechados no diagnóstico, antes de qualquer cobrança.
-            </p>
+            <div class="model-cta">
+              <a href="#contato" class="btn btn-primary btn-lg">Pedir diagnóstico</a>
+              <p class="model-note">
+                Conversa de 30 minutos, sem compromisso. Você sai com o escopo e o valor
+                por escrito, antes de qualquer cobrança.
+              </p>
+            </div>
+          </div>
 
             <!-- ===== Add-ons sob demanda (a la carte) ===== -->
             <div class="addons reveal">
               <div class="block-head center">
                 <span class="eyebrow">Sob demanda</span>
-                <h3>Cresceu além do plano? Add-on transparente.</h3>
+                <h3>O que pesa na conta, com preço na mesa.</h3>
                 <p class="lead">
-                  Cada plano já inclui 1 número de WhatsApp. O que cresce com o seu
-                  uso fica em linha separada: você só paga pelo que usar, e a gente
-                  avisa antes.
+                  Sua assinatura já inclui 1 número de WhatsApp. O que cresce com o
+                  seu uso entra em linha separada, com o preço aqui desde antes da
+                  proposta: você só paga pelo que usar, e a gente avisa antes.
                 </p>
               </div>
               <ul class="addons-grid">
@@ -1073,11 +935,11 @@
                 </li>
                 <li>
                   <strong>Automação adicional</strong>
-                  <span>R$110 a R$120/mês por automação além do limite do plano.</span>
+                  <span>R$110 a R$120/mês por automação, a partir da segunda.</span>
                 </li>
                 <li>
-                  <strong>Sistema ou agente adicional</strong>
-                  <span>A partir de R$497/mês por unidade, além do que já vem no Pro.</span>
+                  <strong>Site, sistema ou agente</strong>
+                  <span>A partir de R$497/mês por unidade mantida no ar, além da primeira.</span>
                 </li>
                 <li>
                   <strong>Implantação sob medida</strong>
@@ -1086,9 +948,9 @@
               </ul>
               <p class="addons-note">
                 Nada é ilimitado, e isso é proposital. Medimos o seu uso pelo padrão
-                normal dos últimos 30 dias. Se passar do plano de forma constante, a
-                gente mostra o número e propõe o add-on ou o upgrade antes de cobrar.
-                Sem surpresa na fatura.
+                normal dos últimos 30 dias. Se passar do combinado de forma constante,
+                a gente mostra o número e propõe o ajuste antes de cobrar. Sem surpresa
+                na fatura.
               </p>
             </div>
           </div>
@@ -1097,7 +959,7 @@
           <div class="included reveal">
             <div class="block-head center">
               <span class="eyebrow">Recorrência que se paga</span>
-              <h3>O que entra no seu plano todo mês.</h3>
+              <h3>O que entra na assinatura todo mês.</h3>
             </div>
             <ul class="included-list">
               <li class="included-item">
@@ -1133,7 +995,7 @@
                 </span>
                 <div>
                   <h4>Evolução contínua</h4>
-                  <p>Sua operação não congela na entrega. A gente ajusta o que já está no ar dentro do seu plano. Projetos novos entram como uma evolução à parte.</p>
+                  <p>Sua operação não congela na entrega. A gente ajusta o que já está no ar dentro da assinatura. Projetos novos entram como uma evolução à parte.</p>
                 </div>
               </li>
               <li class="included-item">
@@ -1412,9 +1274,9 @@
               </button>
               <div class="faq-a">
                 <p>
-                  Sim. Todo projeto entra com um plano de operação que mantém,
-                  monitora e evolui o que foi construído, desde o plano Operação
-                  até parcerias maiores.
+                  Sim. Todo projeto entra com uma assinatura que mantém, monitora e
+                  evolui o que foi construído. O tamanho dela vem do que ficou no ar,
+                  não de um pacote de tabela.
                 </p>
               </div>
             </div>
@@ -1435,8 +1297,8 @@
                 <p>
                   Numa conversa rápida. Você conta sobre a sua operação e a
                   gente identifica onde dá para ganhar tempo e dinheiro
-                  primeiro, sem custo e sem compromisso. Daí orçamos a
-                  implementação e ela já entra com o plano de operação.
+                  primeiro, sem custo e sem compromisso. Daí orçamos a construção e
+                  ela já sai com o valor da assinatura que mantém aquilo no ar.
                 </p>
               </div>
             </div>
@@ -1672,7 +1534,7 @@
             <h5>Navegar</h5>
             <a href="#servicos">Serviços</a>
             <a href="#como">Como funciona</a>
-            <a href="#pacotes">Pacotes</a>
+            <a href="#pacotes">Preços</a>
             <a href="#publicos">Para quem é</a>
             <a href="#faq">FAQ</a>
           </div>

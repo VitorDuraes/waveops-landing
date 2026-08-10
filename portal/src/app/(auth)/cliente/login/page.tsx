@@ -175,7 +175,7 @@ export default function ClienteLoginPage() {
               {noCustomer && (
                 <div className="auth-alt" style={{ marginTop: 12 }}>
                   Não encontramos uma assinatura ativa para este e-mail.{" "}
-                  <Link href="/#pacotes">Ver planos</Link> ou <Link href="/cliente/ativar">Ativar conta</Link>.
+                  <Link href="/#contato">Pedir diagnóstico</Link> ou <Link href="/cliente/ativar">Ativar conta</Link>.
                 </div>
               )}
               {step === 2 && (
@@ -203,7 +203,7 @@ export default function ClienteLoginPage() {
           )}
 
           <div className="auth-alt" style={{ marginTop: 14 }}>
-            Ainda não é cliente? <Link href="/#pacotes">Ver planos</Link>
+            Ainda não é cliente? <Link href="/#contato">Pedir diagnóstico</Link>
           </div>
           <div className="auth-alt" style={{ marginTop: 8 }}>
             É da equipe WaveOps? <Link href="/admin/login">Acessar painel admin</Link>

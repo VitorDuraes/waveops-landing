@@ -71,7 +71,7 @@ function CheckoutInner() {
       <PublicNav />
       <div className="pub-wrap" style={{ maxWidth: 1000 }}>
         <Link className="btn btn-quiet btn-sm" href="/#pacotes" style={{ marginBottom: 18 }}>
-          <Icon name="chevronLeft" /> Voltar aos planos
+          <Icon name="chevronLeft" /> Voltar ao site
         </Link>
         {sobProposta ? (
           <div style={{ maxWidth: 560 }}>
@@ -100,9 +100,9 @@ function CheckoutInner() {
                 <Icon name="whatsapp" /> Pedir proposta no WhatsApp
               </a>
               <p className="hint center" style={{ marginTop: 12 }}>
-                Prefere começar sozinho?{" "}
-                <Link href="/checkout?plano=operacao" style={{ color: "var(--accent-strong)" }}>
-                  Assine o plano de entrada
+                Prefere ver como a gente cobra antes?{" "}
+                <Link href="/#pacotes" style={{ color: "var(--accent-strong)" }}>
+                  Construir e manter
                 </Link>
                 .
               </p>

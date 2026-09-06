@@ -14,6 +14,7 @@ Abra `preview.html` para ver tudo renderizado.
 | `waveops-symbol.svg` | Símbolo roxo, fundo transparente. Para fundo claro. |
 | `waveops-symbol-mono.svg` | Uma cor via `currentColor` (herda o `color` do CSS). |
 | `waveops-lockup.svg` | Símbolo + nome "WaveOps". |
+| `waveops-badge-3d.webp` | Base 3D violeta frontal, transparente, sem pinos metálicos ou soquetes. |
 | `png/waveops-icon.png` | 1000×1000, fundo transparente fora do squircle. |
 | `png/waveops-icon-512.png` | 512×512 — ideal para app icon / redes. |
 | `png/waveops-symbol.png` | Símbolo roxo, transparente, 1000×1000. |
@@ -24,7 +25,18 @@ Abra `preview.html` para ver tudo renderizado.
 <link rel="icon" type="image/svg+xml" href="logo/waveops-icon.svg" />
 ```
 
-## Símbolo no header (inline, sem dependência de fonte)
+## Apresentação 3D no site
+
+O cabeçalho e o rodapé usam `assets/brand/waveops-badge-3d.webp`. O símbolo Sine
+Nodes é aplicado por cima da imagem como SVG no HTML, com a geometria canônica
+exata, centralizado. A base renderizada é frontal, tem bordas lisas e não tem
+pinos metálicos nem soquetes laterais.
+
+Esta é uma variante de apresentação da marca. A geometria canônica e os arquivos
+vetoriais do kit continuam sendo a referência. Este badge é o único elemento 3D
+da página.
+
+## Símbolo vetorial (exemplo inline, sem dependência de fonte)
 ```html
 <a href="#top" style="display:inline-flex;align-items:center;gap:11px;font-family:'Space Grotesk',sans-serif;font-size:22px;letter-spacing:-.02em;text-decoration:none">
   <svg width="34" height="34" viewBox="0 0 100 100" fill="none">

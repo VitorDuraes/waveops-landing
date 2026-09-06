@@ -1,7 +1,8 @@
 # WaveOps — Landing Page
 
-Landing page institucional (dark / startup), em PT-BR, com tema claro/escuro,
-canvas de fluxo animado, validação de formulário de lead e painel de Tweaks.
+Landing page institucional em PT-BR, com tema escuro inicial, opção de tema claro,
+painel de workflow em HTML e SVG, diagramas animados e formulário de lead. A seção comercial
+apresenta entregas sob medida; os valores são conversados pelo WhatsApp.
 
 Não tem build step. A página de produção é HTML + CSS + JS puro, sem nenhuma
 dependência em runtime. O painel de Tweaks (React via CDN) é uma ferramenta só de
@@ -15,7 +16,15 @@ desenvolvimento e fica em `dev/`, fora da página. Para rodar: abra o
 ```
 index.html                → a página (markup de todas as seções)
 assets/
-  styles.css              → todo o estilo + tokens de tema (variáveis CSS)
+  styles.css              → estilos base e componentes existentes
+  cinematic.css           → direção visual, tokens, diagramas e responsividade
+  brand/waveops-badge-3d.webp
+                          → base 3D frontal, transparente, sem pinos laterais.
+                            Usada na logo do topo e do rodapé. Único 3D da página
+  workflow.css            → painel 3D alternativo. Está no repo, mas a página NÃO carrega
+  scene.js                → controlador do painel 3D. Também não carregado
+  workflow-core-v1.webp   → núcleo do painel 3D. Só serve com workflow.css ativo
+  motion.js               → pausa global, movimento reduzido e progresso de leitura
   main.js                 → interações: nav, menu mobile, FAQ, abas de preço,
                             reveal no scroll, scrollspy e o FORMULÁRIO DE LEAD
   theme-store.js          → fonte única de verdade do tema (claro/escuro, cor,
@@ -23,8 +32,26 @@ assets/
 dev/                      → só desenvolvimento, NÃO carregado em produção
   tweaks-app.jsx          → painel de Tweaks (liga-se ao theme-store)
   tweaks-panel.jsx        → componentes do painel (não precisa editar)
+  verify-design.js        → verificações de UI para executar no navegador local
+  verify-workflow.cjs     → controlador de movimento, com DOM simulado
 uploads/                  → PDFs do briefing (referência local, fora do git)
 ```
+
+O hero apresenta um painel compacto com quatro cards e um núcleo 3D sobre uma grade
+pontilhada. O núcleo central, "IA qualifica", conecta as entradas de WhatsApp e site
+às saídas de CRM e follow-up por trajetos SVG violetas animados. O painel permanece
+frontal, com perspectiva CSS e faces laterais nos cards e na moldura. A profundidade
+e o movimento ficam nos elementos, que flutuam em ciclos independentes de 19 a 31 segundos, e nos pulsos das
+conexões SVG.
+
+Os scripts finais carregam na ordem `motion.js`, `main.js` e `scene.js`.
+As animações respeitam `prefers-reduced-motion` e a pausa global, e param quando
+o painel sai da tela ou a aba fica oculta. O HTML e o SVG permanecem legíveis sem
+JavaScript. A preferência de tema continua no `FlowTheme`.
+
+`portal/public/landing.html` e `portal/public/assets/` são cópias geradas.
+Depois de editar a raiz, execute `node portal/scripts/sync-landing.mjs` para
+atualizá-las. O portal também executa essa sincronização em `predev/prebuild`.
 
 ---
 

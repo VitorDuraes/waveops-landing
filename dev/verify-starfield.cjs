@@ -33,13 +33,13 @@ console.log('\nsinal de scroll');
 (async () => {
   const { createScrollSignal } = await import('../assets/scroll-signal.mjs');
 
-  check('em repouso a energia e zero', () => {
+  check('em repouso a energia é zero', () => {
     const s = createScrollSignal({ getY: () => 0 });
     s.sample(); s.sample();
     assert.strictEqual(s.energy, 0);
   });
 
-  check('scroll para baixo gera energia positiva e direcao 1', () => {
+  check('scroll para baixo gera energia positiva e direção 1', () => {
     let y = 0;
     const s = createScrollSignal({ getY: () => y });
     s.sample();
@@ -48,7 +48,7 @@ console.log('\nsinal de scroll');
     assert.strictEqual(s.direction, 1);
   });
 
-  check('scroll para cima gera direcao -1', () => {
+  check('scroll para cima gera direção -1', () => {
     let y = 400;
     const s = createScrollSignal({ getY: () => y });
     s.sample();
@@ -65,7 +65,7 @@ console.log('\nsinal de scroll');
     assert.ok(s.energy <= 1, 'energia passou de 1: ' + s.energy);
   });
 
-  check('energia decai ate zerar quando o scroll para', () => {
+  check('energia decai até zerar quando o scroll para', () => {
     let y = 0;
     const s = createScrollSignal({ getY: () => y });
     s.sample();

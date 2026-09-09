@@ -107,7 +107,7 @@ def main():
         stub = fetch(f"https://esm.sh/{spec}?{QUERY}")
         paths = re.findall(r'"(/[^"]+\.m?js)"', stub)
         if not paths:
-            sys.exit(f"esm.sh nao devolveu caminho de bundle para {spec}")
+            sys.exit(f"esm.sh não devolveu caminho de bundle para {spec}")
         code = fetch("https://esm.sh" + paths[-1])
         for pattern, replacement in REWRITES:
             code = pattern.sub(replacement, code)
@@ -134,10 +134,12 @@ Expected: cinco linhas com nome e tamanho, terminando em `OK: assets/vendor rege
 Run:
 ```bash
 grep -c 'react\.mjs' assets/vendor/react-dom-client.mjs assets/vendor/framer-motion.mjs
-grep -rn 'esm\.sh\|/react@\|/react-dom@' assets/vendor/ | grep -v README
+grep -rnE 'from\s*"(/|https?:)' assets/vendor/*.mjs
 ```
 
-Expected: o primeiro comando mostra pelo menos 1 ocorrência em cada arquivo. O segundo não retorna nada. Qualquer saída no segundo comando significa que sobrou referência ao CDN.
+Expected: o primeiro comando mostra pelo menos 1 ocorrência em cada arquivo. O segundo não retorna nada. Qualquer saída no segundo comando significa que sobrou import apontando para fora.
+
+O segundo comando casa só com declaração de import de verdade. Um `grep` mais amplo por `esm.sh` dá falso positivo: o esm.sh grava um comentário de proveniência (`/* esm.sh - react@19.2.8 */`) na primeira linha de cada bundle, que é texto inerte e não busca nada pela rede.
 
 - [ ] **Step 4: Escrever o README de proveniência**
 
@@ -209,22 +211,22 @@ const check = (nome, fn) => {
 };
 
 console.log('shim do pacote framer');
-check('exporta os 4 simbolos usados pelos componentes', () => {
-  // Validacao por texto: check() e sincrono, entao um callback async faria o
+check('exporta os 4 símbolos usados pelos componentes', () => {
+  // Validação por texto: check() é síncrono, então um callback async faria o
   // try/catch dele nunca ver a falha.
   const src = read('assets/vendor/framer-shim.mjs');
   for (const s of ['addPropertyControls', 'ControlType', 'RenderTarget', 'useIsStaticRenderer']) {
     assert.ok(new RegExp('export[^\\n]*\\b' + s + '\\b').test(src), 'falta export de ' + s);
   }
 });
-check('RenderTarget.current nao devolve o valor de canvas', () => {
+check('RenderTarget.current não devolve o valor de canvas', () => {
   const src = read('assets/vendor/framer-shim.mjs');
   assert.ok(/current\s*\(\s*\)/.test(src), 'RenderTarget precisa do metodo current()');
   assert.ok(!/current\s*\(\s*\)\s*\{\s*return\s*['"]CANVAS/.test(src),
-    'current() nao pode devolver CANVAS, senao o componente renderiza o placeholder estatico');
+    'current() não pode devolver CANVAS, senão o componente renderiza o placeholder estático');
 });
 
-console.log('\n' + passed + ' verificacoes passaram');
+console.log('\n' + passed + ' verificações passaram');
 ```
 
 - [ ] **Step 2: Rodar e confirmar que falha**
@@ -297,13 +299,13 @@ export function useIsStaticRenderer() {
 
 Run: `node dev/verify-starfield.cjs && node --check assets/vendor/framer-shim.mjs`
 
-Expected: `2 verificacoes passaram` e nenhuma saída do `node --check`.
+Expected: `2 verificações passaram` e nenhuma saída do `node --check`.
 
 - [ ] **Step 5: Commit**
 
 ```bash
 git add assets/vendor/framer-shim.mjs dev/verify-starfield.cjs
-git commit -m "feat(landing): shim local do pacote framer com os 4 simbolos usados"
+git commit -m "feat(landing): shim local do pacote framer com os 4 símbolos usados"
 ```
 
 ---
@@ -446,14 +448,14 @@ console.log('\nsinal de scroll');
     s.sample();
     y = 400; s.sample();
     for (let i = 0; i < 200; i++) s.sample();
-    assert.ok(s.energy < 0.01, 'energia nao decaiu: ' + s.energy);
+    assert.ok(s.energy < 0.01, 'energia não decaiu: ' + s.energy);
   });
 
-  console.log('\n' + passed + ' verificacoes passaram');
+  console.log('\n' + passed + ' verificações passaram');
 })();
 ```
 
-Remover a linha `console.log('\n' + passed + ' verificacoes passaram');` que existia no fim da Task 2, para o total sair uma vez só.
+Remover a linha `console.log('\n' + passed + ' verificações passaram');` que existia no fim da Task 2, para o total sair uma vez só.
 
 - [ ] **Step 2: Rodar e confirmar que falha**
 
@@ -514,7 +516,7 @@ export function createScrollSignal({ getY, decay = 0.88, scale = 0.045 }) {
 
 Run: `node dev/verify-starfield.cjs && node --check assets/scroll-signal.mjs`
 
-Expected: `7 verificacoes passaram`, sem nenhuma linha `FAIL`.
+Expected: `7 verificações passaram`, sem nenhuma linha `FAIL`.
 
 - [ ] **Step 5: Commit**
 
@@ -610,7 +612,7 @@ check('nenhum specifier bare sobrou', () => {
     .filter((s) => !s.startsWith('.') && !s.startsWith('/'));
   assert.deepStrictEqual(bare, [], 'sobrou specifier bare: ' + bare.join(', '));
 });
-check('canvas e transparente, nao pinta fundo opaco', () => {
+check('canvas é transparente, não pinta fundo opaco', () => {
   const src = read('assets/starfield.mjs');
   assert.ok(!/fillRect\(0,0,s\.W,s\.H\)/.test(src), 'ainda pinta fundo opaco com fillRect');
   assert.ok(/clearRect\(0,0,s\.W,s\.H\)/.test(src), 'falta o clearRect');
@@ -620,15 +622,15 @@ check('respeita a pausa de movimento', () => {
 });
 check('consome o sinal de scroll', () => {
   const src = read('assets/starfield.mjs');
-  assert.ok(/createScrollSignal/.test(src), 'nao importa createScrollSignal');
-  assert.ok(/scroll\.sample\(\)/.test(src), 'nao amostra o scroll no loop');
+  assert.ok(/createScrollSignal/.test(src), 'não importa createScrollSignal');
+  assert.ok(/scroll\.sample\(\)/.test(src), 'não amostra o scroll no loop');
 });
 check('mantem o perfil de performance por device', () => {
   const src = read('assets/starfield.mjs');
   assert.ok(/getDeviceProfile/.test(src), 'o porte removeu o getDeviceProfile');
   assert.ok(/1500/.test(src), 'perdeu o teto de 1500 pontos do mobile');
   assert.ok(/quantAlpha/.test(src), 'perdeu a quantizacao de alpha, que segura o custo por frame');
-  assert.ok(/spatialGrid/.test(src), 'perdeu o hash espacial da interacao de mouse');
+  assert.ok(/spatialGrid/.test(src), 'perdeu o hash espacial da interação de mouse');
 });
 ```
 
@@ -636,7 +638,7 @@ check('mantem o perfil de performance por device', () => {
 
 Run: `node dev/verify-starfield.cjs && node --check assets/starfield.mjs`
 
-Expected: `12 verificacoes passaram`, sem `FAIL`.
+Expected: `12 verificações passaram`, sem `FAIL`.
 
 - [ ] **Step 6: Commit**
 

@@ -12,10 +12,22 @@
   const MIN_FILL_MS = 1200;
   const fillTimeMs = () => Date.now() - pageLoadedAt;
 
-  /* ---- Analytics helper (SPEC-02). No-op até o Plausible carregar no <head>. ---- */
+  /* ---- Analytics helper (SPEC-02). No-op até o Plausible carregar no <head>. ----
+     O mesmo evento vai para o Plausible (métrica interna) e para o Meta Pixel
+     (otimização de campanha). Só os eventos mapeados aqui viram conversão no Meta:
+     evento sem mapeamento segue apenas para o Plausible. Ver assets/meta-pixel.js. */
+  const FB_EVENTS = {
+    lead_form_submit: 'Lead',
+    whatsapp_click: 'Contact',
+  };
+
   function track(event, props) {
     try {
       if (window.plausible) window.plausible(event, { props: props || {} });
+    } catch (e) {}
+    try {
+      const fbEvent = FB_EVENTS[event];
+      if (fbEvent && window.fbq) window.fbq('track', fbEvent, props || {});
     } catch (e) {}
   }
 
@@ -89,10 +101,9 @@
     if (e.key === 'Escape' && menu && menu.classList.contains('open')) close();
   });
 
-  /* ---- Respeita "reduzir movimento": pausa os beads SVG (SMIL) do canvas ---- */
-  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    document.querySelectorAll('svg.flow-wires').forEach((svg) => { try { svg.pauseAnimations(); } catch (e) {} });
-  }
+  /* ---- Preferência compartilhada com o controle global de movimento ---- */
+  const motionPreference = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+  const motionIsPaused = () => document.documentElement.dataset.motion === 'paused' || Boolean(motionPreference && motionPreference.matches);
 
   /* ---- FAQ accordion (single open) ---- */
   const items = document.querySelectorAll('.faq-item');
@@ -189,10 +200,14 @@
     const cvCards = Array.prototype.slice.call(cv.querySelectorAll('.case-card'));
     const cvN = cvCards.length;
     const cvDotsWrap = cv.querySelector('.cases-dots');
-    const cvReduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const CV_DELAY = 3000;
     let cvActive = 0;
     let cvTimer = null;
+    let cvRemaining = CV_DELAY;
+    let cvStartedAt = 0;
+    let cvHovered = false;
+    let cvFocused = cv.contains(document.activeElement);
+    let cvInView = !('IntersectionObserver' in window);
 
     // o CSS usa --cv-delay para sincronizar a barra de progresso do dot ativo.
     cv.style.setProperty('--cv-delay', CV_DELAY + 'ms');
@@ -232,18 +247,56 @@
       });
     }
 
-    const cvAdvance = () => { cvActive = (cvActive + 1) % cvN; cvRender(); };
-    function cvStart() { if (!cvReduce && !cvTimer) cvTimer = window.setInterval(cvAdvance, CV_DELAY); }
-    function cvStop() { if (cvTimer) { clearInterval(cvTimer); cvTimer = null; } }
-    function cvGo(i) { cvActive = ((i % cvN) + cvN) % cvN; cvRender(); cvStop(); cvStart(); }
+    const cvCanPlay = () => cvN > 1 && !motionIsPaused() && !document.hidden && cvInView && !cvHovered && !cvFocused;
+    function cvStart() {
+      if (!cvCanPlay()) { cvStop(); return; }
+      cv.dataset.autoplay = 'running';
+      if (cvTimer !== null) return;
+      cvStartedAt = performance.now();
+      cvTimer = window.setTimeout(() => {
+        cvTimer = null;
+        cvRemaining = CV_DELAY;
+        cvActive = (cvActive + 1) % cvN;
+        cvRender();
+        cvStart();
+      }, cvRemaining);
+    }
+    function cvStop() {
+      cv.dataset.autoplay = 'paused';
+      if (cvTimer === null) return;
+      window.clearTimeout(cvTimer);
+      cvTimer = null;
+      cvRemaining = Math.max(0, cvRemaining - (performance.now() - cvStartedAt));
+    }
+    function cvGo(i) {
+      const next = ((i % cvN) + cvN) % cvN;
+      if (next === cvActive) return;
+      cvStop();
+      cvActive = next;
+      cvRemaining = CV_DELAY;
+      cvRender();
+      cvStart();
+    }
 
     cvCards.forEach((card, i) => card.addEventListener('click', (e) => {
       if (!card.classList.contains('is-center')) { e.preventDefault(); cvGo(i); }
     }));
-    cv.addEventListener('mouseenter', cvStop);
-    cv.addEventListener('mouseleave', cvStart);
-    cv.addEventListener('focusin', cvStop);
-    cv.addEventListener('focusout', cvStart);
+    cv.addEventListener('mouseenter', () => { cvHovered = true; cvStop(); });
+    cv.addEventListener('mouseleave', () => { cvHovered = false; cvStart(); });
+    cv.addEventListener('focusin', () => { cvFocused = true; cvStop(); });
+    cv.addEventListener('focusout', (event) => { cvFocused = cv.contains(event.relatedTarget); cvStart(); });
+    document.addEventListener('visibilitychange', cvStart);
+    window.addEventListener('waveops:motion', cvStart);
+    if (motionPreference) {
+      if (motionPreference.addEventListener) motionPreference.addEventListener('change', cvStart);
+      else if (motionPreference.addListener) motionPreference.addListener(cvStart);
+    }
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver((entries) => {
+        cvInView = entries[0].isIntersecting;
+        cvStart();
+      }, { threshold: 0 }).observe(cv);
+    }
 
     cvRender();
     cvStart();
@@ -289,24 +342,43 @@
     });
   });
 
-  /* ---- Reveal on scroll (scroll-based, no IntersectionObserver) ---- */
-  document.documentElement.classList.add('anim');
-  let revealEls = Array.prototype.slice.call(document.querySelectorAll('.reveal'));
-  const checkReveal = () => {
-    const trigger = window.innerHeight * 0.92;
-    for (let i = revealEls.length - 1; i >= 0; i--) {
-      const el = revealEls[i];
-      if (el.getBoundingClientRect().top < trigger) {
-        el.classList.add('is-visible');
-        revealEls.splice(i, 1);
-      }
-    }
+  /* ---- Entrada progressiva das seções, sem esconder conteúdo sem JavaScript ---- */
+  const revealEls = Array.prototype.slice.call(document.querySelectorAll('.reveal'));
+  let revealObserver = null;
+  const revealAll = () => {
+    if (revealObserver) revealObserver.disconnect();
+    revealEls.forEach((element) => element.classList.add('is-visible'));
   };
-  checkReveal();
-  window.addEventListener('scroll', checkReveal, { passive: true });
-  window.addEventListener('resize', checkReveal);
-  // Safety net: never leave content hidden (cobre .reveal e os grupos .stagger).
-  setTimeout(() => { document.querySelectorAll('.reveal').forEach((e) => e.classList.add('is-visible')); }, 1800);
+  if (!motionIsPaused() && 'IntersectionObserver' in window) {
+    try {
+      revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting || entry.boundingClientRect.top < 0) {
+            entry.target.classList.add('is-visible');
+            revealObserver.unobserve(entry.target);
+          }
+        });
+      }, { rootMargin: '0px 0px -48px 0px', threshold: 0 });
+      document.documentElement.classList.add('anim');
+      revealEls.forEach((element) => revealObserver.observe(element));
+    } catch (e) { revealAll(); }
+  } else {
+    revealAll();
+  }
+  window.addEventListener('waveops:motion', () => { if (motionIsPaused()) revealAll(); });
+  if (motionPreference) {
+    const handleReducedMotion = () => { if (motionIsPaused()) revealAll(); };
+    if (motionPreference.addEventListener) motionPreference.addEventListener('change', handleReducedMotion);
+    else if (motionPreference.addListener) motionPreference.addListener(handleReducedMotion);
+  }
+  document.addEventListener('focusin', (event) => {
+    let element = event.target.closest('.reveal');
+    while (element) {
+      element.classList.add('is-visible');
+      if (revealObserver) revealObserver.unobserve(element);
+      element = element.parentElement && element.parentElement.closest('.reveal');
+    }
+  });
 
   /* ---- Scrollspy nav highlight (scroll-based) ---- */
   const sections = ['servicos', 'como', 'pacotes', 'publicos', 'faq'];

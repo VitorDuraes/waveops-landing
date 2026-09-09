@@ -1,6 +1,6 @@
 import "server-only";
 import { env } from "./env";
-import { maskEmail } from "./log";
+import { log, maskEmail } from "./log";
 
 // Todas as integracoes degradam para "mock" (apenas log) quando nao ha credencial,
 // para o app rodar sem nenhum servico externo configurado.
@@ -85,10 +85,30 @@ export async function notifyTeamNewCustomer(c: {
   await sendEmail(env.teamNotifyEmail, `Novo cliente WaveOps: ${c.company}`, html);
 }
 
-export async function sendEmail(to: string, subject: string, html: string): Promise<void> {
+// Resultado do envio. `mock` = sem credencial (so log), nao e sucesso real: quem
+// depende do e-mail chegar (codigo de acesso) precisa saber a diferenca.
+export interface EmailResult {
+  ok: boolean;
+  mock: boolean;
+  status?: number;
+  error?: string;
+}
+
+// Traduz o erro do Resend para uma mensagem que o time entende sem abrir o painel.
+function resendErrorHint(status: number, detail: string): string {
+  if (status === 403 && /not verified/i.test(detail)) {
+    return "Domínio do remetente não verificado no Resend. Adicione os registros DNS do domínio e verifique em resend.com/domains.";
+  }
+  if (status === 401 || status === 403) return "Chave do Resend inválida ou sem permissão de envio.";
+  if (status === 422) return "Remetente (EMAIL_FROM) fora de um domínio verificado no Resend.";
+  if (status === 429) return "Limite de envio do Resend atingido. Tente de novo em alguns minutos.";
+  return `Resend recusou o envio (HTTP ${status}).`;
+}
+
+export async function sendEmail(to: string, subject: string, html: string): Promise<EmailResult> {
   if (!env.resendKey) {
     console.log(`[email:mock] para ${to} · ${subject}`);
-    return;
+    return { ok: false, mock: true, error: "RESEND_API_KEY ausente: e-mail não foi enviado (modo log)." };
   }
   try {
     const res = await fetch("https://api.resend.com/emails", {
@@ -98,14 +118,18 @@ export async function sendEmail(to: string, subject: string, html: string): Prom
       body: JSON.stringify({ from: env.emailFrom, to, subject, html, text: htmlToText(html) }),
     });
     // Resend devolve 200/201 no sucesso. Erro comum: 403 (dominio nao verificado) ou
-    // 422 (from fora do dominio). Antes isso era engolido; agora loga o motivo para
-    // o problema aparecer no painel do Netlify em vez de "e-mail sumiu".
+    // 422 (from fora do dominio). O erro sobe para quem chamou: rota de codigo de
+    // acesso NAO pode responder "enviado" quando o Resend recusou. [varredura 2026-08-10]
     if (!res.ok) {
       const detail = await res.text().catch(() => "");
-      console.error(`[email] Resend recusou (${res.status}) para ${to}: ${detail.slice(0, 300)}`);
+      const hint = resendErrorHint(res.status, detail);
+      log.error("email.recusado", { httpStatus: res.status, para: maskEmail(to), detail: detail.slice(0, 300) });
+      return { ok: false, mock: false, status: res.status, error: hint };
     }
+    return { ok: true, mock: false, status: res.status };
   } catch (e) {
-    console.error("[email] erro de rede", e);
+    log.error("email.erro_de_rede", { para: maskEmail(to), erro: (e as Error).message });
+    return { ok: false, mock: false, error: "Falha de rede ao falar com o provedor de e-mail." };
   }
 }
 

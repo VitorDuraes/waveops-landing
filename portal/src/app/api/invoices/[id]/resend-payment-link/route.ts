@@ -14,9 +14,13 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
 
   const link = inv.paymentLink || new URL("/cliente/faturas", env.appUrl).toString();
   const subject = "WaveOps · link de pagamento da sua fatura";
-  const html = `Olá, ${inv.companyName}. Aqui está o link para pagar a fatura ${inv.id}: ${link}`;
-  // Em modo sem credencial o envio degrada para log; com RESEND_API_KEY vai por e-mail.
-  await sendEmail(inv.email, subject, html);
+  const html = `<p>Olá, ${inv.companyName}. Aqui está o link para pagar a fatura ${inv.id}:</p><p><a href="${link}">${link}</a></p>`;
+  const mail = await sendEmail(inv.email, subject, html);
+  // Sem provedor (ou com envio recusado) a rota nao pode responder "reenviado": o
+  // admin marcaria a cobranca como feita sem nada ter saido. [varredura 2026-08-10]
+  if (!mail.ok) {
+    return err(mail.error || "Não foi possível reenviar a cobrança por e-mail.", 502, { reason: "email_failed" });
+  }
 
   return ok({ ok: true, invoice: id, sentTo: inv.email });
 }

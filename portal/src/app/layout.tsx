@@ -11,6 +11,16 @@ const mono = Space_Mono({ subsets: ["latin"], weight: ["400", "700"], variable: 
 export const metadata: Metadata = {
   title: "WaveOps · Portal",
   description: "Portal WaveOps · área do cliente e painel administrativo de assinaturas, cobrança e follow-up.",
+  // Sem isto o navegador pedia /favicon.ico e levava 404 em toda pagina do portal.
+  icons: {
+    icon: [
+      { url: "/assets/favicon.svg", type: "image/svg+xml" },
+      { url: "/assets/favicon-32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: "/assets/apple-touch-icon.png",
+  },
+  // O portal e area logada: nao deve ser indexado.
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

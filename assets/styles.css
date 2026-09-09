@@ -559,6 +559,32 @@ section[id] { scroll-margin-top: 84px; }
 .plans-custom a:hover { border-bottom-color: var(--accent); }
 .plans-fineprint { text-align: center; margin-top: 10px; font-size: 12.5px; color: var(--dim); }
 .plan .pprice .from { font-family: var(--font-mono); font-size: 12px; color: var(--dim); align-self: center; }
+/* "Sob proposta" ocupa o lugar do numero. Menor que o preco (34px seria gritante) e
+   sem o /mes, porque nao ha valor a exibir ate o diagnostico. */
+.plan .pprice.quote .v { font-size: 22px; color: var(--text-2); letter-spacing: -0.01em; }
+/* ===== Como a gente cobra: construir + manter =====
+   Substituiu a grade de planos. Dois cards, nao quatro: a decisao do visitante deixa
+   de ser "qual pacote" e passa a ser "quero conversar". */
+.pricing-model { margin-top: 8px; }
+.model-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: stretch; margin-top: 34px; }
+.model-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 30px; display: flex; flex-direction: column; transition: transform 0.2s, border-color 0.2s; }
+.model-card:hover { transform: translateY(-3px); border-color: var(--border-2); }
+.model-card.feat { border-color: var(--accent); box-shadow: 0 30px 70px -40px rgba(var(--accent-glow), 0.6); background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 7%, var(--surface)), var(--surface)); }
+.model-tag { align-self: flex-start; font-family: var(--font-mono); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-strong); background: var(--accent-soft); border: 1px solid var(--border-2); padding: 4px 10px; border-radius: 999px; }
+.model-card h4 { font-family: var(--font-display); font-size: 26px; letter-spacing: -0.02em; margin-top: 14px; }
+.model-lead { color: var(--muted); font-size: 14.5px; margin-top: 8px; line-height: 1.55; }
+.model-card ul { list-style: none; padding: 0; margin: 20px 0 0; display: flex; flex-direction: column; gap: 11px; flex: 1; }
+.model-card li { position: relative; padding-left: 24px; font-size: 14.5px; color: var(--text-2); }
+.model-card li::before { content: ""; position: absolute; left: 2px; top: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); opacity: 0.85; }
+.model-floor { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 14.5px; color: var(--text-2); }
+.model-floor strong { font-family: var(--font-display); font-size: 19px; color: var(--text); letter-spacing: -0.02em; }
+.model-cta { text-align: center; margin-top: 30px; }
+.model-note { margin-top: 12px; font-size: 13px; color: var(--dim); max-width: 420px; margin-inline: auto; line-height: 1.5; }
+
+/* Nota do toggle: o desconto anual vale no plano de entrada e nas propostas.
+   A margem de baixo abre espaco para o selo "Mais escolhido", que sobe alem do topo
+   do card do Pro e cobria a nota. */
+.billing-note { margin: 10px 0 22px; font-size: 12.5px; color: var(--dim); }
 .plan .plan-note { font-size: 12px; color: var(--dim); margin: -10px 0 14px; }
 
 /* ---- Add-ons sob demanda ---- */
@@ -800,6 +826,7 @@ a, button, .tab, .faq-q, .case-card:not(.is-center), .cases-dot, label[for] { cu
   .foot-brand { grid-column: 1 / -1; }
   .roi { grid-template-columns: 1fr; }
   .plans.four { grid-template-columns: repeat(2, 1fr); gap: 16px; row-gap: 26px; }
+  .model-card { padding: 24px; }
   /* sem escala no destaque fora do grid de 4 colunas: evita sobreposição */
   .plan.featured, .plan.featured:hover { transform: none; }
   .plan.featured:hover { transform: translateY(-4px); }
@@ -808,9 +835,13 @@ a, button, .tab, .faq-q, .case-card:not(.is-center), .cases-dot, label[for] { cu
   body { font-size: 16px; }
   .nav-links { display: none; }
   .hamburger { display: grid; }
-  .nav-actions .btn-primary.desktop { display: none; }
+  /* Esconde TODO botao .desktop no mobile, nao so o primario. O "Ja sou cliente"
+     (btn-ghost.desktop) continuava visivel e empurrava a barra para 406px numa tela
+     de 375px, fazendo a pagina inteira rolar de lado. O drawer ja tem esse link. */
+  .nav-actions .desktop { display: none; }
   .pains-grid { grid-template-columns: 1fr; }
   .plans, .plans.four { grid-template-columns: 1fr; }
+  .model-grid { grid-template-columns: 1fr; }
   .roi-grid { grid-template-columns: 1fr; }
   .steps { grid-template-columns: 1fr 1fr; }
   .cta-left, .cta-form { padding: 30px 24px; }

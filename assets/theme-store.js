@@ -2,7 +2,7 @@
    Both the nav toggle and the React Tweaks panel call into this. */
 (function () {
   const KEY = 'flowops:tweaks:v1';
-  const DEFAULTS = { theme: 'light', accent: 'violet', font: 'a', density: 'compact' };
+  const DEFAULTS = { theme: 'dark', accent: 'violet', font: 'a', density: 'regular' };
 
   function load() {
     try {

@@ -9,8 +9,11 @@ import { useToast } from "@/components/providers";
 export default function AdminLoginPage() {
   const router = useRouter();
   const toast = useToast();
-  const [email, setEmail] = useState("financeiro@waveops.com.br");
-  const [password, setPassword] = useState("waveops-admin");
+  // Campos vazios. Estavam pre-preenchidos com o e-mail do time e com a senha padrao
+  // de desenvolvimento, que ia junto no bundle JS entregue ao navegador de qualquer
+  // visitante de /admin/login. [varredura 2026-08-10]
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
@@ -54,12 +57,12 @@ export default function AdminLoginPage() {
           <p className="sub">Acesso restrito à equipe WaveOps.</p>
           <form onSubmit={onSubmit}>
             <div className="field">
-              <label>E-mail corporativo</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@waveops.com.br" />
+              <label htmlFor="adm-e-mail-corporativo">E-mail corporativo</label>
+              <input id="adm-e-mail-corporativo" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@waveops.com.br" />
             </div>
             <div className="field">
-              <label>Senha</label>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
+              <label htmlFor="adm-senha">Senha</label>
+              <input id="adm-senha" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
             </div>
             <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={loading}>
               {loading ? "Aguarde..." : "Entrar no painel"}

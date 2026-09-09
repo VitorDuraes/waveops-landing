@@ -27,3 +27,7 @@ node_modules/
 # Artefato do build estatico da landing no Netlify (montado pelo netlify.toml,
 # dentro de portal/ porque o base do site e "portal").
 _site/
+
+# Prints de QA de design, gerados localmente. Nao vao para o repo.
+dev/design-*.png
+dev/workflow-*.png

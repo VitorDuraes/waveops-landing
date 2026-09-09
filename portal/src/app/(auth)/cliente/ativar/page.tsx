@@ -36,7 +36,8 @@ export default function AtivarPage() {
       if (!res.ok) throw new Error(data.error || "Falha ao enviar o código");
       if (data.devCode) setCode(String(data.devCode).padStart(6, "0").slice(0, 6).split(""));
       setStep("codigo");
-      toast(data.devCode ? `Código (demo): ${data.devCode}` : "Código enviado para seu e-mail", "info");
+      if (data.warning) toast(`Código (dev): ${data.devCode}. E-mail não saiu: ${data.warning}`, "info");
+      else toast(data.devCode ? `Código (demo): ${data.devCode}` : "Código enviado para seu e-mail", "info");
     } catch (err) {
       toast((err as Error).message, "info");
     } finally {
@@ -116,8 +117,8 @@ export default function AtivarPage() {
           {step === "email" && (
             <form onSubmit={onEmail}>
               <div className="field">
-                <label>E-mail</label>
-                <input
+                <label htmlFor="ativar-e-mail">E-mail</label>
+                <input id="ativar-e-mail"
                   type="email"
                   placeholder="o e-mail da compra"
                   value={email}
@@ -159,8 +160,8 @@ export default function AtivarPage() {
           {step === "senha" && (
             <form onSubmit={onPassword}>
               <div className="field">
-                <label>Nova senha</label>
-                <input
+                <label htmlFor="ativar-nova-senha">Nova senha</label>
+                <input id="ativar-nova-senha"
                   type="password"
                   placeholder="Mínimo de 8 caracteres"
                   value={password}
@@ -169,8 +170,8 @@ export default function AtivarPage() {
                 />
               </div>
               <div className="field">
-                <label>Confirmar senha</label>
-                <input
+                <label htmlFor="ativar-confirmar-senha">Confirmar senha</label>
+                <input id="ativar-confirmar-senha"
                   type="password"
                   placeholder="Repita a senha"
                   value={confirm}

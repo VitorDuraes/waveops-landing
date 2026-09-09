@@ -45,6 +45,9 @@ export interface NewCustomerInput {
   email: string;
   phone?: string;
   planId: string;
+  // Valor mensal COMBINADO com este cliente, em reais. O plano define o escopo; o
+  // valor sai da proposta. Ausente, cai no valor de referencia do plano.
+  amount?: number;
 }
 export interface NewTicketInput {
   customerId: string;
@@ -236,7 +239,7 @@ const mockRepo: Repo = {
       email: input.email,
       phone: input.phone || "",
       plan: plan.name,
-      amount: plan.monthly,
+      amount: input.amount ?? plan.monthly,
       status: "aguardando",
       nextDue: "—",
       lastPay: "—",
@@ -441,17 +444,28 @@ function prismaRepoFactory(): Repo {
       }));
     },
     async listAllInvoices() {
-      const list = await db.invoice.findMany({ include: { customer: true }, orderBy: { dueDate: "desc" } });
+      const list = await db.invoice.findMany({
+        // followups em ordem: o mais recente serve de "ultimo follow-up" da linha.
+        include: { customer: true, followups: { orderBy: { createdAt: "desc" }, take: 1 } },
+        orderBy: { dueDate: "desc" },
+      });
+      // A coluna Cliente mostrava a empresa duas vezes (customer e company vinham do
+      // mesmo campo), o plano estava cravado em "Operação" e o ultimo follow-up era
+      // sempre "—". Agora os tres saem do registro real. [varredura 2026-08-10]
       return list.map((i) => ({
         id: i.id,
-        customer: i.customer.companyName,
+        customer: i.customer.name || i.customer.companyName,
         company: i.customer.companyName,
-        plan: "Operação",
+        plan: i.customer.planLabel || "—",
         amount: centsToReais(i.amount),
         due: fmtBR(i.dueDate),
         status: invStatusToDto(i.status),
         method: methodToDto(i.paymentMethod),
-        lastFollowup: "—",
+        lastFollowup: i.followups[0]?.sentAt
+          ? fmtBR(i.followups[0].sentAt)
+          : i.followups[0]
+            ? "agendado"
+            : "—",
       }));
     },
     async listFollowups() {
@@ -513,6 +527,10 @@ function prismaRepoFactory(): Repo {
     },
     async createCustomer(input) {
       const plan = mockPlans.find((p) => p.id === input.planId) || mockPlans[0];
+      // O valor gravado e o COMBINADO com o cliente. O valor do plano so entra como
+      // padrao quando o admin nao informa nada. A partir daqui toda fatura, o MRR e a
+      // area do cliente leem daqui, nao da tabela de planos.
+      const monthly = input.amount ?? plan.monthly;
       const c = await db.customer.create({
         data: {
           name: input.name,
@@ -521,7 +539,7 @@ function prismaRepoFactory(): Repo {
           phone: input.phone,
           status: "aguardando",
           planLabel: plan.name,
-          monthlyAmount: plan.monthly * 100,
+          monthlyAmount: Math.round(monthly * 100),
           paymentMethod: "pix",
         },
       });
@@ -990,6 +1008,16 @@ function toCustomerDto(c: {
   };
 }
 
+// Rotulos PT-BR da regua de cobranca (mesmos textos de reguaSteps em lib/data).
+const FOLLOWUP_LABELS: Record<string, string> = {
+  before_7_days: "7 dias antes",
+  before_3_days: "3 dias antes",
+  due_today: "No dia do vencimento",
+  overdue_1_day: "Vencido +1 dia",
+  overdue_3_days: "Vencido +3 dias",
+  overdue_7_days: "Vencido +7 dias",
+};
+
 // row do Prisma (followup + customer) -> DTO de UI
 function followupToDto(f: {
   id: string;
@@ -1005,7 +1033,9 @@ function followupToDto(f: {
     id: Number(f.id.replace(/\D/g, "").slice(0, 6) || "0"),
     customer: f.customer.companyName,
     type: f.type as Followup["type"],
-    label: f.type,
+    // Rotulo em PT-BR. Antes ia a chave crua do enum ("before_7_days") direto para a
+    // tela, e a badge do admin classifica pelo texto. [varredura 2026-08-10]
+    label: FOLLOWUP_LABELS[f.type] || f.type,
     channel: channelToDto(f.channel),
     sentAt: f.sentAt ? fmtBR(f.sentAt) : "—",
     status: f.status as Followup["status"],

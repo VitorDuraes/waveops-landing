@@ -15,11 +15,15 @@ import type {
   DemoState,
 } from "@/lib/types";
 
-// Planos reais da WaveOps (waveops.com.br). Preco mensal e equivalente no anual.
+// Planos reais da WaveOps (waveops.com.br). O Operacao e o unico assinavel sozinho
+// (selfService); nos demais o valor sai por proposta e os numeros aqui sao so
+// referencia interna para montar a proposta. O preco que vale e o contratado, que
+// fica no cliente (Customer.monthlyAmount).
 export const plans: Plan[] = [
   {
     id: "operacao",
     name: "Operação",
+    selfService: true,
     monthly: 397,
     annual: 327,
     annualTotal: 3924,
@@ -37,6 +41,7 @@ export const plans: Plan[] = [
   },
   {
     id: "essencial",
+    selfService: false,
     name: "Essencial",
     monthly: 697,
     annual: 577,
@@ -53,6 +58,7 @@ export const plans: Plan[] = [
   },
   {
     id: "pro",
+    selfService: false,
     name: "Pro",
     monthly: 1297,
     annual: 1067,
@@ -71,6 +77,7 @@ export const plans: Plan[] = [
   },
   {
     id: "business",
+    selfService: false,
     name: "Empresarial",
     monthly: 2497,
     annual: 2097,

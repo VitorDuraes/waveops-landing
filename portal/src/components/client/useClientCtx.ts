@@ -25,7 +25,7 @@ export interface ClientCtx {
   alert: AlertInfo;
 }
 
-function buildAlert(status: CustomerStatus, nextDue: string): AlertInfo {
+function buildAlert(status: CustomerStatus, nextDue: string, open?: ClientInvoice): AlertInfo {
   switch (status) {
     case "vencido":
       return {
@@ -63,6 +63,17 @@ function buildAlert(status: CustomerStatus, nextDue: string): AlertInfo {
         s: "Sua assinatura está cancelada. Fale com a gente para reativar quando quiser.",
       };
     default:
+      // Cliente ativo com cobranca aberta (ainda dentro do prazo) nao pode ler
+      // "pagamento em dia" ao lado de um botao "Pagar agora". A mensagem diz o que
+      // existe: a proxima cobranca esta aberta e da para adiantar. [varredura 2026-08-10]
+      if (open) {
+        return {
+          tone: "ok",
+          icon: "checkCircle",
+          t: "Plano ativo",
+          s: `Sua próxima cobrança está aberta e vence em ${open.due}. Pague quando quiser, sem multa por antecipar.`,
+        };
+      }
       return {
         tone: "ok",
         icon: "checkCircle",
@@ -94,6 +105,6 @@ export function useClientCtx(): ClientCtx {
     nextDue,
     open,
     invoices,
-    alert: buildAlert(status, nextDue),
+    alert: buildAlert(status, nextDue, open),
   };
 }

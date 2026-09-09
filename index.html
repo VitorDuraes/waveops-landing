@@ -1,10 +1,10 @@
 <!doctype html>
 <html
   lang="pt-BR"
-  data-theme="light"
+  data-theme="dark"
   data-accent="violet"
   data-font="a"
-  data-density="compact"
+  data-density="regular"
 >
   <head>
     <meta charset="UTF-8" />
@@ -15,7 +15,7 @@
          não deixa configurar. Ver docs/specs/SECURITY-n8n-hardening.md. -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' https://plausible.io; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self' https://plausible.io https://cowboyhouse.app.n8n.cloud; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+      content="default-src 'self'; script-src 'self' https://plausible.io https://connect.facebook.net; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://www.facebook.com; connect-src 'self' https://plausible.io https://cowboyhouse.app.n8n.cloud https://www.facebook.com; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
     />
 
     <title>WaveOps · Automação, Sistemas e IA para sua operação</title>
@@ -69,13 +69,14 @@
       content="https://waveops.com.br/assets/og-image.png"
     />
 
-    <!-- Preload das fontes críticas acima da dobra (corpo Hanken 400 + H1 Space Grotesk 600), antes do fonts.css. -->
+    <!-- Fontes críticas acima da dobra: corpo Hanken 400 e título Hanken 500. -->
     <link rel="preload" href="assets/fonts/hankengrotesk-400-normal-latin.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="assets/fonts/spacegrotesk-600-normal-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="assets/fonts/hankengrotesk-500-normal-latin.woff2" as="font" type="font/woff2" crossorigin />
 
     <!-- Fontes auto-hospedadas (item 3): sem chamada a fonts.googleapis/gstatic. -->
     <link rel="stylesheet" href="assets/fonts.css" />
     <link rel="stylesheet" href="assets/styles.css" />
+    <link rel="stylesheet" href="assets/cinematic.css?v=20260906-marquee4" />
 
     <script type="application/ld+json">
       {
@@ -99,8 +100,7 @@
           "WhatsApp",
           "Integração de sistemas",
           "Agentes de IA"
-        ],
-        "priceRange": "$$"
+        ]
       }
     </script>
 
@@ -112,10 +112,24 @@
     ></script>
     <script src="assets/analytics.js"></script>
 
-    <script src="assets/theme-store.js"></script>
+    <!-- ===== Meta Pixel (Facebook/Instagram Ads). Bootstrap em arquivo proprio por causa da CSP. ===== -->
+    <script src="assets/meta-pixel.js"></script>
+
+    <script src="assets/theme-store.js?v=20260905"></script>
   </head>
   <body>
+    <!-- Meta Pixel: fallback sem JavaScript -->
+    <noscript
+      ><img
+        height="1"
+        width="1"
+        style="display: none"
+        alt=""
+        src="https://www.facebook.com/tr?id=2432999197227570&amp;ev=PageView&amp;noscript=1"
+    /></noscript>
+
     <a class="skip-link" href="#top">Pular para o conteúdo</a>
+    <div class="scroll-progress" aria-hidden="true"></div>
     <div class="bg-deco" aria-hidden="true">
       <div class="grid"></div>
       <div class="glow"></div>
@@ -148,7 +162,7 @@
         <nav class="nav-links" aria-label="Principal">
           <a href="#servicos">Serviços</a>
           <a href="#como">Como funciona</a>
-          <a href="#pacotes">Pacotes</a>
+          <a href="#pacotes">Sob medida</a>
           <a href="#publicos">Para quem é</a>
           <a href="#faq">FAQ</a>
         </nav>
@@ -192,7 +206,7 @@
                raiz-relativo aqui cairia no proprio host da landing (404 ou portal
                duplicado). Mesma regra para /termos e /privacidade (paginas do portal). -->
           <a href="https://portal.waveops.com.br/cliente/login" class="btn btn-ghost desktop">Já sou cliente</a>
-          <a href="#pacotes" class="btn btn-primary desktop">Assinar agora</a>
+          <a href="#contato" class="btn btn-primary desktop">Pedir diagnóstico</a>
           <button
             class="icon-btn hamburger"
             id="hamburger"
@@ -231,10 +245,10 @@
       </button>
       <a href="#servicos">Serviços</a>
       <a href="#como">Como funciona</a>
-      <a href="#pacotes">Pacotes</a>
+      <a href="#pacotes">Sob medida</a>
       <a href="#publicos">Para quem é</a>
       <a href="#faq">FAQ</a>
-      <a href="#pacotes" class="btn btn-primary btn-block btn-lg">Assinar agora</a>
+      <a href="#contato" class="btn btn-primary btn-block btn-lg">Pedir diagnóstico</a>
       <a href="https://portal.waveops.com.br/cliente/login" class="btn btn-ghost btn-block">Já sou cliente</a>
       <a href="#contato" class="btn btn-ghost btn-block">Falar com a gente</a>
     </div>
@@ -244,19 +258,18 @@
       <section class="hero section" data-screen-label="Hero">
         <div class="wrap hero-grid">
           <div class="hero-copy">
-            <span class="eyebrow reveal">Automação · Desenvolvimento · IA</span>
+            <span class="eyebrow reveal"><span class="status-dot" aria-hidden="true"></span> Automação, sistemas &amp; IA</span>
             <h1 class="reveal d1">
-              Coloque sua operação <span class="hl">no automático.</span>
+              Sua operação,<br />
+              <span class="hl">no automático.</span>
             </h1>
             <p class="hero-sub reveal d2">
-              A WaveOps liga as ferramentas que você já usa e automatiza o
-              trabalho manual da sua operação. Você <b>ganha tempo, erra menos e
-              tira processo das costas do time</b>, com IA usada sob supervisão
-              de gente.
+              Conectamos suas ferramentas e automatizamos o trabalho repetitivo.
+              <strong>Seu time ganha tempo para fazer o que importa.</strong>
             </p>
             <div class="hero-cta reveal d3">
               <a href="#contato" class="btn btn-primary btn-lg"
-                >Falar com a gente
+                >Automatizar minha operação
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -455,21 +468,67 @@
             </div>
           </div>
         </div>
+        <div class="wrap hero-bottom">
+          <a class="explore-link" href="#servicos"><span>↓</span> Explore as possibilidades</a>
+          <button id="motion-toggle" class="motion-toggle" type="button" aria-pressed="false" aria-label="Pausar animações">
+            <svg class="motion-pause" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 3h2v10H4zm6 0h2v10h-2z"/></svg>
+            <svg class="motion-play" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="m5 3 8 5-8 5z"/></svg>
+            <span class="motion-label">Pausar animações</span>
+          </button>
+        </div>
       </section>
 
       <!-- ============== LOGOS / INTEGRA ============== -->
       <section class="logos" aria-label="Ferramentas que integramos">
         <div class="wrap">
-          <span class="lab">Integra com o que você já usa</span>
-          <div class="items">
-            <span class="chip">WhatsApp</span>
-            <span class="chip">n8n</span>
-            <span class="chip">Make</span>
-            <span class="chip">Google Sheets</span>
-            <span class="chip">CRM</span>
-            <span class="chip">APIs</span>
-            <span class="chip">Pagamentos</span>
-            <span class="chip">ERP</span>
+          <span class="lab">Suas ferramentas. Agora, conectadas.</span>
+          <div class="items marquee">
+            <!-- Quatro grupos identicos. Um grupo sozinho e mais estreito que a
+                 janela visivel, entao dois nao bastam: sobraria vazio no fim do
+                 ciclo. Com quatro, o track anda menos 25 por cento, que e a largura
+                 exata de um grupo, e a janela fica sempre coberta. -->
+            <div class="marquee-track">
+            <div class="marquee-group">
+              <span class="chip">WhatsApp</span>
+              <span class="chip">n8n</span>
+              <span class="chip">Make</span>
+              <span class="chip">Google Sheets</span>
+              <span class="chip">CRM</span>
+              <span class="chip">APIs</span>
+              <span class="chip">Pagamentos</span>
+              <span class="chip">ERP</span>
+            </div>
+            <div class="marquee-group" aria-hidden="true">
+              <span class="chip">WhatsApp</span>
+              <span class="chip">n8n</span>
+              <span class="chip">Make</span>
+              <span class="chip">Google Sheets</span>
+              <span class="chip">CRM</span>
+              <span class="chip">APIs</span>
+              <span class="chip">Pagamentos</span>
+              <span class="chip">ERP</span>
+            </div>
+            <div class="marquee-group" aria-hidden="true">
+              <span class="chip">WhatsApp</span>
+              <span class="chip">n8n</span>
+              <span class="chip">Make</span>
+              <span class="chip">Google Sheets</span>
+              <span class="chip">CRM</span>
+              <span class="chip">APIs</span>
+              <span class="chip">Pagamentos</span>
+              <span class="chip">ERP</span>
+            </div>
+            <div class="marquee-group" aria-hidden="true">
+              <span class="chip">WhatsApp</span>
+              <span class="chip">n8n</span>
+              <span class="chip">Make</span>
+              <span class="chip">Google Sheets</span>
+              <span class="chip">CRM</span>
+              <span class="chip">APIs</span>
+              <span class="chip">Pagamentos</span>
+              <span class="chip">ERP</span>
+            </div>
+            </div>
           </div>
         </div>
       </section>
@@ -479,15 +538,16 @@
         <div class="wrap">
           <div class="section-head reveal">
             <span class="eyebrow">O que fazemos</span>
-            <h2>Uma entrega, três frentes: processo, tecnologia e IA.</h2>
+            <h2>Menos trabalho manual.<br /><span class="soft-text">Mais operação acontecendo.</span></h2>
             <p>
-              A gente não entrega só "um robô" ou "uma tela". Entrega melhoria
-              de operação, do mapeamento ao que continua rodando depois.
+              Da primeira integração ao sistema sob medida. A gente constrói,
+              conecta e cuida do que faz a sua operação funcionar.
             </p>
           </div>
 
           <div class="pillars">
             <article class="pillar reveal">
+              <div class="service-visual visual-flow" aria-hidden="true"><span class="mini-node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m13 2-9 12h7l-1 8 10-13h-8Z"/></svg><small>Gatilho</small></span><span class="mini-connection"></span><span class="mini-node node-accent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m12 3 3 6 6 3-6 3-3 6-3-6-6-3 6-3Z"/></svg><small>Automação</small></span><span class="mini-connection"></span><span class="mini-node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m5 12 4 4L19 6"/></svg><small>Resolvido</small></span></div>
               <div class="pnum">01</div>
               <div class="picon">
                 <svg
@@ -516,6 +576,7 @@
             </article>
 
             <article class="pillar reveal d1">
+              <div class="service-visual visual-integration" aria-hidden="true"><span class="integration-satellite sat-one">CRM</span><span class="integration-satellite sat-two">API</span><span class="integration-satellite sat-three">ERP</span><div class="integration-ring"></div><div class="integration-center"><img src="assets/brand/waveops-symbol.svg" alt="" width="60" height="60" /></div><span class="integration-caption">Tudo no mesmo fluxo</span></div>
               <div class="pnum">02</div>
               <div class="picon">
                 <svg
@@ -544,6 +605,7 @@
             </article>
 
             <article class="pillar reveal">
+              <div class="service-visual visual-dashboard" aria-hidden="true"><div class="mini-window"><div class="mini-window-top"><i></i><i></i><i></i><span>Sua operação, em um só lugar</span></div><div class="mini-chart"><span style="--bar:36%;--i:0"></span><span style="--bar:54%;--i:1"></span><span style="--bar:44%;--i:2"></span><span style="--bar:70%;--i:3"></span><span style="--bar:62%;--i:4"></span><span style="--bar:88%;--i:5"></span><span style="--bar:77%;--i:6"></span><span style="--bar:100%;--i:7"></span></div></div></div>
               <div class="pnum">03</div>
               <div class="picon">
                 <svg
@@ -573,6 +635,7 @@
             </article>
 
             <article class="pillar reveal d1">
+              <div class="service-visual visual-ai" aria-hidden="true"><div class="ai-message"><span class="ai-spark">✧</span><div><span class="ai-line"></span><span class="ai-line short"></span></div><span class="processing-dots"><i></i><i></i><i></i></span></div><span class="ai-approval"><span>✓</span> Inteligência artificial. Controle humano.</span></div>
               <div class="pnum">04</div>
               <div class="picon">
                 <svg
@@ -627,7 +690,7 @@
         <div class="wrap">
           <div class="section-head reveal">
             <span class="eyebrow">Casos de uso</span>
-            <h2>O que dá para colocar no automático.</h2>
+            <h2>Do repetitivo ao resolvido.</h2>
             <p>
               Exemplos do que a WaveOps liga e constrói em cada frente. Casos
               ilustrativos, para você reconhecer a sua operação.
@@ -726,7 +789,7 @@
         <div class="wrap">
           <div class="section-head center reveal">
             <span class="eyebrow">Como funciona</span>
-            <h2>Do primeiro café ao que roda todo dia.</h2>
+            <h2>Um caminho claro.<br /><span class="soft-text">Do diagnóstico à operação.</span></h2>
             <p>
               Um caminho simples e previsível. Você sempre sabe em que etapa
               está e o que vem a seguir.
@@ -770,346 +833,123 @@
 
 
       <!-- ============== PACOTES ============== -->
-      <section class="section" id="pacotes" data-screen-label="Pacotes">
+      <section class="section" id="pacotes" data-screen-label="Sob medida">
         <div class="wrap">
           <div class="section-head center reveal">
-            <span class="eyebrow">Preços &amp; investimento</span>
-            <h2>A gente coloca no ar e mantém rodando.</h2>
+            <span class="eyebrow">Sob medida</span>
+            <h2>Seu projeto.<br /><span class="soft-text">Uma proposta sob medida.</span></h2>
             <p>
-              A gente constrói a sua operação e mantém ela de pé todo mês:
-              hospedada, monitorada, consertada e evoluindo.
+              Conte o que precisa pelo WhatsApp. A gente define o escopo,
+              a manutenção e os valores com você antes de começar.
             </p>
           </div>
 
-          <!-- ===== (a) CALCULADORA DE ROI ===== -->
-          <div class="roi reveal" id="roi">
-            <div class="roi-head">
-              <span class="eyebrow">Quanto a operação manual custa</span>
-              <h3>Faça a conta antes de olhar o preço.</h3>
+          <!-- ===== Construção e manutenção, com proposta pelo WhatsApp ===== -->
+          <div class="pricing-model reveal">
+            <div class="block-head center">
+              <span class="eyebrow">Da entrega à operação</span>
+              <h3>Construir e cuidar do que está no ar.</h3>
               <p class="lead">
-                Ajuste os números do seu mês. A conta é a sua, não a do
-                concorrente.
+                Cada operação tem um tamanho. A proposta considera o que precisa
+                ser criado e o cuidado necessário depois da entrega.
               </p>
             </div>
-            <div class="roi-grid">
-              <div class="roi-field">
-                <label for="roi-leads">Leads perdidos por mês</label>
-                <input
-                  type="number"
-                  id="roi-leads"
-                  inputmode="numeric"
-                  min="0"
-                  step="1"
-                  value="20"
-                />
-              </div>
-              <div class="roi-field">
-                <label for="roi-ticket">Ticket médio (R$)</label>
-                <input
-                  type="number"
-                  id="roi-ticket"
-                  inputmode="numeric"
-                  min="0"
-                  step="1"
-                  value="500"
-                />
-              </div>
-              <div class="roi-field">
-                <label for="roi-horas">Horas manuais por mês</label>
-                <input
-                  type="number"
-                  id="roi-horas"
-                  inputmode="numeric"
-                  min="0"
-                  step="1"
-                  value="20"
-                />
-              </div>
-              <div class="roi-field">
-                <label for="roi-custo">Custo por hora (R$)</label>
-                <input
-                  type="number"
-                  id="roi-custo"
-                  inputmode="numeric"
-                  min="0"
-                  step="1"
-                  value="50"
-                />
-              </div>
+
+            <div class="model-grid">
+              <article class="model-card">
+                <span class="model-tag">Uma vez</span>
+                <h4>Construir</h4>
+                <p class="model-lead">
+                  A automação, o site, o dashboard ou o agente que você precisa.
+                  Escopo e proposta combinados pelo WhatsApp.
+                </p>
+                <ul>
+                  <li>Escopo escrito e aprovado por você</li>
+                  <li>Preço fechado, sem hora extra na fatura</li>
+                  <li>Você aprova antes de qualquer linha de código</li>
+                  <li>Avaliação do que já existe na sua operação</li>
+                </ul>
+                <p class="model-floor"><strong>Proposta conforme o escopo</strong></p>
+              </article>
+
+              <article class="model-card feat">
+                <span class="model-tag">Todo mês</span>
+                <h4>Manter no ar</h4>
+                <p class="model-lead">
+                  O que a gente construiu fica hospedado, monitorado, consertado e
+                  evoluindo, conforme o que combinamos para a sua operação.
+                </p>
+                <ul>
+                  <li>Infra e credenciais por nossa conta</li>
+                  <li>A gente vê o fluxo parar antes de você</li>
+                  <li>Correção das integrações inclusa</li>
+                  <li>Sem fidelidade: você fica porque funciona</li>
+                </ul>
+                <p class="model-floor"><strong>Operação dimensionada para você</strong></p>
+              </article>
             </div>
-            <div class="roi-out">
-              <p class="roi-cap">Você está perdendo cerca de</p>
-              <p class="roi-loss" id="roi-loss" role="status" aria-live="polite" aria-atomic="true">
-                R$&nbsp;11.000
-              </p>
-              <p class="roi-cap">por mês com o que ainda é manual.</p>
-              <p class="roi-compare">
-                O plano de operação começa em
-                <strong class="roi-price">R$397/mês</strong>.
+
+            <div class="model-cta">
+              <a
+                href="https://wa.me/5534991775784?text=Ol%C3%A1!%20Vim%20pela%20landing%20da%20WaveOps%20e%20quero%20automatizar%20minha%20opera%C3%A7%C3%A3o."
+                class="btn btn-primary btn-lg"
+                target="_blank"
+                rel="noopener"
+              >Conversar sobre meu projeto</a>
+              <p class="model-note">
+                Valores de projeto, manutenção e adicionais são tratados pelo
+                WhatsApp. Você aprova a proposta por escrito antes de começar.
               </p>
             </div>
           </div>
-
-          <!-- ===== (c) PLANO DE OPERAÇÃO: a gente mantém rodando ===== -->
-          <div class="plans-block reveal">
-            <div class="block-head">
-              <span class="eyebrow">Planos · sem fidelidade</span>
-              <h3>A gente mantém rodando.</h3>
-              <p class="lead">
-                Escolha pelo tamanho da operação. Sem fidelidade: você fica
-                porque funciona.
-              </p>
-            </div>
-
-            <div style="text-align: center">
-              <!-- Toggle Mensal / Anual (anual pré-selecionado).
-                   Anual: paga 10, leva 12. Valores anuais por mês são charm (terminam em 7)
-                   e equivalem a ~2 meses grátis sobre o mensal. -->
-              <div
-                class="tabs billing"
-                role="group"
-                aria-label="Forma de cobrança do plano"
-              >
-                <button
-                  class="tab"
-                  type="button"
-                  data-billing="mensal"
-                  aria-pressed="false"
-                >
-                  Mensal
-                </button>
-                <button
-                  class="tab active"
-                  type="button"
-                  data-billing="anual"
-                  aria-pressed="true"
-                >
-                  Anual <span class="save">até 2 meses grátis</span>
-                </button>
-              </div>
-              <p class="sr-only" role="status" aria-live="polite" id="billing-status"></p>
-            </div>
-
-            <div class="plans four">
-              <!-- Operação (piso) -->
-              <article
-                class="plan reveal"
-                data-m="397"
-                data-a="327"
-                data-at="3.924"
-              >
-                <h4 class="pname">Operação</h4>
-                <div class="pprice">
-                  <span class="v">R$327</span><span class="u">/mês</span>
-                </div>
-                <p class="bill-note" data-bill-note>cobrado R$3.924/ano</p>
-                <p class="plan-frame">Custa menos que manter essa tarefa no manual.</p>
-                <ul>
-                  <li class="hot">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Até 2 automações ativas
-                  </li>
-                  <li>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    1 número de WhatsApp incluso
-                  </li>
-                  <li>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Infra hospedada e gerida pela WaveOps
-                  </li>
-                  <li>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Monitoramento dos fluxos
-                  </li>
-                  <li>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Conserto das integrações ativas
-                  </li>
-                  <li>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Relatório mensal de valor em R$
-                  </li>
-                </ul>
-                <p class="plan-note">Agente de IA a partir do Pro.</p>
-                <a href="https://portal.waveops.com.br/checkout?plano=operacao" class="btn btn-ghost btn-block">Assinar Operação</a>
-              </article>
-
-              <!-- Essencial -->
-              <article
-                class="plan reveal d1"
-                data-m="697"
-                data-a="577"
-                data-at="6.924"
-              >
-                <h4 class="pname">Essencial</h4>
-                <div class="pprice">
-                  <span class="v">R$577</span><span class="u">/mês</span>
-                </div>
-                <p class="bill-note" data-bill-note>cobrado R$6.924/ano</p>
-                <p class="plan-frame">Custa menos que manter essa tarefa no manual.</p>
-                <ul>
-                  <li class="inherit">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Tudo do Operação
-                  </li>
-                  <li class="hot">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Até 5 automações ativas
-                  </li>
-                  <li class="hot">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    1 evolução por mês
-                  </li>
-                  <li>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Suporte prioritário
-                  </li>
-                </ul>
-                <p class="plan-note">Agente de IA a partir do Pro.</p>
-                <a href="https://portal.waveops.com.br/checkout?plano=essencial" class="btn btn-ghost btn-block">Assinar Essencial</a>
-              </article>
-
-              <!-- Pro (único com selo) -->
-              <article
-                class="plan featured reveal d2"
-                data-m="1.297"
-                data-a="1.067"
-                data-at="12.804"
-              >
-                <span class="ribbon">Mais escolhido</span>
-                <h4 class="pname">Pro</h4>
-                <div class="pprice">
-                  <span class="v">R$1.067</span><span class="u">/mês</span>
-                </div>
-                <p class="bill-note" data-bill-note>cobrado R$12.804/ano</p>
-                <p class="plan-frame">Custa menos que manter essa tarefa no manual.</p>
-                <ul>
-                  <li class="inherit">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Tudo do Essencial
-                  </li>
-                  <li class="hot">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Até 12 automações ativas
-                  </li>
-                  <li class="hot">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    1 sistema, dashboard ou agente de IA hospedado
-                  </li>
-                  <li class="hot">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Agente de IA com LLM econômico incluso (até 10 mil chamadas por mês)
-                  </li>
-                  <li class="hot">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Evolução contínua do que está no ar
-                  </li>
-                  <li class="hot">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Revisão mensal de resultados
-                  </li>
-                </ul>
-                <a href="https://portal.waveops.com.br/checkout?plano=pro" class="btn btn-primary btn-block">Assinar Pro</a>
-              </article>
-
-              <!-- Empresarial -->
-              <article
-                class="plan reveal d1"
-                data-m="2.497"
-                data-a="2.097"
-                data-at="25.164"
-              >
-                <h4 class="pname">Empresarial</h4>
-                <div class="pprice">
-                  <span class="from">a partir de </span><span class="v">R$2.097</span><span class="u">/mês</span>
-                </div>
-                <p class="bill-note">Valor fechado na ativação.</p>
-                <p class="plan-frame">Custa menos que manter essa tarefa no manual.</p>
-                <ul>
-                  <li class="inherit">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Tudo do Pro
-                  </li>
-                  <li class="hot">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Automações, sistemas e agentes dimensionados com você
-                  </li>
-                  <li class="hot">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Múltiplos números de WhatsApp como canal dedicado
-                  </li>
-                  <li class="hot">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    SLA de resposta
-                  </li>
-                  <li class="hot">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                    Ponto de contato dedicado
-                  </li>
-                </ul>
-                <a href="https://wa.me/5534991775784?text=Ol%C3%A1!%20Vim%20pela%20landing%20da%20WaveOps%20e%20quero%20falar%20sobre%20o%20plano%20Empresarial." target="_blank" rel="noopener" class="btn btn-ghost btn-block">Falar com a gente</a>
-              </article>
-            </div>
-
-            <p class="plans-custom">
-              Operação maior que isso?
-              <a href="#contato">Falar com a gente</a>
-            </p>
-            <p class="plans-fineprint">
-              Escopo, volume e prazos de cada plano são combinados na ativação.
-            </p>
 
             <!-- ===== Add-ons sob demanda (a la carte) ===== -->
             <div class="addons reveal">
               <div class="block-head center">
                 <span class="eyebrow">Sob demanda</span>
-                <h3>Cresceu além do plano? Add-on transparente.</h3>
+                <h3>O que sua operação precisar a mais.</h3>
                 <p class="lead">
-                  Cada plano já inclui 1 número de WhatsApp. O que cresce com o seu
-                  uso fica em linha separada: você só paga pelo que usar, e a gente
-                  avisa antes.
+                  Canais, consumo de IA e novas entregas acompanham a necessidade
+                  do projeto. Escopo e valores de cada adicional são combinados
+                  com você pelo WhatsApp.
                 </p>
               </div>
               <ul class="addons-grid">
                 <li>
                   <strong>Número de WhatsApp extra</strong>
-                  <span>A partir de R$89/mês no canal oficial da Meta, ou R$149/mês em sessão Z-API.</span>
+                  <span>Um novo número conectado à operação, no canal definido para o projeto.</span>
                 </li>
                 <li>
-                  <strong>Consumo de IA acima do incluso</strong>
-                  <span>A partir de R$169/mês por faixa de uso, dimensionada no briefing do projeto.</span>
+                  <strong>Consumo de IA</strong>
+                  <span>Uso dimensionado conforme as tarefas e o volume da sua operação.</span>
                 </li>
                 <li>
                   <strong>Disparo de marketing no WhatsApp</strong>
-                  <span>Saldo pré-pago, a partir de R$0,55 por mensagem. Atendimento ao cliente continua sem custo.</span>
+                  <span>Campanhas dimensionadas conforme o canal e o volume de mensagens.</span>
                 </li>
                 <li>
                   <strong>Automação adicional</strong>
-                  <span>R$110 a R$120/mês por automação além do limite do plano.</span>
+                  <span>Novos fluxos para conectar processos e tirar tarefas manuais do time.</span>
                 </li>
                 <li>
-                  <strong>Sistema ou agente adicional</strong>
-                  <span>A partir de R$497/mês por unidade, além do que já vem no Pro.</span>
+                  <strong>Site, sistema ou agente</strong>
+                  <span>Novas soluções com hospedagem e manutenção definidas na proposta.</span>
                 </li>
                 <li>
                   <strong>Implantação sob medida</strong>
-                  <span>Taxa única. R$0 para manter o que já existe, a partir de R$697 para construir do zero.</span>
+                  <span>Construção do zero ou avaliação para assumir o que já está funcionando.</span>
                 </li>
               </ul>
               <p class="addons-note">
-                Nada é ilimitado, e isso é proposital. Medimos o seu uso pelo padrão
-                normal dos últimos 30 dias. Se passar do plano de forma constante, a
-                gente mostra o número e propõe o add-on ou o upgrade antes de cobrar.
-                Sem surpresa na fatura.
+                Se o uso crescer além do combinado, a gente conversa pelo WhatsApp
+                e propõe o ajuste antes de qualquer cobrança adicional.
               </p>
             </div>
-          </div>
-
           <!-- ===== (d) O QUE ENTRA NO SEU PLANO TODO MÊS ===== -->
           <div class="included reveal">
             <div class="block-head center">
               <span class="eyebrow">Recorrência que se paga</span>
-              <h3>O que entra no seu plano todo mês.</h3>
+              <h3>O que entra na assinatura todo mês.</h3>
             </div>
             <ul class="included-list">
               <li class="included-item">
@@ -1145,7 +985,7 @@
                 </span>
                 <div>
                   <h4>Evolução contínua</h4>
-                  <p>Sua operação não congela na entrega. A gente ajusta o que já está no ar dentro do seu plano. Projetos novos entram como uma evolução à parte.</p>
+                  <p>Sua operação não congela na entrega. A gente ajusta o que já está no ar dentro da assinatura. Projetos novos entram como uma evolução à parte.</p>
                 </div>
               </li>
               <li class="included-item">
@@ -1154,7 +994,7 @@
                 </span>
                 <div>
                   <h4>Relatório mensal de valor</h4>
-                  <p>Todo mês você recebe, em R$, quanto a operação economizou e recuperou.</p>
+                  <p>Todo mês você recebe um relatório do que a operação economizou e recuperou.</p>
                 </div>
               </li>
             </ul>
@@ -1424,9 +1264,9 @@
               </button>
               <div class="faq-a">
                 <p>
-                  Sim. Todo projeto entra com um plano de operação que mantém,
-                  monitora e evolui o que foi construído, desde o plano Operação
-                  até parcerias maiores.
+                  Sim. Todo projeto entra com uma assinatura que mantém, monitora e
+                  evolui o que foi construído. O tamanho dela vem do que ficou no ar,
+                  não de um pacote de tabela.
                 </p>
               </div>
             </div>
@@ -1447,8 +1287,8 @@
                 <p>
                   Numa conversa rápida. Você conta sobre a sua operação e a
                   gente identifica onde dá para ganhar tempo e dinheiro
-                  primeiro, sem custo e sem compromisso. Daí orçamos a
-                  implementação e ela já entra com o plano de operação.
+                  primeiro, sem custo e sem compromisso. Daí orçamos a construção e
+                  ela já sai com o valor da assinatura que mantém aquilo no ar.
                 </p>
               </div>
             </div>
@@ -1684,7 +1524,7 @@
             <h5>Navegar</h5>
             <a href="#servicos">Serviços</a>
             <a href="#como">Como funciona</a>
-            <a href="#pacotes">Pacotes</a>
+            <a href="#pacotes">Sob medida</a>
             <a href="#publicos">Para quem é</a>
             <a href="#faq">FAQ</a>
           </div>
@@ -1715,6 +1555,7 @@
     </footer>
 
     <!-- ============== SCRIPTS ============== -->
-    <script src="assets/main.js"></script>
+    <script src="assets/motion.js?v=20260905"></script>
+    <script src="assets/main.js?v=20260905"></script>
   </body>
 </html>

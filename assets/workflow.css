@@ -1,0 +1,206 @@
+/* Frontal workflow panel. Depth and movement belong to the cards and connections. */
+.hero-grid { gap: 28px; }
+.hero-visual { width: 100%; max-width: 560px; margin: 0 0 0 auto; container-type: inline-size; }
+.workflow-stage {
+  --panel-surface: color-mix(in srgb, var(--surface) 90%, var(--bg));
+  --panel-card: var(--surface-3);
+  --panel-edge: var(--border-2);
+  --panel-dot: var(--border);
+  --panel-wire: color-mix(in srgb, var(--accent) 25%, var(--border-2));
+  position: relative;
+  width: 100%;
+  aspect-ratio: 520 / 440;
+  min-height: 370px;
+  overflow: visible;
+  border: 1px solid var(--panel-edge);
+  border-radius: 25px;
+  background: linear-gradient(155deg, var(--panel-surface), color-mix(in srgb, var(--bg) 42%, var(--panel-surface)));
+  box-shadow: 0 1px 0 rgba(255,255,255,.025) inset, 0 28px 65px -30px var(--scene-shadow), 0 0 75px -45px rgba(var(--glow), .28);
+  transform: perspective(1100px);
+  transform-style: preserve-3d;
+  animation: none;
+}
+.workflow-stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid var(--panel-edge);
+  background: var(--bg-soft);
+  transform: translateZ(-15px);
+  box-shadow: 15px 30px 55px -15px var(--scene-shadow);
+  pointer-events: none;
+}
+.workflow-frame-side { position: absolute; pointer-events: none; background: linear-gradient(var(--surface-3), var(--bg-soft)); border: 1px solid var(--panel-edge); }
+.workflow-frame-bottom { bottom: 0; left: 24px; width: calc(100% - 48px); height: 15px; transform-origin: center bottom; transform: rotateX(90deg); }
+.workflow-frame-right { right: 0; top: 24px; width: 15px; height: calc(100% - 48px); transform-origin: right center; transform: rotateY(-90deg); }
+.workflow-stage .dots-bg {
+  inset: 43px 0 0;
+  border-radius: 0 0 25px 25px;
+  background-image: radial-gradient(circle, var(--panel-dot) .8px, transparent 1px);
+  background-size: 22px 22px;
+  background-position: center 13px;
+  opacity: .8;
+  pointer-events: none;
+}
+.workflow-stage .flow-bar {
+  height: 42px;
+  padding-inline: 14px;
+  border-radius: 25px 25px 0 0;
+  background: var(--panel-surface);
+  backdrop-filter: none;
+  transform: translateZ(1px);
+}
+.workflow-stage .flow-bar .t { font-size: 11px; letter-spacing: -.04em; gap: 8px; }
+.workflow-stage .flow-bar .t b { font-family: var(--font-body); font-size: 12px; font-weight: 700; letter-spacing: -.045em; }
+.workflow-stage .flow-bar .live { font: 10px var(--font-body); gap: 6px; }
+.workflow-stage .flow-bar .live i { width: 7px; height: 7px; animation: none; }
+.workflow-stage .flow-wires { transform: translateZ(2px); overflow: visible; pointer-events: none; }
+.workflow-stage .flow-wires .wire { stroke: var(--panel-wire); stroke-width: 2.5; }
+.workflow-stage .flow-wires .flow { stroke-width: 1.5; stroke-dasharray: 5 8; opacity: .48; animation: none; }
+.workflow-stage .flow-wires .bead { fill: var(--accent); filter: drop-shadow(0 0 5px rgba(var(--glow), .8)); }
+.workflow-stage .fnode {
+  --node-z: 21px;
+  --node-side: color-mix(in srgb, var(--surface-3) 70%, var(--accent));
+  width: clamp(120px, 23cqw, 128px);
+  min-width: 0;
+  min-height: 48px;
+  padding: 9px 11px;
+  gap: 9px;
+  border-radius: 13px;
+  border-color: var(--panel-edge);
+  background: linear-gradient(140deg, color-mix(in srgb, var(--panel-card) 95%, var(--text)), var(--panel-card) 70%);
+  box-shadow: 0 1px 0 rgba(255,255,255,.035) inset, 0 3px 0 -1px var(--panel-surface), 0 4px 0 -1px var(--panel-edge), 0 12px 24px -14px var(--scene-shadow);
+  transform: translate(-50%, -50%) translateZ(var(--node-z));
+  transform-style: preserve-3d;
+  animation: workflow-node-float var(--drift-time, 23s) ease-in-out infinite;
+  transition: border-color .4s ease, box-shadow .4s ease;
+}
+.node-depth, .node-depth i { position: absolute; display: block; pointer-events: none; }
+.node-depth { inset: 0; transform-style: preserve-3d; }
+.node-depth i { background: var(--node-side); border: 1px solid var(--panel-edge); }
+.node-depth .node-back { inset: 0; border-radius: 13px; transform: translateZ(-12px); box-shadow: 0 18px 25px -12px var(--scene-shadow); }
+.node-depth .node-bottom { left: 12px; bottom: 0; width: calc(100% - 24px); height: 12px; transform-origin: center bottom; transform: rotateX(90deg); background: linear-gradient(var(--node-side), var(--panel-surface)); }
+.node-depth .node-right { right: 0; top: 12px; width: 12px; height: calc(100% - 24px); transform-origin: right center; transform: rotateY(-90deg); }
+.workflow-stage .fnode .ic { width: 27px; height: 27px; border-radius: 7px; background: var(--panel-surface); color: var(--muted); }
+.workflow-stage .fnode .ic svg { width: 15px; height: 15px; }
+.workflow-stage .fnode .nm { font-size: 12px; font-weight: 700; line-height: 1.2; letter-spacing: -.02em; white-space: nowrap; }
+.workflow-stage .fnode .sb { font-size: 9.5px; line-height: 1.55; letter-spacing: -.025em; margin-top: 3px; white-space: nowrap; }
+.workflow-stage .wf-whatsapp { --drift-time: 19s; left: 16.9231%; top: 22.9545%; animation-delay: -6s; }
+.workflow-stage .wf-site { --drift-time: 27s; left: 16.9231%; top: 74.7727%; animation-delay: -13s; }
+.workflow-stage .wf-core { left: 50%; top: 49.0909%; }
+.workflow-stage .wf-crm { --drift-time: 23s; left: 83.0769%; top: 24.0909%; animation-delay: -9s; }
+.workflow-stage .wf-followup { --drift-time: 31s; left: 83.0769%; top: 74.0909%; animation-delay: -19s; }
+.workflow-stage .fnode.hub {
+  --node-z: 18px;
+  --drift-time: 21s;
+  width: 154px;
+  height: 154px;
+  min-width: 0;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  transform: translate(-50%, -50%) translateZ(var(--node-z));
+  animation-delay: -5s;
+}
+.workflow-stage .hub .node-depth { display: none; }
+.workflow-core-render { display: block; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 12px 16px rgba(0,0,0,.35)); }
+.workflow-core-mark { position: absolute; width: 64px; height: 64px; left: 47%; top: 52%; color: #f1e9ff; transform: translate(-50%, -50%) rotate(4deg); filter: drop-shadow(0 0 8px rgba(var(--glow), .65)); }
+.workflow-core-label { position: absolute; left: 50%; top: calc(100% - 2px); transform: translateX(-50%); width: 142px; text-align: center; padding: 7px 12px; border: 1px solid rgba(var(--glow), .4); border-radius: 10px; background: var(--panel-card); box-shadow: 0 5px 15px -8px var(--scene-shadow); }
+.workflow-stage .hub .sb { color: var(--accent-strong); white-space: nowrap; }
+.workflow-stage .hub::before {
+  content: '';
+  position: absolute;
+  width: 90%;
+  height: 55%;
+  left: 5%;
+  top: 42%;
+  background: radial-gradient(ellipse, rgba(var(--glow), .22), transparent 70%);
+  transform: translateZ(-2px);
+  filter: blur(14px);
+  pointer-events: none;
+}
+.workflow-stage .hub::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(var(--glow), .6);
+  border-radius: 36px;
+  opacity: 0;
+  pointer-events: none;
+}
+.workflow-stage[data-phase="qualify"] .hub::after { animation: workflow-process 1.4s ease-out both; }
+.workflow-stage .fnode.is-active {
+  border-color: rgba(var(--glow), .75);
+  box-shadow: 0 0 0 3px rgba(var(--glow), .06), 0 1px 0 rgba(255,255,255,.06) inset, 0 4px 0 -1px var(--panel-edge), 0 12px 28px -14px rgba(var(--glow), .28);
+}
+.workflow-stage .flow-toast {
+  left: 14px;
+  bottom: 14px;
+  padding: 9px 13px;
+  min-height: 58px;
+  border-radius: 13px;
+  background: var(--panel-card);
+  font-size: 12px;
+  line-height: 1.65;
+  box-shadow: 0 1px 0 rgba(255,255,255,.025) inset, 0 10px 30px -20px var(--scene-shadow);
+  transform: translateZ(48px);
+  transition: border-color .5s, box-shadow .5s;
+  animation: none;
+}
+.workflow-stage .flow-toast .ic { background: rgba(var(--glow), .14); }
+.workflow-stage[data-phase="complete"] .flow-toast {
+  border-color: rgba(var(--glow), .55);
+  box-shadow: 0 0 25px -12px rgba(var(--glow), .35), 0 10px 30px -20px var(--scene-shadow);
+}
+.workflow-stage[data-phase="complete"] .flow-toast .ic { animation: workflow-result .65s ease-out both; }
+.workflow-caption { display: block; text-align: right; margin: 17px 3px 0; font: 8px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+.workflow-stage[data-suspended="true"] *, .workflow-stage[data-suspended="true"] *::before, .workflow-stage[data-suspended="true"] *::after { animation-play-state: paused !important; }
+@keyframes workflow-node-float {
+  0%, 100% { transform: translate(-50%, -50%) translate3d(0, 0, var(--node-z)); }
+  50% { transform: translate(-50%, -50%) translate3d(0, -5px, calc(var(--node-z) + 5px)); }
+}
+@keyframes workflow-process { from { opacity: .65; transform: scale(1); } to { opacity: 0; transform: scale(1.13, 1.45); } }
+@keyframes workflow-result { 0% { transform: scale(.8); } 55% { transform: scale(1.14); } 100% { transform: scale(1); } }
+@media (min-width: 721px) and (max-width: 980px) {
+  .hero-grid { grid-template-columns: 1fr; }
+  .hero-copy { max-width: 650px; padding-bottom: 35px; }
+  .hero-visual { max-width: 580px; margin: 0 auto 32px; }
+}
+@media (max-width: 720px) {
+  .hero-grid { gap: 0; }
+  .hero-visual { max-width: 520px; margin: 38px auto 26px; }
+  .workflow-stage { border-radius: 21px; }
+  .workflow-stage .flow-bar { border-radius: 21px 21px 0 0; }
+  .workflow-stage .dots-bg { border-radius: 0 0 21px 21px; }
+}
+@container (max-width: 420px) {
+  .workflow-stage .fnode { width: 104px; padding: 8px; gap: 7px; }
+  .workflow-stage .fnode .ic { width: 23px; height: 23px; }
+  .workflow-stage .fnode .nm { font-size: 11px; }
+  .workflow-stage .fnode .sb { font-size: 8.5px; }
+  .workflow-stage .fnode.hub { width: 124px; height: 124px; }
+  .workflow-core-label { top: calc(100% - 12px); width: 126px; padding: 6px 10px; }
+  .workflow-core-mark { width: 54px; height: 54px; }
+  .workflow-stage .flow-toast { font-size: 11px; padding: 8px 10px; min-height: 53px; }
+}
+@container (max-width: 330px) {
+  .workflow-stage .fnode { width: 94px; gap: 6px; padding-inline: 7px; }
+  .workflow-stage .fnode .ic { width: 21px; height: 23px; }
+  .workflow-stage .fnode .nm { font-size: 10.5px; }
+  .workflow-stage .fnode .sb { font-size: 8px; }
+  .workflow-stage .fnode.hub { width: 112px; height: 112px; top: 46%; }
+  .workflow-core-label { top: calc(100% - 32px); width: 116px; padding: 5px 8px; }
+  .workflow-stage .wf-whatsapp, .workflow-stage .wf-site { left: 20%; }
+  .workflow-stage .wf-crm, .workflow-stage .wf-followup { left: 80%; }
+  .workflow-core-mark { width: 48px; height: 48px; }
+  .workflow-stage .flow-bar { padding-inline: 11px; }
+  .workflow-stage .flow-bar .t { font-size: 9px; gap: 5px; }
+  .workflow-stage .flow-bar .live { font-size: 9px; }
+  .workflow-stage .flow-toast { left: 11px; bottom: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .workflow-stage *, .workflow-stage *::before, .workflow-stage *::after { animation: none !important; transition: none !important; }
+}

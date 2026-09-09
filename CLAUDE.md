@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-WaveOps is a single institutional landing page (startup aesthetic, light theme by default with a dark toggle, PT-BR) for an automation/dev/AI consultancy. All copy is Brazilian Portuguese. (The repo and GitHub Pages path are still named `flowops-landing` from the old name; the live brand is WaveOps.)
+WaveOps is a single institutional landing page (cinematic aesthetic, dark theme by default with a light toggle, PT-BR) for an automation/dev/AI consultancy. All copy is Brazilian Portuguese. (The repo and GitHub Pages path are still named `flowops-landing` from the old name; the live brand is WaveOps.)
 
 There is **no build step, no package manager, no test suite, no framework bundling**. The production page is plain HTML + CSS + vanilla JS, with zero runtime dependencies. There is React in the repo (the Tweaks panel under `dev/`), but it is a development-only tool that the production page does not load. See "Tweaks panel" below.
 
@@ -19,7 +19,7 @@ The entry file is `index.html` (renamed from `FlowOps Landing.html` so GitHub Pa
 ## Architecture
 
 ### Script load order (intentional, do not reorder)
-In `<head>`, in order: the CSP `<meta>` (must come first, before any resource), then `assets/fonts.css` + `assets/styles.css`, then the async Plausible script (`plausible.io`), then `assets/analytics.js` (Plausible bootstrap), then `assets/theme-store.js`. At the end of `<body>`: `assets/main.js`.
+In `<head>`, in order: the CSP `<meta>` (must come first, before any resource), then `assets/fonts.css` + `assets/styles.css` + `assets/cinematic.css`, then the async Plausible script (`plausible.io`), then `assets/analytics.js` (Plausible bootstrap), then `assets/theme-store.js`. At the end of `<body>`: `assets/motion.js`, `assets/main.js`.
 1. `assets/theme-store.js` in `<head>` applies the theme attributes before paint (prevents a flash of the wrong theme).
 2. `assets/analytics.js` holds the Plausible queue stub + `init()` (moved out of an inline `<script>` so the CSP can use `script-src 'self'` without `'unsafe-inline'`). Do not re-inline it.
 3. `assets/main.js` at the end of `<body>` wires all DOM interactions.
@@ -40,7 +40,9 @@ The official WaveOps mark is "Sine Nodes": a symmetric sine wave (two humps) cro
 <circle cx="50" cy="50" r="9" fill="none" stroke="#fff" stroke-width="5"/>  <!-- central hollow hub -->
 <circle cx="18" cy="50" r="7.5" fill="#fff"/><circle cx="82" cy="50" r="7.5" fill="#fff"/>  <!-- solid end nodes -->
 ```
-Stroke is `#fff` on a violet chip / dark / violet bg (shown above), `#7c3aed` on a light bg. The hub is `fill="none"`, so the background shows through its centre. The white variant is inlined in the nav and footer of `index.html` (inside the `.brand .mark` violet chip), and is the source for `assets/favicon.svg` (= the kit `waveops-icon.svg`), `assets/apple-touch-icon.png` (full-bleed gradient, regenerated via `assets/_appicon.html`), `assets/favicon-32.png`, the `assets/og-image.*` card, and the `assets/checklist.*` PDF. If you change the mark, update every one of those in lockstep and regenerate the PNG/PDF (Chrome headless `--screenshot` / `--print-to-pdf`). Do NOT regress to either retired mark: the earlier "onda + nó" single-hollow-ring (path `Q 31 30 34 18.6`, `viewBox 0 0 48 48`) or the green FlowOps node-graph (`#03140d`, `viewBox 0 0 24 24`, path `M7 7l9 4`).
+Stroke is `#fff` on a violet chip / dark / violet bg (shown above), `#7c3aed` on a light bg. The hub is `fill="none"`, so the background shows through its centre. The white variant is inlined in the nav and footer of `index.html` (inside `.brand .mark`, over the 3D badge), and is the source for `assets/favicon.svg` (= the kit `waveops-icon.svg`), `assets/apple-touch-icon.png` (full-bleed gradient, regenerated via `assets/_appicon.html`), `assets/favicon-32.png`, the `assets/og-image.*` card, and the `assets/checklist.*` PDF. If you change the canonical mark geometry, update every one of those in lockstep and regenerate the PNG/PDF (Chrome headless `--screenshot` / `--print-to-pdf`). Do NOT regress to either retired mark: the earlier "onda + nó" single-hollow-ring (path `Q 31 30 34 18.6`, `viewBox 0 0 48 48`) or the green FlowOps node-graph (`#03140d`, `viewBox 0 0 24 24`, path `M7 7l9 4`).
+
+The header and footer marks use `assets/brand/waveops-badge-3d.webp`: a transparent rendered purple badge, shot straight on, with smooth edges and no metallic side pins or sockets. It is 512 x 512, lossless WebP, centred with an even margin, so the canonical Sine Nodes SVG overlays it at `left: 50%; top: 50%` with no rotation (see `.brand .mark` in `assets/cinematic.css`). `dev/workflow-core-v1.prompt.md` records the generation prompt and the post-processing (pin removal by row interpolation, frontal view by homography). This is a rendered presentation variant; it does not change the mark geometry or replace the canonical vector brand kit. It is the only 3D element in the page.
 
 ### Theme system — single source of truth
 `assets/theme-store.js` owns all theme state and exposes `window.FlowTheme`:
@@ -49,7 +51,7 @@ Stroke is `#fff` on a violet chip / dark / violet bg (shown above), `#7c3aed` on
 - `set()` writes four attributes on `<html>`: `data-theme`, `data-accent`, `data-font`, `data-density`, then persists and emits to subscribers.
 - **All visual variation lives in CSS, not JS.** `assets/styles.css` defines design tokens (CSS custom properties like `--bg`, `--accent`, `--glow`, `--dscale`) keyed off those four attribute selectors. To add a theme/accent/font/density option you add a CSS rule for the attribute value AND register it in the relevant Tweak control. Never hardcode colors in JS or markup; reference the tokens.
 
-The nav sun/moon button (`main.js`) toggles `theme` through this store and persists it. Since the Tweaks panel is no longer shipped, `accent`, `font`, and `density` are effectively fixed at the `DEFAULTS` (currently `light / violet / a / compact`), which must stay in sync with the `data-*` attributes hardcoded on `<html>`. Keep all theme state in this one store; do not introduce a second source.
+The nav sun/moon button (`main.js`) toggles `theme` through this store and persists it. Since the Tweaks panel is no longer shipped, `accent`, `font`, and `density` are effectively fixed at the `DEFAULTS` (currently `dark / violet / a / regular`), which must stay in sync with the `data-*` attributes hardcoded on `<html>`. Keep all theme state in this one store; do not introduce a second source.
 
 To actually change a default appearance you must edit it in lockstep in three places: `DEFAULTS` in `theme-store.js`, the `<html data-theme/data-accent/data-font/data-density>` attributes, and (if you re-enable it) `TWEAK_DEFAULTS` in the panel. A persisted value in `localStorage` (`flowops:tweaks:v1`) overrides all of them, so clear that key (or use a private window) when testing a default change.
 
@@ -66,7 +68,19 @@ The Tweaks panel is a prototyping aid for experimenting with theme/accent/font/d
 - `dev/tweaks-app.jsx` is the FlowOps panel. It mirrors `FlowTheme` in via `subscribe` and writes back through `FlowTheme.set`; the one-way wiring avoids an update loop. Its `TWEAK_DEFAULTS` is wrapped in `/*EDITMODE-BEGIN*/ ... /*EDITMODE-END*/` markers (a host rewrites that block on disk, so keep them). Editing `TWEAK_DEFAULTS` does NOT change the live default. See the lockstep rule above.
 
 ### main.js conventions
-Single IIFE, no modules. Scroll-driven effects (reveal-on-scroll, scrollspy) are implemented with manual `getBoundingClientRect` checks on `scroll`, **not** `IntersectionObserver` (with a `setTimeout` safety net that force-reveals everything after 1800ms). FAQ accordion, pricing tabs, and mobile menu are class-toggle driven against IDs in the HTML.
+Single IIFE, no modules. Reveals and carousel visibility use `IntersectionObserver`, with content visible if the API is unavailable or motion is paused. Scrollspy uses manual `getBoundingClientRect` checks. FAQ accordion, pricing tabs, and mobile menu are class-toggle driven against IDs in the HTML.
+
+### Cinematic visual layer
+
+`assets/cinematic.css` loads after the base stylesheet and owns the visual tokens, responsive layouts and CSS motion diagrams. Display typography uses the local Hanken Grotesk font.
+
+The hero panel is the flat `.flow-canvas` from `assets/styles.css`: five `.fnode` cards positioned in percentages over a dotted grid, with `IA qualifica` as the hub card and SVG wires carrying animated beads. `assets/workflow.css` and `assets/scene.js` implement an alternative 3D panel with floating cards and a rendered badge at the centre. They are kept in the repo but the page does not load them. To bring that panel back you restore the `.hero-visual` block from the `workflow.css` era and re-add both files to `index.html`.
+
+The integrations strip (`section.logos`) scrolls as a continuous marquee. Four identical `.marquee-group` copies sit in one `.marquee-track`; the animation translates the track by 25%, which is exactly one group width, so the end frame matches the start and the loop closes with no jump. Two groups are not enough because one group is narrower than the visible window. It pauses on hover, freezes in place (not back to the start) under the global `data-motion="paused"`, and stops under reduced motion.
+
+At the end of the body, scripts load in this order: `motion.js`, `main.js`. `motion.js` owns the `data-motion` attribute and emits `waveops:motion` with `{ paused }`; it respects live reduced-motion preferences, and the nav pause button toggles it. No canvas and no WebGL renderer anywhere. Theme defaults and HTML attributes are `dark / violet / a / regular`; saved theme preferences still take precedence.
+
+`dev/verify-workflow.cjs` checks the `scene.js` motion controller with a mocked DOM built from the `data-edge` paths in `index.html`; since the 3D panel is not in the page it exits early with a SKIP line, and starts asserting again if that panel returns. `dev/verify-design.js` provides UI checks to run in a local browser. Neither file is loaded in production.
 
 ## Backend integration points
 

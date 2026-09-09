@@ -48,7 +48,7 @@ def main():
         stub = fetch(f"https://esm.sh/{spec}?{QUERY}")
         paths = re.findall(r'"(/[^"]+\.m?js)"', stub)
         if not paths:
-            sys.exit(f"esm.sh nao devolveu caminho de bundle para {spec}")
+            sys.exit(f"esm.sh não devolveu caminho de bundle para {spec}")
         code = fetch("https://esm.sh" + paths[-1])
         for pattern, replacement in REWRITES:
             code = pattern.sub(replacement, code)

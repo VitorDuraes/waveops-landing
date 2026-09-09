@@ -87,13 +87,26 @@ console.log('\nsinal de scroll');
     assert.ok(!/fillRect\(0,0,s\.W,s\.H\)/.test(src), 'ainda pinta fundo opaco com fillRect');
     assert.ok(/clearRect\(0,0,s\.W,s\.H\)/.test(src), 'falta o clearRect');
   });
-  check('respeita a pausa de movimento', () => {
-    assert.ok(/if\s*\(\s*paused\s*\)/.test(read('assets/starfield.mjs')), 'falta o guard de paused');
+  check('o guard de pausa vem antes de agendar o frame', () => {
+    const src = read('assets/starfield.mjs');
+    const m = src.match(/function animate\(\)\{([\s\S]{0,300})/);
+    assert.ok(m, 'não achou a função animate');
+    const inicio = m[1].replace(/\s+/g, '');
+    const posGuard = inicio.indexOf('if(paused)');
+    const posAgenda = inicio.indexOf('requestAnimationFrame(animate)');
+    assert.ok(posGuard >= 0, 'falta o guard de paused em animate()');
+    assert.ok(posAgenda >= 0, 'não achou o agendamento de frame em animate()');
+    assert.ok(posGuard < posAgenda,
+      'o guard de paused vem DEPOIS de agendar o frame, então a pausa não interrompe o laço');
   });
-  check('consome o sinal de scroll', () => {
+  check('a energia de scroll altera de fato as partículas', () => {
     const src = read('assets/starfield.mjs');
     assert.ok(/createScrollSignal/.test(src), 'não importa createScrollSignal');
-    assert.ok(/scroll\.sample\(\)/.test(src), 'não amostra o scroll no loop');
+    assert.ok(/scroll\.sample\(\)/.test(src), 'não amostra o scroll no laço');
+    assert.ok(/if\(scrollE>0\)\{/.test(src), 'falta o bloco condicional da energia de scroll');
+    assert.ok(/targetY-=scrollDir\*scrollPush\*scrollE/.test(src),
+      'a energia de scroll não desloca targetY, então o acoplamento é decorativo');
+    assert.ok(/alpha=Math\.min\(1,alpha\+scrollE\*/.test(src), 'a energia de scroll não acende o brilho');
   });
   check('mantem o perfil de performance por device', () => {
     const src = read('assets/starfield.mjs');

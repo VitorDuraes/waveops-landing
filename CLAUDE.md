@@ -10,7 +10,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 WaveOps is a single institutional landing page (cinematic aesthetic, dark theme by default with a light toggle, PT-BR) for an automation/dev/AI consultancy. All copy is Brazilian Portuguese. (The repo and GitHub Pages path are still named `flowops-landing` from the old name; the live brand is WaveOps.)
 
-There is **no build step, no package manager, no test suite, no framework bundling**. The production page is plain HTML + CSS + vanilla JS, with zero runtime dependencies. There is React in the repo (the Tweaks panel under `dev/`), but it is a development-only tool that the production page does not load. See "Tweaks panel" below.
+There is **no build step and no package manager**. The production page is plain HTML + CSS + JS.
+Since 09/09/2026 it also loads React 19 and framer-motion 11 as pre-compiled ESM, vendored in
+`assets/vendor/` and served from the same origin, to run the ported Framer Starfield component in
+the hero. This is a deliberate, user-approved deviation from the previous "zero runtime
+dependencies" property: it costs about 113 KB gzip. There is still no npm, no `node_modules`,
+no bundler and no Babel. Regenerate the vendored modules with `python _fetch_vendor.py`;
+see `assets/vendor/README.md`.
 
 ## Running it
 
@@ -24,7 +30,13 @@ In `<head>`, in order: the CSP `<meta>` (must come first, before any resource), 
 2. `assets/analytics.js` holds the Plausible queue stub + `init()` (moved out of an inline `<script>` so the CSP can use `script-src 'self'` without `'unsafe-inline'`). Do not re-inline it.
 3. `assets/main.js` at the end of `<body>` wires all DOM interactions.
 
-No React, no Babel, no build step. The only remaining third-party request is the async Plausible script; everything else (fonts, CSS, JS) is self-hosted. The Tweaks panel and its React/Babel CDN scripts were removed from the page; the sources now live in `dev/`.
+After `assets/main.js`, `assets/starfield-mount.mjs` loads as `<script type="module">`. It mounts the
+`#hero-starfield` React island inside `.flow-canvas`, reads colors from the CSS tokens through
+`FlowTheme` and pauses on the `waveops:motion` event. It has no import map on purpose: every
+specifier is relative, so the CSP stays at `script-src 'self'`. If the module fails, the CSS
+`.dots-bg` fallback stays visible.
+
+No Babel, no build step. Production React usage is limited to the vendored starfield island described above. The only remaining third-party network request is the async Plausible script, everything else (fonts, CSS, JS, and the vendored React/framer-motion ESM) is self-hosted. The Tweaks panel and its React/Babel CDN scripts were removed from the page; the sources now live in `dev/`.
 
 ### Security hardening (HTTP/CSP, fonts, anti-bot)
 - **CSP** is a `<meta http-equiv="Content-Security-Policy">` at the very top of `<head>`. If you add a third-party origin (script, font, image, or a `fetch`/`connect` target), you must add it to the matching directive or the browser blocks it. `connect-src` currently allows the n8n webhook host and `plausible.io`; `script-src` allows `plausible.io`. `style-src` keeps `'unsafe-inline'` because the HTML uses inline `style=` attributes (low risk; not worth a full refactor). `frame-ancestors`/`X-Frame-Options` only work as HTTP headers, which GitHub Pages can't set, so clickjacking protection is pending a host that allows headers.

@@ -356,7 +356,7 @@ Criar `dev/smoke-react.html`:
       return jsx('div', { ref, children: 'hook state=' + n + ' inView=' + String(inView) });
     }
     createRoot(document.getElementById('root')).render(jsx(Probe, {}));
-    log('RESULTADO: OK, um React so, hooks funcionando');
+    log('RESULTADO: OK, um React só, hooks funcionando');
   } catch (e) {
     log('RESULTADO: FALHOU -> ' + e.message);
   }

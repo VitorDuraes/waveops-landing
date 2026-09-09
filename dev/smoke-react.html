@@ -1,0 +1,36 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Smoke: React 19 + framer-motion 11</title>
+<body style="background:#111;color:#eee;font:14px system-ui;padding:24px">
+<h1>Smoke test</h1>
+<div id="root"></div>
+<pre id="log"></pre>
+<script type="module">
+  const log = (m) => { document.getElementById('log').textContent += m + '\n'; };
+  window.addEventListener('error', (e) => log('ERRO: ' + e.message));
+  try {
+    const React = await import('../assets/vendor/react.mjs');
+    const { createRoot } = await import('../assets/vendor/react-dom-client.mjs');
+    const { jsx } = await import('../assets/vendor/jsx-runtime.mjs');
+    const fm = await import('../assets/vendor/framer-motion.mjs');
+
+    log('react ' + (React.version || '?'));
+    log('hooks presentes: ' + ['useState', 'useEffect', 'useRef'].every((h) => typeof React[h] === 'function'));
+    log('framer-motion useScroll: ' + typeof fm.useScroll);
+    log('framer-motion useTransform: ' + typeof fm.useTransform);
+    log('framer-motion useInView: ' + typeof fm.useInView);
+
+    function Probe() {
+      const [n, setN] = React.useState(0);
+      const ref = React.useRef(null);
+      const inView = fm.useInView(ref);
+      React.useEffect(() => { setN(1); }, []);
+      return jsx('div', { ref, children: 'hook state=' + n + ' inView=' + String(inView) });
+    }
+    createRoot(document.getElementById('root')).render(jsx(Probe, {}));
+    log('RESULTADO: OK, um React só, hooks funcionando');
+  } catch (e) {
+    log('RESULTADO: FALHOU -> ' + e.message);
+  }
+</script>
+</body>

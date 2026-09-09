@@ -29,4 +29,50 @@ check('RenderTarget.current não devolve o valor de canvas', () => {
     'current() não pode devolver CANVAS, senão o componente renderiza o placeholder estático');
 });
 
-console.log('\n' + passed + ' verificações passaram');
+console.log('\nsinal de scroll');
+(async () => {
+  const { createScrollSignal } = await import('../assets/scroll-signal.mjs');
+
+  check('em repouso a energia e zero', () => {
+    const s = createScrollSignal({ getY: () => 0 });
+    s.sample(); s.sample();
+    assert.strictEqual(s.energy, 0);
+  });
+
+  check('scroll para baixo gera energia positiva e direcao 1', () => {
+    let y = 0;
+    const s = createScrollSignal({ getY: () => y });
+    s.sample();
+    y = 400; s.sample();
+    assert.ok(s.energy > 0.5, 'energia ficou ' + s.energy);
+    assert.strictEqual(s.direction, 1);
+  });
+
+  check('scroll para cima gera direcao -1', () => {
+    let y = 400;
+    const s = createScrollSignal({ getY: () => y });
+    s.sample();
+    y = 0; s.sample();
+    assert.ok(s.energy > 0.5);
+    assert.strictEqual(s.direction, -1);
+  });
+
+  check('energia satura em 1', () => {
+    let y = 0;
+    const s = createScrollSignal({ getY: () => y });
+    s.sample();
+    y = 999999; s.sample();
+    assert.ok(s.energy <= 1, 'energia passou de 1: ' + s.energy);
+  });
+
+  check('energia decai ate zerar quando o scroll para', () => {
+    let y = 0;
+    const s = createScrollSignal({ getY: () => y });
+    s.sample();
+    y = 400; s.sample();
+    for (let i = 0; i < 200; i++) s.sample();
+    assert.ok(s.energy < 0.01, 'energia não decaiu: ' + s.energy);
+  });
+
+  console.log('\n' + passed + ' verificações passaram');
+})();

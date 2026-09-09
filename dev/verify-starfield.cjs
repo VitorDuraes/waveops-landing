@@ -74,5 +74,34 @@ console.log('\nsinal de scroll');
     assert.ok(s.energy < 0.01, 'energia não decaiu: ' + s.energy);
   });
 
+  console.log('\nporte do starfield');
+  check('nenhum specifier bare sobrou', () => {
+    const src = read('assets/starfield.mjs');
+    const bare = [...src.matchAll(/from\s*"([^".][^"]*)"/g)]
+      .map((m) => m[1])
+      .filter((s) => !s.startsWith('.') && !s.startsWith('/'));
+    assert.deepStrictEqual(bare, [], 'sobrou specifier bare: ' + bare.join(', '));
+  });
+  check('canvas é transparente, não pinta fundo opaco', () => {
+    const src = read('assets/starfield.mjs');
+    assert.ok(!/fillRect\(0,0,s\.W,s\.H\)/.test(src), 'ainda pinta fundo opaco com fillRect');
+    assert.ok(/clearRect\(0,0,s\.W,s\.H\)/.test(src), 'falta o clearRect');
+  });
+  check('respeita a pausa de movimento', () => {
+    assert.ok(/if\s*\(\s*paused\s*\)/.test(read('assets/starfield.mjs')), 'falta o guard de paused');
+  });
+  check('consome o sinal de scroll', () => {
+    const src = read('assets/starfield.mjs');
+    assert.ok(/createScrollSignal/.test(src), 'não importa createScrollSignal');
+    assert.ok(/scroll\.sample\(\)/.test(src), 'não amostra o scroll no loop');
+  });
+  check('mantem o perfil de performance por device', () => {
+    const src = read('assets/starfield.mjs');
+    assert.ok(/getDeviceProfile/.test(src), 'o porte removeu o getDeviceProfile');
+    assert.ok(/1500/.test(src), 'perdeu o teto de 1500 pontos do mobile');
+    assert.ok(/quantAlpha/.test(src), 'perdeu a quantização de alpha, que segura o custo por frame');
+    assert.ok(/spatialGrid/.test(src), 'perdeu o hash espacial da interação de mouse');
+  });
+
   console.log('\n' + passed + ' verificações passaram');
 })();

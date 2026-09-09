@@ -308,6 +308,18 @@ section[id] { scroll-margin-top: 84px; }
   background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
   background-size: 22px 22px; opacity: .6;
 }
+/* Island React do campo de partículas. Fica atrás dos nós e dos fios.
+   O .dots-bg continua no DOM como fallback caso o módulo não carregue. */
+#hero-starfield {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  overflow: hidden;
+}
+#hero-starfield canvas { display: block; width: 100%; height: 100%; }
+.flow-canvas:has(#hero-starfield canvas) .dots-bg { opacity: 0; }
 .flow-bar {
   position: absolute; top: 0; left: 0; right: 0; height: 42px; z-index: 3;
   display: flex; align-items: center; justify-content: space-between; padding: 0 14px;

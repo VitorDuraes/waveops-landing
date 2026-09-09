@@ -1,14 +1,14 @@
 /* WaveOps: substituto local do pacote "framer".
 
-   Verificado em 09/09/2026: framer@2.4.1 e a unica versao que o esm.sh resolve e
-   NAO exporta useIsStaticRenderer. O framer@3.0.4 resolve para "export default null",
-   deixou de ser biblioteca. O pacote real e inutilizavel fora do canvas do Framer,
-   entao os quatro simbolos que os componentes importam sao reimplementados aqui.
+   Verificado em 09/09/2026: framer@2.4.1 é a única versão que o esm.sh resolve e
+   NÃO exporta useIsStaticRenderer. O framer@3.0.4 resolve para "export default null",
+   deixou de ser biblioteca. O pacote real é inutilizável fora do canvas do Framer,
+   então os quatro símbolos que os componentes importam são reimplementados aqui.
 
-   Fora do editor do Framer, os controles de propriedade nao tem funcao: o componente
-   recebe as props direto do nosso codigo de montagem. */
+   Fora do editor do Framer, os controles de propriedade não têm função: o componente
+   recebe as props direto do nosso código de montagem. */
 
-/** Registro de controles do editor. Sem editor, nao faz nada. */
+/** Registro de controles do editor. Sem editor, não faz nada. */
 export function addPropertyControls() {}
 
 /** Constantes que os componentes referenciam ao declarar controles. */
@@ -36,7 +36,7 @@ export const ControlType = Object.freeze({
   FusedNumber: 'fusednumber',
 });
 
-/** Alvo de renderizacao. Sempre "preview": e o modo animado, nao o placeholder. */
+/** Alvo de renderização. Sempre "preview": é o modo animado, não o placeholder. */
 export const RenderTarget = Object.freeze({
   canvas: 'CANVAS',
   export: 'EXPORT',
@@ -47,7 +47,7 @@ export const RenderTarget = Object.freeze({
   },
 });
 
-/** Renderizador estatico e coisa de export do Framer. Aqui e sempre ao vivo. */
+/** Renderizador estático é coisa de export do Framer. Aqui é sempre ao vivo. */
 export function useIsStaticRenderer() {
   return false;
 }

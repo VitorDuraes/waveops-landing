@@ -1,4 +1,4 @@
-/* WaveOps: verificacao dos islands React do hero. Roda com node, sem navegador.
+/* WaveOps: verificação dos islands React do hero. Roda com node, sem navegador.
    Uso: node dev/verify-starfield.cjs */
 'use strict';
 const assert = require('node:assert');
@@ -14,19 +14,19 @@ const check = (nome, fn) => {
 };
 
 console.log('shim do pacote framer');
-check('exporta os 4 simbolos usados pelos componentes', () => {
-  // Validacao por texto: check() e sincrono, entao um callback async faria o
+check('exporta os 4 símbolos usados pelos componentes', () => {
+  // Validação por texto: check() é síncrono, então um callback async faria o
   // try/catch dele nunca ver a falha.
   const src = read('assets/vendor/framer-shim.mjs');
   for (const s of ['addPropertyControls', 'ControlType', 'RenderTarget', 'useIsStaticRenderer']) {
     assert.ok(new RegExp('export[^\\n]*\\b' + s + '\\b').test(src), 'falta export de ' + s);
   }
 });
-check('RenderTarget.current nao devolve o valor de canvas', () => {
+check('RenderTarget.current não devolve o valor de canvas', () => {
   const src = read('assets/vendor/framer-shim.mjs');
   assert.ok(/current\s*\(\s*\)/.test(src), 'RenderTarget precisa do metodo current()');
   assert.ok(!/current\s*\(\s*\)\s*\{\s*return\s*['"]CANVAS/.test(src),
-    'current() nao pode devolver CANVAS, senao o componente renderiza o placeholder estatico');
+    'current() não pode devolver CANVAS, senão o componente renderiza o placeholder estático');
 });
 
-console.log('\n' + passed + ' verificacoes passaram');
+console.log('\n' + passed + ' verificações passaram');

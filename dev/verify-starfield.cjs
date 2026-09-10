@@ -208,6 +208,87 @@ console.log('\nsinal de scroll');
       'passa do ruído do twinkle');
   });
 
+  console.log('\nmotion-lite (substituto do framer-motion no ImageSequence)');
+  const {
+    clamp01,
+    mapRange,
+    progressFromRect,
+    pageProgress,
+    createMotionValue,
+    deriveTransform,
+  } = await import('../assets/motion-lite.mjs');
+
+  check('progresso do scroll: 0 logo abaixo da viewport, 1 ao sair por cima, 0.5 no meio', () => {
+    const viewportHeight = 800;
+    const height = 400;
+    // Offset ["start end", "end start"]: 0 quando o topo do alvo encosta na
+    // base da viewport (top === viewportHeight).
+    const abaixo = progressFromRect({ top: viewportHeight, bottom: viewportHeight + height }, viewportHeight);
+    assert.strictEqual(abaixo, 0, 'alvo logo abaixo da viewport devia dar progresso 0, deu ' + abaixo);
+
+    // 1 quando a base do alvo encosta no topo da viewport (bottom === 0).
+    const saiu = progressFromRect({ top: -height, bottom: 0 }, viewportHeight);
+    assert.strictEqual(saiu, 1, 'alvo que acabou de sair por cima devia dar progresso 1, deu ' + saiu);
+
+    // Ponto médio do percurso: metade da distância total (viewport + altura do alvo).
+    const meio = progressFromRect({ top: 200, bottom: 600 }, viewportHeight);
+    assert.ok(Math.abs(meio - 0.5) < 1e-9, 'meio do percurso devia dar 0.5, deu ' + meio);
+  });
+
+  check('progresso do scroll satura: nunca passa de 1 nem fica abaixo de 0', () => {
+    const viewportHeight = 800;
+    const antesDoInicio = progressFromRect({ top: 100000, bottom: 100400 }, viewportHeight);
+    assert.ok(antesDoInicio >= 0 && antesDoInicio <= 1, 'saturação para baixo falhou: ' + antesDoInicio);
+    assert.strictEqual(antesDoInicio, 0, 'alvo muito abaixo devia saturar em 0, deu ' + antesDoInicio);
+
+    const depoisDoFim = progressFromRect({ top: -100000, bottom: -99600 }, viewportHeight);
+    assert.ok(depoisDoFim >= 0 && depoisDoFim <= 1, 'saturação para cima falhou: ' + depoisDoFim);
+    assert.strictEqual(depoisDoFim, 1, 'alvo muito acima devia saturar em 1, deu ' + depoisDoFim);
+
+    // clamp01 isolado, e pageProgress (progresso da página inteira) também satura.
+    assert.strictEqual(clamp01(5), 1);
+    assert.strictEqual(clamp01(-5), 0);
+    assert.strictEqual(pageProgress(999999, 2000, 800), 1, 'pageProgress não saturou em 1');
+    assert.strictEqual(pageProgress(-999999, 2000, 800), 0, 'pageProgress não saturou em 0');
+  });
+
+  check('useTransform (mapRange): mapeia 0 para 0 e 1 para N, satura fora do intervalo', () => {
+    const N = 4;
+    assert.strictEqual(mapRange(0, [0, 1], [0, N]), 0);
+    assert.strictEqual(mapRange(1, [0, 1], [0, N]), N);
+    assert.strictEqual(mapRange(0.5, [0, 1], [0, N]), N / 2);
+    assert.strictEqual(mapRange(1.5, [0, 1], [0, N]), N, 'não saturou acima de 1');
+    assert.strictEqual(mapRange(-0.5, [0, 1], [0, N]), 0, 'não saturou abaixo de 0');
+  });
+
+  check('assinar o derivado recebe notificação quando a origem muda', () => {
+    const origem = createMotionValue(0);
+    const { value: derivado } = deriveTransform(origem, [0, 1], [0, 10]);
+
+    // Correto na primeira leitura, sem esperar por nenhum evento.
+    assert.strictEqual(derivado.get(), 0, 'derivado não nasceu com o valor mapeado da origem');
+
+    let recebido = null;
+    let chamadas = 0;
+    derivado.on('change', (latest) => {
+      recebido = latest;
+      chamadas += 1;
+    });
+
+    origem.set(0.5);
+    assert.strictEqual(chamadas, 1, 'assinante do derivado não foi notificado quando a origem mudou');
+    assert.strictEqual(recebido, 5, 'derivado notificou com o valor errado: ' + recebido);
+    assert.strictEqual(derivado.get(), 5, 'derivado.get() não refletiu a mudança da origem');
+  });
+
+  check('image-sequence.mjs não importa mais de ./vendor/framer-motion.mjs', () => {
+    const src = read('assets/image-sequence.mjs');
+    assert.ok(!/from"\.\/vendor\/framer-motion\.mjs"/.test(src),
+      'ainda importa o framer-motion inteiro, o ponto desta tarefa é tirar isso do caminho de carga');
+    assert.ok(/from"\.\/motion-lite\.mjs\?v=/.test(src),
+      'não importa mais de ./motion-lite.mjs, então a troca de especificador não aconteceu');
+  });
+
   const resumo = passed === total
     ? passed + ' verificações passaram'
     : passed + ' de ' + total + ' verificações passaram';

@@ -14,7 +14,7 @@
 
 import { progressFromRect } from './motion-lite.mjs?v=20260910';
 
-const VERSAO = '20260910';
+const VERSAO = '20260910b';
 const TOTAL_QUADROS = 48;
 const ID_SCROLL = 'como-sequence';
 const ID_ALVO = 'como-sequence-target';
@@ -51,6 +51,26 @@ if (secaoScroll && alvo && 'IntersectionObserver' in window && window.matchMedia
     return quadros[Math.min(TOTAL_QUADROS - 1, Math.max(0, indice))];
   }
 
+  // Cabeçalho compacto que gruda junto com o painel: sem ele, o visitante
+  // rola 1+ tela de diagrama sem uma palavra de texto. Reaproveita o eyebrow
+  // e o h2 que já existem no cabeçalho da seção (#como), só compactados em
+  // h3, nunca reescritos. aria-hidden porque é duplicata visual decorativa:
+  // o eyebrow e o h2 originais acima já cobrem o texto para leitor de tela,
+  // e o próprio contêiner (#como-sequence-target) já é aria-hidden="true".
+  function cabecalhoGrudado() {
+    return jsx('div', {
+      className: 'sequence-caption',
+      'aria-hidden': 'true',
+      children: jsx('div', {
+        className: 'sequence-caption-inner',
+        children: [
+          jsx('span', { className: 'eyebrow', children: 'Como funciona' }),
+          jsx('h3', { children: 'Um caminho claro. Do diagnóstico à operação.' }),
+        ],
+      }),
+    });
+  }
+
   function pintar() {
     if (!raiz || !jsx) return;
     if (pausado) {
@@ -58,22 +78,34 @@ if (secaoScroll && alvo && 'IntersectionObserver' in window && window.matchMedia
       // dois num estado só): sem raspagem por scroll, um quadro fixo.
       raiz.render(
         jsx('div', {
-          className: 'sequence-frozen',
-          children: jsx('img', {
-            src: quadroDoProgresso().src,
-            alt: 'Fluxo WaveOps se montando, com as animações pausadas',
-            decoding: 'async',
-          }),
+          className: 'sequence-stack',
+          children: [
+            cabecalhoGrudado(),
+            jsx('div', {
+              className: 'sequence-frozen',
+              children: jsx('img', {
+                src: quadroDoProgresso().src,
+                alt: 'Fluxo WaveOps se montando, com as animações pausadas',
+                decoding: 'async',
+              }),
+            }),
+          ],
         })
       );
       return;
     }
     raiz.render(
-      jsx(ImageSequence, {
-        images: quadros,
-        scrollBehavior: 'scrollSection',
-        sectionId: ID_SCROLL,
-        fit: 'cover',
+      jsx('div', {
+        className: 'sequence-stack',
+        children: [
+          cabecalhoGrudado(),
+          jsx(ImageSequence, {
+            images: quadros,
+            scrollBehavior: 'scrollSection',
+            sectionId: ID_SCROLL,
+            fit: 'cover',
+          }),
+        ],
       })
     );
   }

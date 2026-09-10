@@ -12,28 +12,57 @@ WaveOps is a single institutional landing page (cinematic aesthetic, dark theme 
 
 There is **no build step and no package manager**. The production page is plain HTML + CSS + JS.
 Since 09/09/2026 it also loads React 19 as pre-compiled ESM, vendored in `assets/vendor/` and
-served from the same origin, to run the ported Framer Starfield component in the hero. This is a
-deliberate, user-approved deviation from the previous "zero runtime dependencies" property.
+served from the same origin, to run the ported Framer Starfield component in the hero. Since
+10/09/2026 a second island, the ported Framer `ImageSequence`, reuses that same vendored React to
+raspar pelo scroll a sequência de quadros de "Como funciona". This is a deliberate, user-approved
+deviation from the previous "zero runtime dependencies" property.
 
-What the page actually downloads today is about **70.5 KB gzip**, measured on 10/09/2026 with
-`gzip -9` over the real import graph starting at the `<script type="module">`:
+What the page actually downloads is measured over **two import graphs**, one per
+`<script type="module">` in `index.html` (`assets/starfield-mount.mjs` and
+`assets/sequence-mount.mjs`), followed recursively through every relative specifier and stripped
+of `?v=`. The two graphs share four `assets/vendor/` modules, so the number that matters is the
+**union, counted once**, not the sum of both. Measured on 10/09/2026 with `gzip -9` over each file:
 
-| Module | gzip |
-|---|---|
-| `assets/vendor/react-dom-client.mjs` | 56.6 KB |
-| `assets/starfield.mjs` | 6.7 KB |
-| `assets/vendor/react.mjs` | 3.8 KB |
-| `assets/starfield-mount.mjs` | 1.1 KB |
-| `assets/vendor/framer-shim.mjs` | 0.9 KB |
-| `assets/vendor/jsx-runtime.mjs` | 0.8 KB |
-| `assets/scroll-signal.mjs` | 0.6 KB |
-| **Total loaded** | **70.5 KB** |
+| Module | gzip | Quando carrega |
+|---|---|---|
+| `assets/vendor/react-dom-client.mjs` | 56.6 KB | sempre (import estático de `starfield-mount.mjs`) |
+| `assets/starfield.mjs` | 6.7 KB | sempre |
+| `assets/vendor/react.mjs` | 3.8 KB | sempre |
+| `assets/motion-lite.mjs` | 2.8 KB | sempre (import estático de `sequence-mount.mjs`) |
+| `assets/image-sequence.mjs` | 2.6 KB | só quando `#como` se aproxima da viewport E a tela tem 768px ou mais |
+| `assets/sequence-mount.mjs` | 2.4 KB | sempre (é o próprio `<script type="module">`) |
+| `assets/starfield-mount.mjs` | 1.1 KB | sempre (é o próprio `<script type="module">`) |
+| `assets/vendor/framer-shim.mjs` | 0.9 KB | sempre |
+| `assets/vendor/jsx-runtime.mjs` | 0.8 KB | sempre |
+| `assets/scroll-signal.mjs` | 0.6 KB | sempre |
+| **Total único (pior caso: desktop que rola até "Como funciona")** | **78.4 KB** | |
 
-`assets/vendor/framer-motion.mjs` and `assets/vendor/emotion-is-prop-valid.mjs` (50.9 KB gzip
-together) are vendored but **no production island imports them**, so the browser never fetches
-them. The only file that imports `framer-motion.mjs` is `dev/smoke-react.html`, which is not
-production. They stay in the repo on purpose: the phase 2 ImageSequence component needs them, and
-regenerating later costs more than keeping them. Do not quote their weight as page cost.
+Note a coluna "quando carrega": `assets/image-sequence.mjs` é o único módulo de fato condicional.
+Todos os outros, incluindo o `sequence-mount.mjs` e o `motion-lite.mjs` que ele importa
+estaticamente, chegam para **todo visitante, desktop ou mobile**, porque o `<script>` na raiz não
+tem gate de dispositivo; o gate mora dentro do módulo, no `IntersectionObserver` e no
+`matchMedia`. Quem nunca chega em `#como`, ou está abaixo de 768px, para em **75.8 KB**: os mesmos
+78.4 KB menos `image-sequence.mjs`. O `react-dom-client.mjs` e o `jsx-runtime.mjs` que
+`sequence-mount.mjs` importa de forma dinâmica na hora de montar já estão no cache de módulos do
+navegador, carregados antes pelo starfield: o delta real de chegar em `#como` no desktop é só os
+2,6 KB do `image-sequence.mjs`.
+
+`assets/vendor/framer-motion.mjs` e `assets/vendor/emotion-is-prop-valid.mjs` (50.9 KB gzip
+juntos) continuam vendorizados e **hoje não têm nenhum consumidor**, nem em produção nem na fase 2:
+o `ImageSequence` portado usa `assets/motion-lite.mjs`, nosso `useScroll`/`useTransform`/
+`useInView` escritos à mão, que substituiu o `framer-motion` inteiro por 2,8 KB gzip. O único
+arquivo que ainda importa `framer-motion.mjs` é `dev/smoke-react.html`, que não é produção. Os dois
+arquivos ficam no repo porque regenerar depois custa mais caro que manter parado; não cite o peso
+deles como custo de página, e não assuma mais nenhum plano de consumi-los.
+
+**A sequência de quadros em si** (`assets/sequence/`, 48 WebP) pesa **309,1 KB** em bytes brutos,
+medido em 10/09/2026, abaixo do teto de 400 KB do plano da fase 2. Gzip não ajuda nesses arquivos
+porque WebP já é um formato comprimido (um quadro amostrado caiu de 10864 para 10762 bytes com
+`gzip -9`, menos de 1%), então o peso relevante é o tamanho em disco. Esses 309,1 KB nunca entram
+no cálculo de JS acima porque não são módulo: são o `src` de `<img>` que o `ImageSequence` seta
+depois de montado, carga preguiçosa de verdade, via `IntersectionObserver` com `rootMargin: '600px
+0px'` observando a seção, e **nunca no mobile**: o mount confere `window.matchMedia('(min-width:
+768px)')` antes de montar, então abaixo de 768px nenhum quadro é baixado, ponto.
 
 There is still no npm, no `node_modules`, no bundler and no Babel. Regenerate the vendored modules
 with `python _fetch_vendor.py`; see `assets/vendor/README.md`.

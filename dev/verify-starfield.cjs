@@ -289,6 +289,68 @@ console.log('\nsinal de scroll');
       'não importa mais de ./motion-lite.mjs, então a troca de especificador não aconteceu');
   });
 
+  console.log('\nisland da sequência de "Como funciona" (fase 2)');
+  check('a sequência só monta dentro do guard de interseção, nunca solta fora dele', () => {
+    const src = read('assets/sequence-mount.mjs');
+    assert.ok(/observer\s*=\s*new IntersectionObserver\(/.test(src),
+      'não usa IntersectionObserver, então não há carga preguiçosa por scroll');
+    assert.ok(/observer\.observe\(secaoScroll\)/.test(src),
+      'o observer não observa a seção, então nunca dispara');
+    assert.ok(/if\s*\(entrada\.isIntersecting\s*&&\s*desktop\.matches\)\s*montar\(\)/.test(src),
+      'a chamada de montar() não está condicionada a isIntersecting e desktop.matches juntos');
+    assert.ok(!/^\s*montar\(\);\s*$/m.test(src),
+      'existe uma chamada de montar() solta, fora do guard, então a carga deixa de ser preguiçosa');
+  });
+
+  check('abaixo de 768px a montagem não roda mesmo com a seção visível', () => {
+    const src = read('assets/sequence-mount.mjs');
+    assert.ok(/window\.matchMedia\(\s*'\(min-width:\s*768px\)'\s*\)/.test(src),
+      'o corte de mobile não está em 768px, ou não usa matchMedia para lê-lo');
+    assert.ok(/if\s*\(entrada\.isIntersecting\s*&&\s*desktop\.matches\)\s*montar\(\)/.test(src),
+      'desktop.matches não faz parte do guard que libera montar(), então o mobile também baixaria os quadros');
+  });
+
+  check('assina waveops:motion e o congelamento realmente alterna a renderização', () => {
+    const src = read('assets/sequence-mount.mjs');
+    const handler = src.match(/window\.addEventListener\('waveops:motion',\s*\(evento\)\s*=>\s*\{([\s\S]*?)\n  \}\);/);
+    assert.ok(handler, 'não achou o handler completo de waveops:motion');
+    assert.ok(/pausado\s*=\s*Boolean\(evento\.detail\s*&&\s*evento\.detail\.paused\)/.test(handler[1]),
+      'o handler não atualiza pausado a partir de evento.detail.paused');
+    assert.ok(/pintar\(\)/.test(handler[1]),
+      'o handler não repinta depois de mudar pausado, então o congelamento nunca aparece na tela');
+
+    const pintarFn = src.match(/function pintar\(\) \{([\s\S]*?)\n  \}\n/);
+    assert.ok(pintarFn, 'não achou a função pintar()');
+    assert.ok(/if \(pausado\) \{/.test(pintarFn[1]), 'pintar() não ramifica em cima de pausado');
+    assert.ok(/sequence-frozen/.test(pintarFn[1]) && /ImageSequence/.test(pintarFn[1]),
+      'pintar() não alterna entre o quadro congelado e o ImageSequence animado, então pausar não muda nada na tela');
+  });
+
+  check('o número de quadros no disco bate com o que o mount espera', () => {
+    const src = read('assets/sequence-mount.mjs');
+    const m = src.match(/TOTAL_QUADROS\s*=\s*(\d+)/);
+    assert.ok(m, 'não achou TOTAL_QUADROS em sequence-mount.mjs');
+    const esperado = parseInt(m[1], 10);
+    const dir = path.join(root, 'assets/sequence');
+    const quadros = fs.readdirSync(dir).filter((f) => /^frame-\d{3}\.webp$/.test(f));
+    assert.strictEqual(quadros.length, esperado,
+      'assets/sequence/ tem ' + quadros.length + ' quadros, o mount espera ' + esperado);
+    const primeiro = 'frame-000.webp';
+    const ultimo = 'frame-' + String(esperado - 1).padStart(3, '0') + '.webp';
+    assert.ok(quadros.includes(primeiro), 'falta ' + primeiro);
+    assert.ok(quadros.includes(ultimo), 'falta ' + ultimo + ', a numeração não bate com TOTAL_QUADROS menos 1');
+  });
+
+  check('o peso de assets/sequence/ não passa do teto de 400 KB', () => {
+    const dir = path.join(root, 'assets/sequence');
+    const total = fs.readdirSync(dir)
+      .filter((f) => f.endsWith('.webp'))
+      .reduce((soma, f) => soma + fs.statSync(path.join(dir, f)).size, 0);
+    const TETO = 400 * 1024;
+    assert.ok(total <= TETO,
+      'assets/sequence/ pesa ' + Math.round(total / 1024) + ' KB, passou do teto de 400 KB');
+  });
+
   const resumo = passed === total
     ? passed + ' verificações passaram'
     : passed + ' de ' + total + ' verificações passaram';

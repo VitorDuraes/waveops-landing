@@ -796,6 +796,16 @@
               está e o que vem a seguir.
             </p>
           </div>
+
+          <!-- ===== Sequência de quadros do fluxo, raspada pelo scroll (island React, fase 2) =====
+               #como-sequence é o contêiner alto que dá distância de scroll: veja
+               assets/sequence-mount.mjs para a montagem preguiçosa, o desligamento abaixo
+               de 768px e o congelamento sob data-motion="paused". Camada visual apenas,
+               os 6 passos de texto abaixo continuam completos e visíveis sem depender dela. -->
+          <div class="sequence-scroll" id="como-sequence">
+            <div class="sequence-frame" id="como-sequence-target" aria-hidden="true"></div>
+          </div>
+
           <div class="steps">
             <div class="step reveal">
               <span class="num">1</span>
@@ -1559,5 +1569,6 @@
     <script src="assets/motion.js?v=20260905"></script>
     <script src="assets/main.js?v=20260905"></script>
     <script type="module" src="assets/starfield-mount.mjs?v=20260910"></script>
+    <script type="module" src="assets/sequence-mount.mjs?v=20260910"></script>
   </body>
 </html>

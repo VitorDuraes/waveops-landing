@@ -494,6 +494,36 @@ section[id] { scroll-margin-top: 84px; }
 /* ============================================================
    Como funciona (process)
    ============================================================ */
+
+/* Sequência de quadros raspada pelo scroll (island React, fase 2). Ver
+   assets/sequence-mount.mjs. O contêiner é alto de propósito: dá a distância
+   de scroll que o ImageSequence usa para avançar os 48 quadros. Nenhum
+   ancestral do nó sticky pode levar `overflow` diferente de `visible`, isso
+   quebra o `position: sticky` do componente mesmo sem conteúdo transbordando.
+   Some abaixo de 768px: ver o `@media` no fim deste bloco. */
+.sequence-scroll { position: relative; height: 300vh; margin: 0 0 60px; }
+.sequence-frame { position: relative; height: 100%; }
+/* `canvas` é o quadro em movimento (dentro do sticky que o próprio
+   ImageSequence desenha); `.sequence-frozen` é o quadro único que o mount
+   desenha no lugar dele quando o movimento está pausado. */
+.sequence-frozen {
+  position: sticky; top: 0; height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+}
+#como-sequence-target canvas,
+.sequence-frozen img {
+  display: block; width: 100%; height: 100%; object-fit: cover;
+}
+#como-sequence-target canvas,
+.sequence-frozen {
+  border: 1px solid var(--border-2); border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, var(--surface-2), var(--surface));
+  box-shadow: var(--shadow);
+}
+@media (max-width: 767px) {
+  .sequence-scroll { display: none; }
+}
+
 .steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; counter-reset: step; }
 .step { position: relative; padding-top: 30px; }
 .step::before {

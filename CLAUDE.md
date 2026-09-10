@@ -15,21 +15,21 @@ Since 09/09/2026 it also loads React 19 as pre-compiled ESM, vendored in `assets
 served from the same origin, to run the ported Framer Starfield component in the hero. This is a
 deliberate, user-approved deviation from the previous "zero runtime dependencies" property.
 
-What the page actually downloads today is about **72 KB gzip**, measured on 09/09/2026 with
+What the page actually downloads today is about **70.5 KB gzip**, measured on 10/09/2026 with
 `gzip -9` over the real import graph starting at the `<script type="module">`:
 
 | Module | gzip |
 |---|---|
-| `assets/vendor/react-dom-client.mjs` | 58.1 KB |
-| `assets/starfield.mjs` | 6.8 KB |
+| `assets/vendor/react-dom-client.mjs` | 56.6 KB |
+| `assets/starfield.mjs` | 6.7 KB |
 | `assets/vendor/react.mjs` | 3.8 KB |
 | `assets/starfield-mount.mjs` | 1.1 KB |
 | `assets/vendor/framer-shim.mjs` | 0.9 KB |
 | `assets/vendor/jsx-runtime.mjs` | 0.8 KB |
 | `assets/scroll-signal.mjs` | 0.6 KB |
-| **Total loaded** | **72.2 KB** |
+| **Total loaded** | **70.5 KB** |
 
-`assets/vendor/framer-motion.mjs` and `assets/vendor/emotion-is-prop-valid.mjs` (52.1 KB gzip
+`assets/vendor/framer-motion.mjs` and `assets/vendor/emotion-is-prop-valid.mjs` (50.9 KB gzip
 together) are vendored but **no production island imports them**, so the browser never fetches
 them. The only file that imports `framer-motion.mjs` is `dev/smoke-react.html`, which is not
 production. They stay in the repo on purpose: the phase 2 ImageSequence component needs them, and

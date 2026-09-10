@@ -9,7 +9,7 @@
  * @param {number} [opts.decay] fator de decaimento por frame, entre 0 e 1.
  * @param {number} [opts.scale] pixels de deslocamento que saturam a energia.
  */
-export function createScrollSignal({ getY, decay = 0.88, scale = 0.045 }) {
+export function createScrollSignal({ getY, decay = 0.95, scale = 0.18 }) {
   let last = getY();
   let energy = 0;
   let direction = 0;

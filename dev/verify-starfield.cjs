@@ -183,6 +183,31 @@ console.log('\nsinal de scroll');
       'o IntersectionObserver não é desconectado na limpeza do efeito');
   });
 
+  console.log('\ncalibração do scroll');
+  check('a sensibilidade do scroll não regride para valores surdos', () => {
+    const src = read('assets/scroll-signal.mjs');
+    const m = src.match(/decay\s*=\s*([\d.]+)\s*,\s*scale\s*=\s*([\d.]+)/);
+    assert.ok(m, 'não achou os padrões de decay e scale em createScrollSignal');
+    const decay = parseFloat(m[1]), scale = parseFloat(m[2]);
+    // Medido no navegador em 10/09/2026, amostrando uma vez por quadro a 110 fps.
+    // Com scale 0.045 e decay 0.88 o deslocamento ficava em 1,6 a 3,9 px contra
+    // 10 px de ruído do twinkle, ou seja, invisível. Com 0.18 e 0.95 a amplitude
+    // medida foi 22,2 px contra 1,9 px de ruído.
+    assert.ok(scale >= 0.12,
+      'scale ' + scale + ' é baixo demais: exige mais de ' + Math.round(1 / scale) +
+      ' px num quadro só para saturar, e rolagem normal entrega de 3 a 10 px');
+    assert.ok(decay >= 0.93,
+      'decay ' + decay + ' mata a energia rápido demais: o decaimento é POR QUADRO, ' +
+      'e a página roda acima de 100 fps');
+  });
+  check('o empurrão de scroll é forte o bastante para ser visto', () => {
+    const m = read('assets/starfield-mount.mjs').match(/scrollPush:\s*(\d+)/);
+    assert.ok(m, 'não achou scrollPush em starfield-mount.mjs');
+    assert.ok(parseInt(m[1], 10) >= 24,
+      'scrollPush ' + m[1] + ' é fraco: com a calibração atual o deslocamento não ' +
+      'passa do ruído do twinkle');
+  });
+
   const resumo = passed === total
     ? passed + ' verificações passaram'
     : passed + ' de ' + total + ' verificações passaram';

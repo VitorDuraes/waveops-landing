@@ -57,7 +57,7 @@ specifier is relative, so the CSP stays at `script-src 'self'`. If the module fa
 `.dots-bg` fallback stays visible.
 
 Four rules that the island depends on and that are easy to break:
-1. **Cache-busting reaches the sub-imports.** The `<script>` tag carries `?v=20260909` like its
+1. **Cache-busting reaches the sub-imports.** The `<script>` tag carries `?v=20260910` like its
    neighbours, but a query string on the tag does not reach relative sub-imports. So the version
    also travels in the specifiers of our own mutable modules: `./starfield.mjs?v=` in
    `starfield-mount.mjs` and `./scroll-signal.mjs?v=` in `starfield.mjs`. The `assets/vendor/`

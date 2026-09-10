@@ -5,7 +5,12 @@
 
 import { createRoot } from './vendor/react-dom-client.mjs';
 import { jsx } from './vendor/jsx-runtime.mjs';
-import HeroStarfield from './starfield.mjs';
+// Cache-busting: o `?v=` do <script> do index.html não alcança os sub-imports
+// relativos. Os módulos de ./vendor/ são versionados e imutáveis na prática,
+// mas os nossos mudam. Então a versão vai também no especificador. Ao mexer no
+// starfield.mjs ou no scroll-signal.mjs, suba a data aqui, no import do
+// scroll-signal dentro do starfield.mjs e no <script> do index.html.
+import HeroStarfield from './starfield.mjs?v=20260909';
 
 const alvo = document.getElementById('hero-starfield');
 if (alvo) {

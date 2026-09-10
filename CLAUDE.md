@@ -11,12 +11,32 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 WaveOps is a single institutional landing page (cinematic aesthetic, dark theme by default with a light toggle, PT-BR) for an automation/dev/AI consultancy. All copy is Brazilian Portuguese. (The repo and GitHub Pages path are still named `flowops-landing` from the old name; the live brand is WaveOps.)
 
 There is **no build step and no package manager**. The production page is plain HTML + CSS + JS.
-Since 09/09/2026 it also loads React 19 and framer-motion 11 as pre-compiled ESM, vendored in
-`assets/vendor/` and served from the same origin, to run the ported Framer Starfield component in
-the hero. This is a deliberate, user-approved deviation from the previous "zero runtime
-dependencies" property: it costs about 113 KB gzip. There is still no npm, no `node_modules`,
-no bundler and no Babel. Regenerate the vendored modules with `python _fetch_vendor.py`;
-see `assets/vendor/README.md`.
+Since 09/09/2026 it also loads React 19 as pre-compiled ESM, vendored in `assets/vendor/` and
+served from the same origin, to run the ported Framer Starfield component in the hero. This is a
+deliberate, user-approved deviation from the previous "zero runtime dependencies" property.
+
+What the page actually downloads today is about **72 KB gzip**, measured on 09/09/2026 with
+`gzip -9` over the real import graph starting at the `<script type="module">`:
+
+| Module | gzip |
+|---|---|
+| `assets/vendor/react-dom-client.mjs` | 58.1 KB |
+| `assets/starfield.mjs` | 6.8 KB |
+| `assets/vendor/react.mjs` | 3.8 KB |
+| `assets/starfield-mount.mjs` | 1.1 KB |
+| `assets/vendor/framer-shim.mjs` | 0.9 KB |
+| `assets/vendor/jsx-runtime.mjs` | 0.8 KB |
+| `assets/scroll-signal.mjs` | 0.6 KB |
+| **Total loaded** | **72.2 KB** |
+
+`assets/vendor/framer-motion.mjs` and `assets/vendor/emotion-is-prop-valid.mjs` (52.1 KB gzip
+together) are vendored but **no production island imports them**, so the browser never fetches
+them. The only file that imports `framer-motion.mjs` is `dev/smoke-react.html`, which is not
+production. They stay in the repo on purpose: the phase 2 ImageSequence component needs them, and
+regenerating later costs more than keeping them. Do not quote their weight as page cost.
+
+There is still no npm, no `node_modules`, no bundler and no Babel. Regenerate the vendored modules
+with `python _fetch_vendor.py`; see `assets/vendor/README.md`.
 
 ## Running it
 
@@ -36,7 +56,28 @@ After `assets/main.js`, `assets/starfield-mount.mjs` loads as `<script type="mod
 specifier is relative, so the CSP stays at `script-src 'self'`. If the module fails, the CSS
 `.dots-bg` fallback stays visible.
 
-No Babel, no build step. Production React usage is limited to the vendored starfield island described above. The only remaining third-party network request is the async Plausible script, everything else (fonts, CSS, JS, and the vendored React/framer-motion ESM) is self-hosted. The Tweaks panel and its React/Babel CDN scripts were removed from the page; the sources now live in `dev/`.
+Four rules that the island depends on and that are easy to break:
+1. **Cache-busting reaches the sub-imports.** The `<script>` tag carries `?v=20260909` like its
+   neighbours, but a query string on the tag does not reach relative sub-imports. So the version
+   also travels in the specifiers of our own mutable modules: `./starfield.mjs?v=` in
+   `starfield-mount.mjs` and `./scroll-signal.mjs?v=` in `starfield.mjs`. The `assets/vendor/`
+   modules are version pinned and immutable in practice, so they carry no query. Bump all three
+   together.
+2. **Paused must still paint.** `buildGrid()` sets `canvas.width`, which wipes the canvas. The
+   debounced `ResizeObserver` callback therefore repaints whenever no animation loop is running
+   (`isStaticRenderer || paused || !visivel`). Without that, a visitor with
+   `prefers-reduced-motion: reduce`, or anyone pressing `#motion-toggle`, gets an empty hero: the
+   `:has()` rule in `styles.css` keeps `.dots-bg` at `opacity: 0` as long as the canvas element
+   exists, so the CSS fallback does not come back.
+3. **Cursor events are listened for on `window`, not on the island.** `#hero-starfield` keeps
+   `pointer-events: none` so it never steals clicks from the nodes and the wires, and
+   `svg.flow-wires` covers it anyway. `pointerToLocal()` converts page coordinates to container
+   coordinates through `container.getBoundingClientRect()`.
+4. **The loop stops off screen.** An `IntersectionObserver` flips `visivel`; `animate()` returns
+   early when it is false and the observer restarts the loop when the hero comes back. Every
+   listener and both observers are removed in the `useEffect` cleanup.
+
+No Babel, no build step. Production React usage is limited to the vendored starfield island described above. The only remaining third-party network request is the async Plausible script, everything else (fonts, CSS, JS, and the vendored React ESM) is self-hosted. The Tweaks panel and its React/Babel CDN scripts were removed from the page; the sources now live in `dev/`.
 
 ### Security hardening (HTTP/CSP, fonts, anti-bot)
 - **CSP** is a `<meta http-equiv="Content-Security-Policy">` at the very top of `<head>`. If you add a third-party origin (script, font, image, or a `fetch`/`connect` target), you must add it to the matching directive or the browser blocks it. `connect-src` currently allows the n8n webhook host and `plausible.io`; `script-src` allows `plausible.io`. `style-src` keeps `'unsafe-inline'` because the HTML uses inline `style=` attributes (low risk; not worth a full refactor). `frame-ancestors`/`X-Frame-Options` only work as HTTP headers, which GitHub Pages can't set, so clickjacking protection is pending a host that allows headers.

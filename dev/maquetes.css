@@ -1,0 +1,12 @@
+/* ============================================================
+   Este arquivo não tem mais conteúdo.
+
+   O CSS das maquetes e o da seção de cinema passaram a viver num lugar só,
+   assets/cinema.css, carregado por <link> tanto pelo index.html quanto pelos
+   dois laboratórios em dev/. Antes existia uma cópia inline em cada laboratório
+   e este arquivo era a fonte, o que obrigava a sincronizar três lugares na mão.
+   Não existe mais cópia, então não existe mais o que divergir.
+
+   O arquivo continua aqui só para não quebrar link antigo. Edite
+   assets/cinema.css.
+   ============================================================ */

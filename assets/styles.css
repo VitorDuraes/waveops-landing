@@ -495,59 +495,6 @@ section[id] { scroll-margin-top: 84px; }
    Como funciona (process)
    ============================================================ */
 
-/* Sequência de quadros raspada pelo scroll (island React, fase 2). Ver
-   assets/sequence-mount.mjs. O contêiner é alto de propósito: dá a distância
-   de scroll que o ImageSequence usa para avançar os 48 quadros. Nenhum
-   ancestral do nó sticky pode levar `overflow` diferente de `visible`, isso
-   quebra o `position: sticky` do componente mesmo sem conteúdo transbordando.
-   Some abaixo de 768px: ver o `@media` no fim deste bloco. */
-.sequence-scroll { position: relative; height: 220vh; margin: 0 0 60px; }
-.sequence-frame { position: relative; height: 100%; }
-.sequence-stack { position: relative; height: 100%; }
-/* Cabeçalho compacto que acompanha o painel grudado, para o visitante nunca
-   ficar 1+ tela sem saber o que está vendo. Mesma altura e mesmo `top: 0` do
-   nó sticky vizinho (`canvas`/`.sequence-frozen`), com `margin-bottom`
-   negativo para não somar altura real ao contêiner: gruda e desgruda no
-   mesmo ponto de scroll que o quadro, só sobrepõe visualmente por cima.
-   `pointer-events: none` porque é só texto, não pode roubar clique da área. */
-.sequence-caption {
-  position: sticky; top: 0; height: 100vh; margin-bottom: -100vh;
-  z-index: 2; pointer-events: none;
-  display: flex; flex-direction: column; align-items: center;
-}
-.sequence-caption-inner {
-  /* 108px porque o nav é sticky, z-index 60, ~91px de altura: sem essa folga
-     o cabeçalho grudado nasce escondido atrás do nav, sempre no topo (0). */
-  margin-top: 108px; padding: 12px 24px 20px;
-  display: flex; flex-direction: column; align-items: center; gap: 6px;
-  max-width: min(92%, 560px); text-align: center;
-  background: linear-gradient(180deg, var(--surface) 55%, transparent);
-  border-radius: var(--radius-lg);
-}
-.sequence-caption-inner h3 {
-  margin: 0; color: var(--text); font-size: clamp(17px, 2vw, 22px);
-}
-/* `canvas` é o quadro em movimento (dentro do sticky que o próprio
-   ImageSequence desenha); `.sequence-frozen` é o quadro único que o mount
-   desenha no lugar dele quando o movimento está pausado. */
-.sequence-frozen {
-  position: sticky; top: 0; height: 100vh;
-  display: flex; align-items: center; justify-content: center;
-}
-#como-sequence-target canvas,
-.sequence-frozen img {
-  display: block; width: 100%; height: 100%; object-fit: cover;
-}
-#como-sequence-target canvas,
-.sequence-frozen {
-  border: 1px solid var(--border-2); border-radius: var(--radius-lg);
-  background: linear-gradient(180deg, var(--surface-2), var(--surface));
-  box-shadow: var(--shadow);
-}
-@media (max-width: 767px) {
-  .sequence-scroll { display: none; }
-}
-
 .steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; counter-reset: step; }
 .step { position: relative; padding-top: 30px; }
 .step::before {

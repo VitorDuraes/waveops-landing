@@ -35,11 +35,11 @@ if (alvo) {
       jsx(HeroStarfield, {
         ...lerTokens(),
         paused: pausado,
-        gap: 12,
+        gap: 16,
         baseRadius: 1.1,
         influenceRadius: 110,
         pushStrength: 16,
-        glowBoost: 0.5,
+        glowBoost: 0.38,
         scrollPush: 26,
         borderRadius: 0,
         shootingStarsEnabled: true,

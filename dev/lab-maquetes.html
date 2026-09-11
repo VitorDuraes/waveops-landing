@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark" data-accent="violet" data-font="a" data-density="regular">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Laboratório: maquetes de produto · WaveOps</title>
+
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/styles.css">
+<link rel="stylesheet" href="../assets/cinematic.css">
+<link rel="stylesheet" href="../assets/cinema.css">
+
+
+<style>
+/* O CSS das maquetes vive em assets/cinema.css, carregado acima. */
+
+/* ============================================================
+   LABORATÓRIO DAS MAQUETES
+
+   Página de trabalho, não é produção. Ela existe para julgar cada maquete de
+   perto, isolada do scroll do cinema, e para conferir os três estados que
+   decidem se ela pode entrar: tema claro, movimento pausado e o recorte pela
+   borda direita.
+
+   Nada de cor própria aqui: o fundo e os fios saem dos mesmos tokens da
+   página, senão o julgamento seria feito num contexto que não existe.
+   ============================================================ */
+body {
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: clip;
+}
+
+/* ---------- Barra de controle ---------- */
+.lab-barra {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  padding: 14px clamp(16px, 4vw, 48px);
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(14px);
+}
+.lab-barra h1 {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -.02em;
+  margin-right: auto;
+}
+.lab-barra h1 small {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: .04em;
+  color: var(--dim);
+  margin-top: 3px;
+}
+.lab-bt {
+  padding: 8px 14px;
+  border: 1px solid var(--border-2);
+  border-radius: 8px;
+  background: var(--surface);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--muted);
+  transition: border-color .2s ease, color .2s ease;
+}
+.lab-bt:hover { border-color: var(--accent); color: var(--accent-strong); }
+.lab-bt[aria-pressed="true"] {
+  border-color: rgba(var(--glow), .55);
+  background: rgba(var(--glow), .12);
+  color: var(--accent-strong);
+}
+
+/* ---------- Ficha de cada maquete ---------- */
+.lab-ficha {
+  padding: clamp(30px, 5vw, 62px) clamp(16px, 4vw, 48px);
+  border-bottom: 1px solid var(--border);
+}
+.lab-cabeca {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: clamp(18px, 2.4vw, 30px);
+}
+.lab-cabeca b {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  color: var(--accent-strong);
+}
+.lab-cabeca h2 {
+  font-family: var(--font-display);
+  font-size: clamp(19px, 2.2vw, 26px);
+  font-weight: 600;
+  letter-spacing: -.03em;
+}
+.lab-cabeca p {
+  font-size: 13.5px;
+  color: var(--muted);
+  margin-left: auto;
+  max-width: 40ch;
+  text-align: right;
+}
+
+/* A caixa é só um recorte. No estado normal ela mostra a maquete inteira; com
+   o recorte ligado ela corta na mesma proporção que a tela do cinema corta. */
+/* Mesma escala mínima do cinema: 12.5px de base põe o menor texto da maquete
+   em 11.5px, então o laboratório julga a peça no tamanho em que ela roda. */
+.lab-caixa {
+  --mk-fs: 12.5px;
+  font-size: var(--mk-fs);
+  width: 64em;
+  max-width: 100%;
+  position: relative;
+}
+@media (min-width: 1500px) { .lab-caixa { --mk-fs: 13px; } }
+
+body.lab-recorte .lab-caixa {
+  width: 47.4em;
+  overflow: clip;
+  /* Folga em cima e embaixo para a sombra e a inclinação não serem cortadas
+     junto com a lateral: no cinema quem corta é a tela, não a caixa. */
+  padding-block: 2em;
+  margin-block: -2em;
+}
+body.lab-recorte .lab-caixa .mk {
+  transform: perspective(1800px) rotateY(-11deg) rotateX(3deg);
+  transform-origin: 100% 50%;
+}
+@media (max-width: 767px) {
+  body.lab-recorte .lab-caixa { width: 100%; }
+  body.lab-recorte .lab-caixa .mk { transform: none; }
+  .lab-cabeca { flex-wrap: wrap; }
+  .lab-cabeca p { margin-left: 0; text-align: left; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="lab-barra">
+  <h1>Maquetes de produto<small>dev/lab-maquetes.html · não é produção</small></h1>
+  <button class="lab-bt" id="bt-tema" type="button" aria-pressed="false">tema claro</button>
+  <button class="lab-bt" id="bt-motion" type="button" aria-pressed="false">pausar movimento</button>
+  <button class="lab-bt" id="bt-recorte" type="button" aria-pressed="false">ver recorte da tela</button>
+</div>
+
+<main>
+
+<!-- ============================================================
+     01. Automação de processos
+     ============================================================ -->
+<section class="lab-ficha">
+  <div class="lab-cabeca">
+    <b>01</b>
+    <h2>Automação de processos</h2>
+    <p>Uma mensagem chega e o resto acontece sozinho. A fila acende em sequência.</p>
+  </div>
+
+  <div class="lab-caixa">
+<div class="mk mk-fluxo" aria-hidden="true">
+
+  <!-- Conversa: a mensagem que chega. Fica à frente das outras superfícies. -->
+  <section class="mk-jan mk1-conversa">
+    <div class="mk-topo mk-so-amplo">
+      <span class="mk-luzes"><i></i><i></i><i></i></span>
+      <span class="mk-titulo">WhatsApp comercial</span>
+      <span class="mk-chip mk-chip-ok mk-esticar"><i></i>conectado</span>
+    </div>
+    <div class="mk-corpo">
+      <div class="mk1-lista mk-so-amplo">
+        <div class="mk1-contato mk1-contato-ativo">
+          <span class="mk-ava">A</span>
+          <div><b>Ana M.</b><em>Oi, vocês fazem orça…</em></div>
+        </div>
+        <div class="mk1-contato">
+          <span class="mk-ava mk-ava-neutro">B</span>
+          <div><b>Bruno S.</b><em>Perfeito, combinado.</em></div>
+        </div>
+        <div class="mk1-contato">
+          <span class="mk-ava mk-ava-neutro">C</span>
+          <div><b>Carla T.</b><em>Pode mandar o link?</em></div>
+        </div>
+        <div class="mk1-contato">
+          <span class="mk-ava mk-ava-neutro">D</span>
+          <div><b>Diego P.</b><em>Recebido, obrigado.</em></div>
+        </div>
+      </div>
+
+      <div class="mk1-thread">
+        <div class="mk1-thread-topo mk-so-amplo">
+          <span class="mk-ava">A</span>
+          <div><b>Ana M.</b><em>online</em></div>
+          <span class="mk-chip mk-chip-vazio mk-esticar">Novo contato</span>
+        </div>
+        <span class="mk1-dia mk-so-amplo">hoje</span>
+        <div class="mk-fala">
+          <span class="mk-ava">A</span>
+          <div class="mk-balao">
+            <p>Oi, vocês fazem orçamento para automatizar o atendimento?</p>
+            <span class="mk-hora">agora</span>
+          </div>
+        </div>
+        <div class="mk-fala mk-fala-saida mk-so-amplo">
+          <div class="mk-balao">
+            <p>Oi, Ana! Recebi sua mensagem. Já estou chamando alguém do time.</p>
+            <span class="mk-hora">agora · envio automático</span>
+          </div>
+        </div>
+        <div class="mk-escrever mk-so-amplo">
+          <span>Escreva uma mensagem</span>
+          <svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21.5 2.5 10.8 13.2m10.7-10.7-6.7 18.3-3.9-7.6-7.6-3.9 18.2-6.8Z"/></svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Cartão de CRM nascendo, atrás e deslocado. -->
+  <section class="mk-jan mk1-crm">
+    <div class="mk-topo">
+      <span class="mk-luzes"><i></i><i></i><i></i></span>
+      <span class="mk-titulo">CRM</span>
+      <span class="mk-chip mk-chip-acento mk-esticar">novo cartão</span>
+    </div>
+    <div class="mk-corpo">
+      <dl>
+        <div class="mk-campo"><dt>Nome</dt><dd>Ana M.</dd></div>
+        <div class="mk-campo"><dt>Origem</dt><dd>WhatsApp</dd></div>
+        <div class="mk-campo"><dt>Etapa</dt><dd><span class="mk-tag mk-tag-acento">Novo</span></dd></div>
+      </dl>
+      <div class="mk1-crm-pe">
+        <span class="mk-mono">criado pela automação</span>
+        <span class="mk-mono mk-esticar">agora</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Fila de ações: acende de cima para baixo, uma a cada 700ms. -->
+  <section class="mk-jan mk1-fila mk-so-amplo">
+    <div class="mk-topo">
+      <span class="mk-rotulo">Automação · novo lead</span>
+      <span class="mk-chip mk-chip-acento mk-esticar"><i></i>em execução</span>
+    </div>
+    <div class="mk-corpo">
+      <ul>
+        <li class="mk1-passo" style="--i:0">
+          <span class="mk1-marca"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 12.5 5.2 5.2L20 6.5"/></svg></span>
+          <b>Cartão criado</b><span class="mk-mono">agora</span>
+        </li>
+        <li class="mk1-passo" style="--i:1">
+          <span class="mk1-marca"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 12.5 5.2 5.2L20 6.5"/></svg></span>
+          <b>Responsável definido</b><span class="mk-mono">agora</span>
+        </li>
+        <li class="mk1-passo" style="--i:2">
+          <span class="mk1-marca"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 12.5 5.2 5.2L20 6.5"/></svg></span>
+          <b>Follow-up agendado</b><span class="mk-mono">agora</span>
+        </li>
+      </ul>
+      <div class="mk1-fila-pe">
+        <span class="mk-mono">próxima execução</span>
+        <span class="mk-mono mk-esticar">quando chegar mensagem nova</span>
+      </div>
+    </div>
+  </section>
+</div>
+  </div>
+</section>
+
+<!-- ============================================================
+     02. Integração de sistemas
+     ============================================================ -->
+<section class="lab-ficha">
+  <div class="lab-cabeca">
+    <b>02</b>
+    <h2>Integração de sistemas</h2>
+    <p>O mesmo registro nas quatro janelas. Os pacotes atravessam os fios em laço.</p>
+  </div>
+
+  <div class="lab-caixa">
+<div class="mk mk-integra" aria-hidden="true">
+
+  <!-- Fios: linha reta girada, com um pacote que anda só em translateX. -->
+  <span class="mk2-fio mk2-fio-a"><i class="mk2-pacote"></i></span>
+  <span class="mk2-fio mk2-fio-b"><i class="mk2-pacote" style="--atraso:-1.2s"></i></span>
+  <span class="mk2-fio mk2-fio-c"><i class="mk2-pacote" style="--atraso:-2.4s"></i></span>
+
+  <section class="mk-jan mk2-jan mk2-site">
+    <div class="mk-topo">
+      <span class="mk-luzes"><i></i><i></i><i></i></span>
+      <span class="mk-titulo">Site</span>
+    </div>
+    <div class="mk-corpo">
+      <span class="mk-rotulo mk-so-amplo">Formulário</span>
+      <div class="mk2-input">Nome <b>Ana M.</b></div>
+      <div class="mk2-input mk-so-amplo">E-mail <b>ana@exemplo.com</b></div>
+      <div class="mk2-linha"><span class="mk-bt mk-bt-forte">Enviar</span><span class="mk-chip mk-chip-ok mk-esticar">enviado</span></div>
+    </div>
+  </section>
+
+  <section class="mk-jan mk2-jan mk2-crm" style="--atraso:-3s">
+    <div class="mk-topo">
+      <span class="mk-luzes"><i></i><i></i><i></i></span>
+      <span class="mk-titulo">CRM</span>
+      <span class="mk-chip mk-chip-vazio mk-esticar">leads</span>
+    </div>
+    <div class="mk-corpo">
+      <div class="mk2-reg"><span class="mk-ava">A</span><b>Ana M.</b><span class="mk-esticar">Novo</span></div>
+      <div class="mk2-linha mk-so-amplo"><span class="mk-ava mk-ava-neutro">B</span>Bruno S.<span class="mk-esticar">Em contato</span></div>
+      <div class="mk2-linha mk-so-amplo"><span class="mk-ava mk-ava-neutro">C</span>Carla T.<span class="mk-esticar">Proposta</span></div>
+      <div class="mk2-linha mk-so-amplo"><span class="mk-ava mk-ava-neutro">D</span>Diego P.<span class="mk-esticar">Aguardando</span></div>
+      <div class="mk2-linha mk-so-amplo"><span class="mk-mono">sincronizado</span><span class="mk-mono mk-esticar">agora</span></div>
+    </div>
+  </section>
+
+  <section class="mk-jan mk2-jan mk2-pag" style="--atraso:-5s">
+    <div class="mk-topo">
+      <span class="mk-luzes"><i></i><i></i><i></i></span>
+      <span class="mk-titulo">Pagamento</span>
+    </div>
+    <div class="mk-corpo">
+      <span class="mk-rotulo mk-so-amplo">Cobrança</span>
+      <div class="mk2-reg"><b>Ana M.</b><span class="mk-esticar">aguardando</span></div>
+      <div class="mk2-linha mk-so-amplo">Link de cobrança<span class="mk-chip mk-chip-ok mk-esticar">enviado</span></div>
+    </div>
+  </section>
+
+  <section class="mk-jan mk2-jan mk2-zap" style="--atraso:-7s">
+    <div class="mk-topo">
+      <span class="mk-luzes"><i></i><i></i><i></i></span>
+      <span class="mk-titulo">WhatsApp</span>
+    </div>
+    <div class="mk-corpo">
+      <div class="mk2-reg"><span class="mk-ava">A</span><b>Ana M.</b><span class="mk-esticar">conversa aberta</span></div>
+      <div class="mk-fala mk-so-amplo">
+        <div class="mk-balao"><p>Recebi o link, obrigada.</p><span class="mk-hora">agora</span></div>
+      </div>
+    </div>
+  </section>
+
+  <span class="mk-chip mk-chip-acento mk2-tempo"><i></i>em tempo real</span>
+</div>
+  </div>
+</section>
+
+<!-- ============================================================
+     03. Sistemas e painéis sob medida
+     ============================================================ -->
+<section class="lab-ficha">
+  <div class="lab-cabeca">
+    <b>03</b>
+    <h2>Sistemas e painéis sob medida</h2>
+    <p>Indicador mostra rótulo e tendência, nunca valor. A barra enche, o gráfico é varrido.</p>
+  </div>
+
+  <div class="lab-caixa">
+<div class="mk mk-painel" aria-hidden="true">
+  <section class="mk-jan mk3-app">
+    <div class="mk-topo">
+      <span class="mk-luzes"><i></i><i></i><i></i></span>
+      <span class="mk-titulo">Painel da operação</span>
+      <span class="mk-chip mk-chip-vazio mk-esticar">atualizado agora</span>
+    </div>
+
+    <div class="mk-corpo">
+      <!-- Barra lateral -->
+      <nav class="mk3-lado mk-so-amplo">
+        <div class="mk3-marca">
+          <span class="mk3-selo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l2.6-6.5L14 18.5l2.4-6.5H21"/></svg></span>
+          <span>Operação</span>
+        </div>
+        <span class="mk3-nav mk3-nav-ativo"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h6.2v5.4H4zM13.8 5.5H20v3.2h-6.2zM13.8 11.7H20v6.8h-6.2zM4 13.3h6.2v5.2H4z"/></svg>Visão geral</span>
+        <span class="mk3-nav"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 19v-1.4a3.4 3.4 0 0 0-3.4-3.4H7.4A3.4 3.4 0 0 0 4 17.6V19"/><circle cx="9.7" cy="7.6" r="3.1"/><path d="M20 19v-1.4a3.4 3.4 0 0 0-2.6-3.3"/></svg>Leads</span>
+        <span class="mk3-nav"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 6.5H20M9.5 12H20M9.5 17.5H20"/><path d="m4 6.2 1 1 1.9-2M4 11.7l1 1 1.9-2M4 17.2l1 1 1.9-2"/></svg>Tarefas</span>
+        <span class="mk3-nav"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5V11M9.7 19.5V5M15.3 19.5v-6M21 19.5V8"/></svg>Relatórios</span>
+        <span class="mk3-corte"></span>
+        <span class="mk3-nav"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h8M16.6 8H20M4 16h3.4M11.9 16H20"/><circle cx="14.3" cy="8" r="2.3"/><circle cx="9.6" cy="16" r="2.3"/></svg>Configurações</span>
+        <span class="mk3-eu">
+          <span class="mk-ava mk-ava-neutro">A</span>
+          <div><b>Ana</b><em>Time comercial</em></div>
+        </span>
+      </nav>
+
+      <!-- Área principal -->
+      <div class="mk3-main">
+        <div class="mk3-cabeca">
+          <h3>Visão geral</h3>
+          <span class="mk3-seg mk-esticar"><span data-on>Semana</span><span>Mês</span></span>
+          <span class="mk-chip mk-chip-vazio mk-so-amplo">Time comercial</span>
+        </div>
+
+        <div class="mk3-ind">
+          <div class="mk3-card">
+            <span class="mk3-atualiza" style="--i:0"></span>
+            <h4>Leads na semana</h4>
+            <div class="mk3-linha-graf">
+              <svg viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true">
+                <path class="area" d="M0 27 14 24 28 25 42 18 56 19 70 11 84 12 100 4V34H0Z"/>
+                <path class="traco" d="M0 27 14 24 28 25 42 18 56 19 70 11 84 12 100 4" vector-effect="non-scaling-stroke"/>
+              </svg>
+              <span class="mk3-varre"></span>
+            </div>
+            <span class="mk3-pe mk3-pe-alta"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V6m0 0-5.2 5.2M12 6l5.2 5.2"/></svg>em alta</span>
+          </div>
+
+          <div class="mk3-card">
+            <span class="mk3-atualiza" style="--i:1"></span>
+            <h4>Tempo até o primeiro contato</h4>
+            <div class="mk3-barra"><i></i></div>
+            <div class="mk3-marcos"><span>antes</span><span>agora</span></div>
+            <span class="mk3-pe mk3-pe-alta"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v13m0 0 5.2-5.2M12 18l-5.2-5.2"/></svg>caindo</span>
+          </div>
+
+          <div class="mk3-card">
+            <span class="mk3-atualiza" style="--i:2"></span>
+            <h4>Tarefas concluídas</h4>
+            <div class="mk3-anel"></div>
+            <span class="mk3-pe mk3-pe-acento">no ritmo</span>
+          </div>
+        </div>
+
+        <div class="mk3-funil mk-so-amplo">
+          <span class="mk-rotulo">Distribuição por etapa</span>
+          <div class="mk3-funil-barra">
+            <i style="--tom:88%"></i><i style="--tom:62%"></i><i style="--tom:38%"></i><i style="--tom:18%"></i>
+          </div>
+          <div class="mk3-funil-leg">
+            <span>Novo</span><span>Em contato</span><span>Proposta</span><span>Aguardando</span>
+          </div>
+        </div>
+
+        <div class="mk3-tabela">
+          <table class="mk-tab">
+            <thead>
+              <tr><th>Cliente</th><th>Etapa</th><th>Responsável</th><th class="mk-dir">Atualizado</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Ana M.</td><td><span class="mk-tag mk-tag-acento">Novo</span></td><td>Time comercial</td><td class="mk-dir">agora</td></tr>
+              <tr><td>Bruno S.</td><td><span class="mk-tag">Em contato</span></td><td>Ana</td><td class="mk-dir">há 2 min</td></tr>
+              <tr><td>Carla T.</td><td><span class="mk-tag mk-tag-ok">Proposta</span></td><td>Time comercial</td><td class="mk-dir">há 14 min</td></tr>
+              <tr class="mk-so-amplo"><td>Diego P.</td><td><span class="mk-tag">Aguardando</span></td><td>Ana</td><td class="mk-dir">há 1 h</td></tr>
+            </tbody>
+          </table>
+          <div class="mk3-tab-pe mk-so-amplo">
+            <span>Ordenado por atualização</span>
+            <span class="mk-esticar">Ver todos</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trilha da direita: é a parte que a tela corta no cinema. -->
+      <aside class="mk3-trilha">
+        <span class="mk-rotulo">Fila de hoje</span>
+        <span class="mk3-item mk3-item-agora"><i></i><b>Primeiro contato</b><span class="mk-chip mk-chip-acento">agora</span></span>
+        <span class="mk3-item"><i></i><b>Enviar proposta</b><span class="mk-chip mk-chip-vazio">hoje</span></span>
+        <span class="mk3-item"><i></i><b>Confirmar dados</b><span class="mk-chip mk-chip-vazio">hoje</span></span>
+        <span class="mk3-item"><i></i><b>Retomar conversa</b><span class="mk-chip mk-chip-vazio">amanhã</span></span>
+        <span class="mk3-item"><i></i><b>Revisar proposta</b><span class="mk-chip mk-chip-vazio">amanhã</span></span>
+        <span class="mk3-item"><i></i><b>Enviar contrato</b><span class="mk-chip mk-chip-vazio">semana</span></span>
+        <div class="mk3-tab-pe"><span>Ordenado por prazo</span><span class="mk-esticar">Ver agenda</span></div>
+      </aside>
+    </div>
+  </section>
+</div>
+  </div>
+</section>
+
+<!-- ============================================================
+     04. Agentes de IA com supervisão
+     ============================================================ -->
+<section class="lab-ficha">
+  <div class="lab-cabeca">
+    <b>04</b>
+    <h2>Agentes de IA com supervisão</h2>
+    <p>O cursor pousa em Aprovar e o selo troca. Parado, o selo fica em aprovado.</p>
+  </div>
+
+  <div class="lab-caixa">
+<div class="mk mk-agente" aria-hidden="true">
+  <section class="mk-jan mk4-app">
+    <div class="mk-topo">
+      <span class="mk-luzes"><i></i><i></i><i></i></span>
+      <span class="mk-titulo">Atendimento</span>
+      <span class="mk-chip mk-chip-acento mk-esticar"><i></i>aguardando revisão</span>
+    </div>
+
+    <div class="mk-corpo">
+      <!-- Coluna do cliente e da fonte consultada -->
+      <div class="mk4-esq">
+        <span class="mk-rotulo mk-so-amplo">Cliente</span>
+        <div class="mk-fala">
+          <span class="mk-ava">A</span>
+          <div class="mk-balao">
+            <p>Bom dia. Vocês atendem fora do horário comercial?</p>
+            <span class="mk-hora">há 3 min</span>
+          </div>
+        </div>
+        <div class="mk-fala mk-so-amplo">
+          <span class="mk-ava">A</span>
+          <div class="mk-balao">
+            <p>A maioria das mensagens chega à noite.</p>
+            <span class="mk-hora">há 2 min</span>
+          </div>
+        </div>
+
+        <div class="mk4-dados mk-so-amplo">
+          <dl>
+            <div class="mk-campo"><dt>Canal</dt><dd>WhatsApp</dd></div>
+            <div class="mk-campo"><dt>Etapa</dt><dd><span class="mk-tag">Em contato</span></dd></div>
+            <div class="mk-campo"><dt>Na fila</dt><dd>há 2 min</dd></div>
+            <div class="mk-campo"><dt>Etiqueta</dt><dd><span class="mk-tag">fora de horário</span></dd></div>
+          </dl>
+        </div>
+
+        <div class="mk4-fonte mk-so-amplo">
+          <span class="mk-rotulo">fonte: base de conhecimento</span>
+          <ul>
+            <li class="mk4-doc"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 3.5H7.8A1.8 1.8 0 0 0 6 5.3v13.4a1.8 1.8 0 0 0 1.8 1.8h8.4a1.8 1.8 0 0 0 1.8-1.8V8z"/><path d="M13.5 3.5V8H18"/></svg>Horários de atendimento</li>
+            <li class="mk4-doc"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 3.5H7.8A1.8 1.8 0 0 0 6 5.3v13.4a1.8 1.8 0 0 0 1.8 1.8h8.4a1.8 1.8 0 0 0 1.8-1.8V8z"/><path d="M13.5 3.5V8H18"/></svg>Perguntas frequentes</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Coluna do rascunho e da aprovação -->
+      <div class="mk4-dir">
+        <span class="mk-rotulo mk-so-amplo">Resposta</span>
+
+        <div class="mk4-rascunho">
+          <div class="mk4-cabeca">
+            <h4>Resposta sugerida pela IA</h4>
+            <span class="mk4-selos">
+              <span class="mk-chip mk-chip-vazio mk4-selo-rascunho">rascunho da IA</span>
+              <span class="mk-chip mk-chip-ok mk4-selo-aprovado">aprovado por Ana</span>
+            </span>
+          </div>
+
+          <div class="mk4-texto">
+            <p><b>Bom dia, Ana.</b> O time atende em horário comercial.</p>
+            <p>Fora dele, a automação responde as dúvidas mais comuns e registra o seu pedido.</p>
+            <p class="mk4-linha-3 mk-so-amplo">Alguém retoma a conversa no próximo dia útil, pelo mesmo canal.</p>
+          </div>
+
+          <div class="mk4-acoes">
+            <span class="mk4-alvo"><span class="mk-bt mk-bt-forte">Aprovar</span></span>
+            <span class="mk-bt">Editar</span>
+            <span class="mk-bt mk-bt-texto mk-so-amplo">Descartar</span>
+          </div>
+
+          <div class="mk4-nota">
+            <svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2 4.8 6v5.6c0 4.3 3 8.3 7.2 9.2 4.2-.9 7.2-4.9 7.2-9.2V6Z"/><path d="m9 12 2.2 2.2L15.4 10"/></svg>
+            Nada vai para o cliente sem alguém aprovar.
+          </div>
+        </div>
+
+        <div class="mk4-log mk-so-amplo">
+          <span class="mk-rotulo">Revisões</span>
+          <span class="mk4-log-linha"><span class="mk-ava mk-ava-neutro">A</span>aprovado por Ana<span class="mk-esticar">há 4 min</span></span>
+          <span class="mk4-log-linha"><span class="mk-ava mk-ava-neutro">A</span>editado por Ana<span class="mk-esticar">há 12 min</span></span>
+        </div>
+
+        <div class="mk4-regra mk-so-amplo">
+          <span class="mk-rotulo">Agente</span>
+          <span class="mk-chip">escopo: dúvidas frequentes</span>
+          <span class="mk-chip mk-chip-acento">saída: revisão humana</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- O cursor mora fora da janela para poder entrar por fora do quadro. -->
+  <span class="mk4-cursor">
+    <svg viewBox="0 0 14 20" aria-hidden="true"><path d="M2 1.6 2 16.4l3.9-3.8 2.5 5.8 2.6-1.1-2.4-5.7 4.6-.4z"/></svg>
+  </span>
+</div>
+  </div>
+</section>
+
+<!-- ============================================================
+     05. Criação de sites sob medida
+     ============================================================ -->
+<section class="lab-ficha">
+  <div class="lab-cabeca">
+    <b>05</b>
+    <h2>Criação de sites sob medida</h2>
+    <p>Janela de navegador com um site fictício dentro. O site rola sozinho e revela a segunda dobra.</p>
+  </div>
+
+  <div class="lab-caixa">
+<div class="mk mk-site" aria-hidden="true">
+  <section class="mk-jan mk5-navegador">
+    <div class="mk5-abas">
+      <span class="mk-luzes"><i></i><i></i><i></i></span>
+      <span class="mk5-aba"><span class="mk5-fav"></span>Miralta · Arquitetura</span>
+      <span class="mk5-aba-extra"></span>
+    </div>
+
+    <div class="mk5-barra">
+      <span class="mk5-setas">
+        <svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 8 12l7 7"/></svg>
+        <svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
+      </span>
+      <span class="mk5-url">
+        <svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.4" width="14" height="9.6" rx="2.2"/><path d="M8.4 10.4V7.7a3.6 3.6 0 0 1 7.2 0v2.7"/></svg>
+        miralta.exemplo
+      </span>
+    </div>
+
+    <div class="mk5-tela">
+      <div class="mk5-rolo">
+        <header class="mk5-cabeca">
+          <span class="mk5-marca">MIRALTA</span>
+          <span class="mk5-menu"><span>Projetos</span><span>Estúdio</span><span>Diário</span></span>
+          <span class="mk5-bt">Orçamento</span>
+        </header>
+
+        <div class="mk5-hero">
+          <div class="mk5-texto">
+            <span class="mk5-olho">Arquitetura e interiores</span>
+            <p class="mk5-manchete">Espaços que envelhecem bem.</p>
+            <p class="mk5-apoio">Projeto autoral, obra acompanhada de perto e materiais que ganham caráter com o tempo.</p>
+            <span class="mk5-cta">Ver projetos <i>→</i></span>
+          </div>
+          <div class="mk5-arte">
+            <span class="mk5-vidro"><b>Casa Aroeira</b><em>Residência no interior</em></span>
+          </div>
+        </div>
+
+        <div class="mk5-proximo">
+          <span class="mk5-olho">Projetos selecionados</span>
+          <div class="mk5-tiras">
+            <span class="mk5-tira mk5-tira-a"><i></i><b>Casa Aroeira</b><em>Residencial</em></span>
+            <span class="mk5-tira mk5-tira-b"><i></i><b>Pátio Caraíba</b><em>Comercial</em></span>
+            <span class="mk5-tira mk5-tira-c"><i></i><b>Ateliê Sicó</b><em>Interiores</em></span>
+          </div>
+        </div>
+      </div>
+
+      <span class="mk5-grao"></span>
+      <span class="mk5-scroll"><i></i></span>
+    </div>
+  </section>
+</div>
+  </div>
+</section>
+
+</main>
+
+<script>
+/* ============================================================
+   Controles do laboratório. Nada aqui vai para produção: são só os três
+   interruptores que decidem se a maquete passa.
+   ============================================================ */
+(function () {
+  'use strict';
+  var raiz = document.documentElement;
+
+  function alternar(bt, ligado, textoLigado, textoDesligado) {
+    bt.setAttribute('aria-pressed', ligado ? 'true' : 'false');
+    bt.textContent = ligado ? textoLigado : textoDesligado;
+  }
+
+  var btTema = document.getElementById('bt-tema');
+  btTema.addEventListener('click', function () {
+    var claro = raiz.getAttribute('data-theme') !== 'light';
+    raiz.setAttribute('data-theme', claro ? 'light' : 'dark');
+    alternar(btTema, claro, 'tema escuro', 'tema claro');
+  });
+
+  var btMotion = document.getElementById('bt-motion');
+  btMotion.addEventListener('click', function () {
+    var pausar = raiz.getAttribute('data-motion') !== 'paused';
+    if (pausar) { raiz.setAttribute('data-motion', 'paused'); }
+    else { raiz.removeAttribute('data-motion'); }
+    alternar(btMotion, pausar, 'soltar movimento', 'pausar movimento');
+  });
+
+  var btRecorte = document.getElementById('bt-recorte');
+  btRecorte.addEventListener('click', function () {
+    var cortar = !document.body.classList.contains('lab-recorte');
+    document.body.classList.toggle('lab-recorte', cortar);
+    alternar(btRecorte, cortar, 'ver maquete inteira', 'ver recorte da tela');
+  });
+})();
+</script>
+</body>
+</html>

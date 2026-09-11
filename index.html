@@ -77,6 +77,7 @@
     <link rel="stylesheet" href="assets/fonts.css" />
     <link rel="stylesheet" href="assets/styles.css" />
     <link rel="stylesheet" href="assets/cinematic.css?v=20260906-marquee4" />
+    <link rel="stylesheet" href="assets/cinema.css?v=20260911" />
 
     <script type="application/ld+json">
       {
@@ -545,143 +546,596 @@
               conecta e cuida do que faz a sua operação funcionar.
             </p>
           </div>
+        </div>
 
-          <div class="pillars">
-            <article class="pillar reveal">
-              <div class="service-visual visual-flow" aria-hidden="true"><span class="mini-node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m13 2-9 12h7l-1 8 10-13h-8Z"/></svg><small>Gatilho</small></span><span class="mini-connection"></span><span class="mini-node node-accent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m12 3 3 6 6 3-6 3-3 6-3-6-6-3 6-3Z"/></svg><small>Automação</small></span><span class="mini-connection"></span><span class="mini-node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m5 12 4 4L19 6"/></svg><small>Resolvido</small></span></div>
-              <div class="pnum">01</div>
-              <div class="picon">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M13 2L4.5 13.5H11L9 22l9-12h-6.5L13 2z" />
-                </svg>
+        <!-- Painéis de tela cheia. O cabeçalho acima fica no .wrap; o trilho
+             sangra de ponta a ponta e por isso vive fora dele. Sem JavaScript,
+             com movimento pausado ou com prefers-reduced-motion, ele vira uma
+             lista de cinco seções legíveis. Ver assets/cinema.css e cinema.js. -->
+        <div class="cine-rail" id="cine-rail">
+          <div class="cine-stage" id="cine-stage">
+
+            <!-- ---------- Painel 01 ---------- -->
+            <article class="cine-panel" data-painel="1" style="--z:1">
+              <div class="cine-quadro">
+                <div class="cine-texto">
+                  <span class="cine-selo">01</span>
+                  <span class="cine-rotulo">AUTOMAÇÃO DE PROCESSOS</span>
+                  <h3 class="cine-manchete">Tarefas repetitivas passam a acontecer sozinhas.</h3>
+                  <p class="cine-apoio">Sem ninguém precisar lembrar de clicar.</p>
+                  <div class="cine-etiquetas">
+                    <span>Lead direto no CRM</span>
+                    <span>Follow-up automático</span>
+                    <span>Cobrança</span>
+                    <span>Recuperação de vendas</span>
+                    <span>Relatórios recorrentes</span>
+                  </div>
+                </div>
+
+                <div class="cine-peca">
+                  <div class="cine-peca-caixa">
+                    <div class="cine-peca-3d">
+                      <!-- Maquete 01: uma mensagem chega e o resto acontece sozinho.
+                           O CSS das maquetes está no topo do <style> deste arquivo e é cópia
+                           sincronizada de dev/maquetes.css. Mudou lá, injeta de novo nos dois labs. -->
+                      <div class="mk mk-fluxo" aria-hidden="true">
+
+                        <!-- Conversa: a mensagem que chega. Fica à frente das outras superfícies. -->
+                        <section class="mk-jan mk1-conversa">
+                          <div class="mk-topo mk-so-amplo">
+                            <span class="mk-luzes"><i></i><i></i><i></i></span>
+                            <span class="mk-titulo">WhatsApp comercial</span>
+                            <span class="mk-chip mk-chip-ok mk-esticar"><i></i>conectado</span>
+                          </div>
+                          <div class="mk-corpo">
+                            <div class="mk1-lista mk-so-amplo">
+                              <div class="mk1-contato mk1-contato-ativo">
+                                <span class="mk-ava">A</span>
+                                <div><b>Ana M.</b><em>Oi, vocês fazem orça…</em></div>
+                              </div>
+                              <div class="mk1-contato">
+                                <span class="mk-ava mk-ava-neutro">B</span>
+                                <div><b>Bruno S.</b><em>Perfeito, combinado.</em></div>
+                              </div>
+                              <div class="mk1-contato">
+                                <span class="mk-ava mk-ava-neutro">C</span>
+                                <div><b>Carla T.</b><em>Pode mandar o link?</em></div>
+                              </div>
+                              <div class="mk1-contato">
+                                <span class="mk-ava mk-ava-neutro">D</span>
+                                <div><b>Diego P.</b><em>Recebido, obrigado.</em></div>
+                              </div>
+                            </div>
+
+                            <div class="mk1-thread">
+                              <div class="mk1-thread-topo mk-so-amplo">
+                                <span class="mk-ava">A</span>
+                                <div><b>Ana M.</b><em>online</em></div>
+                                <span class="mk-chip mk-chip-vazio mk-esticar">Novo contato</span>
+                              </div>
+                              <span class="mk1-dia mk-so-amplo">hoje</span>
+                              <div class="mk-fala">
+                                <span class="mk-ava">A</span>
+                                <div class="mk-balao">
+                                  <p>Oi, vocês fazem orçamento para automatizar o atendimento?</p>
+                                  <span class="mk-hora">agora</span>
+                                </div>
+                              </div>
+                              <div class="mk-fala mk-fala-saida mk-so-amplo">
+                                <div class="mk-balao">
+                                  <p>Oi, Ana! Recebi sua mensagem. Já estou chamando alguém do time.</p>
+                                  <span class="mk-hora">agora · envio automático</span>
+                                </div>
+                              </div>
+                              <div class="mk-escrever mk-so-amplo">
+                                <span>Escreva uma mensagem</span>
+                                <svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21.5 2.5 10.8 13.2m10.7-10.7-6.7 18.3-3.9-7.6-7.6-3.9 18.2-6.8Z"/></svg>
+                              </div>
+                            </div>
+                          </div>
+                        </section>
+
+                        <!-- Cartão de CRM nascendo, atrás e deslocado. -->
+                        <section class="mk-jan mk1-crm">
+                          <div class="mk-topo">
+                            <span class="mk-luzes"><i></i><i></i><i></i></span>
+                            <span class="mk-titulo">CRM</span>
+                            <span class="mk-chip mk-chip-acento mk-esticar">novo cartão</span>
+                          </div>
+                          <div class="mk-corpo">
+                            <dl>
+                              <div class="mk-campo"><dt>Nome</dt><dd>Ana M.</dd></div>
+                              <div class="mk-campo"><dt>Origem</dt><dd>WhatsApp</dd></div>
+                              <div class="mk-campo"><dt>Etapa</dt><dd><span class="mk-tag mk-tag-acento">Novo</span></dd></div>
+                            </dl>
+                            <div class="mk1-crm-pe">
+                              <span class="mk-mono">criado pela automação</span>
+                              <span class="mk-mono mk-esticar">agora</span>
+                            </div>
+                          </div>
+                        </section>
+
+                        <!-- Fila de ações: acende de cima para baixo, uma a cada 700ms. -->
+                        <section class="mk-jan mk1-fila mk-so-amplo">
+                          <div class="mk-topo">
+                            <span class="mk-rotulo">Automação · novo lead</span>
+                            <span class="mk-chip mk-chip-acento mk-esticar"><i></i>em execução</span>
+                          </div>
+                          <div class="mk-corpo">
+                            <ul>
+                              <li class="mk1-passo" style="--i:0">
+                                <span class="mk1-marca"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 12.5 5.2 5.2L20 6.5"/></svg></span>
+                                <b>Cartão criado</b><span class="mk-mono">agora</span>
+                              </li>
+                              <li class="mk1-passo" style="--i:1">
+                                <span class="mk1-marca"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 12.5 5.2 5.2L20 6.5"/></svg></span>
+                                <b>Responsável definido</b><span class="mk-mono">agora</span>
+                              </li>
+                              <li class="mk1-passo" style="--i:2">
+                                <span class="mk1-marca"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 12.5 5.2 5.2L20 6.5"/></svg></span>
+                                <b>Follow-up agendado</b><span class="mk-mono">agora</span>
+                              </li>
+                            </ul>
+                            <div class="mk1-fila-pe">
+                              <span class="mk-mono">próxima execução</span>
+                              <span class="mk-mono mk-esticar">quando chegar mensagem nova</span>
+                            </div>
+                          </div>
+                        </section>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <h3>Automação de processos</h3>
-              <p>
-                Tarefas repetitivas passam a acontecer sozinhas, sem ninguém
-                precisar lembrar de clicar.
-              </p>
-              <div class="ex">
-                <span>Lead direto no CRM</span>
-                <span>Follow-up automático</span>
-                <span>Cobrança</span>
-                <span>Recuperação de vendas</span>
-                <span>Relatórios recorrentes</span>
-              </div>
+              <div class="cine-veu"></div>
             </article>
 
-            <article class="pillar reveal d1">
-              <div class="service-visual visual-integration" aria-hidden="true"><span class="integration-satellite sat-one">CRM</span><span class="integration-satellite sat-two">API</span><span class="integration-satellite sat-three">ERP</span><div class="integration-ring"></div><div class="integration-center"><img src="assets/brand/waveops-symbol.svg" alt="" width="60" height="60" /></div><span class="integration-caption">Tudo no mesmo fluxo</span></div>
-              <div class="pnum">02</div>
-              <div class="picon">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M9 12a4 4 0 0 1 4-4h3a4 4 0 0 1 0 8h-1" />
-                  <path d="M15 12a4 4 0 0 1-4 4H8a4 4 0 0 1 0-8h1" />
-                </svg>
+            <!-- ---------- Painel 02 ---------- -->
+            <article class="cine-panel" data-painel="2" style="--z:2">
+              <div class="cine-quadro">
+                <div class="cine-texto">
+                  <span class="cine-selo">02</span>
+                  <span class="cine-rotulo">INTEGRAÇÃO DE SISTEMAS</span>
+                  <h3 class="cine-manchete">Suas ferramentas param de trabalhar separadas.</h3>
+                  <p class="cine-apoio">Elas passam a conversar entre si, em tempo real.</p>
+                  <div class="cine-etiquetas">
+                    <span>Site e CRM</span>
+                    <span>CRM e WhatsApp</span>
+                    <span>Checkout e área de membros</span>
+                    <span>Pagamento e sistema</span>
+                  </div>
+                </div>
+
+                <div class="cine-peca">
+                  <div class="cine-peca-caixa">
+                    <div class="cine-peca-3d">
+                      <!-- Maquete 02: o mesmo registro nas quatro ferramentas, em tempo real.
+                           O CSS das maquetes está no topo do <style> deste arquivo e é cópia
+                           sincronizada de dev/maquetes.css. Mudou lá, injeta de novo nos dois labs. -->
+                      <div class="mk mk-integra" aria-hidden="true">
+
+                        <!-- Fios: linha reta girada, com um pacote que anda só em translateX. -->
+                        <span class="mk2-fio mk2-fio-a"><i class="mk2-pacote"></i></span>
+                        <span class="mk2-fio mk2-fio-b"><i class="mk2-pacote" style="--atraso:-1.2s"></i></span>
+                        <span class="mk2-fio mk2-fio-c"><i class="mk2-pacote" style="--atraso:-2.4s"></i></span>
+
+                        <section class="mk-jan mk2-jan mk2-site">
+                          <div class="mk-topo">
+                            <span class="mk-luzes"><i></i><i></i><i></i></span>
+                            <span class="mk-titulo">Site</span>
+                          </div>
+                          <div class="mk-corpo">
+                            <span class="mk-rotulo mk-so-amplo">Formulário</span>
+                            <div class="mk2-input">Nome <b>Ana M.</b></div>
+                            <div class="mk2-input mk-so-amplo">E-mail <b>ana@exemplo.com</b></div>
+                            <div class="mk2-linha"><span class="mk-bt mk-bt-forte">Enviar</span><span class="mk-chip mk-chip-ok mk-esticar">enviado</span></div>
+                          </div>
+                        </section>
+
+                        <section class="mk-jan mk2-jan mk2-crm" style="--atraso:-3s">
+                          <div class="mk-topo">
+                            <span class="mk-luzes"><i></i><i></i><i></i></span>
+                            <span class="mk-titulo">CRM</span>
+                            <span class="mk-chip mk-chip-vazio mk-esticar">leads</span>
+                          </div>
+                          <div class="mk-corpo">
+                            <div class="mk2-reg"><span class="mk-ava">A</span><b>Ana M.</b><span class="mk-esticar">Novo</span></div>
+                            <div class="mk2-linha mk-so-amplo"><span class="mk-ava mk-ava-neutro">B</span>Bruno S.<span class="mk-esticar">Em contato</span></div>
+                            <div class="mk2-linha mk-so-amplo"><span class="mk-ava mk-ava-neutro">C</span>Carla T.<span class="mk-esticar">Proposta</span></div>
+                            <div class="mk2-linha mk-so-amplo"><span class="mk-ava mk-ava-neutro">D</span>Diego P.<span class="mk-esticar">Aguardando</span></div>
+                            <div class="mk2-linha mk-so-amplo"><span class="mk-mono">sincronizado</span><span class="mk-mono mk-esticar">agora</span></div>
+                          </div>
+                        </section>
+
+                        <section class="mk-jan mk2-jan mk2-pag" style="--atraso:-5s">
+                          <div class="mk-topo">
+                            <span class="mk-luzes"><i></i><i></i><i></i></span>
+                            <span class="mk-titulo">Pagamento</span>
+                          </div>
+                          <div class="mk-corpo">
+                            <span class="mk-rotulo mk-so-amplo">Cobrança</span>
+                            <div class="mk2-reg"><b>Ana M.</b><span class="mk-esticar">aguardando</span></div>
+                            <div class="mk2-linha mk-so-amplo">Link de cobrança<span class="mk-chip mk-chip-ok mk-esticar">enviado</span></div>
+                          </div>
+                        </section>
+
+                        <section class="mk-jan mk2-jan mk2-zap" style="--atraso:-7s">
+                          <div class="mk-topo">
+                            <span class="mk-luzes"><i></i><i></i><i></i></span>
+                            <span class="mk-titulo">WhatsApp</span>
+                          </div>
+                          <div class="mk-corpo">
+                            <div class="mk2-reg"><span class="mk-ava">A</span><b>Ana M.</b><span class="mk-esticar">conversa aberta</span></div>
+                            <div class="mk-fala mk-so-amplo">
+                              <div class="mk-balao"><p>Recebi o link, obrigada.</p><span class="mk-hora">agora</span></div>
+                            </div>
+                          </div>
+                        </section>
+
+                        <span class="mk-chip mk-chip-acento mk2-tempo"><i></i>em tempo real</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <h3>Integração de sistemas</h3>
-              <p>
-                Suas ferramentas param de trabalhar separadas e passam a
-                conversar entre si, em tempo real.
-              </p>
-              <div class="ex">
-                <span>Site ↔ CRM</span>
-                <span>CRM ↔ WhatsApp</span>
-                <span>Checkout ↔ área de membros</span>
-                <span>Pagamento ↔ sistema</span>
-              </div>
+              <div class="cine-veu"></div>
             </article>
 
-            <article class="pillar reveal">
-              <div class="service-visual visual-dashboard" aria-hidden="true"><div class="mini-window"><div class="mini-window-top"><i></i><i></i><i></i><span>Sua operação, em um só lugar</span></div><div class="mini-chart"><span style="--bar:36%;--i:0"></span><span style="--bar:54%;--i:1"></span><span style="--bar:44%;--i:2"></span><span style="--bar:70%;--i:3"></span><span style="--bar:62%;--i:4"></span><span style="--bar:88%;--i:5"></span><span style="--bar:77%;--i:6"></span><span style="--bar:100%;--i:7"></span></div></div></div>
-              <div class="pnum">03</div>
-              <div class="picon">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <rect x="3" y="4" width="18" height="14" rx="2" />
-                  <path d="M3 9h18M7 14h5" />
-                </svg>
+            <!-- ---------- Painel 03 ---------- -->
+            <article class="cine-panel" data-painel="3" style="--z:3">
+              <div class="cine-quadro">
+                <div class="cine-texto">
+                  <span class="cine-selo">03</span>
+                  <span class="cine-rotulo">SISTEMAS E PAINÉIS SOB MEDIDA</span>
+                  <h3 class="cine-manchete">Quando planilha não dá mais conta.</h3>
+                  <p class="cine-apoio">Sistemas web e dashboards feitos para a sua operação.</p>
+                  <div class="cine-etiquetas">
+                    <span>CRM interno</span>
+                    <span>Portal do cliente</span>
+                    <span>Sistema de chamados</span>
+                    <span>Dashboards</span>
+                    <span>Agendamento</span>
+                  </div>
+                </div>
+
+                <div class="cine-peca">
+                  <div class="cine-peca-caixa">
+                    <div class="cine-peca-3d">
+                      <!-- Maquete 03: o painel que substitui a planilha.
+                           O CSS das maquetes está no topo do <style> deste arquivo e é cópia
+                           sincronizada de dev/maquetes.css. Mudou lá, injeta de novo nos dois labs. -->
+                      <div class="mk mk-painel" aria-hidden="true">
+                        <section class="mk-jan mk3-app">
+                          <div class="mk-topo">
+                            <span class="mk-luzes"><i></i><i></i><i></i></span>
+                            <span class="mk-titulo">Painel da operação</span>
+                            <span class="mk-chip mk-chip-vazio mk-esticar">atualizado agora</span>
+                          </div>
+
+                          <div class="mk-corpo">
+                            <!-- Barra lateral -->
+                            <nav class="mk3-lado mk-so-amplo">
+                              <div class="mk3-marca">
+                                <span class="mk3-selo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l2.6-6.5L14 18.5l2.4-6.5H21"/></svg></span>
+                                <span>Operação</span>
+                              </div>
+                              <span class="mk3-nav mk3-nav-ativo"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h6.2v5.4H4zM13.8 5.5H20v3.2h-6.2zM13.8 11.7H20v6.8h-6.2zM4 13.3h6.2v5.2H4z"/></svg>Visão geral</span>
+                              <span class="mk3-nav"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 19v-1.4a3.4 3.4 0 0 0-3.4-3.4H7.4A3.4 3.4 0 0 0 4 17.6V19"/><circle cx="9.7" cy="7.6" r="3.1"/><path d="M20 19v-1.4a3.4 3.4 0 0 0-2.6-3.3"/></svg>Leads</span>
+                              <span class="mk3-nav"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 6.5H20M9.5 12H20M9.5 17.5H20"/><path d="m4 6.2 1 1 1.9-2M4 11.7l1 1 1.9-2M4 17.2l1 1 1.9-2"/></svg>Tarefas</span>
+                              <span class="mk3-nav"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5V11M9.7 19.5V5M15.3 19.5v-6M21 19.5V8"/></svg>Relatórios</span>
+                              <span class="mk3-corte"></span>
+                              <span class="mk3-nav"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h8M16.6 8H20M4 16h3.4M11.9 16H20"/><circle cx="14.3" cy="8" r="2.3"/><circle cx="9.6" cy="16" r="2.3"/></svg>Configurações</span>
+                              <span class="mk3-eu">
+                                <span class="mk-ava mk-ava-neutro">A</span>
+                                <div><b>Ana</b><em>Time comercial</em></div>
+                              </span>
+                            </nav>
+
+                            <!-- Área principal -->
+                            <div class="mk3-main">
+                              <div class="mk3-cabeca">
+                                <h3>Visão geral</h3>
+                                <span class="mk3-seg mk-esticar"><span data-on>Semana</span><span>Mês</span></span>
+                                <span class="mk-chip mk-chip-vazio mk-so-amplo">Time comercial</span>
+                              </div>
+
+                              <div class="mk3-ind">
+                                <div class="mk3-card">
+                                  <span class="mk3-atualiza" style="--i:0"></span>
+                                  <h4>Leads na semana</h4>
+                                  <div class="mk3-linha-graf">
+                                    <svg viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true">
+                                      <path class="area" d="M0 27 14 24 28 25 42 18 56 19 70 11 84 12 100 4V34H0Z"/>
+                                      <path class="traco" d="M0 27 14 24 28 25 42 18 56 19 70 11 84 12 100 4" vector-effect="non-scaling-stroke"/>
+                                    </svg>
+                                    <span class="mk3-varre"></span>
+                                  </div>
+                                  <span class="mk3-pe mk3-pe-alta"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V6m0 0-5.2 5.2M12 6l5.2 5.2"/></svg>em alta</span>
+                                </div>
+
+                                <div class="mk3-card">
+                                  <span class="mk3-atualiza" style="--i:1"></span>
+                                  <h4>Tempo até o primeiro contato</h4>
+                                  <div class="mk3-barra"><i></i></div>
+                                  <div class="mk3-marcos"><span>antes</span><span>agora</span></div>
+                                  <span class="mk3-pe mk3-pe-alta"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v13m0 0 5.2-5.2M12 18l-5.2-5.2"/></svg>caindo</span>
+                                </div>
+
+                                <div class="mk3-card">
+                                  <span class="mk3-atualiza" style="--i:2"></span>
+                                  <h4>Tarefas concluídas</h4>
+                                  <div class="mk3-anel"></div>
+                                  <span class="mk3-pe mk3-pe-acento">no ritmo</span>
+                                </div>
+                              </div>
+
+                              <div class="mk3-funil mk-so-amplo">
+                                <span class="mk-rotulo">Distribuição por etapa</span>
+                                <div class="mk3-funil-barra">
+                                  <i style="--tom:88%"></i><i style="--tom:62%"></i><i style="--tom:38%"></i><i style="--tom:18%"></i>
+                                </div>
+                                <div class="mk3-funil-leg">
+                                  <span>Novo</span><span>Em contato</span><span>Proposta</span><span>Aguardando</span>
+                                </div>
+                              </div>
+
+                              <div class="mk3-tabela">
+                                <table class="mk-tab">
+                                  <thead>
+                                    <tr><th>Cliente</th><th>Etapa</th><th>Responsável</th><th class="mk-dir">Atualizado</th></tr>
+                                  </thead>
+                                  <tbody>
+                                    <tr><td>Ana M.</td><td><span class="mk-tag mk-tag-acento">Novo</span></td><td>Time comercial</td><td class="mk-dir">agora</td></tr>
+                                    <tr><td>Bruno S.</td><td><span class="mk-tag">Em contato</span></td><td>Ana</td><td class="mk-dir">há 2 min</td></tr>
+                                    <tr><td>Carla T.</td><td><span class="mk-tag mk-tag-ok">Proposta</span></td><td>Time comercial</td><td class="mk-dir">há 14 min</td></tr>
+                                    <tr class="mk-so-amplo"><td>Diego P.</td><td><span class="mk-tag">Aguardando</span></td><td>Ana</td><td class="mk-dir">há 1 h</td></tr>
+                                  </tbody>
+                                </table>
+                                <div class="mk3-tab-pe mk-so-amplo">
+                                  <span>Ordenado por atualização</span>
+                                  <span class="mk-esticar">Ver todos</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <!-- Trilha da direita: é a parte que a tela corta no cinema. -->
+                            <aside class="mk3-trilha">
+                              <span class="mk-rotulo">Fila de hoje</span>
+                              <span class="mk3-item mk3-item-agora"><i></i><b>Primeiro contato</b><span class="mk-chip mk-chip-acento">agora</span></span>
+                              <span class="mk3-item"><i></i><b>Enviar proposta</b><span class="mk-chip mk-chip-vazio">hoje</span></span>
+                              <span class="mk3-item"><i></i><b>Confirmar dados</b><span class="mk-chip mk-chip-vazio">hoje</span></span>
+                              <span class="mk3-item"><i></i><b>Retomar conversa</b><span class="mk-chip mk-chip-vazio">amanhã</span></span>
+                              <span class="mk3-item"><i></i><b>Revisar proposta</b><span class="mk-chip mk-chip-vazio">amanhã</span></span>
+                              <span class="mk3-item"><i></i><b>Enviar contrato</b><span class="mk-chip mk-chip-vazio">semana</span></span>
+                              <div class="mk3-tab-pe"><span>Ordenado por prazo</span><span class="mk-esticar">Ver agenda</span></div>
+                            </aside>
+                          </div>
+                        </section>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <h3>Sistemas & painéis sob medida</h3>
-              <p>
-                Quando planilha não dá mais conta: sistemas web e dashboards
-                feitos para a sua operação.
-              </p>
-              <div class="ex">
-                <span>CRM interno</span>
-                <span>Portal do cliente</span>
-                <span>Sistema de chamados</span>
-                <span>Dashboards</span>
-                <span>Agendamento</span>
-              </div>
+              <div class="cine-veu"></div>
             </article>
 
-            <article class="pillar reveal d1">
-              <div class="service-visual visual-ai" aria-hidden="true"><div class="ai-message"><span class="ai-spark">✧</span><div><span class="ai-line"></span><span class="ai-line short"></span></div><span class="processing-dots"><i></i><i></i><i></i></span></div><span class="ai-approval"><span>✓</span> Inteligência artificial. Controle humano.</span></div>
-              <div class="pnum">04</div>
-              <div class="picon">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path
-                    d="M12 3l1.8 4.5L18 9l-4.2 1.5L12 15l-1.8-4.5L6 9l4.2-1.5L12 3z"
-                  />
-                  <path
-                    d="M18 15l.9 2.2L21 18l-2.1.8L18 21l-.9-2.2L15 18l2.1-.8L18 15z"
-                  />
-                </svg>
+            <!-- ---------- Painel 04 ---------- -->
+            <article class="cine-panel" data-painel="4" style="--z:4">
+              <div class="cine-quadro">
+                <div class="cine-texto">
+                  <span class="cine-selo">04</span>
+                  <span class="cine-rotulo">AGENTES DE IA COM SUPERVISÃO</span>
+                  <h3 class="cine-manchete">IA para tarefas específicas, com revisão humana.</h3>
+                  <p class="cine-apoio">Função clara, fonte de dados definida. Nada de IA solta, sem regra e sem objetivo.</p>
+                  <div class="cine-etiquetas">
+                    <span>Atendimento</span>
+                    <span>Qualificação de lead</span>
+                    <span>Consulta de documentos</span>
+                    <span>Análise de tickets</span>
+                  </div>
+                </div>
+
+                <div class="cine-peca">
+                  <div class="cine-peca-caixa">
+                    <div class="cine-peca-3d">
+                      <!-- Maquete 04: a IA escreve, o humano aprova.
+                           O CSS das maquetes está no topo do <style> deste arquivo e é cópia
+                           sincronizada de dev/maquetes.css. Mudou lá, injeta de novo nos dois labs. -->
+                      <div class="mk mk-agente" aria-hidden="true">
+                        <section class="mk-jan mk4-app">
+                          <div class="mk-topo">
+                            <span class="mk-luzes"><i></i><i></i><i></i></span>
+                            <span class="mk-titulo">Atendimento</span>
+                            <span class="mk-chip mk-chip-acento mk-esticar"><i></i>aguardando revisão</span>
+                          </div>
+
+                          <div class="mk-corpo">
+                            <!-- Coluna do cliente e da fonte consultada -->
+                            <div class="mk4-esq">
+                              <span class="mk-rotulo mk-so-amplo">Cliente</span>
+                              <div class="mk-fala">
+                                <span class="mk-ava">A</span>
+                                <div class="mk-balao">
+                                  <p>Bom dia. Vocês atendem fora do horário comercial?</p>
+                                  <span class="mk-hora">há 3 min</span>
+                                </div>
+                              </div>
+                              <div class="mk-fala mk-so-amplo">
+                                <span class="mk-ava">A</span>
+                                <div class="mk-balao">
+                                  <p>A maioria das mensagens chega à noite.</p>
+                                  <span class="mk-hora">há 2 min</span>
+                                </div>
+                              </div>
+
+                              <div class="mk4-dados mk-so-amplo">
+                                <dl>
+                                  <div class="mk-campo"><dt>Canal</dt><dd>WhatsApp</dd></div>
+                                  <div class="mk-campo"><dt>Etapa</dt><dd><span class="mk-tag">Em contato</span></dd></div>
+                                  <div class="mk-campo"><dt>Na fila</dt><dd>há 2 min</dd></div>
+                                  <div class="mk-campo"><dt>Etiqueta</dt><dd><span class="mk-tag">fora de horário</span></dd></div>
+                                </dl>
+                              </div>
+
+                              <div class="mk4-fonte mk-so-amplo">
+                                <span class="mk-rotulo">fonte: base de conhecimento</span>
+                                <ul>
+                                  <li class="mk4-doc"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 3.5H7.8A1.8 1.8 0 0 0 6 5.3v13.4a1.8 1.8 0 0 0 1.8 1.8h8.4a1.8 1.8 0 0 0 1.8-1.8V8z"/><path d="M13.5 3.5V8H18"/></svg>Horários de atendimento</li>
+                                  <li class="mk4-doc"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 3.5H7.8A1.8 1.8 0 0 0 6 5.3v13.4a1.8 1.8 0 0 0 1.8 1.8h8.4a1.8 1.8 0 0 0 1.8-1.8V8z"/><path d="M13.5 3.5V8H18"/></svg>Perguntas frequentes</li>
+                                </ul>
+                              </div>
+                            </div>
+
+                            <!-- Coluna do rascunho e da aprovação -->
+                            <div class="mk4-dir">
+                              <span class="mk-rotulo mk-so-amplo">Resposta</span>
+
+                              <div class="mk4-rascunho">
+                                <div class="mk4-cabeca">
+                                  <h4>Resposta sugerida pela IA</h4>
+                                  <span class="mk4-selos">
+                                    <span class="mk-chip mk-chip-vazio mk4-selo-rascunho">rascunho da IA</span>
+                                    <span class="mk-chip mk-chip-ok mk4-selo-aprovado">aprovado por Ana</span>
+                                  </span>
+                                </div>
+
+                                <div class="mk4-texto">
+                                  <p><b>Bom dia, Ana.</b> O time atende em horário comercial.</p>
+                                  <p>Fora dele, a automação responde as dúvidas mais comuns e registra o seu pedido.</p>
+                                  <p class="mk4-linha-3 mk-so-amplo">Alguém retoma a conversa no próximo dia útil, pelo mesmo canal.</p>
+                                </div>
+
+                                <div class="mk4-acoes">
+                                  <span class="mk4-alvo"><span class="mk-bt mk-bt-forte">Aprovar</span></span>
+                                  <span class="mk-bt">Editar</span>
+                                  <span class="mk-bt mk-bt-texto mk-so-amplo">Descartar</span>
+                                </div>
+
+                                <div class="mk4-nota">
+                                  <svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2 4.8 6v5.6c0 4.3 3 8.3 7.2 9.2 4.2-.9 7.2-4.9 7.2-9.2V6Z"/><path d="m9 12 2.2 2.2L15.4 10"/></svg>
+                                  Nada vai para o cliente sem alguém aprovar.
+                                </div>
+                              </div>
+
+                              <div class="mk4-log mk-so-amplo">
+                                <span class="mk-rotulo">Revisões</span>
+                                <span class="mk4-log-linha"><span class="mk-ava mk-ava-neutro">A</span>aprovado por Ana<span class="mk-esticar">há 4 min</span></span>
+                                <span class="mk4-log-linha"><span class="mk-ava mk-ava-neutro">A</span>editado por Ana<span class="mk-esticar">há 12 min</span></span>
+                              </div>
+
+                              <div class="mk4-regra mk-so-amplo">
+                                <span class="mk-rotulo">Agente</span>
+                                <span class="mk-chip">escopo: dúvidas frequentes</span>
+                                <span class="mk-chip mk-chip-acento">saída: revisão humana</span>
+                              </div>
+                            </div>
+                          </div>
+                        </section>
+
+                        <!-- O cursor mora fora da janela para poder entrar por fora do quadro. -->
+                        <span class="mk4-cursor">
+                          <svg viewBox="0 0 14 20" aria-hidden="true"><path d="M2 1.6 2 16.4l3.9-3.8 2.5 5.8 2.6-1.1-2.4-5.7 4.6-.4z"/></svg>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <h3>Agentes de IA com supervisão</h3>
-              <p>
-                IA para tarefas específicas, com função clara, fonte de dados
-                definida e revisão humana.
-              </p>
-              <div class="ex">
-                <span>Atendimento</span>
-                <span>Qualificação de lead</span>
-                <span>Consulta de documentos</span>
-                <span>Análise de tickets</span>
-              </div>
-              <p class="note">
-                <svg
-                  viewBox="0 0 24 24"
-                  width="14"
-                  height="14"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2.2"
-                  stroke-linecap="round"
-                >
-                  <path d="M12 8v4M12 16h.01" />
-                  <circle cx="12" cy="12" r="9" />
-                </svg>
-                Nada de IA solta, sem regra e sem objetivo.
-              </p>
+              <div class="cine-veu"></div>
             </article>
+
+            <!-- ---------- Painel 05 ---------- -->
+            <article class="cine-panel" data-painel="5" style="--z:5">
+              <div class="cine-quadro">
+                <div class="cine-texto">
+                  <span class="cine-selo">05</span>
+                  <span class="cine-rotulo">CRIAÇÃO DE SITES SOB MEDIDA</span>
+                  <h3 class="cine-manchete">Seu site para de ser cartão de visita.</h3>
+                  <p class="cine-apoio">Ele passa a capturar, qualificar e entregar o lead direto na sua operação.</p>
+                  <div class="cine-etiquetas">
+                    <span>Landing page</span>
+                    <span>Site institucional</span>
+                    <span>Página de captura</span>
+                    <span>Integração com o CRM</span>
+                    <span>Medição de conversão</span>
+                  </div>
+                </div>
+
+                <div class="cine-peca">
+                  <div class="cine-peca-caixa">
+                    <div class="cine-peca-3d">
+                      <!-- Maquete 05: a prova do serviço. Um site fictício rolando
+                           dentro de uma janela de navegador. -->
+                      <div class="mk mk-site" aria-hidden="true">
+                        <section class="mk-jan mk5-navegador">
+                          <div class="mk5-abas">
+                            <span class="mk-luzes"><i></i><i></i><i></i></span>
+                            <span class="mk5-aba"><span class="mk5-fav"></span>Miralta · Arquitetura</span>
+                            <span class="mk5-aba-extra"></span>
+                          </div>
+
+                          <div class="mk5-barra">
+                            <span class="mk5-setas">
+                              <svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 8 12l7 7"/></svg>
+                              <svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
+                            </span>
+                            <span class="mk5-url">
+                              <svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.4" width="14" height="9.6" rx="2.2"/><path d="M8.4 10.4V7.7a3.6 3.6 0 0 1 7.2 0v2.7"/></svg>
+                              miralta.exemplo
+                            </span>
+                          </div>
+
+                          <div class="mk5-tela">
+                            <div class="mk5-rolo">
+                              <header class="mk5-cabeca">
+                                <span class="mk5-marca">MIRALTA</span>
+                                <span class="mk5-menu"><span>Projetos</span><span>Estúdio</span><span>Diário</span></span>
+                                <span class="mk5-bt">Orçamento</span>
+                              </header>
+
+                              <div class="mk5-hero">
+                                <div class="mk5-texto">
+                                  <span class="mk5-olho">Arquitetura e interiores</span>
+                                  <p class="mk5-manchete">Espaços que envelhecem bem.</p>
+                                  <p class="mk5-apoio">Projeto autoral, obra acompanhada de perto e materiais que ganham caráter com o tempo.</p>
+                                  <span class="mk5-cta">Ver projetos <i>→</i></span>
+                                </div>
+                                <div class="mk5-arte">
+                                  <span class="mk5-vidro"><b>Casa Aroeira</b><em>Residência no interior</em></span>
+                                </div>
+                              </div>
+
+                              <div class="mk5-proximo">
+                                <span class="mk5-olho">Projetos selecionados</span>
+                                <div class="mk5-tiras">
+                                  <span class="mk5-tira mk5-tira-a"><i></i><b>Casa Aroeira</b><em>Residencial</em></span>
+                                  <span class="mk5-tira mk5-tira-b"><i></i><b>Pátio Caraíba</b><em>Comercial</em></span>
+                                  <span class="mk5-tira mk5-tira-c"><i></i><b>Ateliê Sicó</b><em>Interiores</em></span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <span class="mk5-grao"></span>
+                            <span class="mk5-scroll"><i></i></span>
+                          </div>
+                        </section>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="cine-veu"></div>
+            </article>
+
+            <!-- ---------- Indicador ---------- -->
+            <ol class="cine-indice" id="cine-indice" aria-hidden="true">
+              <li class="cine-marca"><b>01</b><span class="cine-trilho"><i></i></span></li>
+              <li class="cine-marca"><b>02</b><span class="cine-trilho"><i></i></span></li>
+              <li class="cine-marca"><b>03</b><span class="cine-trilho"><i></i></span></li>
+              <li class="cine-marca"><b>04</b><span class="cine-trilho"><i></i></span></li>
+              <li class="cine-marca"><b>05</b><span class="cine-trilho"><i></i></span></li>
+            </ol>
+
           </div>
         </div>
       </section>
@@ -1559,6 +2013,7 @@
     <!-- ============== SCRIPTS ============== -->
     <script src="assets/motion.js?v=20260905"></script>
     <script src="assets/main.js?v=20260905"></script>
+    <script src="assets/cinema.js?v=20260911" defer></script>
     <script type="module" src="assets/starfield-mount.mjs?v=20260910e"></script>
   </body>
 </html>

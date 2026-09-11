@@ -115,12 +115,20 @@ body {
    o recorte ligado ela corta na mesma proporção que a tela do cinema corta. */
 /* Mesma escala mínima do cinema: 12.5px de base põe o menor texto da maquete
    em 11.5px, então o laboratório julga a peça no tamanho em que ela roda. */
+/* A caixa é o contêiner de consulta das maquetes. assets/cinema.css escolhe
+   o arranjo pela caixa medida (nome tela, 62em por 37em para a composição
+   desenhada), então sem container-type aqui o laboratório mostraria sempre
+   o arranjo em fluxo e julgaria a peça errada. A altura precisa ser
+   definida: container-type: size não funciona com altura automática. */
 .lab-caixa {
   --mk-fs: 12.5px;
   font-size: var(--mk-fs);
   width: 64em;
   max-width: 100%;
+  height: 38em;
   position: relative;
+  container-type: size;
+  container-name: tela;
 }
 @media (min-width: 1500px) { .lab-caixa { --mk-fs: 13px; } }
 

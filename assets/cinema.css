@@ -1,18 +1,25 @@
 /* ============================================================
-   WaveOps. Seção de cinema: painéis de tela cheia e maquetes de produto.
+   WaveOps. Seção de cinema: UMA janela só, e o conteúdo dela se transforma.
 
    Este arquivo é o único lugar onde esse CSS vive. Ele é carregado por <link>
-   no index.html e pelos dois laboratórios em dev/, então não existe mais cópia
-   inline para sincronizar.
+   no index.html e por dev/lab-maquetes.html, então não existe cópia inline
+   para sincronizar. dev/lab-cinema.html ficou para trás: ele monta a marcação
+   .cine- do empilhamento antigo, que saiu em 11/09/2026.
 
    Duas metades:
 
-   . a SEÇÃO (itens 1 a 8): o trilho, o palco grudado, os cinco painéis que se
-     empilham por scroll, o indicador de progresso e a lista estática que vale
-     sem JavaScript;
+   . a CENA (itens 1 a 8): o trilho que compra o curso de rolagem, o palco
+     grudado, a janela única com barra de título e rodapé, os cinco estados
+     empilhados na mesma célula de grade, o cartão da lead que atravessa a cena
+     inteira e a lista estática que vale sem JavaScript;
 
-   . as MAQUETES (item 9 em diante): cinco janelas de aplicativo desenhadas em
-     HTML e CSS que ocupam a zona visual de cada painel.
+   . as MAQUETES (item 9 em diante): as cinco telas de aplicativo desenhadas em
+     HTML e CSS que ocupam o interior da janela, uma por estado.
+
+   Por que uma janela só. O empilhamento anterior punha painel de tela cheia por
+   cima de painel de tela cheia, e cada troca lia como slide novo. O alvo é o
+   oposto: a moldura permanece, o rótulo da barra troca, e o que está dentro se
+   transforma conforme o scroll avança. Cena contínua, não cinco telas.
 
    Regras que este arquivo respeita de propósito:
 
@@ -23,12 +30,17 @@
      prefers-reduced-motion o projeto zera toda animação com !important, então
      o que o CSS declara fora do @keyframes tem que ser a tela pronta;
 
-   . por quadro, o JavaScript escreve apenas transform e opacity.
+   . por quadro, o JavaScript escreve apenas transform e opacity;
+
+   . nada de will-change. O mecanismo anterior punha will-change: transform em
+     cinco elementos do tamanho da viewport, o que cria cinco camadas de
+     composição desse tamanho e não compra nada: quem recebe transform aqui
+     é o quadro dentro da janela, que o navegador já promove sozinho.
    ============================================================ */
 
 :root {
   /* Altura do nav sticky. Existe como token para o palco não repetir número
-     mágico: se o nav mudar de altura, muda aqui e o painel acompanha. */
+     mágico: se o nav mudar de altura, muda aqui e a cena acompanha. */
   --nav-h: 70px;
 }
 
@@ -36,189 +48,109 @@
    contexto de rolagem e mata o position: sticky do palco em silêncio. clip corta
    igual e não cria esse contexto. O @supports é a trava: em navegador sem clip
    a regra não entra, o body continua com hidden, e o motor (que testa o mesmo
-   suporte) não liga o cinema. O visitante cai na lista estática, legível. */
+   suporte) não liga a cena. O visitante cai na lista estática, legível. */
 @supports (overflow: clip) {
   body { overflow-x: clip; }
 }
 
 /* ============================================================
-   PAINÉIS DE TELA CHEIA, RASPADOS PELO SCROLL
-
-   Quatro painéis, um por frente da WaveOps. Cada um ocupa a tela inteira e
-   sangra de ponta a ponta: sem moldura, sem canto arredondado, sem largura
-   máxima. Painel dentro de cartão parece print colado numa página, e é o
-   oposto do que a referência entrega.
-
-   O painel que está na tela não sai. O próximo sobe por cima e o cobre. O
-   coberto recua: encolhe, anda para trás em Z e escurece atrás de um véu. A
-   diferença entre papel deslizando e profundidade real mora nesses três
-   movimentos acontecendo juntos.
-
-   Tudo é função do scroll. Nenhuma transição tem duração própria, então
-   parar de rolar congela a imagem no quadro exato e rolar para trás desfaz
-   quadro a quadro, igual raspar uma linha do tempo de vídeo.
-
-   Três decisões estruturais que este arquivo respeita de propósito:
-
-   . a cor sempre sai de token. Os quatro mundos nascem da mesma fórmula, só
-     mudando ângulo, quantidade de tinta e posição do halo, então trocar
-     --accent troca a seção inteira sem tocar em nada aqui;
-
-   . o estado estático é o padrão do CSS e o cinema é a exceção, ligada pela
-     classe .viva que o JavaScript adiciona. Sem JavaScript, com o motor
-     falhando ou com prefers-reduced-motion, o visitante cai numa lista de
-     quatro seções legíveis, nunca numa tela vazia;
-
-   . por quadro o JavaScript faz uma leitura de layout e escreve apenas
-     transform e opacity.
-   ============================================================ */
-
-/* ---------- Superfície ---------- */
-body {
-  background: var(--bg);
-  /* styles.css usa overflow-x: hidden no body. hidden transforma o body em
-     contexto de rolagem e mata o position: sticky do palco em silêncio.
-     clip corta igual e não cria esse contexto. */
-  overflow-x: clip;
-}
-
-/* ============================================================
    1. O trilho e o palco
 
-   O trilho é só altura: ele compra o curso de rolagem que a seção precisa.
-   O palco gruda no topo e é a janela de uma tela por onde os painéis passam.
+   O trilho é só altura: ele compra o curso de rolagem que a cena precisa. O
+   palco gruda no topo e é a janela de uma tela por onde a cena passa.
    ============================================================ */
-.cine-rail {
+.cena-rail {
   position: relative;
-  /* Altura só existe no modo cinema. Na lista estática o conteúdo manda. */
+  /* Altura só existe no modo cena. Na lista estática o conteúdo manda. */
 }
 
-.cine-stage {
+.cena-stage {
   position: relative;
 }
 
-/* ---------- Modo cinema: o JavaScript liga com .viva ---------- */
-.cine-rail.viva .cine-stage {
+/* ---------- Modo cena: o JavaScript liga com .viva ---------- */
+.cena-rail.viva .cena-stage {
   position: sticky;
   /* O nav da página é sticky com 70px (assets/styles.css). Grudar em top: 0
-     faria o painel passar por baixo dele e a manchete sumir atrás do menu. O
-     palco gruda logo abaixo e desconta essa altura da própria janela. */
+     faria a manchete passar por baixo dele. O palco gruda logo abaixo e
+     desconta essa altura da própria janela. */
   top: var(--nav-h);
   height: calc(100vh - var(--nav-h));
   height: calc(100svh - var(--nav-h));
-  /* Corta a sombra dos painéis enquanto eles estão em escala 1. Só quando o
-     painel recua a sombra aparece, e aí ela desenha a borda do que ficou
-     para trás. */
-  overflow: clip;
 }
 
 /* ============================================================
-   2. O painel
+   2. O palco: manchete em cima, janela embaixo
 
-   Os quatro mundos de cor saem de uma fórmula só. Cada painel muda seis
-   variáveis e nada mais: ângulo do gradiente, quanto de accent entra na
-   mistura, onde a mistura termina, e a posição e a força do halo. Nenhuma cor
-   é escrita à mão, então trocar --accent troca a seção inteira.
+   A escala da maquete é UMA conta, e ela mora aqui. --mk-fs é o corpo base da
+   maquete, e como cada medida interna da maquete está em em, esse único valor
+   redimensiona tudo sem borrar texto (scale() borraria).
+
+   As duas pernas do min() são as duas formas de a janela não caber:
+
+   . largura: a janela tem 64em. Descontando as goteiras do palco, sobra
+     100vw menos 128px, e o divisor 68 deixa folga para a sombra;
+
+   . altura: a janela inteira (barra 2.6em, tela 38em, rodapé 2.2em, mais
+     fios) mede 43em. O que sobra de tela é 100svh menos o nav, menos as
+     goteiras do palco, menos o bloco de texto e o respiro entre os dois.
+     Medido no bloco de texto mais alto dos cinco: 358px cobre os quatro.
+
+   O piso de 12px não é estética: o menor texto das maquetes é .917em, e
+   .917 vezes 12 dá 11,0px, que é o mínimo legível declarado no projeto.
+   Quando nem 12px cabe, a janela encolhe pelo min(100%, ...) abaixo e a
+   consulta de contêiner do item 16 troca a composição sozinha.
    ============================================================ */
-.cine-panel {
-  position: relative;
-  z-index: 1;
-  isolation: isolate;
-  /* A tela é quem corta a peça visual. É aqui que o corte acontece. */
-  overflow: clip;
-
-  --ang: 168deg;
-  --tinta: 9%;
-  --parada: 60%;
-  --halo-x: 10%;
-  --halo-y: 106%;
-  --halo-k: 1;
-  --halo: .30;
-
-  background:
-    radial-gradient(118% 86% at var(--halo-x) var(--halo-y),
-      rgba(var(--glow), calc(var(--halo) * var(--halo-k))), transparent 62%),
-    linear-gradient(var(--ang),
-      color-mix(in srgb, var(--accent) var(--tinta), var(--bg)) 0%,
-      var(--bg) var(--parada));
-}
-
-/* No tema claro o halo violeta sobre fundo branco satura rápido. Baixar a
-   alfa mantém os quatro mundos distintos sem lavar o texto. */
-[data-theme="light"] .cine-panel { --halo: .20; }
-
-/* Painel 01: vazio, com uma brasa baixa no canto esquerdo. */
-.cine-panel[data-painel="1"] { --ang: 168deg; --tinta: 4%;  --parada: 42%; --halo-x: 8%;  --halo-y: 104%; --halo-k: 1.2; }
-/* Painel 02: o mundo forte. Violeta atravessando a tela na diagonal. */
-.cine-panel[data-painel="2"] { --ang: 124deg; --tinta: 36%; --parada: 88%; --halo-x: 86%; --halo-y: 4%;   --halo-k: 1.25; }
-/* Painel 03: quase preto, com a testa iluminada. A tinta fica na faixa de
-   cima porque é o ombro que sobra à mostra quando ele recua: painel escuro com
-   tinta embaixo vira barra preta sem informação na hora em que é coberto. */
-.cine-panel[data-painel="3"] { --ang: 186deg; --tinta: 20%; --parada: 34%; --halo-x: 98%; --halo-y: 40%;  --halo-k: .5; }
-/* Painel 04: meio-termo, halo largo e baixo atrás da peça visual. */
-.cine-panel[data-painel="4"] { --ang: 146deg; --tinta: 22%; --parada: 70%; --halo-x: 74%; --halo-y: 96%;  --halo-k: .95; }
-/* Painel 05: fecha a sequência subindo a tinta de novo, com o halo na testa do
-   lado oposto ao do painel 02. O olho lê o fim do arco sem repetir mundo. */
-.cine-panel[data-painel="5"] { --ang: 206deg; --tinta: 30%; --parada: 78%; --halo-x: 16%; --halo-y: 12%;  --halo-k: 1.1; }
-
-.cine-rail.viva .cine-panel {
-  position: absolute;
-  inset: 0;
-  z-index: var(--z);
-  will-change: transform;
-  /* A sombra fica fora do palco enquanto o painel está em escala 1, então não
-     desenha moldura nenhuma na tela cheia. Ela só entra em cena quando o
-     painel encolhe. */
-  box-shadow: 0 0 72px -6px var(--scene-shadow);
-}
-
-/* O véu é do próprio painel: ele escurece o que ficou para trás sem mexer
-   em filter, que custaria repintura por quadro. */
-.cine-veu {
-  position: absolute;
-  inset: 0;
-  z-index: 6;
-  background: var(--bg);
-  opacity: 0;
-  pointer-events: none;
-}
-.cine-rail:not(.viva) .cine-veu { display: none; }
-
-/* ============================================================
-   3. Conteúdo do painel
-   ============================================================ */
-.cine-quadro {
-  position: relative;
-  z-index: 2;
+.cena-palco {
   height: 100%;
   display: grid;
-  grid-template-columns: minmax(0, 1.04fr) minmax(0, .96fr);
-  align-items: center;
-  column-gap: clamp(24px, 4vw, 64px);
-  /* Padding generoso no conteúdo, zero na direita: é por ali que a peça sai. */
-  padding: clamp(30px, 5vh, 72px) 0 clamp(30px, 5vh, 72px) clamp(22px, 5vw, 92px);
+  grid-template-rows: auto minmax(0, 1fr);
+  justify-items: center;
+  gap: clamp(12px, 2.2vh, 24px);
+  padding: clamp(12px, 2.4vh, 26px) clamp(16px, 4vw, 56px);
+
+  --mk-fs: clamp(12px, min(calc((100vw - 128px) / 68), calc((100vh - 358px) / 43)), 16px);
+  --mk-fs: clamp(12px, min(calc((100vw - 128px) / 68), calc((100svh - 358px) / 43)), 16px);
 }
 
-.cine-texto {
+/* ============================================================
+   3. Os cinco textos, empilhados na mesma célula
+
+   Grade de uma célula só com os cinco blocos em cima um do outro: a altura do
+   contêiner passa a ser a do bloco mais alto e nunca muda, então trocar de
+   estado não mexe no layout da página. Nenhum position: absolute envolvido.
+
+   Os cinco h3 e os cinco p ficam na árvore do documento o tempo todo. opacity
+   zero não tira nada da árvore de acessibilidade, então leitor de tela e busca
+   continuam lendo as cinco frentes.
+   ============================================================ */
+.cena-textos {
   display: grid;
-  align-content: center;
-  gap: clamp(14px, 2.2vh, 26px);
-  padding-right: clamp(8px, 1.5vw, 24px);
+  width: min(100%, calc(64 * var(--mk-fs)));
 }
 
-/* O selo numérico só aparece na lista estática, onde o indicador lateral não
-   existe e o número precisaria voltar para dentro do painel. */
-.cine-selo {
-  display: block;
+.cena-fala {
+  grid-area: 1 / 1;
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: clamp(7px, 1.1vh, 13px);
+}
+.cena-rail.viva .cena-fala { opacity: 0; }
+.cena-rail.viva .cena-fala[data-cena="1"] { opacity: 1; }
+
+/* O selo numérico só aparece na lista estática, onde o rodapé da janela não
+   existe e o número precisa voltar para dentro do texto. */
+.cena-selo {
   font-family: var(--font-mono);
   font-size: 13px;
   font-weight: 700;
   letter-spacing: .1em;
   color: color-mix(in srgb, var(--text) 38%, transparent);
+  display: none;
 }
-.cine-rail.viva .cine-selo { display: none; }
 
-.cine-rotulo {
+.cena-rotulo {
   font-family: var(--font-mono);
   font-size: clamp(10px, .95vw, 12.5px);
   font-weight: 700;
@@ -226,317 +158,366 @@ body {
   color: var(--accent-strong);
 }
 
-/* A manchete é a peça de tipografia do painel: corpo grande, entrelinha
-   abaixo de 1, medida curta de propósito para quebrar em duas ou três linhas
-   e formar bloco, não faixa. */
-.cine-manchete {
+/* A manchete é a peça de tipografia do estado: entrelinha curta, medida
+   fechada, para formar bloco e não faixa. Ela é menor que a do empilhamento
+   antigo de propósito: agora divide a tela com a janela inteira, e altura
+   gasta aqui é altura tirada da maquete. */
+.cena-manchete {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: clamp(29px, 5.2vw, 72px);
-  line-height: .98;
-  letter-spacing: -.035em;
-  max-width: 15ch;
+  font-size: clamp(25px, 3.5vw, 46px);
+  line-height: 1;
+  letter-spacing: -.032em;
+  max-width: 22ch;
   text-wrap: balance;
   color: var(--text);
+  margin: 0;
 }
 
-/* O apoio deriva do --text em vez de usar --muted porque o fundo de cada
-   painel é diferente: mistura com transparência mantém o contraste em todos
-   os quatro mundos e nos dois temas. */
-.cine-apoio {
+/* O apoio deriva do --text em vez de usar --muted: mistura com transparência
+   mantém o contraste nos dois temas sem inventar token novo. */
+.cena-apoio {
   font-family: var(--font-body);
-  font-size: clamp(15px, 1.45vw, 20px);
-  line-height: 1.5;
-  max-width: 44ch;
+  font-size: clamp(14px, 1.25vw, 17.5px);
+  line-height: 1.45;
+  max-width: 56ch;
   color: color-mix(in srgb, var(--text) 74%, transparent);
+  margin: 0;
 }
 
 /* Etiqueta com fio vertical em vez de pílula: o fio diz que os itens são
-   instâncias da mesma categoria, e não repete o kit de cartão arredondado
-   que a página já usa em outros lugares. */
-.cine-etiquetas {
+   instâncias da mesma categoria, e não repete o kit de cartão arredondado que
+   a página já usa em outros lugares. */
+.cena-etiquetas {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px clamp(16px, 1.8vw, 24px);
-  margin-top: clamp(2px, 1vh, 10px);
+  gap: 8px clamp(14px, 1.6vw, 22px);
 }
-.cine-etiquetas span {
+.cena-etiquetas span {
   font-family: var(--font-body);
-  font-size: clamp(11.5px, 1vw, 13.5px);
+  font-size: clamp(11.5px, 1vw, 13px);
   font-weight: 500;
   line-height: 1.25;
-  padding-left: 11px;
+  padding-left: 10px;
   border-left: 1px solid color-mix(in srgb, var(--accent-strong) 60%, transparent);
   color: color-mix(in srgb, var(--text) 80%, transparent);
 }
 
 /* ============================================================
-   4. A zona da peça visual
+   4. A janela
 
-   Aqui mora a maquete de produto: uma janela de aplicativo desenhada em HTML e
-   CSS, com tamanho de tela real (64em por 38em na escala de --mk-fs). Ela vaza
-   pela borda direita e a tela corta, igual print de produto na referência.
-
-   Duas decisões que esta zona toma e que o resto do arquivo depende:
-
-   . a maquete NÃO é ampliada por scale(). Escalar texto de 12px o borra, e é a
-     nitidez do texto pequeno que faz a peça parecer produto em vez de desenho.
-     Toda a escala vem de --mk-fs, e como cada medida interna está em em, mudar
-     essa única variável redimensiona a maquete inteira sem perder nitidez;
-
-   . a sangria é declarada, não herdada do acaso. 16.6em de 64em é 26% fora do
-     quadro, com os 47.4em da coluna segura da esquerda inteiros dentro da tela.
-     É essa conta que garante que o conteúdo que importa nunca caia no corte.
+   Uma só, a mesma nos cinco estados. Barra de título em cima, tela no meio,
+   rodapé com o progresso embaixo. A moldura nunca sai de cena: é ela que faz
+   o olho ler transformação em vez de troca de slide.
    ============================================================ */
-.cine-peca {
+.cena-janela {
   position: relative;
-  align-self: stretch;
-
-  /* Piso de escala. 12.5px de base põe o menor texto da maquete em 11.5px, e
-     nenhuma faixa de janela desce disso: a trava do right acima resolve a
-     largura cortando a composição, que é o que pode ser sacrificado. */
-  --mk-fs: 12.5px;
-  --peca-w: 64em;
-  --peca-h: 38em;
-  --peca-sangra: 16.6em;
-}
-
-.cine-peca-caixa {
-  position: absolute;
-  top: 50%;
-  /* Duas regras numa linha. A primeira é a sangria de projeto: 16.6em de 64em,
-     26% fora do quadro. A segunda é a trava: 100% é a largura da coluna da
-     peça, então calc(100% - 64em) é o recuo máximo que ainda deixa a borda
-     esquerda da maquete dentro da coluda. min() pega o que sangra mais, e o
-     resultado é que em janela estreita o corte cresce sozinho em vez de a
-     maquete avançar por cima da manchete. É isso que permite manter --mk-fs
-     alto em qualquer largura: quem cede é a composição, nunca o corpo do
-     texto. */
-  right: min(calc(-1 * var(--peca-sangra)), calc(100% - var(--peca-w)));
-  width: var(--peca-w);
-  height: var(--peca-h);
-  /* É este font-size que faz os em acima resolverem na escala da maquete, e
-     não na escala do texto do painel. */
+  width: min(100%, calc(64 * var(--mk-fs)));
+  height: min(100%, calc(43 * var(--mk-fs)));
   font-size: var(--mk-fs);
-  transform: translateY(-50%);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: .92em;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--scene-shadow) 45%, transparent),
+    0 2.4em 4.4em -1.6em var(--scene-shadow),
+    0 1em 2em -1em var(--scene-shadow);
+  overflow: hidden;
 }
 
-/* A perspectiva mora só aqui. O JavaScript nunca reescreve esta string, então
-   não há risco de o motor perder o ângulo num quadro. */
-.cine-peca-3d {
-  width: 100%;
-  height: 100%;
+/* ---------- Barra de título ---------- */
+.cena-barra {
+  display: flex;
+  align-items: center;
+  gap: .67em;
+  height: 2.6em;
+  padding: 0 .92em;
+  border-bottom: 1px solid var(--border);
+  background:
+    linear-gradient(to bottom, color-mix(in srgb, var(--text) 6%, transparent), transparent 62%),
+    color-mix(in srgb, var(--surface-2) 74%, var(--surface));
+}
+[data-theme="light"] .cena-barra {
+  background: color-mix(in srgb, var(--surface-2) 74%, var(--surface));
+}
+
+.cena-luzes { display: flex; gap: .33em; flex: none; }
+.cena-luzes i {
+  width: .5em;
+  height: .5em;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--text) 17%, transparent);
+}
+
+/* Os cinco rótulos e os cinco chips também empilham numa célula só: a barra
+   fica com a largura do mais largo e não se mexe quando o estado troca. */
+.cena-barra-titulos,
+.cena-barra-chips { display: grid; min-width: 0; }
+.cena-barra-chips { margin-left: auto; justify-items: end; }
+
+.cena-barra-titulo,
+.cena-barra-chip { grid-area: 1 / 1; }
+
+/* Estado declarado na barra e no cartão da lead: só o do estado 01. O motor
+   sobrescreve por quadro; sem ele, a janela nasce coerente com a maquete que
+   o CSS deixa acesa. */
+.cena-barra-titulo,
+.cena-barra-chip,
+.cena-lead-origem,
+.cena-lead-etapa { opacity: 0; }
+.cena-barra-titulo[data-cena="1"],
+.cena-barra-chip[data-cena="1"],
+.cena-lead-origem[data-cena="1"],
+.cena-lead-etapa[data-cena="1"] { opacity: 1; }
+
+.cena-barra-titulo {
+  font-family: var(--font-mono);
+  font-size: .917em;
+  font-weight: 700;
+  letter-spacing: .01em;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- A tela: é aqui que a transformação acontece ---------- */
+.cena-tela {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  overflow: hidden;
+  /* A tela é o contêiner de consulta das maquetes (item 16). Medir a caixa
+     real em vez do viewport é o que permite a mesma maquete servir a janela
+     larga do desktop e a janela alta do celular sem regime paralelo de
+     media query. */
+  container-type: size;
+  container-name: tela;
+  background:
+    radial-gradient(120% 90% at 18% 4%, rgba(var(--glow), .10), transparent 60%),
+    var(--surface-2);
+}
+
+.cena-quadro {
+  grid-area: 1 / 1;
+  min-width: 0;
+  min-height: 0;
   display: grid;
   place-items: center;
-  /* Perspectiva longa de propósito. Com 1000px o lado esquerdo da maquete, que
-     é justamente o lado que fica dentro do quadro, encurtava 14% e o texto de
-     11px lá deixava de ser texto. Com 1800px o encurtamento cai para 8% e o
-     olho continua lendo giro. */
-  transform: perspective(1800px) rotateY(-11deg) rotateX(3deg);
-  transform-origin: 100% 50%;
+  opacity: 0;
+}
+/* Estado declarado: o primeiro estado inteiro. Sem JavaScript, com o motor
+   falhando ou com movimento pausado, a janela mostra uma cena completa e
+   legível. Nunca tela vazia. */
+.cena-quadro[data-cena="1"] { opacity: 1; }
+
+/* Maquete que ocupa a janela inteira (03, 04 e 05). A moldura já é a janela,
+   então a janela interna perde cromo e o conteúdo vai de borda a borda. */
+.cena-cheia {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
 }
 
-/* Escala por faixa de janela. A maquete tem largura fixa em em, então quem
-   manda no tamanho é --mk-fs. Em janela estreita a coluna da peça encolhe e a
-   maquete precisa encolher junto, senão ela invade a manchete, que é o
-   conteúdo. */
-@media (min-width: 1280px) { .cine-peca { --mk-fs: 13px; } }
-@media (min-width: 1600px) { .cine-peca { --mk-fs: 14px; } .cine-manchete { font-size: clamp(72px, 4.6vw, 86px); } }
-
-/* ---------- Janela estreita E baixa: a peça entra inteira ao lado do texto ----------
-   Aqui a maquete já está em pilha (item 17). Pilha cortada pela borda ficaria
-   com os cartões fatiados ao meio, que lê como defeito e não como print. Então
-   nesta faixa, e só nela, a peça não sangra: ela entra inteira na coluna. */
-@media (min-width: 768px) and (max-width: 1099px) and (max-height: 939px) {
-  .cine-peca-caixa {
-    left: 0;
-    right: clamp(12px, 1.6vw, 26px);
-    width: auto;
-    height: auto;
-  }
-  .cine-peca-3d { transform: none; width: 100%; height: auto; }
+/* ---------- Rodapé: o progresso dos cinco estados ---------- */
+.cena-rodape {
+  display: flex;
+  align-items: center;
+  gap: .67em;
+  height: 2.2em;
+  padding: 0 .92em;
+  border-top: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface-2) 60%, var(--surface));
 }
 
-/* ---------- Coluna única: tablet em pé ----------
-   Entre 768px e 1099px a coluna da peça fica com menos de 500px, e nessa
-   largura a maquete de 64em só caberia cortada quase pela metade. Com altura
-   de sobra, o painel troca de eixo: manchete em cima, maquete inteira embaixo,
-   ancorada à esquerda e saindo pela direita só o que não couber.
-
-   O corte de 940px de altura não é estética, é conta: texto mais maquete mais
-   respiro dá cerca de 895px, então abaixo disso a coluna única estouraria o
-   painel e a maquete apareceria cortada em cima e embaixo. Janela estreita e
-   baixa continua em duas colunas, com a composição cortada pela trava do
-   right. */
-@media (max-width: 1099px) and (min-height: 940px) {
-  .cine-quadro {
-    grid-template-columns: minmax(0, 1fr);
-    align-content: center;
-    row-gap: clamp(20px, 3vh, 34px);
-    padding: clamp(30px, 4vh, 56px) clamp(24px, 4vw, 44px) clamp(30px, 4vh, 56px) clamp(52px, 7vw, 78px);
-  }
-  .cine-texto { padding-right: 0; }
-  .cine-manchete { font-size: clamp(34px, 5.6vw, 52px); max-width: 17ch; }
-  .cine-peca {
-    align-self: center;
-    min-height: calc(38 * var(--mk-fs));
-  }
-  /* Ancorada à esquerda: em coluna única o texto começa na esquerda e a
-     maquete continua dali, saindo pela direita só quando não cabe. */
-  .cine-peca-caixa { left: 0; right: auto; }
-  /* Origem à esquerda para acompanhar a âncora: a borda próxima passa a ser a
-     direita, que é a que sai de quadro, igual ao desktop. */
-  .cine-peca-3d {
-    transform: perspective(2400px) rotateY(-7deg) rotateX(2deg);
-    transform-origin: 0 50%;
-  }
-}
-
-/* ============================================================
-   5. Indicador de progresso
-
-   Quatro números na goteira ESQUERDA, com um fio de 1px do lado de fora. O fio
-   do painel ativo preenche conforme o progresso dentro dele, por scaleY, que é
-   transform e não custa layout.
-
-   Por que esquerda. A maquete agora sangra até a borda direita em toda largura
-   a partir de 768px, então o lado direito é território permanentemente ocupado
-   por interface densa, e o número caía em cima de texto de produto. A goteira
-   esquerda é vazia por construção nos quatro painéis: o padding do quadro
-   reserva de 38px a 92px antes de o texto começar, e nada sangra por ali.
-   Mudar de lado resolve na origem em vez de mascarar, e dispensa a pastilha com
-   backdrop-filter, que criava camada de composição por cima de um palco sticky
-   de 100vh numa página que já roda um rAF por quadro de scroll.
-
-   O fio fica do lado de fora do número, encostado na borda, igual era à
-   direita: a relação de "régua na margem" é a mesma, espelhada.
-   ============================================================ */
-.cine-indice {
-  position: absolute;
-  z-index: 20;
-  left: clamp(10px, 1.2vw, 22px);
-  top: 50%;
-  transform: translateY(-50%);
-  display: grid;
-  gap: clamp(13px, 2.1vh, 24px);
+.cena-indice {
+  display: flex;
+  align-items: center;
+  gap: .92em;
   list-style: none;
   margin: 0;
   padding: 0;
+  width: 100%;
 }
-.cine-rail:not(.viva) .cine-indice { display: none; }
-
-.cine-marca {
+.cena-marca {
+  flex: 1;
+  min-width: 0;
   display: grid;
-  /* Espelhado: o fio na coluna de fora, o número na de dentro. O HTML segue na
-     ordem número, fio, então a troca acontece por grid-column e não pede
-     mudança de markup. */
-  grid-template-columns: 1px auto;
-  align-items: center;
-  gap: 9px;
+  gap: .33em;
 }
-.cine-marca b {
-  grid-column: 2;
+.cena-marca b {
   font-family: var(--font-mono);
-  font-size: 11px;
+  /* Piso em px: .833em do corpo base cai para 10,5px na janela de 1440x900, e
+     11px é o mínimo legível declarado no projeto. */
+  font-size: max(11px, .833em);
   font-weight: 700;
   letter-spacing: .06em;
   color: var(--text);
   opacity: .3;
 }
-.cine-marca .cine-trilho { grid-column: 1; }
-.cine-trilho {
+.cena-trilho {
   position: relative;
-  width: 1px;
-  height: clamp(20px, 3.4vh, 34px);
-  background: color-mix(in srgb, var(--text) 22%, transparent);
+  display: block;
+  height: 2px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--text) 16%, transparent);
+  overflow: hidden;
 }
-.cine-trilho i {
+.cena-trilho i {
   position: absolute;
   inset: 0;
   display: block;
   background: var(--accent-strong);
-  transform: scaleY(0);
-  transform-origin: 50% 0;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
 }
 
 /* ============================================================
-   7. Tela estreita
+   5. O cartão da lead: o fio que atravessa a cena
 
-   A peça visual desce para baixo da manchete em vez de disputar a largura
-   com ela. Em 390px uma peça vazando pela direita ao lado do texto roubaria
-   metade da linha, e a manchete é o conteúdo. Descendo, ela mantém o corte
-   pela borda direita, que é a assinatura do efeito, sem encolher o tipo.
+   A Ana M. é a mesma nas cinco maquetes. Este cartão é a prova disso na tela:
+   ele NUNCA é desmontado, ele anda de um ponto ao outro da janela durante a
+   transformação e para junto com ela. É esse objeto persistente, e não a
+   opacidade das maquetes, que faz o olho ler cena contínua.
+
+   O motor escreve só transform. As posições de repouso de cada estado vivem
+   no JavaScript em fração da tela, e o deslocamento é medido a partir do
+   estado 01, que é o que o CSS declara aqui. Com isso o estado parado já
+   nasce certo, sem JavaScript nenhum.
    ============================================================ */
-@media (max-width: 767px) {
-  .cine-quadro {
-    grid-template-columns: minmax(0, 1fr);
-    align-content: center;
-    row-gap: clamp(18px, 3vh, 30px);
-    /* A goteira esquerda agora hospeda o indicador, então ela precisa ser larga
-       o bastante para o número não encostar na primeira letra do texto. */
-    padding: clamp(26px, 4vh, 44px) 0 clamp(26px, 4vh, 44px) clamp(44px, 12vw, 58px);
-  }
-  .cine-texto { padding-right: clamp(10px, 4vw, 20px); }
-  /* A maquete entra inteira, sem giro e sem sangria: em 390px ela vira pilha
-     vertical (ver a regra .mk-so-amplo no bloco das maquetes). A caixa segue
-     absoluta e centrada porque é ela que o motor transforma por quadro. */
-  .cine-peca {
-    align-self: center;
-    min-height: 320px;
-  }
-  /* Margem à direita igual à da esquerda do quadro: sem ela a maquete encosta
-     na borda da tela e volta a parecer cortada, que é exatamente o efeito que
-     não pode existir no celular. Ela também tira a maquete de baixo do
-     indicador de progresso. */
-  .cine-peca-caixa { left: 0; right: clamp(20px, 6vw, 30px); width: auto; height: auto; }
-  .cine-peca-3d { transform: none; width: 100%; height: auto; }
-  /* Medida maior que a do desktop de propósito: em 390px uma manchete de
-     13ch quebra em cinco linhas e vira parede. 16ch põe em quatro. */
-  .cine-manchete { font-size: clamp(27px, 8.2vw, 40px); max-width: 16ch; }
-  .cine-apoio { font-size: clamp(14px, 3.8vw, 16px); }
-  /* Sem véu e sem pastilha: na goteira esquerda o indicador não tem nada por
-     baixo dele, porque a maquete começa depois do padding do quadro. */
-  .cine-indice { left: 10px; gap: 12px; }
-  .cine-marca b { font-size: 10px; }
+.cena-lead {
+  position: absolute;
+  z-index: 7;
+  /* Arranjo padrão: faixa de baixo, que o .cena-quadro reserva. A
+     composição do item 17 tira o cartão dali e o põe a flutuar. */
+  left: .67em;
+  top: auto;
+  bottom: .58em;
+  display: flex;
+  align-items: center;
+  gap: .58em;
+  padding: .5em .67em;
+  border: 1px solid rgba(var(--glow), .42);
+  border-radius: .67em;
+  background: color-mix(in srgb, var(--surface) 92%, var(--accent));
+  box-shadow:
+    0 1.2em 2.4em -1em var(--scene-shadow),
+    0 .3em .8em -.4em var(--scene-shadow);
+  pointer-events: none;
 }
-
-/* Janela baixa e deitada: o painel precisa caber sem cortar a etiqueta. */
-/* Janela baixa e deitada: o painel precisa caber sem cortar a etiqueta, e a
-   maquete de 38em precisa caber na altura que sobra. */
-@media (max-height: 620px) and (min-width: 768px) {
-  .cine-manchete { font-size: clamp(27px, 3.4vw, 44px); }
+.cena-lead-corpo { display: grid; gap: .08em; min-width: 0; }
+.cena-lead-nome {
+  font-size: 1em;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
 }
+.cena-lead-origens,
+.cena-lead-etapas { display: grid; }
+.cena-lead-origem,
+.cena-lead-etapa { grid-area: 1 / 1; }
+.cena-lead-origem {
+  font-family: var(--font-mono);
+  font-size: .917em;
+  color: color-mix(in srgb, var(--dim) 88%, transparent);
+  white-space: nowrap;
+}
+.cena-lead-etapas { justify-items: end; margin-left: .17em; }
 
 /* ============================================================
-   8. Movimento reduzido
+   6. Lista estática: o padrão do CSS
 
-   O JavaScript já não liga o cinema quando a preferência está ativa, então
-   este bloco é a segunda trava: se a classe .viva tiver entrado antes de a
-   preferência mudar, o CSS desmonta o empilhamento na hora.
+   Vale sem JavaScript, com o motor falhando, com o botão de pausa da página e
+   sob prefers-reduced-motion. A janela congela no estado 01, inteiro e
+   legível, e os cinco estados viram uma lista de leitura.
+
+   A janela vem antes na tela e depois na árvore: order a põe em cima para o
+   olho, e o DOM mantém os cinco h3 na frente para o leitor de tela.
+   ============================================================ */
+.cena-rail:not(.viva) .cena-palco {
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(30px, 5vh, 60px);
+  padding-block: clamp(30px, 5vh, 60px);
+}
+.cena-rail:not(.viva) .cena-janela {
+  order: -1;
+  /* O palco em lista tem altura automática, e ali o 100% de min(100%, 43em)
+     não resolve contra nada. A janela passa a declarar a própria altura. */
+  height: calc(43 * var(--mk-fs));
+}
+
+.cena-rail:not(.viva) .cena-textos {
+  display: grid;
+  gap: clamp(34px, 6vh, 64px);
+  width: min(100%, calc(64 * var(--mk-fs)));
+}
+.cena-rail:not(.viva) .cena-fala { grid-area: auto; }
+.cena-rail:not(.viva) .cena-selo { display: block; }
+
+/* Na lista estática a janela mostra um estado só. Tudo que é do estado 02 em
+   diante sai da janela, inclusive o rótulo e o chip da barra. */
+.cena-rail:not(.viva) .cena-janela [data-cena]:not([data-cena="1"]) { display: none; }
+.cena-rail:not(.viva) .cena-rodape { display: none; }
+
+/* ============================================================
+   7. Movimento reduzido
+
+   O motor já não liga a cena quando a preferência está ativa, e ele escuta a
+   mudança ao vivo. Esta é a segunda trava: se a classe .viva tiver entrado
+   antes de a preferência mudar, o CSS desmonta a cena na hora.
    ============================================================ */
 @media (prefers-reduced-motion: reduce) {
-  .cine-rail.viva { height: auto !important; }
-  .cine-rail.viva .cine-stage { position: relative; height: auto; overflow: visible; }
-  .cine-rail.viva .cine-panel {
-    position: relative;
-    inset: auto;
-    transform: none !important;
-    box-shadow: none;
-    will-change: auto;
+  .cena-rail.viva { height: auto !important; }
+  .cena-rail.viva .cena-stage { position: relative; height: auto; }
+  .cena-rail.viva .cena-palco {
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(30px, 5vh, 60px);
+    padding-block: clamp(30px, 5vh, 60px);
   }
-  .cine-rail.viva .cine-veu { display: none; }
-  .cine-rail.viva .cine-indice { display: none; }
-  .cine-rail.viva .cine-selo { display: block; }
-  .cine-rail.viva .cine-quadro { padding-block: clamp(46px, 7vw, 86px); }
+  .cena-rail.viva .cena-janela { order: -1; height: calc(43 * var(--mk-fs)); }
+  .cena-rail.viva .cena-textos { display: grid; gap: clamp(34px, 6vh, 64px); }
+  .cena-rail.viva .cena-fala { grid-area: auto; opacity: 1 !important; }
+  .cena-rail.viva .cena-selo { display: block; }
+  .cena-rail.viva .cena-janela [data-cena]:not([data-cena="1"]) { display: none; }
+  .cena-rail.viva .cena-quadro[data-cena="1"] { opacity: 1 !important; }
+  .cena-rail.viva .cena-rodape { display: none; }
+  .cena-rail.viva .cena-lead { transform: none !important; }
 }
 
-/* Lista estática: é o padrão do CSS, vale sem JavaScript e sob movimento
-   reduzido. Painel continua sangrando de ponta a ponta, só deixa de empilhar. */
-.cine-rail:not(.viva) .cine-quadro { padding-block: clamp(46px, 7vw, 86px); }
-/* Na lista estática a caixa da peça continua absoluta e centrada, então a
-   linha precisa de altura própria: 38 vezes a escala da maquete, mais folga
-   para a sombra. em aqui resolveria no corpo do painel, não no da maquete. */
-.cine-rail:not(.viva) .cine-peca { min-height: calc(38 * var(--mk-fs) + 44px); }
+/* ============================================================
+   8. Tela estreita
+
+   Abaixo de 768px a manchete ganha medida maior de propósito: em 390px uma
+   manchete de 22ch quebra em cinco linhas e vira parede.
+   ============================================================ */
+@media (max-width: 767px) {
+  .cena-palco {
+    gap: clamp(10px, 1.8vh, 18px);
+    padding: clamp(10px, 1.8vh, 18px) 16px;
+    /* Em 390px a perna de largura manda: 94vw dividido por 29 põe a janela
+       encostada nas goteiras de 16px com o corpo base acima do piso. A perna
+       de altura continua existindo para o celular deitado. */
+    --mk-fs: clamp(12px, min(calc((100vw - 32px) / 29), calc((100svh - 300px) / 43)), 14px);
+  }
+  .cena-textos { width: 100%; }
+  .cena-janela { width: 100%; height: 100%; }
+  .cena-manchete { font-size: clamp(24px, 7.4vw, 34px); max-width: 17ch; }
+  .cena-apoio { font-size: clamp(13.5px, 3.6vw, 15px); }
+  .cena-rodape { padding: 0 .67em; }
+  .cena-indice { gap: .5em; }
+}
 
 /* ============================================================
    9. Maquetes: o palco e os tokens locais
@@ -2051,30 +2032,193 @@ body {
 }
 
 /* ============================================================
-   16. Tela larga: a composição
+   16. Arranjo padrão: a maquete em fluxo dentro da janela
 
-   A composição desenhada, em caixa de tamanho fixo, com as superfícies em
-   profundidades diferentes. É essa versão que atravessa a borda direita da tela.
+   Este é o PADRÃO, e a composição desenhada do item 17 é a exceção. A ordem
+   importa: a janela pode ter qualquer proporção (larga e baixa no notebook,
+   estreita e alta no celular), e em fluxo a maquete se acomoda em qualquer
+   uma delas. A composição de posição absoluta só entra quando a caixa medida
+   comporta ela inteira.
 
-   A condição tem duas pernas porque a peça precisa de LARGURA VISÍVEL, e a
-   largura visível depende da altura: acima de 1100px ela existe nas duas
-   colunas; entre 768px e 1099px ela só existe quando a janela é alta o
-   bastante para o painel virar coluna única. Janela estreita e baixa cai na
-   pilha do item 17, e o motivo está lá.
-
-   Coluna segura: os primeiros 47.4em. O que estiver depois disso é
-   sacrificável, porque é a parte que a tela corta.
+   Quem decide é a consulta de contêiner sobre .cena-tela, não o viewport. A
+   caixa real é o que manda: a mesma largura de janela pode sobrar ou faltar
+   dependendo de quanto a manchete gastou de altura acima.
    ============================================================ */
-@media (min-width: 1100px), (min-width: 768px) and (min-height: 940px) {
-  .mk {
-    width: 64em;
-    height: 38em;
-    display: block;
+.mk {
+  width: 100%;
+  height: 100%;
+}
+
+/* Respiro só nas maquetes que são composição de janelas soltas. As maquetes
+   03, 04 e 05 são a própria janela e vão de borda a borda. */
+.mk-fluxo,
+.mk-integra {
+  align-content: center;
+  padding: .83em;
+}
+
+.mk-fluxo {
+  grid-template-columns: repeat(auto-fit, minmax(17em, 1fr));
+  align-items: start;
+  gap: .83em;
+}
+
+/* Em fluxo a conversa nunca recebe as 31em que a composição reserva para
+   ela: o rail de contatos ao lado da thread espremeria o balão a uma
+   palavra por linha. Fora da composição o rail sai e sobra a mensagem,
+   que é o conteúdo. */
+.mk-fluxo .mk1-lista,
+.mk-fluxo .mk1-thread-topo { display: none; }
+
+/* Rodapé de duas pontas em coluna estreita: sem quebra, a segunda ponta
+   sai pela borda da janela e o overflow: hidden corta a frase. */
+.mk-fluxo .mk1-fila-pe,
+.mk-fluxo .mk1-crm-pe { flex-wrap: wrap; }
+
+.mk-integra {
+  grid-template-columns: repeat(auto-fit, minmax(14em, 1fr));
+  align-items: start;
+  gap: .67em;
+}
+
+/* Em fluxo o chip de tempo real não tem fio para acompanhar: ele vira uma
+   linha própria embaixo das quatro janelas. */
+.mk-integra .mk2-tempo {
+  display: inline-flex;
+  position: static;
+  grid-column: 1 / -1;
+  justify-self: center;
+}
+
+/* As três maquetes de janela inteira preenchem a tela da cena. */
+.mk-painel,
+.mk-agente,
+.mk-site { display: grid; }
+
+/* Espaço reservado para a faixa do cartão da lead, que no arranjo padrão
+   mora encostada na borda de baixo. Sem esta reserva o cartão cobriria a
+   última linha da maquete, que é onde costuma estar o fecho da história. */
+.cena-quadro { padding-bottom: 3.4em; }
+
+/* ---------- Trimagem: caixa estreita ----------
+   Abaixo de 46em a maquete perde peça em vez de encolher tipo. O que sai é
+   sempre o que dá densidade, nunca o que dá sentido: some o rail de contatos,
+   somem as colunas laterais, somem as linhas repetidas. Tudo que sai carrega
+   a classe .mk-so-amplo no HTML, para a decisão ficar visível em quem lê o
+   markup. ---------- */
+/* Peça que depende de ALTURA, não de largura: a fila de ações da maquete
+   01 precisa de umas 12em livres embaixo do cartão de CRM. Em caixa baixa
+   ela sai; em celular em pé, que é alto, ela fica. */
+@container tela (max-height: 26em) {
+  .mk-so-alto { display: none !important; }
+}
+
+@container tela (max-width: 46em) {
+  .mk-so-amplo { display: none !important; }
+
+  .mk-jan { border-radius: .75em; }
+  .mk-topo { height: 2.17em; padding-inline: .67em; }
+  .mk-corpo { padding: .67em; gap: .5em; }
+  .mk-campo { padding: .25em 0; }
+  .mk-balao { max-width: 100%; }
+
+  /* ---------- 01 ----------
+     A conversa perde a moldura de janela e vira só o balão que chega: a
+     janela some, a mensagem fica. */
+  .mk1-conversa {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    /* Sem moldura não há o que recortar, e o overflow: hidden da janela estava
+       comendo a última linha do balão. */
+    overflow: visible;
   }
+  .mk1-conversa .mk-corpo { padding: 0; min-height: auto; }
+  .mk1-thread { padding: 0; gap: .5em; }
+  .mk1-crm .mk-corpo { padding-block: .42em; }
+  .mk1-passo { padding: .25em 0; }
+
+  /* ---------- 02 ---------- */
+  .mk2-jan .mk-corpo { padding: .5em; gap: .42em; }
+  .mk2-reg { padding: .33em .42em; gap: .42em; }
+  .mk2-reg .mk-ava { width: 1.42em; height: 1.42em; }
+
+  /* ---------- 03 e 04 ----------
+     As colunas laterais saem e a janela vira uma coluna só. */
+  .mk3-app .mk-corpo,
+  .mk4-app .mk-corpo { flex-direction: column; }
+
+  .mk3-main { padding: .67em; gap: .58em; }
+  .mk3-cabeca h3 { font-size: 1.17em; }
+  .mk3-card { padding: .58em; gap: .42em; }
+  .mk3-card h4 { min-height: 2.4em; }
+  .mk3-linha-graf { height: 2.4em; }
+  .mk3-anel { width: 2.4em; height: 2.4em; }
+  .mk-tab td { padding: .42em .5em .42em 0; }
+  .mk-tab th { padding: 0 .5em .33em 0; }
+
+  .mk4-esq {
+    width: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--mk-l1);
+    padding: .67em;
+    gap: .5em;
+  }
+  .mk4-dir { padding: .67em; gap: .5em; }
+  .mk4-rascunho { padding: .67em; gap: .5em; }
+  .mk4-texto { font-size: 1em; }
+
+  /* ---------- 05 ----------
+     O navegador continua sendo navegador, só perde a segunda coluna do hero.
+     O scroll interno continua, com percurso menor. */
+  .mk5-tela { --mk5-curso: 5.6em; }
+  .mk5-cabeca { padding: .83em 1em; gap: .83em; }
+  .mk5-marca { font-size: 1.083em; letter-spacing: .18em; }
+  .mk5-hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: .83em;
+    padding: .33em 1em 1.17em;
+  }
+  .mk5-manchete { font-size: 2.17em; max-width: 15ch; }
+  .mk5-apoio { font-size: 1em; max-width: 34ch; }
+  .mk5-cta { padding: .5em 1em; }
+  .mk5-arte { min-height: 6.5em; border-radius: 3.5em 3.5em 0 0; }
+  .mk5-vidro { left: auto; right: .83em; bottom: .67em; }
+  .mk5-proximo { padding: 1.17em 1em 1.5em; gap: .83em; }
+  .mk5-tira i { height: 4.5em; }
+}
+
+/* Caixa larga mas ainda sem altura para a composição: a barra lateral do
+   painel e a coluna do cliente cabem, e é o que dá densidade de produto. */
+@container tela (min-width: 46.01em) {
+  .mk3-app .mk-corpo,
+  .mk4-app .mk-corpo { flex-direction: row; }
+  .mk3-lado { display: flex; }
+}
+
+/* ============================================================
+   17. A composição desenhada
+
+   Aqui as superfícies saem do fluxo e assumem posição e profundidade, que é o
+   que faz a maquete parecer captura de tela de operação de verdade em vez de
+   cartão empilhado. Ela só entra quando a caixa medida comporta a composição
+   inteira: 62em de largura e 37em de altura, que é o envelope dos elementos
+   mais distantes (o cartão de WhatsApp da maquete 02 termina em 61,5em, a
+   fila da 01 termina em 34em de altura).
+
+   Fora desse envelope a maquete voltaria a ser cortada pela borda, que é
+   exatamente o defeito que esta reescrita existe para matar.
+   ============================================================ */
+@container tela (min-width: 62em) and (min-height: 37em) {
+  .cena-quadro { padding: 0; }
+
+  .mk { display: block; position: relative; }
   .mk-jan { position: absolute; }
 
   /* ---------- 01 ---------- */
   .mk1-conversa { z-index: 2; left: 0;    top: 4em;   width: 31em; height: 30em; }
+  .mk-fluxo .mk1-lista { display: flex; }
+  .mk-fluxo .mk1-thread-topo { display: flex; }
   .mk1-crm      { z-index: 1; left: 33em; top: 1.5em; width: 22em; height: 14.5em; }
   .mk1-fila     { z-index: 3; left: 33em; top: 19em;  width: 28em; height: 15em; }
 
@@ -2092,17 +2236,20 @@ body {
   .mk2-fio-b { left: 30em;   top: 17.5em; width: 7.6em; --fio-w: 7.6em; transform: rotate(-7.6deg); }
   .mk2-fio-c { left: 33.5em; top: 27em;   width: 5.1em; --fio-w: 5.1em; transform: rotate(-11.3deg); }
 
-  .mk2-tempo { display: inline-flex; left: 27.5em; top: 14.8em; }
+  /* A especificidade precisa bater a do arranjo em fluxo, que prende o chip
+     numa linha própria da grade. Sem o .mk-integra na frente, o position:
+     static do item 16 ganha e o chip volta para o canto de cima. */
+  .mk-integra .mk2-tempo { display: inline-flex; position: absolute; left: 27.5em; top: 14.8em; }
 
-  /* ---------- 03 ---------- */
-  .mk3-app { z-index: 1; left: 0; top: 0; width: 64em; height: 38em; }
+  /* ---------- 03, 04 e 05: a maquete É a janela ---------- */
+  .mk3-app,
+  .mk4-app,
+  .mk5-navegador { position: absolute; inset: 0; width: auto; height: auto; }
+
   .mk3-trilha { display: flex; }
 
-  /* ---------- 04 ---------- */
-  .mk4-app { z-index: 1; left: 0; top: 0; width: 64em; height: 38em; }
-
-  /* ---------- 05 ---------- */
-  .mk5-navegador { z-index: 1; left: 0; top: 0; width: 64em; height: 38em; }
+  /* ---------- 04: o cursor ----------
+     O cursor mora fora da janela para poder entrar por fora do quadro. */
   .mk4-cursor { display: block; left: 27.2em; top: 18em; animation: mk4-mover 10s ease-in-out infinite; }
 
   /* O cursor entra por baixo e à esquerda, pousa no Aprovar e fica. O retorno
@@ -2117,113 +2264,10 @@ body {
     97%      { transform: translate(-6.5em, 5em); opacity: 0; }
     100%     { transform: translate(-6.5em, 5em); opacity: 0; }
   }
-}
 
-/* ============================================================
-   17. Tela estreita
-
-   Vale em dois lugares: no celular, e em janela estreita E baixa (1024x768 de
-   iPad deitado, 1000x700 de janela de desktop não maximizada). Nos dois casos a
-   coluna da peça oferece menos de 380px úteis, e a composição ampla ali só
-   caberia cortada em mais da metade.
-
-   Medido antes desta regra existir, em 1000x700: a maquete 01 perdia o cartão
-   de CRM E a fila de três ações, ou seja, dois dos três elementos que o brief
-   nomeia, justamente os que provam a frase "sem ninguém precisar lembrar de
-   clicar". Cortar margem é aceitável, cortar o argumento não é. Então nessa
-   faixa a maquete entra INTEIRA, em pilha, sem sangrar.
-
-   Ela não encolhe por transform: ela perde peça. O que sai é sempre o que dá
-   densidade, nunca o que dá sentido: some o rail de contatos, some a coluna
-   lateral, somem as linhas repetidas. Tudo que sai carrega a classe
-   .mk-so-amplo no HTML, para a decisão ficar visível em quem lê o markup.
-   ============================================================ */
-@media (max-width: 767px),
-       (min-width: 768px) and (max-width: 1099px) and (max-height: 939px) {
-  .mk-so-amplo { display: none !important; }
-
-  .mk-jan { border-radius: .75em; }
-  .mk-topo { height: 2.17em; padding-inline: .67em; }
-  .mk-corpo { padding: .67em; gap: .5em; }
-  .mk-campo { padding: .25em 0; }
-  .mk-balao { max-width: 100%; }
-
-  /* ---------- 01 ----------
-     A conversa perde a moldura de janela e vira só o balão que chega: a
-     janela some, a mensagem fica. */
-  .mk1-conversa {
-    border: 0;
-    background: transparent;
-    box-shadow: none;
-    /* Sem moldura não há o que recortar, e o overflow: hidden da janela estava
-       comendo 5px da última linha do balão. */
-    overflow: visible;
-  }
-  /* min-height: 0 no corpo deixa o item flex encolher abaixo do conteúdo, e a
-     última linha do balão sobrava 4px fora da caixa. Em altura automática o
-     conteúdo é que manda. */
-  .mk1-conversa .mk-corpo { padding: 0; min-height: auto; }
-  .mk1-thread { padding: 0; gap: .5em; }
-  .mk1-crm .mk-corpo { padding-block: .42em; }
-  .mk1-passo { padding: .25em 0; }
-
-  /* ---------- 02 ----------
-     Grade de duas colunas. O mesmo registro nas quatro janelas continua
-     sendo a informação, e ela sobrevive ao formato pequeno. */
-  .mk-integra { grid-template-columns: 1fr 1fr; gap: .5em; }
-  .mk2-jan .mk-corpo { padding: .5em; gap: .42em; }
-  .mk2-reg { padding: .33em .42em; gap: .42em; }
-  .mk2-reg .mk-ava { width: 1.42em; height: 1.42em; }
-  .mk2-tempo {
-    display: inline-flex;
-    position: static;
-    grid-column: 1 / -1;
-    justify-self: center;
-  }
-
-  /* ---------- 03 e 04 ----------
-     As colunas laterais saem e a janela vira uma coluna só. */
-  .mk3-app .mk-corpo,
-  .mk4-app .mk-corpo { flex-direction: column; }
-
-  .mk3-main { padding: .67em; gap: .58em; }
-  .mk3-cabeca h3 { font-size: 1.17em; }
-  .mk3-card { padding: .58em; gap: .42em; }
-  .mk3-card h4 { min-height: 2.4em; }
-  .mk3-linha-graf { height: 2.4em; }
-  .mk3-anel { width: 2.4em; height: 2.4em; }
-  .mk-tab td { padding: .42em .5em .42em 0; }
-  .mk-tab th { padding: 0 .5em .33em 0; }
-
-  /* ---------- 05 ----------
-     O navegador continua sendo navegador, só perde a fila de abas e a segunda
-     coluna do hero. O scroll interno continua, com percurso menor. */
-  .mk5-tela { flex: none; height: 17.5em; --mk5-curso: 5.6em; }
-  .mk5-cabeca { padding: .83em 1em; gap: .83em; }
-  .mk5-marca { font-size: 1.083em; letter-spacing: .18em; }
-  .mk5-hero {
-    grid-template-columns: minmax(0, 1fr);
-    gap: .83em;
-    padding: .33em 1em 1.17em;
-  }
-  .mk5-manchete { font-size: 2.17em; max-width: 15ch; }
-  .mk5-apoio { font-size: 1em; max-width: 34ch; }
-  .mk5-cta { padding: .5em 1em; }
-  .mk5-arte { min-height: 6.5em; border-radius: 3.5em 3.5em 0 0; }
-  .mk5-vidro { left: auto; right: .83em; bottom: .67em; }
-  .mk5-proximo { padding: 1.17em 1em 1.5em; gap: .83em; }
-  .mk5-tira i { height: 4.5em; }
-
-  .mk4-esq {
-    width: auto;
-    border-right: 0;
-    border-bottom: 1px solid var(--mk-l1);
-    padding: .67em;
-    gap: .5em;
-  }
-  .mk4-dir { padding: .67em; gap: .5em; }
-  .mk4-rascunho { padding: .67em; gap: .5em; }
-  .mk4-texto { font-size: 1em; }
+  /* O cartão da lead sai da faixa de baixo e passa a flutuar sobre a
+     composição, que é onde ele encontra as superfícies da Ana M. */
+  .cena-lead { left: 2%; top: 89.5%; bottom: auto; }
 }
 
 /* ============================================================

@@ -126,6 +126,7 @@
    ============================================================ */
 .cena-textos {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   width: min(100%, calc(64 * var(--mk-fs)));
 }
 
@@ -289,6 +290,13 @@
   min-width: 0;
   min-height: 0;
   display: grid;
+  /* A trilha precisa ser minmax(0, 1fr), não auto. Com trilha auto os cinco
+     quadros dividem a MESMA célula, e basta um deles ter conteúdo mais largo
+     que a janela para a trilha crescer e levar os outros quatro junto: medido
+     em 11/09/2026, a janela de 805x480 ficava com trilha de 822x490 e as cinco
+     maquetes vazavam 17px pela direita. */
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   overflow: hidden;
   /* A tela é o contêiner de consulta das maquetes (item 16). Medir a caixa
      real em vez do viewport é o que permite a mesma maquete servir a janela
@@ -2045,6 +2053,9 @@
    dependendo de quanto a manchete gastou de altura acima.
    ============================================================ */
 .mk {
+  /* .mk *, e não .mk, é quem herda border-box no item 9. Sem isto o
+     padding abaixo soma com o height: 100% e a maquete vaza pela borda. */
+  box-sizing: border-box;
   width: 100%;
   height: 100%;
 }
@@ -2058,7 +2069,7 @@
 }
 
 .mk-fluxo {
-  grid-template-columns: repeat(auto-fit, minmax(17em, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(17em, 100%), 1fr));
   align-items: start;
   gap: .83em;
 }
@@ -2076,7 +2087,9 @@
 .mk-fluxo .mk1-crm-pe { flex-wrap: wrap; }
 
 .mk-integra {
-  grid-template-columns: repeat(auto-fit, minmax(14em, 1fr));
+  /* min() na perna de baixo: sem ele, numa caixa de 27em o auto-fit ainda
+     reserva 14em por coluna e a grade estoura a janela. */
+  grid-template-columns: repeat(auto-fit, minmax(min(14em, 100%), 1fr));
   align-items: start;
   gap: .67em;
 }
@@ -2106,10 +2119,19 @@
    somem as colunas laterais, somem as linhas repetidas. Tudo que sai carrega
    a classe .mk-so-amplo no HTML, para a decisão ficar visível em quem lê o
    markup. ---------- */
-/* Peça que depende de ALTURA, não de largura: a fila de ações da maquete
-   01 precisa de umas 12em livres embaixo do cartão de CRM. Em caixa baixa
-   ela sai; em celular em pé, que é alto, ela fica. */
-@container tela (max-height: 26em) {
+/* ---------- Trimagem: caixa baixa ----------
+   Irmã da trimagem por largura, e pelo mesmo motivo. Medido em 11/09/2026:
+   em 1366x768 a caixa da janela fica com 31,8em de altura e as maquetes 03
+   e 04 completas pedem 36em, então elas vazavam 43px pela borda de baixo e
+   a janela cortava a última linha.
+
+   Quem sai aqui é .mk-so-alto, e não .mk-so-amplo: são duas listas
+   diferentes. A peça que pede LARGURA (rail de contatos, barra lateral,
+   coluna da direita) continua em pé numa janela larga e baixa. A que pede
+   ALTURA (fila de ações, ficha do cliente, base de conhecimento, registro
+   de revisões) é a que sai. Peça que pede as duas coisas carrega as duas
+   classes no HTML. ---------- */
+@container tela (max-height: 36em) {
   .mk-so-alto { display: none !important; }
 }
 
@@ -2211,6 +2233,8 @@
    ============================================================ */
 @container tela (min-width: 62em) and (min-height: 37em) {
   .cena-quadro { padding: 0; }
+  .mk-fluxo,
+  .mk-integra { padding: 0; }
 
   .mk { display: block; position: relative; }
   .mk-jan { position: absolute; }

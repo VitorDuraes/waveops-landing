@@ -1,0 +1,198 @@
+/* ============================================================
+   WaveOps: motion system
+
+   Um lugar só para curva, duração e atraso. Antes disto o projeto
+   tinha 26 blocos de @keyframes e três curvas diferentes escritas à
+   mão em arquivos diferentes, o que fazia dois elementos vizinhos se
+   moverem com ritmos que não combinavam.
+
+   Aqui não há efeito nenhum. Só o vocabulário que o resto do CSS usa.
+   Regra da casa: cada viewport tem no máximo UM elemento chamando
+   atenção, e o movimento serve para dirigir o olho, nunca para enfeitar.
+   ============================================================ */
+
+:root {
+  /* ---------- Curvas ----------
+     Quatro, e só quatro. Cada uma tem um trabalho.
+
+     entrada  o elemento chega e assenta. Desacelera forte no fim, que
+              é o que dá a sensação de peso e de coisa cara.
+     saida    o elemento vai embora. Acelera, porque saída lenta
+              prende o olho em quem já não importa.
+     padrao   estado para estado no mesmo lugar: cor, borda, opacidade.
+     firme    percurso de ida e volta, com as duas pontas em repouso.
+              É a curva de quem gruda e solta. */
+  --ease-entrada: cubic-bezier(.16, 1, .3, 1);
+  --ease-saida:   cubic-bezier(.55, 0, .78, .3);
+  --ease-padrao:  cubic-bezier(.4, 0, .2, 1);
+  --ease-firme:   cubic-bezier(.65, 0, .35, 1);
+
+  /* ---------- Durações ----------
+     Toque responde em menos de 200ms, senão parece travado. Cena leva
+     quase um segundo, senão parece apressada. Não há valor no meio por
+     acaso: quatro degraus obrigam a escolher. */
+  --t-toque: 160ms;   /* hover, foco, pressionar */
+  --t-base:  320ms;   /* troca de estado visível */
+  --t-calmo: 560ms;   /* entrada de bloco */
+  --t-cena:  900ms;   /* mudança de composição */
+
+  /* ---------- Ritmo ----------
+     Atraso entre irmãos numa entrada escalonada. Multiplicado por --i,
+     que cada elemento declara. Acima de 8 itens o escalonamento vira
+     espera, então a regra .em-fila trava o acúmulo. */
+  --passo: 70ms;
+
+  /* ---------- Deslocamentos ----------
+     Distância que um elemento percorre ao entrar. Curto de propósito:
+     movimento grande lê como template, movimento curto lê como produto. */
+  --desloca-y: 14px;
+  --desloca-x: 20px;
+}
+
+/* ============================================================
+   Primitivas de entrada
+
+   Todas partem do estado final e só recuam quando o elemento ainda
+   não entrou. Assim, se o JavaScript falhar ou a classe nunca chegar,
+   o conteúdo fica visível. Movimento é melhoria, nunca requisito.
+   ============================================================ */
+
+/* Sobe e aparece. O caso mais comum, para bloco de texto e cartão. */
+.mv-sobe {
+  opacity: 0;
+  transform: translate3d(0, var(--desloca-y), 0);
+  transition:
+    opacity var(--t-calmo) var(--ease-entrada) var(--atraso, 0ms),
+    transform var(--t-calmo) var(--ease-entrada) var(--atraso, 0ms);
+}
+
+/* Entra pelo lado. Para elemento que chega de fora da composição. */
+.mv-entra-x {
+  opacity: 0;
+  transform: translate3d(var(--desloca-x), 0, 0);
+  transition:
+    opacity var(--t-calmo) var(--ease-entrada) var(--atraso, 0ms),
+    transform var(--t-calmo) var(--ease-entrada) var(--atraso, 0ms);
+}
+
+/* Revela por máscara, sem mover. Para manchete grande, onde deslocar
+   o texto inteiro chama mais atenção que a própria frase. O clip-path
+   é composto pela GPU e não causa recálculo de layout. */
+.mv-revela {
+  clip-path: inset(0 0 110% 0);
+  transition: clip-path var(--t-cena) var(--ease-entrada) var(--atraso, 0ms);
+}
+
+/* Escala discreta. O teto de 1 é proposital: cresce até o tamanho
+   natural e para. Passar de 1 e voltar é o quique que o briefing proíbe. */
+.mv-assenta {
+  opacity: 0;
+  transform: scale(.985);
+  transition:
+    opacity var(--t-calmo) var(--ease-entrada) var(--atraso, 0ms),
+    transform var(--t-calmo) var(--ease-entrada) var(--atraso, 0ms);
+}
+
+/* O estado de chegada é um só para todas as primitivas. Quem liga a
+   classe é o IntersectionObserver que o assets/main.js já mantém. */
+.mv-sobe.is-visible,
+.mv-entra-x.is-visible,
+.mv-assenta.is-visible {
+  opacity: 1;
+  transform: none;
+}
+.mv-revela.is-visible { clip-path: inset(0 0 -10% 0); }
+
+/* ============================================================
+   Escalonamento
+
+   O filho declara --i e herda o compasso. Trava em 8 porque a partir
+   daí o último item entra depois de meio segundo, e isso deixa de ser
+   ritmo e vira atraso percebido.
+   ============================================================ */
+.em-fila > * { --atraso: calc(var(--passo) * min(var(--i, 0), 8)); }
+
+.em-fila > *:nth-child(1)  { --i: 0; }
+.em-fila > *:nth-child(2)  { --i: 1; }
+.em-fila > *:nth-child(3)  { --i: 2; }
+.em-fila > *:nth-child(4)  { --i: 3; }
+.em-fila > *:nth-child(5)  { --i: 4; }
+.em-fila > *:nth-child(6)  { --i: 5; }
+.em-fila > *:nth-child(7)  { --i: 6; }
+.em-fila > *:nth-child(8)  { --i: 7; }
+.em-fila > *:nth-child(n+9) { --i: 8; }
+
+/* ============================================================
+   Superfícies que respondem ao toque
+
+   Profundidade leve, borda que acende. Sem sombra crescendo, sem
+   levantar 8px, sem glow. O cartão reconhece o ponteiro, não comemora.
+   ============================================================ */
+.mv-superficie {
+  transition:
+    border-color var(--t-toque) var(--ease-padrao),
+    background-color var(--t-toque) var(--ease-padrao),
+    transform var(--t-base) var(--ease-padrao);
+}
+@media (hover: hover) {
+  .mv-superficie:hover {
+    border-color: var(--border-2);
+    transform: translate3d(0, -2px, 0);
+  }
+}
+
+/* Ícone que anda dentro do botão quando o ponteiro chega. 3px, o
+   bastante para o olho notar a intenção de avançar. */
+.mv-seta { transition: transform var(--t-toque) var(--ease-padrao); }
+@media (hover: hover) {
+  .mv-empurra:hover .mv-seta { transform: translate3d(3px, 0, 0); }
+}
+
+/* Sublinhado que se desenha da esquerda para a direita. Usa scaleX em
+   vez de width para não recalcular layout a cada quadro. */
+.mv-sublinha { position: relative; }
+.mv-sublinha::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -2px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--t-base) var(--ease-padrao);
+}
+@media (hover: hover) {
+  .mv-sublinha:hover::after,
+  .mv-sublinha:focus-visible::after { transform: scaleX(1); }
+}
+
+/* ============================================================
+   Movimento desligado
+
+   Vale para os dois caminhos: a preferência do sistema operacional e o
+   botão de pausa da página, que o assets/motion.js controla pelo
+   atributo data-motion no <html>.
+
+   A regra é mostrar o ESTADO FINAL, nunca o inicial. Esconder conteúdo
+   de quem pediu menos movimento é o pior desfecho possível, e já
+   aconteceu neste projeto: o hero ficou vazio porque o canvas parou de
+   pintar e o fallback estava escondido por uma regra :has().
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-toque: 1ms; --t-base: 1ms; --t-calmo: 1ms; --t-cena: 1ms;
+    --passo: 0ms; --desloca-y: 0px; --desloca-x: 0px;
+  }
+  .mv-sobe, .mv-entra-x, .mv-assenta { opacity: 1; transform: none; }
+  .mv-revela { clip-path: none; }
+  .mv-superficie:hover, .mv-empurra:hover .mv-seta { transform: none; }
+}
+
+html[data-motion="paused"] {
+  --t-toque: 1ms; --t-base: 1ms; --t-calmo: 1ms; --t-cena: 1ms;
+  --passo: 0ms; --desloca-y: 0px; --desloca-x: 0px;
+}
+html[data-motion="paused"] .mv-sobe,
+html[data-motion="paused"] .mv-entra-x,
+html[data-motion="paused"] .mv-assenta { opacity: 1; transform: none; }
+html[data-motion="paused"] .mv-revela { clip-path: none; }

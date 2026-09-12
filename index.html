@@ -78,6 +78,8 @@
     <link rel="stylesheet" href="assets/styles.css" />
     <link rel="stylesheet" href="assets/cinematic.css?v=20260906-marquee4" />
     <link rel="stylesheet" href="assets/cinema.css?v=20260911" />
+    <link rel="stylesheet" href="assets/motion-system.css?v=20260911" />
+    <link rel="stylesheet" href="assets/operacao.css?v=20260911" />
 
     <script type="application/ld+json">
       {
@@ -261,7 +263,7 @@
           <div class="hero-copy">
             <span class="eyebrow reveal"><span class="status-dot" aria-hidden="true"></span> Automação, sistemas &amp; IA</span>
             <h1 class="reveal d1">
-              Sua operação,<br />
+              <span class="l1">Sua operação,</span><br />
               <span class="hl">no automático.</span>
             </h1>
             <p class="hero-sub reveal d2">
@@ -312,160 +314,136 @@
           </div>
 
           <div class="hero-visual reveal d2">
+            <!-- A janela da operação. Seis nós de interface, cinco fios que
+                 só acendem quando existe um evento, e o registro ao vivo
+                 embaixo. O laço de eventos vive no assets/operacao.js.
+                 preserveAspectRatio="none" no SVG: as coordenadas do viewBox
+                 viram percentagens da caixa, então os nós posicionados por
+                 percentagem ficam colados nas pontas dos fios em qualquer
+                 proporção, inclusive no celular. -->
             <div
               class="flow-canvas"
               role="img"
-              aria-label="Fluxo de automação: leads do WhatsApp e do site são qualificados por IA e enviados para o CRM e follow-up automático"
+              aria-label="Janela da operação WaveOps: um lead que chega pelo WhatsApp ou pelo formulário do site é qualificado por IA, entra no CRM, dispara follow-up e confirma pagamento, com cada evento registrado embaixo"
             >
               <div id="hero-starfield" aria-hidden="true"></div>
               <div class="dots-bg" aria-hidden="true"></div>
               <div class="flow-bar">
-                <span class="t"><b>waveops</b> · fluxo comercial</span>
+                <span class="t"><b>waveops</b> · operação</span>
                 <span class="live"><i></i> rodando</span>
               </div>
 
               <svg
                 class="flow-wires"
                 viewBox="0 0 520 440"
-                preserveAspectRatio="xMidYMid meet"
+                preserveAspectRatio="none"
                 aria-hidden="true"
               >
-                <path class="wire" d="M88,101 C175,135 190,185 260,216" />
-                <path class="wire" d="M88,343 C175,305 190,250 260,216" />
-                <path class="wire" d="M260,216 C330,185 345,130 432,106" />
-                <path class="wire" d="M260,216 C330,250 345,300 432,339" />
-                <path class="flow" d="M88,101 C175,135 190,185 260,216" />
-                <path class="flow" d="M88,343 C175,305 190,250 260,216" />
-                <path class="flow" d="M260,216 C330,185 345,130 432,106" />
-                <path class="flow" d="M260,216 C330,250 345,300 432,339" />
-                <circle class="bead" r="4">
-                  <animateMotion
-                    dur="2.6s"
-                    repeatCount="indefinite"
-                    path="M88,101 C175,135 190,185 260,216"
-                  />
-                </circle>
-                <circle class="bead" r="4">
-                  <animateMotion
-                    dur="2.6s"
-                    begin="0.6s"
-                    repeatCount="indefinite"
-                    path="M88,343 C175,305 190,250 260,216"
-                  />
-                </circle>
-                <circle class="bead" r="4">
-                  <animateMotion
-                    dur="2.6s"
-                    begin="1.3s"
-                    repeatCount="indefinite"
-                    path="M260,216 C330,185 345,130 432,106"
-                  />
-                </circle>
-                <circle class="bead" r="4">
-                  <animateMotion
-                    dur="2.6s"
-                    begin="1.9s"
-                    repeatCount="indefinite"
-                    path="M260,216 C330,250 345,300 432,339"
-                  />
-                </circle>
+                <path class="wire" d="M98,100 C170,124 190,148 262,170" />
+                <path class="wire" d="M98,240 C170,216 190,192 262,170" />
+                <path class="wire" d="M262,170 C330,150 350,92 428,72" />
+                <path class="wire" d="M262,170 C320,170 370,170 428,170" />
+                <path class="wire" d="M262,170 C330,190 350,248 428,268" />
+                <path class="hv-pulso" data-fio="f1" pathLength="100" d="M98,100 C170,124 190,148 262,170" />
+                <path class="hv-pulso" data-fio="f2" pathLength="100" d="M98,240 C170,216 190,192 262,170" />
+                <path class="hv-pulso" data-fio="f3" pathLength="100" d="M262,170 C330,150 350,92 428,72" />
+                <path class="hv-pulso" data-fio="f4" pathLength="100" d="M262,170 C320,170 370,170 428,170" />
+                <path class="hv-pulso" data-fio="f5" pathLength="100" d="M262,170 C330,190 350,248 428,268" />
               </svg>
 
-              <div class="fnode" style="left: 17%; top: 23%">
-                <span class="ic"
-                  ><svg viewBox="0 0 24 24" fill="currentColor">
-                    <path
-                      d="M12 2a10 10 0 0 0-8.7 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2z"
-                    /></svg
-                ></span>
+              <!-- Composição de celular: duas colunas em vez de três. Abaixo
+                   de 720px o conjunto de cima é escondido e este assume, com
+                   os nós reposicionados pelo CSS. Os dois conjuntos usam as
+                   mesmas chaves data-fio, e o operacao.js pulsa os dois: o
+                   que está escondido não anima, então não custa nada. -->
+              <svg
+                class="flow-wires flow-wires-mob"
+                viewBox="0 0 400 480"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                <path class="wire" d="M108,62 C108,110 150,120 200,149" />
+                <path class="wire" d="M292,62 C292,110 250,120 200,149" />
+                <path class="wire" d="M200,149 C200,200 140,195 108,235" />
+                <path class="wire" d="M200,149 C200,200 260,195 292,235" />
+                <path class="wire" d="M200,149 C200,220 200,250 200,307" />
+                <path class="hv-pulso" data-fio="f1" pathLength="100" d="M108,62 C108,110 150,120 200,149" />
+                <path class="hv-pulso" data-fio="f2" pathLength="100" d="M292,62 C292,110 250,120 200,149" />
+                <path class="hv-pulso" data-fio="f3" pathLength="100" d="M200,149 C200,200 140,195 108,235" />
+                <path class="hv-pulso" data-fio="f4" pathLength="100" d="M200,149 C200,200 260,195 292,235" />
+                <path class="hv-pulso" data-fio="f5" pathLength="100" d="M200,149 C200,220 200,250 200,307" />
+              </svg>
+
+              <div class="fnode" data-no="lead">
+                <span class="ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.7 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2z" /></svg></span>
                 <div>
                   <div class="nm">Lead novo</div>
                   <div class="sb">WhatsApp</div>
                 </div>
               </div>
-              <div class="fnode" style="left: 17%; top: 78%">
-                <span class="ic"
-                  ><svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <rect x="3" y="4" width="18" height="16" rx="2" />
-                    <path d="M3 9h18M8 14h6" /></svg
-                ></span>
+              <div class="fnode" data-no="site">
+                <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 9h18M8 14h6" /></svg></span>
                 <div>
                   <div class="nm">Form do site</div>
                   <div class="sb">captura</div>
                 </div>
               </div>
-              <div class="fnode hub" style="left: 50%; top: 49%">
-                <span class="ic"
-                  ><svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M13 2L4.5 13.5H11L9 22l9-12h-6.5L13 2z" /></svg
-                ></span>
+              <div class="fnode hub" data-no="hub">
+                <span class="ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4.5 13.5H11L9 22l9-12h-6.5L13 2z" /></svg></span>
                 <div>
                   <div class="nm">IA qualifica</div>
                   <div class="sb">score · roteia</div>
                 </div>
               </div>
-              <div class="fnode" style="left: 83%; top: 24%">
-                <span class="ic"
-                  ><svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M22 11l-3 3-1.5-1.5" /></svg
-                ></span>
+              <div class="fnode" data-no="crm">
+                <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 11l-3 3-1.5-1.5" /></svg></span>
                 <div>
                   <div class="nm">CRM atualizado</div>
                   <div class="sb">negócio criado</div>
                 </div>
               </div>
-              <div class="fnode" style="left: 83%; top: 77%">
-                <span class="ic"
-                  ><svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <path d="M3 12a9 9 0 1 0 9-9" />
-                    <path d="M3 4v5h5" /></svg
-                ></span>
+              <div class="fnode" data-no="follow">
+                <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9" /><path d="M3 4v5h5" /></svg></span>
                 <div>
                   <div class="nm">Follow-up</div>
                   <div class="sb">automático</div>
                 </div>
               </div>
+              <div class="fnode" data-no="pag">
+                <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20M6 15h4" /></svg></span>
+                <div>
+                  <div class="nm">Pagamento</div>
+                  <div class="sb">confirmado</div>
+                </div>
+              </div>
 
-              <div class="flow-toast">
-                <span class="ic"
-                  ><svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2.4"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <path d="M20 6L9 17l-5-5" /></svg
-                ></span>
-                <span
-                  ><b>Venda recuperada</b><br /><span class="dim"
-                    >sem ninguém clicar</span
-                  ></span
-                >
+              <div class="hv-registro" aria-hidden="true">
+                <div class="hv-reg-topo">
+                  <span>registro ao vivo</span>
+                  <span class="hv-mini"><i style="--h: 40%"></i><i style="--h: 62%"></i><i style="--h: 48%"></i><i style="--h: 78%"></i><i style="--h: 58%"></i><i style="--h: 88%"></i><i style="--h: 70%"></i></span>
+                </div>
+                <ol class="hv-linhas">
+                  <li class="hv-linha" data-s="0" style="--s: 0">
+                    <span class="hv-hora">09:41</span>
+                    <span class="hv-marca"></span>
+                    <span class="hv-txt">Dashboard atualizado</span>
+                  </li>
+                  <li class="hv-linha" data-s="1" style="--s: 1">
+                    <span class="hv-hora">09:41</span>
+                    <span class="hv-marca"></span>
+                    <span class="hv-txt">Pagamento aprovado</span>
+                  </li>
+                  <li class="hv-linha" data-s="2" style="--s: 2">
+                    <span class="hv-hora">09:40</span>
+                    <span class="hv-marca"></span>
+                    <span class="hv-txt">Follow-up enviado</span>
+                  </li>
+                  <li class="hv-linha" data-s="3" style="--s: 3">
+                    <span class="hv-hora">09:38</span>
+                    <span class="hv-marca"></span>
+                    <span class="hv-txt">CRM atualizado</span>
+                  </li>
+                </ol>
               </div>
             </div>
           </div>
@@ -483,12 +461,49 @@
       <!-- ============== LOGOS / INTEGRA ============== -->
       <section class="logos" aria-label="Ferramentas que integramos">
         <div class="wrap">
-          <span class="lab">Suas ferramentas. Agora, conectadas.</span>
+          <p class="lab">
+            Suas ferramentas.<span class="soft-text">Agora, conectadas.</span>
+            <span class="rede-nota">Integração em tempo real</span>
+          </p>
+
+          <!-- A rede é a frase desenhada: as ferramentas ligadas a um centro,
+               com um sinal por vez saindo de uma delas. Quem pulsa e quem
+               acende é decidido no assets/operacao.js. -->
+          <div class="rede" aria-hidden="true">
+            <svg viewBox="0 0 900 340" preserveAspectRatio="none">
+              <path class="rede-fio" d="M150,52 Q300,52 450,170" />
+              <path class="rede-fio" d="M108,128 Q280,128 450,170" />
+              <path class="rede-fio" d="M108,212 Q280,212 450,170" />
+              <path class="rede-fio" d="M150,288 Q300,288 450,170" />
+              <path class="rede-fio" d="M750,52 Q600,52 450,170" />
+              <path class="rede-fio" d="M792,128 Q620,128 450,170" />
+              <path class="rede-fio" d="M792,212 Q620,212 450,170" />
+              <path class="rede-fio" d="M750,288 Q600,288 450,170" />
+              <path class="rede-pulso" pathLength="100" d="M150,52 Q300,52 450,170" />
+              <path class="rede-pulso" pathLength="100" d="M108,128 Q280,128 450,170" />
+              <path class="rede-pulso" pathLength="100" d="M108,212 Q280,212 450,170" />
+              <path class="rede-pulso" pathLength="100" d="M150,288 Q300,288 450,170" />
+              <path class="rede-pulso" pathLength="100" d="M750,52 Q600,52 450,170" />
+              <path class="rede-pulso" pathLength="100" d="M792,128 Q620,128 450,170" />
+              <path class="rede-pulso" pathLength="100" d="M792,212 Q620,212 450,170" />
+              <path class="rede-pulso" pathLength="100" d="M750,288 Q600,288 450,170" />
+            </svg>
+            <span class="rede-item" style="left: 16.67%; top: 15.29%">WhatsApp</span>
+            <span class="rede-item" style="left: 12.00%; top: 37.65%">n8n</span>
+            <span class="rede-item" style="left: 12.00%; top: 62.35%">Make</span>
+            <span class="rede-item" style="left: 16.67%; top: 84.71%">Google Sheets</span>
+            <span class="rede-item" style="left: 83.33%; top: 15.29%">CRM</span>
+            <span class="rede-item" style="left: 88.00%; top: 37.65%">APIs</span>
+            <span class="rede-item" style="left: 88.00%; top: 62.35%">Pagamentos</span>
+            <span class="rede-item" style="left: 83.33%; top: 84.71%">ERP</span>
+            <div class="rede-centro"><svg viewBox="0 0 100 100" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 50 Q 30 33 41 50" /><path d="M59 50 Q 70 67 82 50" /></g><circle cx="50" cy="50" r="9" fill="none" stroke="currentColor" stroke-width="5" /><circle cx="18" cy="50" r="7.5" fill="currentColor" /><circle cx="82" cy="50" r="7.5" fill="currentColor" /></svg></div>
+          </div>
+
+          <!-- A esteira continua no arquivo e assume abaixo de 900px, onde
+               uma rede de oito pontas não cabe sem virar sopa de letra.
+               Quatro grupos idênticos: o track anda 25 por cento, que é a
+               largura exata de um grupo, então o laço fecha sem salto. -->
           <div class="items marquee">
-            <!-- Quatro grupos identicos. Um grupo sozinho e mais estreito que a
-                 janela visivel, entao dois nao bastam: sobraria vazio no fim do
-                 ciclo. Com quatro, o track anda menos 25 por cento, que e a largura
-                 exata de um grupo, e a janela fica sempre coberta. -->
             <div class="marquee-track">
             <div class="marquee-group">
               <span class="chip">WhatsApp</span>
@@ -1161,16 +1176,25 @@
             <div class="cases-stage">
               <!-- 01 · Automação de processos -->
               <article class="case-card">
-                <div class="case-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 13.5H11L9 22l9-12h-6.5L13 2z" /></svg>
+                <div class="case-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 13.5H11L9 22l9-12h-6.5L13 2z" /></svg></div>
+                <span class="case-label">Automação de processos</span>
+
+                <div class="caso-antes">
+                  <span class="caso-rot">Problema</span>
+                  <h3>Lead chega, o follow-up não sai e a cobrança fica para depois.</h3>
                 </div>
-                <span class="case-label">Caso de uso</span>
-                <h3>Lead chega, o follow-up não sai e a cobrança fica para depois.</h3>
-                <p>
-                  A WaveOps joga o lead direto no CRM e dispara follow-up,
-                  cobrança e relatórios recorrentes sozinhos. A tarefa repetitiva
-                  acontece sem ninguém precisar lembrar de clicar.
-                </p>
+
+                <div class="caso-meio">
+                  <span class="caso-rot">Processamento WaveOps</span>
+                  <div class="caso-trilho" aria-hidden="true"><i></i></div>
+                  <p class="caso-como">A WaveOps joga o lead direto no CRM e dispara follow-up, cobrança e relatórios recorrentes sozinhos.</p>
+                </div>
+
+                <div class="caso-depois">
+                  <span class="caso-rot">Resultado</span>
+                  <p>A tarefa repetitiva acontece sem ninguém precisar lembrar de clicar.</p>
+                </div>
+
                 <a href="#contato" class="case-cta">
                   Agendar diagnóstico
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
@@ -1179,16 +1203,25 @@
 
               <!-- 02 · Integração de sistemas -->
               <article class="case-card">
-                <div class="case-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 0 1 4-4h3a4 4 0 0 1 0 8h-1" /><path d="M15 12a4 4 0 0 1-4 4H8a4 4 0 0 1 0-8h1" /></svg>
+                <div class="case-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 0 1 4-4h3a4 4 0 0 1 0 8h-1" /><path d="M15 12a4 4 0 0 1-4 4H8a4 4 0 0 1 0-8h1" /></svg></div>
+                <span class="case-label">Integração de sistemas</span>
+
+                <div class="caso-antes">
+                  <span class="caso-rot">Problema</span>
+                  <h3>Site, CRM, WhatsApp e pagamento trabalham cada um por conta.</h3>
                 </div>
-                <span class="case-label">Caso de uso</span>
-                <h3>Site, CRM, WhatsApp e pagamento trabalham cada um por conta.</h3>
-                <p>
-                  A WaveOps liga as ferramentas que você já usa e faz elas
-                  conversarem em tempo real. Dado entra uma vez e aparece em todos
-                  os lugares, sem copia e cola.
-                </p>
+
+                <div class="caso-meio">
+                  <span class="caso-rot">Processamento WaveOps</span>
+                  <div class="caso-trilho" aria-hidden="true"><i></i></div>
+                  <p class="caso-como">A WaveOps liga as ferramentas que você já usa e faz elas conversarem em tempo real.</p>
+                </div>
+
+                <div class="caso-depois">
+                  <span class="caso-rot">Resultado</span>
+                  <p>Dado entra uma vez e aparece em todos os lugares, sem cópia e cola.</p>
+                </div>
+
                 <a href="#contato" class="case-cta">
                   Agendar diagnóstico
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
@@ -1197,16 +1230,25 @@
 
               <!-- 03 · Sistemas e painéis sob medida -->
               <article class="case-card">
-                <div class="case-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2" /><path d="M3 9h18M7 14h5" /></svg>
+                <div class="case-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2" /><path d="M3 9h18M7 14h5" /></svg></div>
+                <span class="case-label">Painéis sob medida</span>
+
+                <div class="caso-antes">
+                  <span class="caso-rot">Problema</span>
+                  <h3>A planilha virou o sistema da empresa e parou de dar conta.</h3>
                 </div>
-                <span class="case-label">Caso de uso</span>
-                <h3>A planilha virou o sistema da empresa e parou de dar conta.</h3>
-                <p>
-                  A WaveOps troca a planilha por um sistema web sob medida: portal
-                  do cliente, sistema de chamados ou dashboard com os números da
-                  operação num lugar só. Feito para o seu processo.
-                </p>
+
+                <div class="caso-meio">
+                  <span class="caso-rot">Processamento WaveOps</span>
+                  <div class="caso-trilho" aria-hidden="true"><i></i></div>
+                  <p class="caso-como">A WaveOps troca a planilha por um sistema web sob medida: portal do cliente, sistema de chamados ou dashboard, feito para o seu processo.</p>
+                </div>
+
+                <div class="caso-depois">
+                  <span class="caso-rot">Resultado</span>
+                  <p>Os números da operação num lugar só, sem planilha no meio.</p>
+                </div>
+
                 <a href="#contato" class="case-cta">
                   Agendar diagnóstico
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
@@ -1215,16 +1257,25 @@
 
               <!-- 04 · Agentes de IA com supervisão -->
               <article class="case-card">
-                <div class="case-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.5L18 9l-4.2 1.5L12 15l-1.8-4.5L6 9l4.2-1.5L12 3z" /><path d="M18 15l.9 2.2L21 18l-2.1.8L18 21l-.9-2.2L15 18l2.1-.8L18 15z" /></svg>
+                <div class="case-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.5L18 9l-4.2 1.5L12 15l-1.8-4.5L6 9l4.2-1.5L12 3z" /><path d="M18 15l.9 2.2L21 18l-2.1.8L18 21l-.9-2.2L15 18l2.1-.8L18 15z" /></svg></div>
+                <span class="case-label">Agentes de IA com supervisão</span>
+
+                <div class="caso-antes">
+                  <span class="caso-rot">Problema</span>
+                  <h3>Atender, qualificar lead e ler documento o dia todo trava o time.</h3>
                 </div>
-                <span class="case-label">Caso de uso</span>
-                <h3>Atender, qualificar lead e ler documento o dia todo trava o time.</h3>
-                <p>
-                  A WaveOps coloca um agente de IA para atendimento, qualificação
-                  de lead ou consulta de documentos, com função clara, fonte de
-                  dados definida e revisão humana. Nada de IA solta.
-                </p>
+
+                <div class="caso-meio">
+                  <span class="caso-rot">Processamento WaveOps</span>
+                  <div class="caso-trilho" aria-hidden="true"><i></i></div>
+                  <p class="caso-como">A WaveOps coloca um agente de IA para atendimento, qualificação de lead ou consulta de documentos, com função clara e fonte de dados definida.</p>
+                </div>
+
+                <div class="caso-depois">
+                  <span class="caso-rot">Resultado</span>
+                  <p>A resposta sai revisada por gente. Nada de IA solta.</p>
+                </div>
+
                 <a href="#contato" class="case-cta">
                   Agendar diagnóstico
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
@@ -1235,6 +1286,49 @@
             <div class="cases-controls">
               <div class="cases-dots" role="tablist" aria-label="Selecionar caso"></div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== UMA OPERAÇÃO ============== -->
+      <!-- O único momento grande da página. Quatro frentes entram como linhas
+           separadas, encontram um centro e saem como uma linha só. Nada mais
+           se mexe nesta tela: a seção existe para isso. -->
+      <section class="section conv" id="operacao" data-screen-label="Uma operação">
+        <div class="wrap">
+          <div class="conv-head reveal">
+            <span class="eyebrow">Uma operação</span>
+            <h2>Uma operação.<br /><span class="soft-text">Tudo conectado.</span></h2>
+            <p>
+              Automação, integração, painel sob medida e agente de IA
+              supervisionado. Não são quatro projetos, é uma operação.
+            </p>
+            <ul class="conv-frentes" aria-hidden="true">
+            <li>Automação</li>
+            <li>Integração</li>
+            <li>Painel sob medida</li>
+            <li>Agente de IA</li>
+            </ul>
+          </div>
+
+          <div class="conv-palco reveal" data-em-cena aria-hidden="true">
+            <svg viewBox="0 0 1200 360" preserveAspectRatio="none">
+            <path class="conv-fio" pathLength="100" style="--atraso: 0.05s" d="M230,40 C480,40 600,180 820,180" />
+            <path class="conv-fio" pathLength="100" style="--atraso: 0.17s" d="M230,133 C480,133 620,180 820,180" />
+            <path class="conv-fio" pathLength="100" style="--atraso: 0.29s" d="M230,227 C480,227 620,180 820,180" />
+            <path class="conv-fio" pathLength="100" style="--atraso: 0.41s" d="M230,320 C480,320 600,180 820,180" />
+              <path class="conv-tronco" pathLength="100" d="M820,180 L950,180" />
+            <path class="conv-pulso" pathLength="100" style="--atraso: 0s" d="M230,40 C480,40 600,180 820,180 L950,180" />
+            <path class="conv-pulso" pathLength="100" style="--atraso: 2.8s" d="M230,133 C480,133 620,180 820,180 L950,180" />
+            <path class="conv-pulso" pathLength="100" style="--atraso: 5.6s" d="M230,227 C480,227 620,180 820,180 L950,180" />
+            <path class="conv-pulso" pathLength="100" style="--atraso: 8.4s" d="M230,320 C480,320 600,180 820,180 L950,180" />
+            </svg>
+          <span class="conv-rot" style="--y: 11.11%">Automação</span>
+          <span class="conv-rot" style="--y: 36.94%">Integração</span>
+          <span class="conv-rot" style="--y: 63.06%">Painel sob medida</span>
+          <span class="conv-rot" style="--y: 88.89%">Agente de IA</span>
+            <div class="conv-hub"><svg viewBox="0 0 100 100" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 50 Q 30 33 41 50" /><path d="M59 50 Q 70 67 82 50" /></g><circle cx="50" cy="50" r="9" fill="none" stroke="currentColor" stroke-width="5" /><circle cx="18" cy="50" r="7.5" fill="currentColor" /><circle cx="82" cy="50" r="7.5" fill="currentColor" /></svg></div>
+            <span class="conv-saida">Sua operação</span>
           </div>
         </div>
       </section>
@@ -2013,6 +2107,7 @@
     <!-- ============== SCRIPTS ============== -->
     <script src="assets/motion.js?v=20260905"></script>
     <script src="assets/main.js?v=20260905"></script>
+    <script src="assets/operacao.js?v=20260911"></script>
     <script src="assets/cinema.js?v=20260911" defer></script>
     <script type="module" src="assets/starfield.mjs?v=20260911a"></script>
   </body>

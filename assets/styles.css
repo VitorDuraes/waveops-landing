@@ -1,5 +1,5 @@
 /* ============================================================
-   WaveOps — Landing styles
+   WaveOps: Landing styles
    Tokens driven by [data-theme] / [data-accent] / [data-font] / [data-density]
    ============================================================ */
 
@@ -308,6 +308,18 @@ section[id] { scroll-margin-top: 84px; }
   background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
   background-size: 22px 22px; opacity: .6;
 }
+/* Island React do campo de partículas. Fica atrás dos nós e dos fios.
+   O .dots-bg continua no DOM como fallback caso o módulo não carregue. */
+#hero-starfield {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  overflow: hidden;
+}
+#hero-starfield canvas { display: block; width: 100%; height: 100%; }
+.flow-canvas:has(#hero-starfield canvas) .dots-bg { opacity: 0; }
 .flow-bar {
   position: absolute; top: 0; left: 0; right: 0; height: 42px; z-index: 3;
   display: flex; align-items: center; justify-content: space-between; padding: 0 14px;
@@ -482,6 +494,7 @@ section[id] { scroll-margin-top: 84px; }
 /* ============================================================
    Como funciona (process)
    ============================================================ */
+
 .steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; counter-reset: step; }
 .step { position: relative; padding-top: 30px; }
 .step::before {
@@ -751,19 +764,26 @@ a, button, .tab, .faq-q, .case-card:not(.is-center), .cases-dot, label[for] { cu
 :root { --ease-out: cubic-bezier(.16, 1, .3, 1); }
 
 @media (prefers-reduced-motion: no-preference) {
-  html.anim .reveal { opacity: 0; transform: translateY(16px); transition: opacity .55s var(--ease-out), transform .55s var(--ease-out); }
+  /* Curva, duração e passo vêm de assets/motion-system.css, que é o único
+     lugar onde esses números são escolhidos. Antes havia três curvas iguais
+     escritas à mão em arquivos diferentes, e mudar o ritmo da página pedia
+     mudar as três. */
+  html.anim .reveal { opacity: 0; transform: translateY(var(--desloca-y, 16px)); transition: opacity var(--t-calmo, 550ms) var(--ease-entrada, ease), transform var(--t-calmo, 550ms) var(--ease-entrada, ease); }
   html.anim .reveal.is-visible { opacity: 1; transform: none; }
-  html.anim .reveal.d1 { transition-delay: .07s; }
-  html.anim .reveal.d2 { transition-delay: .14s; }
-  html.anim .reveal.d3 { transition-delay: .21s; }
+  html.anim .reveal.d1 { transition-delay: calc(var(--passo, 70ms) * 1); }
+  html.anim .reveal.d2 { transition-delay: calc(var(--passo, 70ms) * 2); }
+  html.anim .reveal.d3 { transition-delay: calc(var(--passo, 70ms) * 3); }
 
   /* ---- Stagger: o JS marca o container com .stagger e cada filho ganha
      --i (índice). O atraso incremental cria a entrada em cascata.
      Movimento curto (translateY) só nos itens, com o mesmo easing. ---- */
   html.anim .stagger > * {
-    opacity: 0; transform: translateY(14px);
-    transition: opacity .5s var(--ease-out), transform .5s var(--ease-out);
-    transition-delay: calc(var(--i, 0) * .06s);
+    opacity: 0; transform: translateY(var(--desloca-y, 14px));
+    transition: opacity var(--t-calmo, 500ms) var(--ease-entrada, ease), transform var(--t-calmo, 500ms) var(--ease-entrada, ease);
+    /* O passo é o mesmo do resto da página. O min() trava o acúmulo em 8
+       itens: acima disso o último entra depois de meio segundo, e aí deixa
+       de ser ritmo e vira atraso percebido. */
+    transition-delay: calc(min(var(--i, 0), 8) * var(--passo, 70ms));
   }
   html.anim .stagger.is-visible > * { opacity: 1; transform: none; }
 
@@ -852,7 +872,7 @@ a, button, .tab, .faq-q, .case-card:not(.is-center), .cases-dot, label[for] { cu
 }
 
 /* ============================================================
-   Prova social (SPEC-07) — estilos prontos; a seção #prova fica
+   Prova social (SPEC-07): estilos prontos; a seção #prova fica
    com atributo `hidden` no index.html até ter foto e número reais.
    ============================================================ */
 .testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }

@@ -1,0 +1,2438 @@
+/* ============================================================
+   WaveOps. Seção de cinema: painéis de tela cheia e maquetes de produto.
+
+   Este arquivo é o único lugar onde esse CSS vive. Ele é carregado por <link>
+   no index.html e pelos dois laboratórios em dev/, então não existe mais cópia
+   inline para sincronizar.
+
+   Duas metades:
+
+   . a SEÇÃO (itens 1 a 8): o trilho, o palco grudado, os cinco painéis que se
+     empilham por scroll, o indicador de progresso e a lista estática que vale
+     sem JavaScript;
+
+   . as MAQUETES (item 9 em diante): cinco janelas de aplicativo desenhadas em
+     HTML e CSS que ocupam a zona visual de cada painel.
+
+   Regras que este arquivo respeita de propósito:
+
+   . cor sempre de token. A única exceção está declarada e escopada na maquete
+     05, porque ali o conteúdo é o site de outra marca;
+
+   . o estado parado é o estado COMPLETO. Sob [data-motion="paused"] e sob
+     prefers-reduced-motion o projeto zera toda animação com !important, então
+     o que o CSS declara fora do @keyframes tem que ser a tela pronta;
+
+   . por quadro, o JavaScript escreve apenas transform e opacity.
+   ============================================================ */
+
+:root {
+  /* Altura do nav sticky. Existe como token para o palco não repetir número
+     mágico: se o nav mudar de altura, muda aqui e o painel acompanha. */
+  --nav-h: 70px;
+}
+
+/* assets/styles.css põe overflow-x: hidden no body. hidden transforma o body em
+   contexto de rolagem e mata o position: sticky do palco em silêncio. clip corta
+   igual e não cria esse contexto. O @supports é a trava: em navegador sem clip
+   a regra não entra, o body continua com hidden, e o motor (que testa o mesmo
+   suporte) não liga o cinema. O visitante cai na lista estática, legível. */
+@supports (overflow: clip) {
+  body { overflow-x: clip; }
+}
+
+/* ============================================================
+   PAINÉIS DE TELA CHEIA, RASPADOS PELO SCROLL
+
+   Quatro painéis, um por frente da WaveOps. Cada um ocupa a tela inteira e
+   sangra de ponta a ponta: sem moldura, sem canto arredondado, sem largura
+   máxima. Painel dentro de cartão parece print colado numa página, e é o
+   oposto do que a referência entrega.
+
+   O painel que está na tela não sai. O próximo sobe por cima e o cobre. O
+   coberto recua: encolhe, anda para trás em Z e escurece atrás de um véu. A
+   diferença entre papel deslizando e profundidade real mora nesses três
+   movimentos acontecendo juntos.
+
+   Tudo é função do scroll. Nenhuma transição tem duração própria, então
+   parar de rolar congela a imagem no quadro exato e rolar para trás desfaz
+   quadro a quadro, igual raspar uma linha do tempo de vídeo.
+
+   Três decisões estruturais que este arquivo respeita de propósito:
+
+   . a cor sempre sai de token. Os quatro mundos nascem da mesma fórmula, só
+     mudando ângulo, quantidade de tinta e posição do halo, então trocar
+     --accent troca a seção inteira sem tocar em nada aqui;
+
+   . o estado estático é o padrão do CSS e o cinema é a exceção, ligada pela
+     classe .viva que o JavaScript adiciona. Sem JavaScript, com o motor
+     falhando ou com prefers-reduced-motion, o visitante cai numa lista de
+     quatro seções legíveis, nunca numa tela vazia;
+
+   . por quadro o JavaScript faz uma leitura de layout e escreve apenas
+     transform e opacity.
+   ============================================================ */
+
+/* ---------- Superfície ---------- */
+body {
+  background: var(--bg);
+  /* styles.css usa overflow-x: hidden no body. hidden transforma o body em
+     contexto de rolagem e mata o position: sticky do palco em silêncio.
+     clip corta igual e não cria esse contexto. */
+  overflow-x: clip;
+}
+
+/* ============================================================
+   1. O trilho e o palco
+
+   O trilho é só altura: ele compra o curso de rolagem que a seção precisa.
+   O palco gruda no topo e é a janela de uma tela por onde os painéis passam.
+   ============================================================ */
+.cine-rail {
+  position: relative;
+  /* Altura só existe no modo cinema. Na lista estática o conteúdo manda. */
+}
+
+.cine-stage {
+  position: relative;
+}
+
+/* ---------- Modo cinema: o JavaScript liga com .viva ---------- */
+.cine-rail.viva .cine-stage {
+  position: sticky;
+  /* O nav da página é sticky com 70px (assets/styles.css). Grudar em top: 0
+     faria o painel passar por baixo dele e a manchete sumir atrás do menu. O
+     palco gruda logo abaixo e desconta essa altura da própria janela. */
+  top: var(--nav-h);
+  height: calc(100vh - var(--nav-h));
+  height: calc(100svh - var(--nav-h));
+  /* Corta a sombra dos painéis enquanto eles estão em escala 1. Só quando o
+     painel recua a sombra aparece, e aí ela desenha a borda do que ficou
+     para trás. */
+  overflow: clip;
+}
+
+/* ============================================================
+   2. O painel
+
+   Os quatro mundos de cor saem de uma fórmula só. Cada painel muda seis
+   variáveis e nada mais: ângulo do gradiente, quanto de accent entra na
+   mistura, onde a mistura termina, e a posição e a força do halo. Nenhuma cor
+   é escrita à mão, então trocar --accent troca a seção inteira.
+   ============================================================ */
+.cine-panel {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+  /* A tela é quem corta a peça visual. É aqui que o corte acontece. */
+  overflow: clip;
+
+  --ang: 168deg;
+  --tinta: 9%;
+  --parada: 60%;
+  --halo-x: 10%;
+  --halo-y: 106%;
+  --halo-k: 1;
+  --halo: .30;
+
+  background:
+    radial-gradient(118% 86% at var(--halo-x) var(--halo-y),
+      rgba(var(--glow), calc(var(--halo) * var(--halo-k))), transparent 62%),
+    linear-gradient(var(--ang),
+      color-mix(in srgb, var(--accent) var(--tinta), var(--bg)) 0%,
+      var(--bg) var(--parada));
+}
+
+/* No tema claro o halo violeta sobre fundo branco satura rápido. Baixar a
+   alfa mantém os quatro mundos distintos sem lavar o texto. */
+[data-theme="light"] .cine-panel { --halo: .20; }
+
+/* Painel 01: vazio, com uma brasa baixa no canto esquerdo. */
+.cine-panel[data-painel="1"] { --ang: 168deg; --tinta: 4%;  --parada: 42%; --halo-x: 8%;  --halo-y: 104%; --halo-k: 1.2; }
+/* Painel 02: o mundo forte. Violeta atravessando a tela na diagonal. */
+.cine-panel[data-painel="2"] { --ang: 124deg; --tinta: 36%; --parada: 88%; --halo-x: 86%; --halo-y: 4%;   --halo-k: 1.25; }
+/* Painel 03: quase preto, com a testa iluminada. A tinta fica na faixa de
+   cima porque é o ombro que sobra à mostra quando ele recua: painel escuro com
+   tinta embaixo vira barra preta sem informação na hora em que é coberto. */
+.cine-panel[data-painel="3"] { --ang: 186deg; --tinta: 20%; --parada: 34%; --halo-x: 98%; --halo-y: 40%;  --halo-k: .5; }
+/* Painel 04: meio-termo, halo largo e baixo atrás da peça visual. */
+.cine-panel[data-painel="4"] { --ang: 146deg; --tinta: 22%; --parada: 70%; --halo-x: 74%; --halo-y: 96%;  --halo-k: .95; }
+/* Painel 05: fecha a sequência subindo a tinta de novo, com o halo na testa do
+   lado oposto ao do painel 02. O olho lê o fim do arco sem repetir mundo. */
+.cine-panel[data-painel="5"] { --ang: 206deg; --tinta: 30%; --parada: 78%; --halo-x: 16%; --halo-y: 12%;  --halo-k: 1.1; }
+
+.cine-rail.viva .cine-panel {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z);
+  will-change: transform;
+  /* A sombra fica fora do palco enquanto o painel está em escala 1, então não
+     desenha moldura nenhuma na tela cheia. Ela só entra em cena quando o
+     painel encolhe. */
+  box-shadow: 0 0 72px -6px var(--scene-shadow);
+}
+
+/* O véu é do próprio painel: ele escurece o que ficou para trás sem mexer
+   em filter, que custaria repintura por quadro. */
+.cine-veu {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  background: var(--bg);
+  opacity: 0;
+  pointer-events: none;
+}
+.cine-rail:not(.viva) .cine-veu { display: none; }
+
+/* ============================================================
+   3. Conteúdo do painel
+   ============================================================ */
+.cine-quadro {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: grid;
+  /* A peça leva 60% da largura útil, não 48%. A conta é da sangria: a maquete
+     tem 64em fixos, e para o corte ficar em 8em é a coluna dela que precisa ter
+     56em. Com 48% isso só acontecia acima de 1570px, e abaixo disso a trava
+     abria um corte de até 33% que comia rótulo, carimbo de hora e frase. Com
+     60% a conta fecha a partir de 1280px. O texto perde largura e ganha uma
+     linha de manchete, que é o preço certo: manchete quebrada continua legível,
+     texto de produto cortado pela metade não. */
+  grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
+  align-items: center;
+  column-gap: clamp(24px, 4vw, 64px);
+  /* Padding no conteúdo, zero na direita: é por ali que a peça sai. O respiro
+     vertical encolheu de 5vh para 3.4vh porque a composição ocupava 27,8% da
+     tela e o resto era margem. Quem paga uma tela inteira de rolagem por
+     capítulo precisa receber uma tela inteira de conteúdo. */
+  padding: clamp(24px, 3.4vh, 52px) 0 clamp(24px, 3.4vh, 52px) clamp(22px, 5vw, 92px);
+}
+
+.cine-texto {
+  display: grid;
+  align-content: center;
+  gap: clamp(14px, 2.2vh, 26px);
+  padding-right: clamp(8px, 1.5vw, 24px);
+}
+
+/* O selo numérico só aparece na lista estática, onde o indicador lateral não
+   existe e o número precisaria voltar para dentro do painel. */
+.cine-selo {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  color: color-mix(in srgb, var(--text) 38%, transparent);
+}
+.cine-rail.viva .cine-selo { display: none; }
+
+/* O rótulo é afirmação, não etiqueta de pasta. Caixa normal, corpo de leitura
+   e sem o entreletras largo: em caixa alta a 10px ele lia como metadado de
+   arquivo, e o visitante pulava direto para a manchete sem saber de qual
+   frente o capítulo estava falando. */
+.cine-rotulo {
+  font-family: var(--font-body);
+  font-size: clamp(12.5px, 1.05vw, 15px);
+  font-weight: 600;
+  letter-spacing: -.005em;
+  text-transform: none;
+  color: var(--accent-strong);
+}
+
+/* A manchete é a peça de tipografia do painel: corpo grande, entrelinha
+   abaixo de 1, medida curta de propósito para quebrar em duas ou três linhas
+   e formar bloco, não faixa. */
+.cine-manchete {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(29px, 5.2vw, 72px);
+  line-height: .98;
+  letter-spacing: -.035em;
+  max-width: 15ch;
+  text-wrap: balance;
+  color: var(--text);
+}
+
+/* O apoio deriva do --text em vez de usar --muted porque o fundo de cada
+   painel é diferente: mistura com transparência mantém o contraste em todos
+   os quatro mundos e nos dois temas. */
+.cine-apoio {
+  font-family: var(--font-body);
+  font-size: clamp(15px, 1.45vw, 20px);
+  line-height: 1.5;
+  max-width: 44ch;
+  color: color-mix(in srgb, var(--text) 74%, transparent);
+}
+
+/* Etiqueta com fio vertical em vez de pílula: o fio diz que os itens são
+   instâncias da mesma categoria, e não repete o kit de cartão arredondado
+   que a página já usa em outros lugares. */
+.cine-etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px clamp(16px, 1.8vw, 24px);
+  margin-top: clamp(2px, 1vh, 10px);
+}
+.cine-etiquetas span {
+  font-family: var(--font-body);
+  font-size: clamp(11.5px, 1vw, 13.5px);
+  font-weight: 500;
+  line-height: 1.25;
+  padding-left: 11px;
+  border-left: 1px solid color-mix(in srgb, var(--accent-strong) 60%, transparent);
+  color: color-mix(in srgb, var(--text) 80%, transparent);
+}
+
+/* ============================================================
+   4. A zona da peça visual
+
+   Aqui mora a maquete de produto: uma janela de aplicativo desenhada em HTML e
+   CSS, com tamanho de tela real (64em por 38em na escala de --mk-fs). Ela vaza
+   pela borda direita e a tela corta, igual print de produto na referência.
+
+   Duas decisões que esta zona toma e que o resto do arquivo depende:
+
+   . a maquete NÃO é ampliada por scale(). Escalar texto de 12px o borra, e é a
+     nitidez do texto pequeno que faz a peça parecer produto em vez de desenho.
+     Toda a escala vem de --mk-fs, e como cada medida interna está em em, mudar
+     essa única variável redimensiona a maquete inteira sem perder nitidez;
+
+   . a sangria é declarada, não herdada do acaso. São 8em de 64em, 12,5% fora do
+     quadro, e a faixa sacrificada é maior que a sangria de propósito: --mk-faixa
+     reserva 8.5em à direita de toda maquete como ZONA DECORATIVA. Ali só entram
+     borda, chapa, gradiente, sombra e continuação de coluna. Rótulo, carimbo de
+     hora e frase param antes. Medido em 1280, 1440, 1920 e 2560: nenhum
+     elemento de texto das maquetes cai no corte.
+   ============================================================ */
+.cine-peca {
+  position: relative;
+  align-self: stretch;
+
+  /* Piso de escala. 12.5px de base põe o menor texto da maquete em 11.46px, e
+     nenhuma faixa de janela desce disso: a trava do right abaixo resolve a
+     largura cortando a composição, que é o que pode ser sacrificado. */
+  --mk-fs: 12.5px;
+  --peca-w: 64em;
+  --peca-h: 38em;
+  --peca-sangra: 8em;
+}
+
+.cine-peca-caixa {
+  position: absolute;
+  top: 50%;
+  /* Duas regras numa linha. A primeira é a sangria de projeto: 8em de 64em,
+     12,5% fora do quadro. A segunda é a trava: 100% é a largura da coluna da
+     peça, então calc(100% - 64em) é o recuo máximo que ainda deixa a borda
+     esquerda da maquete dentro da coluna. min() pega o que sangra mais, e o
+     resultado é que em janela estreita o corte cresce sozinho em vez de a
+     maquete avançar por cima da manchete. A faixa decorativa de 8.5em cobre
+     esse crescimento: medido de 768px a 2560px, a trava só passa de 8em em
+     1280px, e lá ela para em 8.1em, ainda dentro da faixa. */
+  right: min(calc(-1 * var(--peca-sangra)), calc(100% - var(--peca-w)));
+  width: var(--peca-w);
+  height: var(--peca-h);
+  /* É este font-size que faz os em acima resolverem na escala da maquete, e
+     não na escala do texto do painel. */
+  font-size: var(--mk-fs);
+  transform: translateY(-50%);
+}
+
+/* A perspectiva mora só aqui. O JavaScript nunca reescreve esta string, então
+   não há risco de o motor perder o ângulo num quadro. */
+.cine-peca-3d {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  /* Perspectiva longa de propósito. Com 1000px o lado esquerdo da maquete, que
+     é justamente o lado que fica dentro do quadro, encurtava 14% e o texto de
+     11px lá deixava de ser texto. Com 1800px o encurtamento cai para 8% e o
+     olho continua lendo giro. */
+  transform: perspective(1800px) rotateY(-11deg) rotateX(3deg);
+  transform-origin: 100% 50%;
+}
+
+/* Escala por faixa de janela. A maquete tem largura fixa em em, então quem
+   manda no tamanho é --mk-fs. Em janela estreita a coluna da peça encolhe e a
+   maquete precisa encolher junto, senão ela invade a manchete, que é o
+   conteúdo.
+
+   O degrau de 13px subiu de 1280px para 1440px: em 1280px a coluna da peça tem
+   699px e a maquete de 64em precisa caber ali com no máximo 8.1em de sangria.
+   Com 13px ela pediria 832px e a trava abriria um corte de 10em, que comeria
+   texto. Com 12.5px ela pede 800px e o corte para em 8.1em. */
+/* O degrau de 14px desceu de 1600px para 1440px. Em 1440 a coluna da peça tem
+   783px e a maquete de 64em a 14px pede 896px: a trava abre 8,1em de corte, ou
+   seja ainda dentro da faixa decorativa de 8,5em. O ganho é de ocupação: a
+   composição sai de 27,8% para 32,1% da tela. */
+@media (min-width: 1440px) { .cine-peca { --mk-fs: 14px; } }
+@media (min-width: 1600px) { .cine-peca { --mk-fs: 15px; } .cine-manchete { font-size: clamp(72px, 4.6vw, 86px); } }
+/* Acima de 1800px a coluna da peça já sobra: a maquete de 64em cabe com o corte
+   de 8em mesmo com a divisão original de 48%. Devolver a largura ao texto aqui
+   fecha o vão entre a última letra da manchete e a borda esquerda da maquete,
+   que em 1920px cai de 274px para 133px. */
+@media (min-width: 1800px) { .cine-quadro { grid-template-columns: minmax(0, .96fr) minmax(0, 1.04fr); } }
+/* Monitor grande: a maquete cresce junto em vez de boiar no meio da coluna. A
+   trava de altura existe porque 38em a 16px dá 608px, e em janela baixa isso
+   não caberia entre as margens do painel. */
+@media (min-width: 2000px) and (min-height: 900px) { .cine-peca { --mk-fs: 16px; } }
+/* Tablet em pé e estreito: em 768px a coluna única tem 684px e a maquete de
+   64em a 12.5px pediria 800px, o que abriria 9.3em de corte. 12.2px fecha a
+   conta em 8em e mantém o menor texto em 11.19px, acima do piso de 11px. */
+@media (max-width: 830px) and (min-height: 940px) { .cine-peca { --mk-fs: 12.2px; } }
+
+/* ---------- Janela estreita E baixa: a peça em pilha, sangrando ----------
+   Aqui a maquete já está em pilha (item 17). A pilha também sangra, senão o
+   efeito sumiria justo na faixa de tablet deitado e de janela de desktop não
+   maximizada. O que muda em relação ao desktop é a unidade: a caixa é ancorada
+   nos dois lados, então o -14.3% do right resolve sobre a largura da coluna e
+   devolve exatamente 12,5% da maquete fora do quadro, em qualquer largura.
+
+   Os cartões não ficam fatiados ao meio porque o item 17 reserva a mesma faixa
+   decorativa, em porcentagem: o conteúdo para antes, e o que o corte pega é
+   chapa, borda e sombra. */
+@media (min-width: 768px) and (max-width: 1279px) and (max-height: 939px) {
+  .cine-peca-caixa {
+    left: 0;
+    right: -14.3%;
+    width: auto;
+    height: auto;
+  }
+  .cine-peca-3d { transform: none; width: 100%; height: auto; }
+}
+
+/* ---------- Coluna única: tablet em pé ----------
+   Abaixo de 1280px a coluna da peça fica com menos de 700px, e nessa largura a
+   maquete de 64em só caberia cortada em um terço. Com altura de sobra, o painel
+   troca de eixo: manchete em cima, maquete embaixo, ocupando a linha inteira e
+   saindo pela direita a mesma sangria de 12,5% do desktop.
+
+   O corte de 940px de altura não é estética, é conta: texto mais maquete mais
+   respiro dá cerca de 895px, então abaixo disso a coluna única estouraria o
+   painel e a maquete apareceria cortada em cima e embaixo. Janela estreita e
+   baixa continua em duas colunas, com a maquete em pilha. */
+@media (max-width: 1279px) and (min-height: 940px) {
+  .cine-quadro {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    row-gap: clamp(20px, 3vh, 34px);
+    /* Zero na direita, igual ao desktop, porque é por ali que a peça sai. Com
+       padding aqui a sangria de 8em virava 59px de fato em 1024px: o recuo do
+       quadro comia metade do corte e o efeito ficava abaixo do mínimo. O
+       respiro da direita passou para o texto, que é quem precisa dele. */
+    padding: clamp(30px, 4vh, 56px) 0 clamp(30px, 4vh, 56px) clamp(52px, 7vw, 78px);
+  }
+  .cine-texto { padding-right: clamp(24px, 4vw, 44px); }
+  .cine-manchete { font-size: clamp(34px, 5.6vw, 52px); max-width: 17ch; }
+  .cine-peca {
+    align-self: center;
+    min-height: calc(38 * var(--mk-fs));
+  }
+  /* Ancorada à direita, como no desktop. Ancorar à esquerda deixava a sangria
+     ao acaso da largura: em 820px sobravam 4,7% fora do quadro e o efeito
+     sumia, em 1024px a maquete entrava inteira e não sangrava nada. Com a
+     âncora na direita a regra geral vale aqui também, e a sangria é sempre os
+     mesmos 8em. */
+  .cine-peca-3d {
+    transform: perspective(2400px) rotateY(-7deg) rotateX(2deg);
+    transform-origin: 100% 50%;
+  }
+}
+
+/* ============================================================
+   5. Indicador de progresso
+
+   Quatro números na goteira ESQUERDA, com um fio de 1px do lado de fora. O fio
+   do painel ativo preenche conforme o progresso dentro dele, por scaleY, que é
+   transform e não custa layout.
+
+   Por que esquerda. A maquete agora sangra até a borda direita em toda largura
+   a partir de 768px, então o lado direito é território permanentemente ocupado
+   por interface densa, e o número caía em cima de texto de produto. A goteira
+   esquerda é vazia por construção nos quatro painéis: o padding do quadro
+   reserva de 38px a 92px antes de o texto começar, e nada sangra por ali.
+   Mudar de lado resolve na origem em vez de mascarar, e dispensa a pastilha com
+   backdrop-filter, que criava camada de composição por cima de um palco sticky
+   de 100vh numa página que já roda um rAF por quadro de scroll.
+
+   O fio fica do lado de fora do número, encostado na borda, igual era à
+   direita: a relação de "régua na margem" é a mesma, espelhada.
+   ============================================================ */
+.cine-indice {
+  position: absolute;
+  z-index: 20;
+  left: clamp(10px, 1.2vw, 22px);
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  gap: clamp(13px, 2.1vh, 24px);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.cine-rail:not(.viva) .cine-indice { display: none; }
+
+/* O indicador deixa de ser enfeite: cada marca é um botão que leva ao seu
+   capítulo. O alvo de toque tem 44px de altura mínima, que é o piso da
+   diretriz, e ele é transparente: quem cresce é a área clicável, não o
+   desenho. */
+.cine-alvo {
+  display: contents;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+}
+.cine-marca:focus-within b { opacity: 1; }
+.cine-alvo:focus-visible { outline: none; }
+.cine-marca:focus-within .cine-trilho {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 3px;
+}
+.cine-marca {
+  display: grid;
+  /* Espelhado: o fio na coluna de fora, o número na de dentro. O HTML segue na
+     ordem número, fio, então a troca acontece por grid-column e não pede
+     mudança de markup. */
+  grid-template-columns: 1px auto;
+  align-items: center;
+  gap: 9px;
+}
+.cine-marca b {
+  grid-column: 2;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  color: var(--text);
+  opacity: .3;
+}
+.cine-marca .cine-trilho { grid-column: 1; }
+.cine-trilho {
+  position: relative;
+  width: 1px;
+  height: clamp(20px, 3.4vh, 34px);
+  background: color-mix(in srgb, var(--text) 22%, transparent);
+}
+.cine-trilho i {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: var(--accent-strong);
+  transform: scaleY(0);
+  transform-origin: 50% 0;
+}
+
+/* ============================================================
+   7. Tela estreita
+
+   A peça visual desce para baixo da manchete em vez de disputar a largura
+   com ela. Em 390px uma peça vazando pela direita ao lado do texto roubaria
+   metade da linha, e a manchete é o conteúdo. Descendo, ela mantém o corte
+   pela borda direita, que é a assinatura do efeito, sem encolher o tipo.
+   ============================================================ */
+@media (max-width: 767px) {
+  .cine-quadro {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    row-gap: clamp(18px, 3vh, 30px);
+    /* A goteira esquerda agora hospeda o indicador, então ela precisa ser larga
+       o bastante para o número não encostar na primeira letra do texto. */
+    padding: clamp(26px, 4vh, 44px) 0 clamp(26px, 4vh, 44px) clamp(44px, 12vw, 58px);
+  }
+  .cine-texto { padding-right: clamp(10px, 4vw, 20px); }
+  /* A maquete entra inteira, sem giro e sem sangria: em 390px ela vira pilha
+     vertical (ver a regra .mk-so-amplo no bloco das maquetes). A caixa segue
+     absoluta e centrada porque é ela que o motor transforma por quadro. */
+  .cine-peca {
+    align-self: center;
+    min-height: 320px;
+  }
+  /* A maquete SANGRA no celular também. Ela não sangrava, e aí o visitante de
+     celular via um site diferente do de desktop: o corte pela borda direita é
+     a assinatura do efeito, é ele que faz a peça parecer print de produto.
+     Quem garante que o corte não come conteúdo é a mesma faixa decorativa do
+     item 16, aqui em porcentagem, declarada no bloco do item 17. */
+  .cine-peca-caixa { left: 0; right: -14.3%; width: auto; height: auto; }
+  .cine-peca-3d { transform: none; width: 100%; height: auto; }
+  /* Medida maior que a do desktop de propósito: em 390px uma manchete de
+     13ch quebra em cinco linhas e vira parede. 16ch põe em quatro. */
+  .cine-manchete { font-size: clamp(27px, 8.2vw, 40px); max-width: 16ch; }
+  .cine-apoio { font-size: clamp(14px, 3.8vw, 16px); }
+  /* Sem véu e sem pastilha: na goteira esquerda o indicador não tem nada por
+     baixo dele, porque a maquete começa depois do padding do quadro. */
+  .cine-indice { left: 10px; gap: 12px; }
+  .cine-marca b { font-size: 10px; }
+}
+
+/* Janela baixa e deitada: o painel precisa caber sem cortar a etiqueta. */
+/* Janela baixa e deitada: o painel precisa caber sem cortar a etiqueta, e a
+   maquete de 38em precisa caber na altura que sobra. */
+@media (max-height: 620px) and (min-width: 768px) {
+  .cine-manchete { font-size: clamp(27px, 3.4vw, 44px); }
+}
+
+/* ============================================================
+   8. Movimento reduzido
+
+   O JavaScript já não liga o cinema quando a preferência está ativa, então
+   este bloco é a segunda trava: se a classe .viva tiver entrado antes de a
+   preferência mudar, o CSS desmonta o empilhamento na hora.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .cine-rail.viva { height: auto !important; }
+  .cine-rail.viva .cine-stage { position: relative; height: auto; overflow: visible; }
+  .cine-rail.viva .cine-panel {
+    position: relative;
+    inset: auto;
+    transform: none !important;
+    box-shadow: none;
+    will-change: auto;
+  }
+  .cine-rail.viva .cine-veu { display: none; }
+  .cine-rail.viva .cine-indice { display: none; }
+  .cine-rail.viva .cine-selo { display: block; }
+  .cine-rail.viva .cine-quadro { padding-block: clamp(46px, 7vw, 86px); }
+}
+
+/* Lista estática: é o padrão do CSS, vale sem JavaScript e sob movimento
+   reduzido. Painel continua sangrando de ponta a ponta, só deixa de empilhar. */
+.cine-rail:not(.viva) .cine-quadro { padding-block: clamp(46px, 7vw, 86px); }
+/* Na lista estática a caixa da peça continua absoluta e centrada, então a
+   linha precisa de altura própria: 38 vezes a escala da maquete, mais folga
+   para a sombra. em aqui resolveria no corpo do painel, não no da maquete. */
+.cine-rail:not(.viva) .cine-peca { min-height: calc(38 * var(--mk-fs) + 44px); }
+
+/* ============================================================
+   9. Maquetes: o palco e os tokens locais
+   ============================================================ */
+.mk {
+  /* --mk-fs vem de fora (lab ou zona do painel). O fallback existe para a
+     maquete nunca nascer sem escala se alguém esquecer de declarar. */
+  font-size: var(--mk-fs, 12px);
+  font-family: var(--font-body);
+  line-height: 1.35;
+  letter-spacing: 0;
+  color: var(--text);
+  position: relative;
+  width: 100%;
+
+  /* ---------- Faixa decorativa da direita ----------
+     A maquete sangra pela borda direita da tela, e o corte não pode comer
+     conteúdo. --mk-faixa é a largura reservada na ponta direita de toda
+     superfície que atravessa o corte. Dentro dela só pode existir chapa,
+     borda, gradiente, sombra e continuação de coluna. Rótulo, carimbo de hora,
+     chip e frase param antes dela, empurrados por padding-right.
+
+     O valor é maior que a sangria de propósito: 8.5em contra 8em de corte. A
+     folga de meio em absorve o arredondamento do navegador e o 0.1em que a
+     trava do right acrescenta em 1280px.
+
+     Na pilha do item 17 a unidade vira porcentagem, porque ali a maquete não
+     tem largura fixa em em: a caixa é ancorada nos dois lados e cresce com a
+     coluna. 14.5% cobre os 12,5% de sangria com a mesma folga. */
+  --mk-faixa: 8.5em;
+
+  /* Hierarquia de tinta. Deriva dos tokens do projeto em vez de inventar
+     opacidade nova: --muted e --dim já foram calibrados para os dois temas. */
+  --mk-t2: var(--muted);
+  --mk-t3: var(--dim);
+  --mk-t4: color-mix(in srgb, var(--dim) 62%, transparent);
+
+  /* Fios e chapas. */
+  --mk-l1: var(--border);
+  --mk-l2: var(--border-2);
+  --mk-chapa: var(--surface);
+  --mk-chapa-2: var(--surface-2);
+  --mk-chapa-3: var(--surface-3);
+
+  /* Brilho do topo da janela. No tema claro a chapa já é branca, então o
+     realce vira ruído: ele é desligado mais abaixo. */
+  --mk-luz: color-mix(in srgb, var(--text) 7%, transparent);
+
+  --mk-sombra:
+    0 0 0 1px color-mix(in srgb, var(--scene-shadow) 55%, transparent),
+    0 2.4em 4.4em -1.6em var(--scene-shadow),
+    0 1em 2em -1em var(--scene-shadow),
+    0 .25em .6em -.4em var(--scene-shadow);
+}
+
+[data-theme="light"] .mk { --mk-luz: transparent; }
+
+.mk *, .mk *::before, .mk *::after { box-sizing: border-box; }
+.mk ul { list-style: none; margin: 0; padding: 0; }
+.mk p { margin: 0; }
+.mk svg { display: block; }
+
+/* Ícone padrão: traço, nunca preenchimento. Herda a cor de quem o contém. */
+.mk-ico {
+  width: 1em;
+  height: 1em;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ============================================================
+   10. Peças de interface compartilhadas
+
+   O kit é o mesmo nas quatro maquetes. É ele que faz as quatro parecerem o
+   mesmo produto, e não quatro desenhos soltos.
+   ============================================================ */
+
+/* ---------- Janela ---------- */
+.mk-jan {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--mk-chapa);
+  border: 1px solid var(--mk-l2);
+  border-radius: .92em;
+  box-shadow: var(--mk-sombra);
+  overflow: hidden;
+}
+
+/* Barra de título. Altura fixa porque é a peça que dá o tom de "aplicativo":
+   variar essa altura entre as quatro maquetes quebraria a família. */
+.mk-topo {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: .67em;
+  height: 2.42em;
+  padding: 0 .83em;
+  border-bottom: 1px solid var(--mk-l1);
+  background:
+    linear-gradient(to bottom, var(--mk-luz), transparent 60%),
+    color-mix(in srgb, var(--mk-chapa-2) 74%, var(--mk-chapa));
+}
+
+.mk-luzes { display: flex; gap: .33em; flex: none; }
+.mk-luzes i {
+  width: .5em;
+  height: .5em;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--text) 17%, transparent);
+}
+
+.mk-titulo {
+  font-family: var(--font-mono);
+  font-size: .917em;
+  font-weight: 700;
+  letter-spacing: .01em;
+  color: var(--mk-t2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Barra de título não quebra linha. A altura dela é fixa, então uma etiqueta em
+   duas linhas transborda e o chip do lado sobe. Só apareceu depois que a faixa
+   decorativa estreitou a barra da fila da maquete 01. */
+.mk-topo > .mk-rotulo { white-space: nowrap; }
+
+/* Empurra o que vem depois para a direita da barra. */
+.mk-esticar { margin-left: auto; }
+
+/* ---------- Corpo ---------- */
+.mk-corpo {
+  flex: 1;
+  min-height: 0;
+  padding: .92em;
+  display: flex;
+  flex-direction: column;
+  gap: .67em;
+}
+
+/* ---------- Chip de estado ---------- */
+.mk-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .42em;
+  flex: none;
+  padding: .25em .58em;
+  border: 1px solid var(--mk-l2);
+  border-radius: .5em;
+  background: var(--mk-chapa-2);
+  font-family: var(--font-mono);
+  font-size: .917em;
+  line-height: 1.25;
+  color: var(--mk-t2);
+  white-space: nowrap;
+}
+.mk-chip i {
+  width: .42em;
+  height: .42em;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+.mk-chip-ok {
+  color: var(--positive);
+  border-color: color-mix(in srgb, var(--positive) 42%, transparent);
+  background: var(--positive-bg);
+}
+.mk-chip-acento {
+  color: var(--accent-strong);
+  border-color: rgba(var(--glow), .45);
+  background: rgba(var(--glow), .12);
+}
+.mk-chip-vazio {
+  color: var(--mk-t3);
+  background: transparent;
+}
+
+/* ---------- Etiqueta de seção dentro da janela ---------- */
+.mk-rotulo {
+  font-family: var(--font-mono);
+  font-size: .917em;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--mk-t4);
+}
+
+/* Nada compõe escala duas vezes. Um elemento de .917em dentro de outro de
+   .917em cai para .84em, e 12px de base viram 10px sem ninguém pedir. A regra
+   é geral de propósito: lista explícita por par de classe já falhou duas vezes
+   aqui, porque toda composição nova inventa um aninhamento que ninguém previu.
+   Dentro de qualquer peça pequena, a peça pequena filha herda em vez de
+   encolher de novo. O piso do texto passa a ser sempre .917 vezes --mk-fs. */
+.mk :is(.mk-chip, .mk-mono, .mk-rotulo, .mk-titulo, .mk-tag, .mk-bt, .mk-ava,
+        .mk-hora, .mk2-linha, .mk2-input, .mk2-reg, .mk3-item, .mk3-pe,
+        .mk4-doc, .mk4-log-linha, .mk1-contato, .mk-campo dt)
+   :is(.mk-chip, .mk-mono, .mk-rotulo, .mk-titulo, .mk-tag, .mk-bt, .mk-ava,
+       .mk-hora) { font-size: 1em; }
+
+.mk-mono {
+  font-family: var(--font-mono);
+  font-size: .917em;
+  color: var(--mk-t3);
+  white-space: nowrap;
+}
+
+/* ---------- Linha de campo: rótulo à esquerda, valor à direita ----------
+   O rótulo tem largura fixa para as linhas alinharem em coluna. É esse
+   alinhamento, e não a borda, que faz o bloco parecer formulário de verdade. */
+.mk-campo {
+  display: flex;
+  align-items: baseline;
+  gap: .83em;
+  padding: .42em 0;
+  border-bottom: 1px solid var(--mk-l1);
+}
+.mk-campo:last-child { border-bottom: 0; }
+.mk-campo dt {
+  flex: none;
+  width: 6.2em;
+  font-size: .917em;
+  color: var(--mk-t3);
+}
+.mk-campo dd {
+  margin: 0;
+  font-size: 1em;
+  font-weight: 500;
+  color: var(--text);
+  min-width: 0;
+  white-space: nowrap;
+}
+
+/* ---------- Etiqueta de etapa ---------- */
+.mk-tag {
+  display: inline-block;
+  padding: .17em .5em;
+  border-radius: .33em;
+  font-size: .917em;
+  font-weight: 500;
+  line-height: 1.3;
+  background: var(--mk-chapa-3);
+  color: var(--mk-t2);
+  white-space: nowrap;
+}
+.mk-tag-acento { background: rgba(var(--glow), .16); color: var(--accent-strong); }
+.mk-tag-ok { background: var(--positive-bg); color: var(--positive); }
+
+/* ---------- Avatar ---------- */
+.mk-ava {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.83em;
+  height: 1.83em;
+  border-radius: 50%;
+  background: rgba(var(--glow), .2);
+  border: 1px solid rgba(var(--glow), .3);
+  color: var(--accent-strong);
+  font-size: .917em;
+  font-weight: 700;
+}
+.mk-ava-neutro {
+  background: var(--mk-chapa-3);
+  border-color: var(--mk-l2);
+  color: var(--mk-t2);
+}
+
+/* ---------- Balão de conversa ---------- */
+.mk-fala { display: flex; gap: .58em; align-items: flex-start; }
+.mk-balao {
+  min-width: 0;
+  max-width: 17em;
+  padding: .58em .75em .42em;
+  border: 1px solid var(--mk-l1);
+  border-radius: .83em .83em .83em .17em;
+  background: var(--mk-chapa-2);
+}
+.mk-balao p { font-size: 1.083em; color: var(--text); }
+.mk-balao .mk-hora {
+  display: block;
+  margin-top: .25em;
+  font-family: var(--font-mono);
+  font-size: .917em;
+  color: var(--mk-t4);
+}
+.mk-fala-saida { flex-direction: row-reverse; }
+.mk-fala-saida .mk-balao {
+  border-radius: .83em .83em .17em .83em;
+  background: rgba(var(--glow), .12);
+  border-color: rgba(var(--glow), .26);
+}
+.mk-fala-saida .mk-hora { text-align: right; }
+
+/* ---------- Campo de escrita, desligado ---------- */
+.mk-escrever {
+  display: flex;
+  align-items: center;
+  gap: .58em;
+  margin-top: auto;
+  padding: .5em .67em;
+  border: 1px solid var(--mk-l1);
+  border-radius: .67em;
+  background: var(--mk-chapa-2);
+  font-size: 1em;
+  color: var(--mk-t4);
+}
+.mk-escrever .mk-ico { width: 1.17em; height: 1.17em; margin-left: auto; color: var(--mk-t3); }
+
+/* ---------- Botões (decorativos, não são <button>) ---------- */
+.mk-bt {
+  display: inline-flex;
+  align-items: center;
+  gap: .42em;
+  padding: .5em .92em;
+  border-radius: .5em;
+  border: 1px solid var(--mk-l2);
+  background: var(--mk-chapa-2);
+  font-size: 1em;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+.mk-bt-forte {
+  border-color: transparent;
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: 0 .5em 1.2em -.6em rgba(var(--glow), .8);
+}
+.mk-bt-texto {
+  border-color: transparent;
+  background: transparent;
+  color: var(--mk-t3);
+  font-weight: 500;
+}
+
+/* ---------- Tabela ---------- */
+.mk-tab { width: 100%; border-collapse: collapse; font-size: 1em; }
+.mk-tab th {
+  text-align: left;
+  font-size: .917em;
+  font-weight: 500;
+  color: var(--mk-t4);
+  padding: 0 .83em .42em 0;
+  border-bottom: 1px solid var(--mk-l2);
+  white-space: nowrap;
+}
+.mk-tab td {
+  padding: .58em .75em .58em 0;
+  border-bottom: 1px solid var(--mk-l1);
+  color: var(--mk-t2);
+  white-space: nowrap;
+}
+.mk-tab tr:last-child td { border-bottom: 0; }
+.mk-tab td:first-child { color: var(--text); font-weight: 500; }
+.mk-tab .mk-dir { text-align: right; padding-right: 0; }
+
+/* ============================================================
+   11. Animação
+
+   Tudo abaixo mexe só em transform e opacity, em laço lento. O estado
+   declarado fora do @keyframes é sempre o estado final e completo, então
+   zerar a animação nunca esvazia a tela.
+   ============================================================ */
+
+/* Surgir: usado por qualquer peça que "nasce" dentro do laço. */
+@keyframes mk-nascer {
+  0%, 4%   { opacity: 0; transform: translateY(.58em) scale(.985); }
+  11%, 100%{ opacity: 1; transform: none; }
+}
+
+/* Acender: a linha da fila sai de apagada e fica acesa até o fim do laço. */
+@keyframes mk-acender {
+  0%, 9%   { opacity: .22; }
+  14%, 100%{ opacity: 1; }
+}
+
+/* Pulso lento de ponto vivo. Nunca chega a zero: some é diferente de piscar. */
+@keyframes mk-pulso {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: .38; transform: scale(.82); }
+}
+
+/* Pacote de dados atravessando o fio. --fio-w é a largura do fio. */
+@keyframes mk-viajar {
+  0%       { transform: translateX(0); opacity: 0; }
+  10%      { opacity: 1; }
+  86%      { opacity: 1; }
+  100%     { transform: translateX(var(--fio-w)); opacity: 0; }
+}
+
+/* Respiro de janela: 3px de deriva vertical em 9 segundos. */
+@keyframes mk-flutuar {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-.25em); }
+}
+
+/* Barra que preenche. Sempre termina cheia. */
+@keyframes mk-encher {
+  0%, 6%   { transform: scaleX(.16); }
+  46%, 100%{ transform: scaleX(1); }
+}
+
+/* Varredura do gráfico: um cursor de leitura que atravessa e some. */
+@keyframes mk-varrer {
+  0%       { transform: translateX(0); opacity: 0; }
+  8%       { opacity: .85; }
+  62%      { opacity: .85; }
+  70%, 100%{ transform: translateX(var(--varre-w, 10em)); opacity: 0; }
+}
+
+/* Fio de atualização no topo do indicador. Nasce e some, não fica. */
+@keyframes mk-atualizar {
+  0%       { transform: scaleX(0); opacity: .9; }
+  26%      { transform: scaleX(1); opacity: .9; }
+  44%, 100%{ transform: scaleX(1); opacity: 0; }
+}
+
+/* ============================================================
+   12. Maquete 01: automação de processos
+
+   Uma mensagem chega e o resto acontece sozinho. Três superfícies soltas, em
+   profundidades diferentes: a conversa à frente, o cartão de CRM nascendo
+   atrás e deslocado, e a fila de ações por cima das duas.
+   ============================================================ */
+.mk-fluxo { display: grid; gap: .83em; }
+
+/* A janela da conversa tem rail de contatos e thread, como um cliente de
+   mensagem de verdade. É esse rail que dá densidade à peça: sem ele sobra
+   espaço vazio, que é justamente o erro que a maquete existe para corrigir. */
+.mk1-conversa .mk-corpo { flex-direction: row; padding: 0; gap: 0; }
+
+.mk1-lista {
+  flex: none;
+  width: 10.8em;
+  display: flex;
+  flex-direction: column;
+  gap: .17em;
+  padding: .5em;
+  border-right: 1px solid var(--mk-l1);
+  background: color-mix(in srgb, var(--mk-chapa-2) 62%, var(--mk-chapa));
+}
+.mk1-contato {
+  display: flex;
+  align-items: center;
+  gap: .5em;
+  padding: .42em;
+  border-radius: .5em;
+  min-width: 0;
+}
+.mk1-contato div { min-width: 0; display: grid; }
+.mk1-contato b {
+  font-size: .917em;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mk1-contato em {
+  font-style: normal;
+  font-size: .917em;
+  color: var(--mk-t4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mk1-contato .mk-ava { width: 1.58em; height: 1.58em; }
+.mk1-contato-ativo {
+  background: rgba(var(--glow), .13);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.mk1-thread-topo {
+  display: flex;
+  align-items: center;
+  gap: .58em;
+  margin: -.75em -.75em 0;
+  padding: .58em .75em;
+  border-bottom: 1px solid var(--mk-l1);
+}
+.mk1-thread-topo div { display: grid; min-width: 0; }
+.mk1-thread-topo b { font-size: 1em; font-weight: 600; color: var(--text); }
+.mk1-thread-topo em { font-style: normal; font-size: .917em; color: var(--positive); }
+
+.mk1-dia {
+  align-self: center;
+  padding: .17em .67em;
+  border-radius: .83em;
+  background: var(--mk-chapa-2);
+  font-family: var(--font-mono);
+  font-size: .917em;
+  color: var(--mk-t4);
+}
+
+.mk1-thread {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: .67em;
+  padding: .75em;
+}
+.mk1-thread .mk-balao { animation: mk-nascer 11s ease-out infinite; }
+
+.mk1-crm .mk-corpo { gap: 0; padding-block: .5em; }
+.mk1-crm { box-shadow: 0 1em 2.2em -1.2em var(--scene-shadow); }
+.mk1-fila {
+  box-shadow:
+    0 2.2em 4em -1.4em var(--scene-shadow),
+    0 .5em 1.2em -.6em var(--scene-shadow);
+}
+
+/* Rodapé da fila: o gatilho que dispara a próxima execução. É informação de
+   configuração, não de resultado. */
+.mk1-fila-pe {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: .83em;
+  padding-top: .58em;
+  border-top: 1px solid var(--mk-l1);
+}
+.mk1-crm { animation: mk-nascer 11s .55s ease-out infinite backwards; }
+
+.mk1-crm-pe {
+  display: flex;
+  align-items: center;
+  gap: .83em;
+  margin-top: .5em;
+  padding-top: .58em;
+  border-top: 1px solid var(--mk-l1);
+}
+
+/* ---------- Fila de ações ---------- */
+.mk1-fila .mk-corpo { gap: .5em; padding: .75em .92em .83em; }
+
+.mk1-passo {
+  display: flex;
+  align-items: center;
+  gap: .67em;
+  padding: .42em 0;
+  /* Estado declarado: acesa. A animação só a apaga no começo do laço. */
+  opacity: 1;
+  animation: mk-acender 11s ease-out infinite backwards;
+  animation-delay: calc(.9s + var(--i) * .7s);
+}
+.mk1-passo b {
+  flex: 1;
+  min-width: 0;
+  font-size: 1em;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+}
+.mk1-passo .mk-mono { color: var(--mk-t4); }
+
+.mk1-marca {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.42em;
+  height: 1.42em;
+  border-radius: 50%;
+  background: var(--positive-bg);
+  border: 1px solid color-mix(in srgb, var(--positive) 40%, transparent);
+  color: var(--positive);
+}
+.mk1-marca .mk-ico { width: .83em; height: .83em; stroke-width: 2.4; }
+
+/* O fio que liga os três passos, atrás das bolinhas. */
+.mk1-fila ul { position: relative; }
+.mk1-fila ul::before {
+  content: "";
+  position: absolute;
+  left: .67em;
+  top: 1.1em;
+  bottom: 1.1em;
+  width: 1px;
+  background: var(--mk-l2);
+}
+
+/* ============================================================
+   13. Maquete 02: integração de sistemas
+
+   Quatro janelas menores, o mesmo registro dentro das quatro, e fios com um
+   pacote viajando. A prova de que é um dado só, e não quatro cópias, é o nome
+   repetido e destacado nas quatro.
+   ============================================================ */
+.mk-integra { display: grid; gap: .67em; }
+
+.mk2-jan .mk-topo { height: 2.08em; padding-inline: .67em; }
+.mk2-jan .mk-corpo { padding: .67em; gap: .5em; }
+
+/* A linha do registro que se repete nas quatro janelas. */
+.mk2-reg {
+  display: flex;
+  align-items: center;
+  gap: .5em;
+  padding: .42em .58em;
+  border: 1px solid rgba(var(--glow), .3);
+  border-radius: .5em;
+  background: rgba(var(--glow), .1);
+}
+.mk2-reg b { font-size: 1em; font-weight: 600; color: var(--text); white-space: nowrap; }
+.mk2-reg .mk-esticar { font-family: var(--font-mono); font-size: .917em; color: var(--accent-strong); }
+
+.mk2-linha {
+  display: flex;
+  align-items: center;
+  gap: .5em;
+  padding: .33em .58em;
+  border-radius: .42em;
+  font-size: .917em;
+  color: var(--mk-t3);
+}
+.mk2-linha .mk-esticar { color: var(--mk-t4); }
+
+/* Campo de formulário desligado, para a janela do site. */
+.mk2-input {
+  display: flex;
+  align-items: center;
+  gap: .5em;
+  padding: .42em .58em;
+  border: 1px solid var(--mk-l1);
+  border-radius: .42em;
+  background: var(--mk-chapa-2);
+  font-size: .917em;
+  color: var(--mk-t3);
+}
+.mk2-input b { color: var(--text); font-weight: 500; }
+
+/* ---------- Fios e pacote ---------- */
+/* O botão herda o corpo da linha em que está: definir .917em aqui somaria
+   com o .917em da linha e derrubaria o texto para 9px. */
+.mk2-jan .mk-bt { padding: .33em .75em; }
+
+.mk2-fio {
+  position: absolute;
+  height: 1px;
+  transform-origin: 0 50%;
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--accent) 55%, transparent),
+    color-mix(in srgb, var(--accent) 16%, transparent));
+  display: none;
+}
+.mk2-fio::before,
+.mk2-fio::after {
+  content: "";
+  position: absolute;
+  top: -.125em;
+  width: .33em;
+  height: .33em;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 70%, transparent);
+}
+.mk2-fio::before { left: -.17em; }
+.mk2-fio::after { right: -.17em; }
+
+.mk2-pacote {
+  position: absolute;
+  left: 0;
+  top: -.25em;
+  width: .5em;
+  height: .5em;
+  border-radius: 50%;
+  background: var(--accent-strong);
+  box-shadow: 0 0 0 .29em rgba(var(--glow), .2);
+  /* Parado, o pacote descansa no meio do fio: continua legível como "dado em
+     trânsito", que é o que a peça precisa dizer. */
+  transform: translateX(calc(var(--fio-w) * .52));
+  animation: mk-viajar 3.6s linear infinite;
+  animation-delay: var(--atraso, 0s);
+}
+
+.mk2-tempo {
+  position: absolute;
+  z-index: 6;
+  display: none;
+}
+.mk2-tempo i { animation: mk-pulso 2.2s ease-in-out infinite; }
+
+/* ============================================================
+   14. Maquete 03: sistemas e painéis sob medida
+
+   Uma janela só, com barra lateral, cabeçalho, três indicadores e tabela. Os
+   indicadores mostram rótulo e tendência. Nenhum valor absoluto, em lugar
+   nenhum: é a forma que informa, não o número.
+   ============================================================ */
+.mk-painel { display: grid; }
+
+.mk3-app .mk-corpo { padding: 0; gap: 0; flex-direction: row; }
+
+/* ---------- Barra lateral ---------- */
+.mk3-lado {
+  flex: none;
+  width: 12.17em;
+  display: flex;
+  flex-direction: column;
+  gap: .17em;
+  padding: .83em .67em;
+  border-right: 1px solid var(--mk-l1);
+  background: color-mix(in srgb, var(--mk-chapa-2) 60%, var(--mk-chapa));
+}
+
+.mk3-marca {
+  display: flex;
+  align-items: center;
+  gap: .58em;
+  padding: .25em .42em .92em;
+  font-size: 1.083em;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  color: var(--text);
+}
+.mk3-marca span:last-child { white-space: nowrap; }
+.mk3-selo {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.83em;
+  height: 1.83em;
+  border-radius: .5em;
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.mk3-selo svg { width: 1.25em; height: 1.25em; }
+
+.mk3-nav {
+  display: flex;
+  align-items: center;
+  gap: .58em;
+  padding: .42em .5em;
+  border-radius: .42em;
+  font-size: 1em;
+  color: var(--mk-t3);
+  white-space: nowrap;
+}
+.mk3-nav .mk-ico { width: 1.08em; height: 1.08em; opacity: .8; }
+.mk3-nav-ativo {
+  background: rgba(var(--glow), .14);
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+.mk3-corte {
+  margin: .58em .5em;
+  height: 1px;
+  background: var(--mk-l1);
+}
+
+/* ---------- Área principal ---------- */
+.mk3-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: .75em;
+  padding: .83em;
+}
+
+.mk3-cabeca { display: flex; align-items: center; gap: .67em; }
+.mk3-cabeca h3 {
+  font-family: var(--font-body);
+  font-size: 1.25em;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  line-height: 1.2;
+  color: var(--text);
+  margin: 0;
+}
+
+/* Controle segmentado. Duas opções, uma marcada. */
+.mk3-seg {
+  display: flex;
+  padding: .17em;
+  border: 1px solid var(--mk-l1);
+  border-radius: .5em;
+  background: var(--mk-chapa-2);
+}
+.mk3-seg span {
+  padding: .21em .58em;
+  border-radius: .33em;
+  font-size: .917em;
+  color: var(--mk-t3);
+  white-space: nowrap;
+}
+.mk3-seg span[data-on] {
+  background: var(--mk-chapa);
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: 0 .17em .42em -.25em var(--scene-shadow);
+}
+
+/* ---------- Indicadores ---------- */
+.mk3-ind {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .67em;
+}
+.mk3-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: .5em;
+  padding: .75em;
+  border: 1px solid var(--mk-l1);
+  border-radius: .67em;
+  background: var(--mk-chapa-2);
+  overflow: hidden;
+}
+.mk3-card h4 {
+  font-family: var(--font-body);
+  font-size: .917em;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--mk-t3);
+  margin: 0;
+  /* Três linhas de reserva: com o rótulo mais longo em duas colunas estreitas,
+     menos que isso desalinha a tendência dos três cartões. */
+  min-height: 3.2em;
+}
+
+/* Fio de atualização. Some quando parado: o indicador embaixo já está pronto. */
+.mk3-atualiza {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 2px;
+  transform-origin: 0 50%;
+  background: linear-gradient(90deg, var(--accent), transparent);
+  opacity: 0;
+  animation: mk-atualizar 9s ease-out infinite;
+  animation-delay: calc(var(--i) * 1.1s);
+}
+
+.mk3-pe {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: .42em;
+  font-family: var(--font-mono);
+  font-size: .917em;
+  color: var(--mk-t3);
+}
+.mk3-pe .mk-ico { width: .92em; height: .92em; }
+.mk3-pe-alta { color: var(--positive); }
+.mk3-pe-acento { color: var(--accent-strong); }
+
+/* Gráfico de linha. Sem eixo e sem número: só a forma da tendência. */
+.mk3-linha-graf {
+  position: relative;
+  height: 3.5em;
+  overflow: hidden;
+}
+.mk3-linha-graf svg { width: 100%; height: 100%; overflow: visible; }
+.mk3-linha-graf .traco {
+  fill: none;
+  stroke: var(--accent-strong);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mk3-linha-graf .area { fill: rgba(var(--glow), .15); stroke: none; }
+.mk3-varre {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  background: var(--accent-strong);
+  opacity: 0;
+  --varre-w: 9em;
+  animation: mk-varrer 9s 1.4s linear infinite;
+}
+
+/* Barra que preenche. */
+.mk3-funil { display: grid; gap: .5em; }
+.mk3-funil-barra,
+.mk3-funil-leg {
+  display: grid;
+  grid-template-columns: 34fr 26fr 22fr 18fr;
+  gap: 2px;
+}
+.mk3-funil-barra { height: .75em; }
+.mk3-funil-barra i {
+  border-radius: .17em;
+  background: color-mix(in srgb, var(--accent) var(--tom), var(--mk-chapa-3));
+}
+.mk3-funil-leg span {
+  font-size: .917em;
+  color: var(--mk-t4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mk3-barra {
+  height: .58em;
+  border-radius: .29em;
+  background: var(--mk-chapa-3);
+  overflow: hidden;
+}
+.mk3-barra i {
+  display: block;
+  height: 100%;
+  width: 68%;
+  border-radius: .29em;
+  background: linear-gradient(90deg, rgba(var(--glow), .5), var(--accent));
+  transform-origin: 0 50%;
+  animation: mk-encher 9s .5s ease-out infinite;
+}
+.mk3-marcos {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: .917em;
+  color: var(--mk-t4);
+}
+
+/* Anel de progresso. O conic-gradient desenha o arco, a máscara abre o miolo. */
+.mk3-anel {
+  position: relative;
+  width: 3.5em;
+  height: 3.5em;
+  margin-inline: auto;
+  border-radius: 50%;
+  background: conic-gradient(var(--accent) 0turn .68turn, var(--mk-chapa-3) .68turn 1turn);
+  -webkit-mask: radial-gradient(circle, transparent 58%, currentColor 59%);
+          mask: radial-gradient(circle, transparent 58%, currentColor 59%);
+}
+
+/* ---------- Tabela ---------- */
+.mk3-tabela { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
+/* Rodapé da tabela. Produto de verdade sempre diz de onde vem a lista que está
+   na tela, e é essa linha que fecha o bloco em vez de deixá-lo boiando. */
+.mk3-tab-pe {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: .83em;
+  padding-top: .75em;
+  border-top: 1px solid var(--mk-l1);
+  font-size: .917em;
+  color: var(--mk-t4);
+}
+.mk3-tab-pe .mk-esticar { color: var(--accent-strong); font-weight: 600; }
+
+/* Identificação de quem está usando o sistema, encostada no pé da lateral. */
+.mk3-eu {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: .58em;
+  padding: .5em .42em 0;
+  border-top: 1px solid var(--mk-l1);
+}
+.mk3-eu div { display: grid; min-width: 0; }
+.mk3-eu b { font-size: .917em; font-weight: 600; color: var(--text); }
+.mk3-eu em { font-style: normal; font-size: .917em; color: var(--mk-t4); }
+
+/* ---------- Trilha da direita: é ela que atravessa a borda da tela ---------- */
+.mk3-trilha {
+  flex: none;
+  width: 16em;
+  display: none;
+  flex-direction: column;
+  gap: .58em;
+  padding: .92em;
+  border-left: 1px solid var(--mk-l1);
+  background: color-mix(in srgb, var(--mk-chapa-2) 50%, var(--mk-chapa));
+}
+.mk3-item {
+  display: flex;
+  align-items: center;
+  gap: .5em;
+  padding: .5em .58em;
+  border: 1px solid var(--mk-l1);
+  border-radius: .5em;
+  background: var(--mk-chapa);
+  font-size: .917em;
+  color: var(--mk-t2);
+  white-space: nowrap;
+}
+.mk3-item b {
+  flex: 1;
+  min-width: 0;
+  font-weight: 400;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mk3-item i {
+  flex: none;
+  width: .5em;
+  height: .5em;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--text) 26%, transparent);
+}
+.mk3-item-agora i { background: var(--accent); }
+
+/* ============================================================
+   15. Maquete 04: agentes de IA com supervisão
+
+   A IA escreve, o humano aprova. O selo troca de "rascunho da IA" para
+   "aprovado por Ana" dentro do laço, e o estado parado é o aprovado: é a
+   assinatura humana que a peça precisa afirmar.
+
+   Ordem das colunas: a RESPOSTA vem primeiro, o CLIENTE depois. A inversão é
+   deliberada e é a correção de um defeito: com o cliente à esquerda, a tela
+   cortava justamente a resposta sugerida pela IA, que é a prova do painel. Os
+   nomes das classes dizem o papel, não o lado, para a ordem poder mudar de novo
+   sem o CSS virar mentira.
+   ============================================================ */
+.mk-agente { display: grid; }
+
+.mk4-app .mk-corpo { padding: 0; gap: 0; flex-direction: row; }
+
+.mk4-cliente {
+  flex: none;
+  width: 27em;
+  display: flex;
+  flex-direction: column;
+  gap: .75em;
+  padding: .92em;
+  border-left: 1px solid var(--mk-l1);
+  background: color-mix(in srgb, var(--mk-chapa-2) 55%, var(--mk-chapa));
+}
+
+.mk4-fonte {
+  margin-top: auto;
+  padding: .67em;
+  border: 1px solid var(--mk-l1);
+  border-radius: .67em;
+  background: var(--mk-chapa);
+}
+.mk4-fonte .mk-rotulo { text-transform: none; letter-spacing: .02em; }
+.mk4-fonte ul { display: grid; gap: .33em; margin-top: .58em; }
+.mk4-doc {
+  display: flex;
+  align-items: center;
+  gap: .5em;
+  padding: .33em .42em;
+  border-radius: .42em;
+  background: var(--mk-chapa-2);
+  font-size: .917em;
+  color: var(--mk-t2);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.mk4-doc .mk-ico { width: .92em; height: .92em; color: var(--mk-t3); }
+
+.mk4-resposta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: .75em;
+  padding: .92em;
+}
+
+/* ---------- Cartão do rascunho ---------- */
+.mk4-rascunho {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: .67em;
+  padding: .92em;
+  border: 1px solid rgba(var(--glow), .32);
+  border-radius: .75em;
+  background:
+    linear-gradient(180deg, rgba(var(--glow), .1), transparent 46%),
+    var(--mk-chapa-2);
+}
+.mk4-cabeca { display: flex; align-items: center; gap: .67em; }
+.mk4-cabeca h4 {
+  font-family: var(--font-body);
+  font-size: 1.083em;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* Os dois selos ocupam o mesmo lugar. O aprovado é o estado declarado. */
+.mk4-selos { position: relative; display: inline-grid; }
+.mk4-selos .mk-chip { grid-area: 1 / 1; }
+.mk4-selo-rascunho {
+  opacity: 0;
+  animation: mk4-selo-sai 10s ease-out infinite;
+}
+.mk4-selo-aprovado {
+  opacity: 1;
+  animation: mk4-selo-entra 10s ease-out infinite;
+}
+@keyframes mk4-selo-sai {
+  0%, 44%  { opacity: 1; }
+  50%, 100%{ opacity: 0; }
+}
+@keyframes mk4-selo-entra {
+  0%, 44%  { opacity: 0; }
+  50%, 100%{ opacity: 1; }
+}
+
+.mk4-texto {
+  display: grid;
+  gap: .33em;
+  font-size: 1.083em;
+  line-height: 1.5;
+  color: var(--mk-t2);
+}
+.mk4-texto b { color: var(--text); font-weight: 500; }
+
+.mk4-acoes { display: flex; align-items: center; gap: .58em; margin-top: .17em; }
+
+/* A regra escrita dentro do produto. É ela que transforma "IA respondendo" em
+   "IA com supervisão", que é a frente inteira desta maquete. */
+.mk4-nota {
+  display: flex;
+  align-items: center;
+  gap: .5em;
+  padding-top: .58em;
+  border-top: 1px solid var(--mk-l1);
+  font-size: .917em;
+  color: var(--mk-t3);
+}
+.mk4-nota .mk-ico { width: .92em; height: .92em; color: var(--accent-strong); }
+
+/* Histórico de revisão, encostado no rodapé da coluna. */
+.mk4-log { display: grid; gap: .42em; }
+
+/* Dados do contato, do lado do cliente. */
+.mk4-dados {
+  padding: .5em .67em;
+  border: 1px solid var(--mk-l1);
+  border-radius: .67em;
+  background: var(--mk-chapa);
+}
+.mk4-dados .mk-campo dt { width: 5.4em; }
+
+/* A regra do agente escrita como configuração, não como promessa. Escopo,
+   fonte e saída são exatamente o que a seção afirma no texto do painel. */
+.mk4-regra {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: .5em;
+  flex-wrap: wrap;
+  padding-top: .67em;
+  border-top: 1px solid var(--mk-l1);
+}
+.mk4-regra .mk-rotulo { margin-right: .17em; }
+.mk4-log-linha {
+  display: flex;
+  align-items: center;
+  gap: .58em;
+  padding: .42em .58em;
+  border: 1px solid var(--mk-l1);
+  border-radius: .5em;
+  background: var(--mk-chapa-2);
+  font-size: .917em;
+  color: var(--mk-t2);
+  white-space: nowrap;
+}
+.mk4-log-linha .mk-esticar { font-family: var(--font-mono); color: var(--mk-t4); }
+
+/* Aro de foco do botão: é o que o cursor acende quando pousa. */
+.mk4-alvo { position: relative; display: inline-flex; }
+.mk4-alvo::after {
+  content: "";
+  position: absolute;
+  inset: -.29em;
+  border-radius: .75em;
+  border: 1px solid rgba(var(--glow), .55);
+  opacity: 1;
+  animation: mk4-aro 10s ease-out infinite;
+}
+@keyframes mk4-aro {
+  0%, 38%  { opacity: 0; transform: scale(1.06); }
+  46%, 100%{ opacity: 1; transform: scale(1); }
+}
+
+/* ---------- Cursor ----------
+   Parado, ele descansa em cima do Aprovar, com o aro aceso e o selo aprovado:
+   o quadro congelado conta a história inteira sem precisar de movimento. */
+.mk4-cursor {
+  position: absolute;
+  z-index: 8;
+  width: 1.08em;
+  height: 1.5em;
+  color: var(--text);
+  filter: drop-shadow(0 .17em .33em var(--scene-shadow));
+  display: none;
+}
+.mk4-cursor svg { width: 100%; height: 100%; }
+.mk4-cursor svg path {
+  fill: var(--mk-chapa);
+  stroke: var(--text);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+
+/* ============================================================
+   13. Maquete 05: criação de sites sob medida
+
+   Aqui a maquete não mostra a operação do cliente: ela É a prova do serviço.
+   Uma janela de navegador com um site dentro, e o site precisa ser bonito o
+   bastante para o visitante querer um igual. O cromo do navegador usa os
+   tokens da WaveOps, porque a janela é peça do nosso kit. O conteúdo dentro
+   dela é de outra marca, e é onde mora a única exceção de cor deste projeto.
+
+   O movimento é o próprio assunto: o site rola devagar dentro da janela e
+   revela a segunda dobra. Scroll dentro de scroll, num painel que fala de
+   site. Parado, ele volta ao topo, com o hero inteiro à vista.
+   ============================================================ */
+.mk-site { display: grid; }
+
+/* ---------- Cromo do navegador: tokens da WaveOps ---------- */
+.mk5-navegador .mk-corpo { padding: 0; gap: 0; }
+
+.mk5-abas {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: .67em;
+  height: 2.17em;
+  padding: 0 .83em;
+  background: color-mix(in srgb, var(--mk-chapa-3) 60%, var(--mk-chapa));
+}
+.mk5-aba {
+  display: flex;
+  align-items: center;
+  gap: .5em;
+  max-width: 16em;
+  padding: .25em .75em;
+  border-radius: .5em .5em 0 0;
+  background: var(--mk-chapa-2);
+  border: 1px solid var(--mk-l1);
+  border-bottom: 0;
+  font-size: .917em;
+  color: var(--mk-t2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Favicon do site fictício: desenhado, sem imagem e SEM TEXTO. Uma letra aqui
+   cairia para 8,6px, porque a aba já está em .917em e a letra encolheria de
+   novo. Favicon não precisa de texto: duas faixas da paleta da marca bastam. */
+.mk5-fav {
+  flex: none;
+  width: 1.17em;
+  height: 1.17em;
+  border-radius: .25em;
+  background: linear-gradient(135deg, var(--si-brasa) 48%, var(--si-oliva) 48%);
+}
+.mk5-aba-extra {
+  flex: none;
+  width: 1.17em;
+  height: 1.17em;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--text) 12%, transparent);
+}
+
+.mk5-barra {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: .67em;
+  height: 2.5em;
+  padding: 0 .83em;
+  border-bottom: 1px solid var(--mk-l1);
+  background: var(--mk-chapa-2);
+}
+.mk5-setas { display: flex; gap: .5em; color: var(--mk-t4); }
+.mk5-setas .mk-ico { width: 1.08em; height: 1.08em; }
+.mk5-url {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: .5em;
+  height: 1.75em;
+  padding: 0 .83em;
+  border-radius: .92em;
+  background: var(--mk-chapa);
+  border: 1px solid var(--mk-l1);
+  font-family: var(--font-mono);
+  font-size: .917em;
+  color: var(--mk-t2);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.mk5-url .mk-ico { width: .92em; height: .92em; color: var(--positive); }
+
+/* ---------- A tela do site ----------
+   PALETA DA MARCA FICTÍCIA. Estas são as únicas cores cruas do projeto, e
+   estão escopadas neste contêiner de propósito.
+
+   Por que não sai dos tokens da WaveOps: o site de dentro é de OUTRA marca. Se
+   ele fosse violeta, a maquete contaria a história errada, a da WaveOps
+   mostrando a si mesma, e não a de um site entregue para um cliente.
+
+   Por que não segue o tema da página: site de cliente não muda de cor porque o
+   visitante trocou o tema daqui. A independência é deliberada, e é ela que faz
+   a peça parecer uma janela de navegador de verdade por cima da página, seja a
+   página escura ou clara. Conferido nos dois temas.
+
+   A marca é Miralta, estúdio de arquitetura inventado para esta peça. O
+   domínio termina em .exemplo, que não existe como TLD, então não há como
+   colidir com empresa real nenhuma. */
+.mk5-tela {
+  --si-tinta: #171310;
+  --si-papel: #f5efe6;
+  --si-papel-2: #e6dccd;
+  --si-linha: rgba(23, 19, 16, .14);
+  --si-fraco: rgba(23, 19, 16, .62);
+  --si-brasa: #b0522c;
+  --si-oliva: #4d5b40;
+
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--si-papel);
+  color: var(--si-tinta);
+}
+
+/* O conteúdo que rola. Parado, ele está no topo: o hero inteiro à vista. */
+.mk5-rolo {
+  position: absolute;
+  inset: 0 0 auto 0;
+  /* 11em é o curso que faz a segunda dobra aparecer INTEIRA, com as legendas
+     dos projetos, e não só as tampas dos blocos. Menos que isso revela pela
+     metade, que lê como corte e não como rolagem. */
+  --mk5-curso: 11em;
+  animation: mk5-rolar 15s cubic-bezier(.42, 0, .2, 1) infinite;
+}
+
+/* ---------- Cabeçalho do site ---------- */
+.mk5-cabeca {
+  display: flex;
+  align-items: center;
+  gap: 1.67em;
+  padding: 1.17em 2.5em;
+}
+.mk5-marca {
+  font-family: var(--font-display);
+  font-size: 1.25em;
+  font-weight: 700;
+  letter-spacing: .22em;
+  color: var(--si-tinta);
+}
+.mk5-menu { display: flex; gap: 1.5em; }
+.mk5-menu span { font-size: .917em; color: var(--si-fraco); }
+.mk5-menu span:first-child { color: var(--si-tinta); font-weight: 600; }
+.mk5-bt {
+  margin-left: auto;
+  padding: .42em 1em;
+  border: 1px solid var(--si-tinta);
+  border-radius: 1.5em;
+  font-size: .917em;
+  font-weight: 600;
+  color: var(--si-tinta);
+  white-space: nowrap;
+}
+
+/* ---------- Hero ---------- */
+.mk5-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 27em) minmax(0, 1fr);
+  align-items: center;
+  gap: 2em;
+  padding: 1em 0 2.5em 2.5em;
+}
+.mk5-texto { display: grid; gap: 1em; }
+.mk5-olho {
+  font-family: var(--font-mono);
+  font-size: .917em;
+  font-weight: 700;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--si-brasa);
+}
+/* A manchete do site é tipo de display, não texto de interface: é ela que faz
+   o visitante querer um site assim. Peso 400 e entrelinha curta, para não soar
+   com a voz da WaveOps, que usa 500 e 600. */
+.mk5-manchete {
+  font-family: var(--font-display);
+  font-size: 3.2em;
+  font-weight: 400;
+  line-height: .98;
+  letter-spacing: -.035em;
+  color: var(--si-tinta);
+  margin: 0;
+  max-width: 11ch;
+}
+.mk5-apoio {
+  font-size: 1.083em;
+  line-height: 1.55;
+  color: var(--si-fraco);
+  max-width: 30ch;
+}
+.mk5-cta {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: .67em;
+  margin-top: .33em;
+  padding: .75em 1.33em;
+  border-radius: 1.75em;
+  background: var(--si-tinta);
+  color: var(--si-papel);
+  font-size: 1em;
+  font-weight: 600;
+  box-shadow: 0 1.2em 2.4em -1.2em var(--si-tinta);
+}
+
+/* ---------- A arte do hero ----------
+   Sem imagem: três gradientes empilhados fazem a profundidade, e o arco
+   recortado dá o assunto, que é arquitetura. Ela anda menos que a página no
+   laço, e é essa diferença que o olho lê como camada. */
+.mk5-arte {
+  position: relative;
+  align-self: stretch;
+  min-height: 15.5em;
+  border-radius: 9em 9em 0 0;
+  background:
+    radial-gradient(110% 75% at 24% 10%, color-mix(in srgb, var(--si-brasa) 85%, transparent), transparent 58%),
+    radial-gradient(100% 85% at 86% 78%, color-mix(in srgb, var(--si-oliva) 92%, transparent), transparent 60%),
+    linear-gradient(158deg, color-mix(in srgb, var(--si-papel-2) 80%, var(--si-brasa)), var(--si-tinta) 125%);
+  animation: mk5-camada 15s cubic-bezier(.42, 0, .2, 1) infinite;
+}
+/* Sombra interna embaixo: dá volume ao arco sem precisar de foto. */
+.mk5-arte::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(to top, color-mix(in srgb, var(--si-tinta) 42%, transparent), transparent 46%);
+}
+.mk5-vidro {
+  position: absolute;
+  z-index: 2;
+  left: -2.17em;
+  bottom: 1.67em;
+  display: grid;
+  gap: .17em;
+  padding: .75em 1em;
+  border-radius: .58em;
+  background: color-mix(in srgb, var(--si-papel) 88%, transparent);
+  border: 1px solid color-mix(in srgb, var(--si-papel) 60%, transparent);
+  box-shadow: 0 1.33em 2.5em -1.33em color-mix(in srgb, var(--si-tinta) 70%, transparent);
+}
+.mk5-vidro b { font-size: 1em; font-weight: 600; color: var(--si-tinta); white-space: nowrap; }
+.mk5-vidro em { font-style: normal; font-size: .917em; color: var(--si-fraco); white-space: nowrap; }
+
+/* ---------- A segunda dobra, que o scroll revela ---------- */
+.mk5-proximo {
+  display: grid;
+  gap: 1.17em;
+  padding: 2em 2.5em 2.5em;
+  border-top: 1px solid var(--si-linha);
+  background: var(--si-papel-2);
+}
+.mk5-tiras { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1em; }
+.mk5-tira { display: grid; gap: .5em; }
+.mk5-tira i {
+  height: 7em;
+  border-radius: .5em;
+  background: linear-gradient(148deg, var(--tom-a), var(--tom-b));
+}
+/* Os três tons saem por mistura da própria paleta declarada acima. Nenhuma cor
+   crua nova, e nenhuma cor no atributo style do HTML. */
+.mk5-tira-a { --tom-a: color-mix(in srgb, var(--si-papel) 68%, var(--si-oliva)); --tom-b: color-mix(in srgb, var(--si-oliva) 78%, var(--si-tinta)); }
+.mk5-tira-b { --tom-a: color-mix(in srgb, var(--si-papel) 58%, var(--si-brasa)); --tom-b: color-mix(in srgb, var(--si-brasa) 72%, var(--si-tinta)); }
+.mk5-tira-c { --tom-a: var(--si-papel); --tom-b: color-mix(in srgb, var(--si-tinta) 52%, var(--si-papel-2)); }
+.mk5-tira b { font-size: 1em; font-weight: 600; color: var(--si-tinta); }
+.mk5-tira em { font-style: normal; font-size: .917em; color: var(--si-fraco); }
+
+/* ---------- Granulação e barra de rolagem do site ---------- */
+.mk5-grao {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: .5;
+  color: var(--si-linha);
+  /* Duas malhas de pontos com passos diferentes não coincidem, e a soma parece
+     grão em vez de xadrez. Sem imagem, sem filtro, sem custo de repintura. */
+  background-image:
+    radial-gradient(currentColor .5px, transparent .5px),
+    radial-gradient(currentColor .5px, transparent .5px);
+  background-size: 3px 3px, 4px 4px;
+  background-position: 0 0, 1px 2px;
+}
+.mk5-scroll {
+  position: absolute;
+  z-index: 4;
+  top: .5em;
+  bottom: .5em;
+  right: .33em;
+  width: 3px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--si-tinta) 8%, transparent);
+}
+.mk5-scroll i {
+  display: block;
+  width: 100%;
+  height: 38%;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--si-tinta) 34%, transparent);
+  animation: mk5-polegar 15s cubic-bezier(.42, 0, .2, 1) infinite;
+}
+
+/* ---------- Os três laços ----------
+   Todos com a mesma duração e a mesma curva, para a página, a camada e o
+   polegar andarem juntos. O estado declarado fora do @keyframes é o topo da
+   página: parado, o hero está inteiro na tela. */
+@keyframes mk5-rolar {
+  0%, 12%   { transform: translateY(0); }
+  46%, 62%  { transform: translateY(calc(-1 * var(--mk5-curso, 8.2em))); }
+  92%, 100% { transform: translateY(0); }
+}
+@keyframes mk5-camada {
+  0%, 12%   { transform: translateY(0); }
+  46%, 62%  { transform: translateY(2.4em); }
+  92%, 100% { transform: translateY(0); }
+}
+@keyframes mk5-polegar {
+  0%, 12%   { transform: translateY(0); }
+  46%, 62%  { transform: translateY(150%); }
+  92%, 100% { transform: translateY(0); }
+}
+
+/* ============================================================
+   16. Tela larga: a composição
+
+   A composição desenhada, em caixa de tamanho fixo, com as superfícies em
+   profundidades diferentes. É essa versão que atravessa a borda direita da tela.
+
+   A condição tem duas pernas porque a peça precisa de LARGURA VISÍVEL, e a
+   largura visível depende da altura: acima de 1280px ela existe nas duas
+   colunas; entre 768px e 1279px ela só existe quando a janela é alta o
+   bastante para o painel virar coluna única. Janela estreita e baixa cai na
+   pilha do item 17, e o motivo está lá.
+
+   COLUNA SEGURA: os primeiros 55.5em. Os 8.5em finais são a faixa decorativa
+   (--mk-faixa): a tela corta ali, e ali só pode existir chapa, borda, gradiente,
+   sombra e continuação de coluna. Toda superfície que atravessa 55.5em empurra
+   o próprio conteúdo para dentro com padding-right: var(--mk-faixa). É por isso
+   que várias janelas abaixo ficaram MAIS largas: elas continuam sangrando, mas
+   o texto delas para antes do corte.
+   ============================================================ */
+@media (min-width: 1280px), (min-width: 768px) and (min-height: 940px) {
+  .mk {
+    width: 64em;
+    height: 38em;
+    display: block;
+  }
+  .mk-jan { position: absolute; }
+
+  /* ---------- 01 ----------
+     O CRM e a fila cresceram para a direita e devolveram a diferença em
+     padding. Assim as duas continuam atravessando a borda da tela, mas o que
+     atravessa é a chapa delas, não o carimbo "agora" nem a linha da próxima
+     execução. */
+  .mk1-conversa { z-index: 2; left: 0;    top: 4em;   width: 31em; height: 30em; }
+  .mk1-crm      { z-index: 1; left: 33em; top: 1.5em; width: 24em; height: 14.5em; }
+  .mk1-fila     { z-index: 3; left: 33em; top: 19em;  width: 29em; height: 15em; }
+  /* O subtraendo é a distância entre a borda direita da janela e os 64em da
+     tela: 64 menos 57 no CRM, 64 menos 62 na fila. O que sobra é exatamente o
+     recuo que põe o conteúdo antes dos 55.5em. */
+  .mk1-crm  > .mk-topo, .mk1-crm  > .mk-corpo { padding-right: calc(var(--mk-faixa) - 7em); }
+  .mk1-fila > .mk-topo, .mk1-fila > .mk-corpo { padding-right: calc(var(--mk-faixa) - 2em); }
+
+  /* ---------- 02 ----------
+     Pagamento e WhatsApp são as duas janelas que encostam no corte. Elas
+     mantêm posição e largura, para os fios não precisarem ser redesenhados, e
+     recuam só o conteúdo. */
+  .mk-integra .mk2-jan { animation: mk-flutuar 9s ease-in-out infinite; animation-delay: var(--atraso, 0s); }
+  .mk2-site { z-index: 2; left: 0;      top: 1em;    width: 21em; height: 13.5em; }
+  .mk2-crm  { z-index: 2; left: 8.5em;  top: 17.5em; width: 25em; height: 18.5em; }
+  .mk2-pag  { z-index: 3; left: 36em;   top: 2em;    width: 22em; height: 14.5em; }
+  .mk2-zap  { z-index: 4; left: 36.5em; top: 20.5em; width: 24.5em; height: 13.5em; }
+  .mk2-pag > .mk-topo, .mk2-pag > .mk-corpo { padding-right: calc(var(--mk-faixa) - 6em); }
+  .mk2-zap > .mk-topo, .mk2-zap > .mk-corpo { padding-right: calc(var(--mk-faixa) - 3em); }
+
+  .mk2-fio { display: block; z-index: 1; }
+  /* Cada fio é uma linha reta girada. O pacote anda só em translateX, então ele
+     segue o fio sem o navegador precisar de path nem de layout por quadro. */
+  .mk2-fio-a { left: 9.5em;  top: 14.5em; width: 6.7em; --fio-w: 6.7em; transform: rotate(26.6deg); }
+  .mk2-fio-b { left: 30em;   top: 17.5em; width: 7.6em; --fio-w: 7.6em; transform: rotate(-7.6deg); }
+  .mk2-fio-c { left: 33.5em; top: 27em;   width: 3.1em; --fio-w: 3.1em; transform: rotate(-11.3deg); }
+
+  .mk2-tempo { display: inline-flex; left: 27.5em; top: 14.8em; }
+
+  /* ---------- 03 ----------
+     A trilha da direita era 16em e ficava inteira depois do corte: "Fila de
+     hoje" e os seis itens estavam 100% fora da tela. Agora ela tem 24em, e os
+     8.5em finais são a faixa: os cartões da fila continuam atravessando a borda,
+     o texto deles para antes. A área principal cede a largura, e cede porque
+     ela já cabia: a tabela e os três indicadores são os mesmos. */
+  .mk3-app { z-index: 1; left: 0; top: 0; width: 64em; height: 38em; }
+  .mk3-app > .mk-topo { padding-right: var(--mk-faixa); }
+  .mk3-trilha { display: flex; width: 24em; }
+  .mk3-trilha > .mk-rotulo { align-self: flex-start; }
+  .mk3-trilha .mk3-item,
+  .mk3-trilha .mk3-tab-pe { padding-right: calc(var(--mk-faixa) - .34em); }
+
+  /* ---------- 04 ----------
+     A composição foi invertida: a resposta sugerida pela IA passou para a
+     ESQUERDA e o histórico do cliente para a direita. O painel precisa provar
+     que a IA escreve e o humano aprova, e era exatamente a resposta que o corte
+     comia. Agora o que a borda pega é contexto: o canal, a etapa e a fonte
+     consultada, que o visitante já entende sem ler inteiro. */
+  .mk4-app { z-index: 1; left: 0; top: 0; width: 64em; height: 38em; }
+  .mk4-app > .mk-topo { padding-right: var(--mk-faixa); }
+  .mk4-cliente { padding-right: var(--mk-faixa); }
+
+  /* ---------- 05 ----------
+     O site de dentro ganha a mesma faixa: a barra do navegador, o cabeçalho e a
+     segunda dobra param antes do corte. O que a tela pega é o arco do hero e a
+     chapa clara da segunda dobra, que são gradiente puro. */
+  .mk5-navegador { z-index: 1; left: 0; top: 0; width: 64em; height: 38em; }
+  .mk5-barra,
+  .mk5-cabeca,
+  .mk5-proximo { padding-right: var(--mk-faixa); }
+  .mk4-cursor { display: block; left: 4.6em; top: 18em; animation: mk4-mover 10s ease-in-out infinite; }
+
+  /* O cursor entra por baixo e à esquerda, pousa no Aprovar e fica. O retorno
+     acontece com ele invisível, senão o laço mostraria um salto para trás. */
+  @keyframes mk4-mover {
+    0%       { transform: translate(-6.5em, 5em); opacity: 0; }
+    8%       { opacity: 1; }
+    40%      { transform: translate(0, 0); }
+    44%      { transform: translate(0, .25em); }
+    48%, 92% { transform: translate(0, 0); opacity: 1; }
+    96%      { opacity: 0; }
+    97%      { transform: translate(-6.5em, 5em); opacity: 0; }
+    100%     { transform: translate(-6.5em, 5em); opacity: 0; }
+  }
+}
+
+/* ============================================================
+   17. Tela estreita
+
+   Vale em dois lugares: no celular, e em janela estreita E baixa (1024x768 de
+   iPad deitado, 1000x700 de janela de desktop não maximizada). Nos dois casos a
+   coluna da peça oferece menos de 700px úteis, e a composição ampla ali só
+   caberia cortada em um terço.
+
+   Medido antes desta regra existir, em 1000x700: a maquete 01 perdia o cartão
+   de CRM E a fila de três ações, ou seja, dois dos três elementos que o brief
+   nomeia, justamente os que provam a frase "sem ninguém precisar lembrar de
+   clicar". Cortar margem é aceitável, cortar o argumento não é. Então nessa
+   faixa a maquete entra em pilha.
+
+   Ela não encolhe por transform: ela perde peça. O que sai é sempre o que dá
+   densidade, nunca o que dá sentido: some o rail de contatos, some a coluna
+   lateral, somem as linhas repetidas. Tudo que sai carrega a classe
+   .mk-so-amplo no HTML, para a decisão ficar visível em quem lê o markup.
+
+   A pilha SANGRA, ao contrário do que esta regra fazia antes. O corte é o que
+   faz a peça parecer print de produto, e desligá-lo na faixa de tablet matava o
+   efeito justo ali. Quem garante que o corte não come conteúdo é a mesma faixa
+   decorativa do item 16, aqui em porcentagem: 14.5% da janela, contra 12,5% de
+   sangria. O celular continua sem sangria, e o motivo está no item 7.
+   ============================================================ */
+@media (max-width: 767px),
+       (min-width: 768px) and (max-width: 1279px) and (max-height: 939px) {
+  .mk-so-amplo { display: none !important; }
+
+  .mk-jan { border-radius: .75em; }
+  .mk-topo { height: 2.17em; padding-inline: .67em; }
+  .mk-corpo { padding: .67em; gap: .5em; }
+  .mk-campo { padding: .25em 0; }
+  .mk-balao { max-width: 100%; }
+
+  /* ---------- 01 ----------
+     A conversa perde a moldura de janela e vira só o balão que chega: a
+     janela some, a mensagem fica. */
+  .mk1-conversa {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    /* Sem moldura não há o que recortar, e o overflow: hidden da janela estava
+       comendo 5px da última linha do balão. */
+    overflow: visible;
+  }
+  /* min-height: 0 no corpo deixa o item flex encolher abaixo do conteúdo, e a
+     última linha do balão sobrava 4px fora da caixa. Em altura automática o
+     conteúdo é que manda. */
+  .mk1-conversa .mk-corpo { padding: 0; min-height: auto; }
+  .mk1-thread { padding: 0; gap: .5em; }
+  .mk1-crm .mk-corpo { padding-block: .42em; }
+  .mk1-passo { padding: .25em 0; }
+
+  /* ---------- 02 ----------
+     Grade de duas colunas. O mesmo registro nas quatro janelas continua
+     sendo a informação, e ela sobrevive ao formato pequeno. */
+  .mk-integra { grid-template-columns: 1fr 1fr; gap: .5em; }
+  .mk2-jan .mk-corpo { padding: .5em; gap: .42em; }
+  .mk2-reg { padding: .33em .42em; gap: .42em; }
+  .mk2-reg .mk-ava { width: 1.42em; height: 1.42em; }
+  .mk2-tempo {
+    display: inline-flex;
+    position: static;
+    grid-column: 1 / -1;
+    justify-self: center;
+  }
+
+  /* ---------- 03 e 04 ----------
+     As colunas laterais saem e a janela vira uma coluna só. */
+  .mk3-app .mk-corpo,
+  .mk4-app .mk-corpo { flex-direction: column; }
+
+  .mk3-main { padding: .67em; gap: .58em; }
+  .mk3-cabeca h3 { font-size: 1.17em; }
+  .mk3-card { padding: .58em; gap: .42em; }
+  .mk3-card h4 { min-height: 2.4em; }
+  .mk3-linha-graf { height: 2.4em; }
+  .mk3-anel { width: 2.4em; height: 2.4em; }
+  .mk-tab td { padding: .42em .5em .42em 0; }
+  .mk-tab th { padding: 0 .5em .33em 0; }
+
+  /* ---------- 05 ----------
+     O navegador continua sendo navegador, só perde a fila de abas e a segunda
+     coluna do hero. O scroll interno continua, com percurso menor. */
+  .mk5-tela { flex: none; height: 17.5em; --mk5-curso: 5.6em; }
+  .mk5-cabeca { padding: .83em 1em; gap: .83em; }
+  .mk5-marca { font-size: 1.083em; letter-spacing: .18em; }
+  .mk5-hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: .83em;
+    padding: .33em 1em 1.17em;
+  }
+  .mk5-manchete { font-size: 2.17em; max-width: 15ch; }
+  .mk5-apoio { font-size: 1em; max-width: 34ch; }
+  .mk5-cta { padding: .5em 1em; }
+  .mk5-arte { min-height: 6.5em; border-radius: 3.5em 3.5em 0 0; }
+  .mk5-vidro { left: auto; right: .83em; bottom: .67em; }
+  .mk5-proximo { padding: 1.17em 1em 1.5em; gap: .83em; }
+  .mk5-tira i { height: 4.5em; }
+
+  /* Na pilha a ordem volta a ser vertical. A resposta continua vindo primeiro,
+     então o cliente entra embaixo, com o fio em cima em vez de na lateral. */
+  .mk4-cliente {
+    width: auto;
+    border-left: 0;
+    border-top: 1px solid var(--mk-l1);
+    padding: .67em;
+    gap: .5em;
+  }
+  .mk4-resposta { padding: .67em; gap: .5em; }
+  .mk4-rascunho { padding: .67em; gap: .5em; }
+  .mk4-texto { font-size: 1em; }
+}
+
+/* ============================================================
+   17b. A faixa decorativa da pilha
+
+   Mesma ideia do item 16, outra unidade. Na pilha a maquete não tem largura
+   fixa em em: a caixa é ancorada nos dois lados e cresce com a coluna, então a
+   reserva precisa ser proporcional. 14.5% da janela cobre os 12,5% que a tela
+   corta, com folga.
+
+   A porcentagem resolve sempre sobre a largura da janela (.mk-jan), porque só
+   filhos diretos dela recebem o recuo. No navegador da maquete 05 o corpo tem
+   padding zero por construção, então o recuo desce para as peças do cromo e
+   para as faixas do site, uma a uma.
+
+   Fora daqui, no celular, não existe sangria e portanto não existe faixa.
+   ============================================================ */
+@media (max-width: 767px),
+       (min-width: 768px) and (max-width: 1279px) and (max-height: 939px) {
+  .mk { --mk-faixa: 14.5%; }
+
+  .mk-jan > .mk-topo,
+  .mk-jan > .mk-corpo { padding-right: var(--mk-faixa); }
+
+  /* A maquete 02 é a única que vira grade de duas colunas aqui. A porcentagem
+     resolve sobre a janela, e a janela da coluna da direita tem metade da
+     largura da peça, então lá o recuo precisa ser o dobro para cobrir os mesmos
+     12,5% de corte. Sem isso o chip "Novo" do CRM e o "leads" do topo ficavam
+     fora da tela. */
+  .mk2-crm > .mk-topo, .mk2-crm > .mk-corpo,
+  .mk2-zap > .mk-topo, .mk2-zap > .mk-corpo { padding-right: calc(var(--mk-faixa) * 2); }
+
+  /* O corpo do navegador é só o encaixe do cromo: recuar ele encolheria a
+     tela do site inteira, e a tela do site precisa sangrar. */
+  .mk5-navegador > .mk-corpo { padding-right: 0; }
+  .mk5-abas,
+  .mk5-barra,
+  .mk5-cabeca,
+  .mk5-hero,
+  .mk5-proximo { padding-right: var(--mk-faixa); }
+}
+
+/* Tela muito estreita: duas fileiras passam a quebrar.
+
+   Medido em 340px e 360px: "conversa aberta" na maquete 02 e os dois selos da
+   maquete 04 caíam no corte. Não era falta de faixa, era transbordo de flex.
+   Nas duas fileiras o último item tem margin-left: auto e o primeiro tem
+   white-space: nowrap, então quando a linha não cabe o último é empurrado para
+   fora da caixa, passando por cima do padding da faixa. Deixar a fileira
+   quebrar resolve na origem: o item desce para a segunda linha e continua
+   inteiro dentro da tela. */
+@media (max-width: 420px) {
+  .mk2-reg { flex-wrap: wrap; }
+  .mk2-reg .mk-esticar { margin-left: 0; }
+  .mk4-cabeca { flex-wrap: wrap; }
+  .mk4-cabeca h4 { white-space: normal; }
+  .mk4-selos { margin-left: 0; }
+}
+
+/* ============================================================
+   18. Movimento reduzido
+
+   assets/cinematic.css já zera animação sob a preferência e sob
+   [data-motion="paused"]. Esta trava é a segunda, para a maquete continuar
+   correta se algum dia ela sair deste projeto.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .mk *, .mk *::before, .mk *::after { animation: none !important; }
+}

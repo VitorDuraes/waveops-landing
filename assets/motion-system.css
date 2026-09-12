@@ -1,0 +1,113 @@
+/* ============================================================
+   WaveOps: motion system
+
+   Um lugar só para curva, duração e atraso. Antes disto o projeto
+   tinha 26 blocos de @keyframes e três curvas diferentes escritas à
+   mão em arquivos diferentes, o que fazia dois elementos vizinhos se
+   moverem com ritmos que não combinavam.
+
+   Aqui não há efeito nenhum. Só o vocabulário que o resto do CSS usa.
+   Regra da casa: cada viewport tem no máximo UM elemento chamando
+   atenção, e o movimento serve para dirigir o olho, nunca para enfeitar.
+   ============================================================ */
+
+:root {
+  /* ---------- Curvas ----------
+     Quatro, e só quatro. Cada uma tem um trabalho.
+
+     entrada  o elemento chega e assenta. Desacelera forte no fim, que
+              é o que dá a sensação de peso e de coisa cara.
+     saida    o elemento vai embora. Acelera, porque saída lenta
+              prende o olho em quem já não importa.
+     padrao   estado para estado no mesmo lugar: cor, borda, opacidade.
+     firme    percurso de ida e volta, com as duas pontas em repouso.
+              É a curva de quem gruda e solta. */
+  --ease-entrada: cubic-bezier(.16, 1, .3, 1);
+  --ease-saida:   cubic-bezier(.55, 0, .78, .3);
+  --ease-padrao:  cubic-bezier(.4, 0, .2, 1);
+  --ease-firme:   cubic-bezier(.65, 0, .35, 1);
+
+  /* ---------- Durações ----------
+     Toque responde em menos de 200ms, senão parece travado. Cena leva
+     quase um segundo, senão parece apressada. Não há valor no meio por
+     acaso: quatro degraus obrigam a escolher. */
+  --t-toque: 160ms;   /* hover, foco, pressionar */
+  --t-base:  320ms;   /* troca de estado visível */
+  --t-calmo: 560ms;   /* entrada de bloco */
+  --t-cena:  900ms;   /* mudança de composição */
+
+  /* ---------- Ritmo ----------
+     Atraso entre irmãos numa entrada escalonada. Multiplicado por --i,
+     que o assets/main.js escreve em cada filho de .stagger. Acima de 8
+     itens o escalonamento vira espera, então a regra de .stagger em
+     assets/styles.css trava o acúmulo com min(). */
+  --passo: 70ms;
+
+  /* ---------- Deslocamentos ----------
+     Distância que um elemento percorre ao entrar. Curto de propósito:
+     movimento grande lê como template, movimento curto lê como produto. */
+  --desloca-y: 14px;
+  --desloca-x: 20px;
+}
+
+/* ============================================================
+   A primitiva em uso: revelação por máscara
+
+   Para manchete grande, onde deslocar o texto inteiro chama mais
+   atenção que a própria frase. O clip-path é composto pela GPU e não
+   causa recálculo de layout.
+
+   Ela parte do estado final e só recua enquanto o elemento não entrou.
+   Se o JavaScript falhar, o conteúdo fica visível: movimento é
+   melhoria, nunca requisito.
+
+   As outras primitivas que este arquivo já teve (subir, entrar pelo
+   lado, assentar, escalonar em fila, superfície que responde ao toque)
+   saíram porque o projeto já resolve as mesmas coisas com .reveal e
+   .stagger, que o assets/main.js mantém. Duas formas de fazer a mesma
+   entrada é o problema que este arquivo existe para acabar, não para
+   duplicar. O que ficou aqui foi o vocabulário, e é ele que .reveal e
+   .stagger passaram a consumir.
+   ============================================================ */
+.mv-revela {
+  clip-path: inset(0 0 112% 0);
+  transition: clip-path var(--t-cena) var(--ease-entrada) var(--atraso, 0ms);
+}
+
+/* A segunda forma existe porque a manchete de seção não é observada
+   sozinha: quem carrega .reveal é o bloco em volta dela. Assim a
+   primitiva pega carona no observador que já roda, sem inflar a lista
+   de elementos observados.
+
+   Folga negativa nos dois lados: acento sobe acima da altura de caixa
+   alta e cedilha desce abaixo da linha de base. Com o corte em zero a
+   máscara comeria os dois. */
+.mv-revela.is-visible,
+.reveal.is-visible .mv-revela { clip-path: inset(-25% 0 -25% 0); }
+
+/* ============================================================
+   Movimento desligado
+
+   Vale para os dois caminhos: a preferência do sistema operacional e o
+   botão de pausa da página, que o assets/motion.js controla pelo
+   atributo data-motion no <html>.
+
+   A regra é mostrar o ESTADO FINAL, nunca o inicial. Esconder conteúdo
+   de quem pediu menos movimento é o pior desfecho possível, e já
+   aconteceu neste projeto: o hero ficou vazio porque o canvas parou de
+   pintar e o fallback estava escondido por uma regra :has().
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-toque: 1ms; --t-base: 1ms; --t-calmo: 1ms; --t-cena: 1ms;
+    --passo: 0ms; --desloca-y: 0px; --desloca-x: 0px;
+  }
+  .mv-revela, .reveal .mv-revela { clip-path: none; }
+}
+
+html[data-motion="paused"] {
+  --t-toque: 1ms; --t-base: 1ms; --t-calmo: 1ms; --t-cena: 1ms;
+  --passo: 0ms; --desloca-y: 0px; --desloca-x: 0px;
+}
+html[data-motion="paused"] .mv-revela,
+html[data-motion="paused"] .reveal .mv-revela { clip-path: none; }

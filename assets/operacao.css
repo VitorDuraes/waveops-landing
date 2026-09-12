@@ -1,0 +1,1040 @@
+/* ============================================================
+   WaveOps: uma operação viva
+
+   Camada visual dos blocos que contam a operação: o hero, a rede de
+   integrações, o momento de convergência, o percurso e os casos.
+
+   Regra da casa, herdada do motion-system: cada viewport tem no máximo
+   UM elemento chamando atenção. Aqui isso significa que o movimento só
+   existe onde ele explica alguma coisa. Fio parado é fio sem evento.
+
+   Carrega DEPOIS de styles.css, cinematic.css e cinema.css, então pode
+   sobrescrever sem !important. Toda cor sai de token.
+   ============================================================ */
+
+/* ============================================================
+   1. HERO: a operação rodando dentro de uma janela
+
+   A janela já existia como .flow-canvas. O que muda é o conteúdo:
+   seis nós de interface, cinco fios que só acendem quando existe um
+   evento, e um registro ao vivo embaixo, que é onde o laço de eventos
+   aparece em texto.
+   ============================================================ */
+
+/* O flutuar contínuo saiu. Ele competia com o laço de eventos pela
+   atenção, e o briefing pede um foco por viewport, não dois.
+   O --saida é escrito pelo operacao.js a cada quadro de scroll, entre
+   0 e 1: sem sequestro de scroll, o visitante rola normal e a
+   composição é que se despede. */
+.hero .flow-canvas {
+  animation: none;
+  aspect-ratio: 520 / 440;
+  background: linear-gradient(168deg, var(--surface-2), var(--surface) 62%);
+  border-color: var(--border-2);
+  box-shadow:
+    0 40px 90px -50px var(--scene-shadow),
+    0 1px 0 rgba(255, 255, 255, .04) inset;
+  transform-origin: 50% 30%;
+  transform:
+    translate3d(0, calc(var(--saida, 0) * -22px), 0)
+    scale(calc(1 - var(--saida, 0) * .055));
+  opacity: calc(1 - var(--saida, 0) * .38);
+}
+/* A copy usa --saida2, que so comeca a contar depois que 40% do hero ja
+   passou, e desbota no maximo 35%. Medido: com a curva anterior o botao
+   principal chegava a 68% de opacidade ainda dentro da tela, e o briefing
+   manda preservar a conversao. */
+.hero .hero-copy {
+  transform: translate3d(0, calc(var(--saida2, 0) * -12px), 0);
+  opacity: calc(1 - var(--saida2, 0) * .35);
+}
+
+/* ---------- Barra de título ---------- */
+.hero .flow-bar {
+  height: 44px;
+  background: color-mix(in srgb, var(--surface) 84%, transparent);
+  border-bottom-color: var(--border-2);
+}
+.hero .flow-bar .t { letter-spacing: -.01em; }
+
+/* ---------- Fios ---------- */
+/* preserveAspectRatio="none" no SVG: as coordenadas do viewBox viram
+   percentagens da caixa, então os nós posicionados em % ficam colados
+   nas pontas dos fios em qualquer proporção, inclusive no celular. */
+.hero .flow-wires path.wire {
+  stroke: var(--border-2);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+/* O fio pontilhado que corria sempre saiu junto com o flutuar. */
+.hero .flow-wires path.flow { display: none; }
+
+.hv-pulso {
+  fill: none;
+  stroke: var(--accent-strong);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  /* pathLength="100" no atributo normaliza o comprimento: o mesmo
+     traço anda igual num fio curto e num fio longo. */
+  stroke-dasharray: 9 200;
+  stroke-dashoffset: 209;
+  opacity: 0;
+  filter: drop-shadow(0 0 4px rgba(var(--glow), .8));
+}
+.hv-pulso.corre { animation: hv-pulso 1.15s cubic-bezier(.33, 0, .2, 1) both; }
+@keyframes hv-pulso {
+  0%   { stroke-dashoffset: 209; opacity: 0; }
+  14%  { opacity: 1; }
+  82%  { opacity: 1; }
+  100% { stroke-dashoffset: 109; opacity: 0; }
+}
+
+/* ---------- Nós ---------- */
+/* As posições vivem aqui, e não num atributo style, porque estilo inline
+   vence media query: sem isto o celular não conseguiria reposicionar.
+   width: max-content é o que impede o nó de encolher até a borda direita
+   do container e quebrar "CRM atualizado" em duas linhas. */
+.hero [data-no] { left: var(--x); top: var(--y); }
+.hero [data-no="lead"]   { --x: 18.85%; --y: 22.73%; }
+.hero [data-no="site"]   { --x: 18.85%; --y: 54.55%; }
+.hero [data-no="hub"]    { --x: 50.38%; --y: 38.64%; }
+.hero [data-no="crm"]    { --x: 82.31%; --y: 16.36%; }
+.hero [data-no="follow"] { --x: 82.31%; --y: 38.64%; }
+.hero [data-no="pag"]    { --x: 82.31%; --y: 60.91%; }
+
+.hero .flow-wires-mob { display: none; }
+
+.hero .fnode {
+  width: max-content;
+  min-width: 128px;
+  padding: 9px 12px;
+  background: color-mix(in srgb, var(--surface-3) 92%, transparent);
+  border-color: var(--border-2);
+  border-radius: 11px;
+  box-shadow: 0 14px 30px -20px var(--scene-shadow);
+  transition:
+    border-color var(--t-base, 320ms) var(--ease-padrao, ease),
+    box-shadow var(--t-base, 320ms) var(--ease-padrao, ease),
+    transform var(--t-base, 320ms) var(--ease-padrao, ease);
+}
+.hero .fnode .nm { font-size: 11.5px; letter-spacing: -.01em; }
+.hero .fnode .sb { font-size: 10px; letter-spacing: .01em; }
+.hero .fnode .ic { width: 25px; height: 25px; border-radius: 7px; }
+.hero .fnode .ic svg { width: 14px; height: 14px; }
+
+/* Estado aceso: só o nó do evento da vez. Dois acesos ao mesmo tempo
+   já viram enfeite, porque o olho perde a ordem da leitura. */
+.hero .fnode.aceso {
+  border-color: rgba(var(--glow), .55);
+  box-shadow: 0 0 0 1px rgba(var(--glow), .22), 0 16px 34px -18px rgba(var(--glow), .5);
+  transform: translate(-50%, -50%) translate3d(0, -2px, 0);
+}
+.hero .fnode.aceso .ic { background: rgba(var(--glow), .16); color: var(--accent-strong); }
+
+.hero .fnode.hub { min-width: 138px; }
+.hero .fnode.hub.pensando .sb::after {
+  content: "";
+  display: inline-block;
+  width: 3px; height: 3px; margin-left: 5px; border-radius: 50%;
+  background: currentColor;
+  animation: hv-pensa 1.1s steps(1, end) infinite;
+}
+@keyframes hv-pensa { 0%, 49% { opacity: 1; } 50%, 100% { opacity: .15; } }
+
+/* ---------- Registro ao vivo ---------- */
+/* É o laço de eventos em texto. Quatro linhas, a mais nova no topo,
+   as outras desbotando por profundidade. */
+.hv-registro {
+  position: absolute;
+  left: 3.2%; right: 3.2%; bottom: 3.4%;
+  height: 24.4%;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-2);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  box-shadow: 0 18px 40px -26px var(--scene-shadow);
+  overflow: hidden;
+}
+.hv-reg-topo {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 7px 11px 6px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--dim);
+  flex-shrink: 0;
+}
+/* Mini gráfico: é a casa do evento "Dashboard atualizado". Ele não
+   mostra número nenhum, só forma, porque a empresa não publica métrica. */
+.hv-mini { display: flex; align-items: flex-end; gap: 2px; height: 11px; }
+.hv-mini i {
+  width: 3px;
+  height: var(--h, 50%);
+  border-radius: 1px;
+  background: var(--border-2);
+  transform-origin: bottom;
+  transition: background var(--t-base, 320ms) var(--ease-padrao, ease);
+}
+.hv-registro.atualiza .hv-mini i {
+  background: var(--accent-strong);
+  animation: hv-barra .5s var(--ease-entrada, ease) both;
+}
+.hv-mini i:nth-child(2) { animation-delay: .05s; }
+.hv-mini i:nth-child(3) { animation-delay: .1s; }
+.hv-mini i:nth-child(4) { animation-delay: .15s; }
+.hv-mini i:nth-child(5) { animation-delay: .2s; }
+.hv-mini i:nth-child(6) { animation-delay: .25s; }
+.hv-mini i:nth-child(7) { animation-delay: .3s; }
+@keyframes hv-barra { from { transform: scaleY(.25); } to { transform: scaleY(1); } }
+
+.hv-linhas {
+  position: relative;
+  flex: 1;
+  margin: 0; padding: 0;
+  list-style: none;
+}
+.hv-linha {
+  position: absolute;
+  left: 11px; right: 11px; top: 5px;
+  display: flex; align-items: center; gap: 9px;
+  height: 21px;
+  font-size: 11px;
+  white-space: nowrap;
+  transform: translate3d(0, calc(var(--s, 0) * 21px), 0);
+  transition:
+    transform var(--t-calmo, 560ms) var(--ease-entrada, ease),
+    opacity var(--t-calmo, 560ms) var(--ease-entrada, ease);
+}
+/* A opacidade conta a idade do evento. O JS só troca o data-s. */
+.hv-linha[data-s="0"] { opacity: 1; }
+.hv-linha[data-s="1"] { opacity: .6; }
+.hv-linha[data-s="2"] { opacity: .32; }
+.hv-linha[data-s="3"] { opacity: .14; }
+/* Quadro de reciclagem: a linha volta ao topo sem transição e invisível,
+   para não desenhar um rastro atravessando o registro inteiro. */
+.hv-linha.reciclando { transition: none; opacity: 0; }
+.hv-hora {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--dim);
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+.hv-marca {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--accent-strong);
+  flex-shrink: 0;
+}
+.hv-txt {
+  color: var(--text);
+  font-weight: 500;
+  letter-spacing: -.005em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ============================================================
+   2. ENTRADA DO HERO
+
+   A ordem importa mais que a duração: o fundo, depois a interface,
+   depois a fala, e só no fim o sistema começa a rodar. Quem chega vê
+   a tela existir antes de ver ela trabalhar.
+
+   Ordem e atraso:
+     060ms  a janela da operação
+     380ms  o rótulo
+     470ms  "Sua operação,"        revelação por máscara
+     640ms  "no automático."       mesma máscara, um tempo depois
+     860ms  a descrição
+     990ms  os botões
+    1100ms  a linha de confiança
+    1600ms  o laço de eventos começa (no operacao.js)
+   ============================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  html.anim .hero-anim .hero-copy > *,
+  html.anim .hero-anim .hero-visual {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+    animation: hv-entra .72s var(--ease-entrada, ease) forwards;
+  }
+  html.anim .hero-anim .hero-visual {
+    transform: translate3d(0, 22px, 0) scale(.972);
+    animation-name: hv-entra-janela;
+    animation-duration: .9s;
+    animation-delay: .06s;
+  }
+  html.anim .hero-anim .hero-copy .eyebrow { animation-delay: .38s; }
+  html.anim .hero-anim .hero-copy .hero-sub { animation-delay: .86s; }
+  html.anim .hero-anim .hero-copy .hero-cta { animation-delay: .99s; }
+  html.anim .hero-anim .hero-copy .hero-trust { animation-delay: 1.1s; }
+
+  /* A manchete não sobe: ela é revelada por máscara, linha a linha.
+     Deslocar um título desse tamanho chama mais atenção que a frase. */
+  html.anim .hero-anim .hero-copy h1 {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+  html.anim .hero-anim .hero-copy h1 > span {
+    clip-path: inset(0 0 112% 0);
+    animation: hv-revela .9s var(--ease-entrada, ease) forwards;
+  }
+  html.anim .hero-anim .hero-copy h1 > .l1 { animation-delay: .47s; }
+  html.anim .hero-anim .hero-copy h1 > .hl { animation-delay: .64s; }
+}
+@keyframes hv-entra { to { opacity: 1; transform: none; } }
+@keyframes hv-entra-janela { to { opacity: 1; transform: none; } }
+/* Folga negativa nos dois lados: acento de "operação" sobe acima da
+   altura de caixa alta e a vírgula desce abaixo da linha de base. */
+@keyframes hv-revela { to { clip-path: inset(-28% 0 -28% 0); } }
+
+/* As duas linhas precisam ser bloco para a máscara existir. */
+.hero h1 > .l1,
+.hero h1 > .hl { display: inline-block; }
+
+/* ============================================================
+   3. REDE DE INTEGRAÇÕES
+
+   "Suas ferramentas. Agora, conectadas." deixa de ser uma esteira de
+   nomes e passa a mostrar a coisa que a frase promete: as ferramentas
+   ligadas a um centro, com um sinal viajando de uma ponta à outra.
+
+   A esteira continua no arquivo e vira a versão de celular, onde uma
+   rede de oito pontas não cabe sem virar sopa de letra.
+   ============================================================ */
+.logos {
+  padding-block: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--surface) 34%, transparent),
+    transparent 78%);
+}
+.logos .wrap {
+  display: grid;
+  grid-template-columns: minmax(240px, 320px) 1fr;
+  gap: 48px;
+  align-items: center;
+  padding-block: 56px;
+}
+.logos .lab {
+  max-width: none;
+  font-family: var(--font-display);
+  font-size: clamp(24px, 2.5vw, 34px);
+  font-weight: 500;
+  line-height: 1.14;
+  letter-spacing: -.04em;
+  color: var(--text);
+}
+.logos .lab .soft-text { color: var(--dim); display: block; }
+.rede-nota {
+  display: block;
+  margin-top: 14px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.rede {
+  position: relative;
+  width: 100%;
+  height: clamp(250px, 24vw, 330px);
+}
+.rede svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.rede path.rede-fio {
+  fill: none;
+  stroke: var(--border-2);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.rede path.rede-pulso {
+  fill: none;
+  stroke: var(--accent-strong);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 10 200;
+  stroke-dashoffset: 210;
+  opacity: 0;
+  filter: drop-shadow(0 0 4px rgba(var(--glow), .75));
+}
+.rede path.rede-pulso.corre { animation: rede-pulso 1.5s cubic-bezier(.36, 0, .18, 1) both; }
+@keyframes rede-pulso {
+  0%   { stroke-dashoffset: 210; opacity: 0; }
+  12%  { opacity: 1; }
+  84%  { opacity: 1; }
+  100% { stroke-dashoffset: 110; opacity: 0; }
+}
+
+/* O "Google " de "Google Sheets" some na tela estreita. Medido: com ele o
+   chip pede 86px de meia largura e a coluna de fora só oferece 41px em 346px
+   de rede, ou seja ele saía da tela. Sem ele a rede inteira cabe no celular,
+   e a ferramenta continua reconhecível. */
+.so-amplo { display: inline; }
+
+.rede-item {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 13px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--muted);
+  white-space: nowrap;
+  transition:
+    border-color var(--t-base, 320ms) var(--ease-padrao, ease),
+    color var(--t-base, 320ms) var(--ease-padrao, ease),
+    background var(--t-base, 320ms) var(--ease-padrao, ease);
+}
+.rede-item.aceso {
+  border-color: rgba(var(--glow), .5);
+  color: var(--text);
+  background: color-mix(in srgb, var(--surface-3) 92%, transparent);
+}
+
+/* O centro é a WaveOps. Ele fica sempre um pouco mais claro que as
+   pontas, porque é o único lugar por onde tudo passa. */
+.rede-centro {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  display: grid; place-items: center;
+  width: 78px; height: 78px;
+  border-radius: 20px;
+  border: 1px solid rgba(var(--glow), .42);
+  background:
+    radial-gradient(circle at 50% 30%, rgba(var(--glow), .2), transparent 70%),
+    var(--surface-2);
+  box-shadow: 0 0 44px -14px rgba(var(--glow), .5);
+  color: var(--accent-strong);
+}
+.rede-centro svg { width: 38px; height: 38px; }
+/* O anel responde quando o sinal chega. Sem ele o centro so recebe e
+   nunca confirma, e a rede fica com cara de mao unica. */
+.rede-centro::after {
+  content: "";
+  position: absolute;
+  inset: -9px;
+  border-radius: 26px;
+  border: 1px solid rgba(var(--glow), .16);
+}
+.rede-centro.recebe::after { animation: rede-recebe 1.1s var(--ease-saida, ease) both; }
+@keyframes rede-recebe {
+  from { transform: scale(1); border-color: rgba(var(--glow), .7); }
+  to   { transform: scale(1.36); border-color: rgba(var(--glow), 0); }
+}
+
+/* A esteira só aparece onde a rede não cabe. */
+.logos .items.marquee { display: none; grid-column: 1 / -1; }
+
+/* ============================================================
+   4. CONVERGÊNCIA: "Uma operação. Tudo conectado."
+
+   O único momento grande da página. Quatro frentes entram pela
+   esquerda como linhas separadas, encontram um centro e saem como
+   uma linha só. É a frase desenhada, não um enfeite ao lado dela.
+
+   Nada mais se mexe nesta tela. A seção existe para isso.
+   ============================================================ */
+/* O palco fica no fundo da página, entre duas seções levantadas. O momento
+   grande é o mais escuro de propósito: é assim que uma tela de cinema se
+   separa do resto da sala. */
+.conv {
+  position: relative;
+  border-block: 1px solid var(--border);
+  background:
+    radial-gradient(ellipse 70% 55% at 72% 50%, rgba(var(--glow), .09), transparent 72%),
+    var(--bg);
+  overflow: hidden;
+}
+.conv .wrap {
+  display: grid;
+  grid-template-columns: minmax(300px, 420px) 1fr;
+  gap: 56px;
+  align-items: center;
+}
+.conv-head h2 {
+  font-size: clamp(34px, 3.9vw, 52px);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -.05em;
+  margin: 18px 0 20px;
+}
+.conv-head p {
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--muted);
+  max-width: 400px;
+}
+
+.conv-palco {
+  position: relative;
+  width: 100%;
+  height: clamp(280px, 27vw, 360px);
+}
+.conv-palco svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.conv-svg-mob { display: none; }
+
+.conv-fio,
+.conv-tronco {
+  fill: none;
+  stroke: var(--border-2);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+}
+.conv-tronco { stroke: rgba(var(--glow), .45); stroke-width: 1.8; }
+
+/* O desenho só começa quando a seção entra em quadro. Antes disso a
+   linha não existe, então não há o que o visitante perca. */
+.conv-palco.is-visible .conv-fio,
+.conv-palco.is-visible .conv-tronco {
+  animation: conv-desenha 1.05s var(--ease-entrada, ease) forwards;
+}
+/* O atraso vem do atributo, nao de :nth-of-type: fio, tronco e pulso sao
+   todos <path>, entao contar por tipo acertaria o elemento errado. */
+.conv-palco.is-visible .conv-fio { animation-delay: var(--atraso, 0s); }
+.conv-palco.is-visible .conv-tronco { animation-delay: .78s; }
+@keyframes conv-desenha { to { stroke-dashoffset: 0; } }
+
+/* Quatro pulsos, um de cada frente, em rodízio. Puro CSS: o atraso de
+   cada um é um quarto do ciclo, então nunca há dois ao mesmo tempo. */
+.conv-pulso {
+  fill: none;
+  stroke: var(--accent-strong);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 11 220;
+  stroke-dashoffset: 231;
+  opacity: 0;
+  filter: drop-shadow(0 0 5px rgba(var(--glow), .8));
+}
+/* O atraso precisa estar na MESMA regra do atalho, e depois dele. O atalho
+   `animation` reseta animation-delay para 0, e como ele tem especificidade
+   maior que `.conv-palco .conv-pulso`, os quatro pulsos disparavam juntos.
+   Medido na captura: quatro traços na tela ao mesmo tempo. */
+.conv-palco.is-visible.em-cena .conv-pulso {
+  animation: conv-pulso 11.2s linear infinite;
+  animation-delay: var(--atraso, 0s);
+}
+@keyframes conv-pulso {
+  0%   { stroke-dashoffset: 231; opacity: 0; }
+  2%   { opacity: 1; }
+  20%  { opacity: 1; }
+  24%  { stroke-dashoffset: 131; opacity: 0; }
+  100% { stroke-dashoffset: 131; opacity: 0; }
+}
+
+/* O rotulo termina 14px antes do inicio da linha, que no viewBox esta em
+   19,17% da largura. Alinhado a direita, ele aponta para o proprio fio. */
+.conv-rot {
+  position: absolute;
+  left: 0;
+  top: var(--y);
+  width: calc(19.17% - 14px);
+  transform: translateY(-50%);
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--dim);
+  white-space: nowrap;
+}
+
+/* Versao de tela estreita das quatro frentes: abaixo de 720px nao sobra
+   largura a esquerda da linha, entao os nomes sobem para o texto. */
+.conv-frentes {
+  display: none;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.conv-frentes li {
+  padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.conv-hub {
+  position: absolute;
+  left: 68.3%; top: 50%;
+  transform: translate(-50%, -50%);
+  display: grid; place-items: center;
+  width: 66px; height: 66px;
+  border-radius: 18px;
+  border: 1px solid rgba(var(--glow), .45);
+  background:
+    radial-gradient(circle at 50% 25%, rgba(var(--glow), .22), transparent 72%),
+    var(--surface-2);
+  box-shadow: 0 0 40px -12px rgba(var(--glow), .55);
+  color: var(--accent-strong);
+}
+.conv-hub svg { width: 34px; height: 34px; }
+.conv-saida {
+  position: absolute;
+  right: 0; top: 50%;
+  transform: translateY(-50%);
+  padding: 9px 13px;
+  border: 1px solid rgba(var(--glow), .35);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--accent-strong);
+  white-space: nowrap;
+}
+
+/* ============================================================
+   5. PERCURSO: a linha que avança
+
+   Seis etapas, uma linha só. O preenchimento acompanha o scroll da
+   seção, e cada etapa acende quando a linha chega nela. O olho segue
+   a linha, não seis caixas piscando.
+   ============================================================ */
+#como .steps { position: relative; }
+/* Trilho e preenchimento vivem no container, não em cada etapa: uma
+   linha contínua lê como percurso, seis tracinhos leem como grade. */
+#como .steps::before,
+#como .steps::after {
+  content: "";
+  position: absolute;
+  top: 17px;
+  left: 17px;
+  right: calc(100% / 6 - 17px);
+  height: 1px;
+}
+#como .steps::before { background: var(--border-2); }
+#como .steps::after {
+  background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+  transform: scaleX(var(--percurso, 0));
+  transform-origin: left center;
+  box-shadow: 0 0 12px rgba(var(--glow), .5);
+}
+#como .step::before { display: none; }
+#como .step .num {
+  transition:
+    background var(--t-base, 320ms) var(--ease-padrao, ease),
+    border-color var(--t-base, 320ms) var(--ease-padrao, ease),
+    color var(--t-base, 320ms) var(--ease-padrao, ease);
+}
+#como .step h4,
+#como .step p {
+  transition: color var(--t-base, 320ms) var(--ease-padrao, ease);
+}
+#como .step:not(.ativo) h4 { color: var(--muted); }
+#como .step.ativo .num {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+#como .step.ativo h4 { color: var(--text); }
+
+/* ============================================================
+   6. CASOS DE USO: problema, processamento, resultado
+
+   O cartão passa a ter três tempos declarados. Antes ele misturava a
+   dor e a solução no mesmo parágrafo, e quem lê rápido não separava
+   uma coisa da outra.
+   ============================================================ */
+.cases-stage { height: clamp(440px, 46vw, 505px); }
+.case-card { width: clamp(300px, 41vw, 420px); padding: 28px; }
+.case-card .case-icon { width: 40px; height: 40px; border-radius: 11px; margin-bottom: 13px; }
+.case-card .case-icon svg { width: 20px; height: 20px; }
+/* Piso de 10,5px nos rotulos. Medido no celular: abaixo disso o olho
+   para de ler o rotulo e ele vira ruido cinza. */
+.case-card .case-label { color: var(--accent-strong); font-size: 10.5px; }
+.caso-rot {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 8px;
+}
+.caso-antes h3 {
+  font-size: clamp(18px, 1.9vw, 21px);
+  font-weight: 500;
+  line-height: 1.28;
+  letter-spacing: -.025em;
+  color: var(--muted);
+  margin: 0;
+}
+
+/* O meio é o único lugar do cartão com movimento, e ele é discreto:
+   um traço que atravessa uma vez e volta depois de uma pausa longa. */
+.caso-meio {
+  margin: 16px 0;
+  padding: 14px 0;
+  border-block: 1px solid var(--border);
+}
+.caso-trilho {
+  position: relative;
+  height: 1px;
+  margin-bottom: 12px;
+  background: var(--border-2);
+  overflow: hidden;
+}
+.caso-trilho i {
+  position: absolute;
+  inset-block: -1px;
+  left: 0;
+  width: 34%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-strong), transparent);
+  transform: translate3d(-110%, 0, 0);
+}
+.case-card.is-center .caso-trilho i { animation: caso-corre 4.4s cubic-bezier(.5, 0, .3, 1) infinite; }
+@keyframes caso-corre {
+  0%   { transform: translate3d(-110%, 0, 0); }
+  38%  { transform: translate3d(300%, 0, 0); }
+  100% { transform: translate3d(300%, 0, 0); }
+}
+.caso-como {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--muted);
+  margin: 0;
+}
+.caso-depois .caso-rot { color: var(--accent-strong); }
+.caso-depois p {
+  font-size: 15px;
+  line-height: 1.55;
+  font-weight: 500;
+  color: var(--text);
+  margin: 0;
+  flex: 1;
+}
+.case-card .case-cta { margin-top: 18px; }
+
+/* ============================================================
+   7. ACABAMENTO
+
+   Tipografia editorial, profundidade entre seções e microinterações.
+   Nada aqui chama atenção sozinho: é a camada que faz o conjunto
+   parecer caro quando o visitante não está olhando para nada em
+   particular.
+   ============================================================ */
+
+/* ---------- Profundidade entre seções ----------
+   O benchmark apontou 1,04:1 de contraste entre seções vizinhas, ou
+   seja, nenhuma: o scroll virava um bloco só e o olho perdia onde um
+   assunto terminava.
+
+   A razão de contraste da WCAG é a métrica errada para separar dois
+   fundos escuros: entre #0a0b0e e um cinza bem mais claro ela continua
+   perto de 1,07, porque no pé da escala a luminância absoluta mal se
+   move. Quem mede degrau percebido é o L* do CIE. Medido no tema
+   escuro: o fundo da página tem L* 3,03 e esta camada tem L* 6,40,
+   um degrau de 3,37. A mistura anterior dava 1,29, que o olho não via.
+
+   No tema claro a conta inverte: --surface-2 e --bg são quase o mesmo
+   branco, então a camada desce para --bg-soft, com degrau de 3,0. */
+:root { --camada: color-mix(in srgb, var(--surface-2) 70%, var(--bg)); }
+[data-theme="light"] { --camada: var(--bg-soft); }
+/* Alternância estrita a partir de "Casos de uso": uma seção levantada,
+   a seguinte no fundo da página, e assim até o rodapé. Degrau medido de
+   3,42 em L* no tema escuro e 3,34 no claro, em cada emenda. */
+#casos, #como, #publicos, #contato { background: var(--camada); }
+#pacotes, #faq { background: var(--bg); }
+#como, #publicos, #pacotes, #faq { border-block: 1px solid var(--border); }
+
+/* Grade quase invisível. Só em duas seções, e some nas bordas para
+   não virar papel de parede. */
+#como > .wrap::before,
+.conv::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 64px 64px;
+  opacity: .5;
+  mask-image: radial-gradient(ellipse 62% 58% at 50% 44%, #000, transparent 76%);
+}
+#como > .wrap { position: relative; }
+#como > .wrap > * { position: relative; }
+
+/* ---------- Tipografia editorial ---------- */
+.section-head h2,
+.conv-head h2,
+.case-card h3,
+.cta-left h2 { text-wrap: balance; }
+.section-head p, .conv-head p { text-wrap: pretty; }
+.section-head { position: relative; }
+.section-head .eyebrow { color: var(--accent-strong); }
+
+/* ---------- Microinterações ----------
+   Superfície reconhece o ponteiro, não comemora: 2px de elevação e a
+   borda acendendo. O salto de 3 e 4px que existia em quatro lugares
+   diferentes virou um valor só. */
+@media (hover: hover) {
+  .pillar:hover,
+  .pain:hover,
+  .step:hover,
+  .model-card:hover,
+  .addons-grid li:hover,
+  .tcard:hover { transform: translate3d(0, -2px, 0); }
+  .step:hover .num { transform: none; box-shadow: 0 0 0 4px rgba(var(--glow), .12); }
+
+  /* A seta do botão anda 3px: o bastante para o olho ler intenção de
+     avançar, pouco o bastante para não parecer um brinquedo. */
+  .btn svg { transition: transform var(--t-toque, 160ms) var(--ease-padrao, ease); }
+  .btn-primary:hover svg { transform: translate3d(3px, 0, 0); }
+  .explore-link:hover span { transform: translate3d(0, 3px, 0); }
+
+  /* Link de navegação: sublinhado que se desenha, em scaleX, para não
+     recalcular layout a cada quadro. */
+  .nav-links a { position: relative; }
+  .nav-links a::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: -5px;
+    height: 1px;
+    background: var(--accent-strong);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--t-base, 320ms) var(--ease-padrao, ease);
+  }
+  .nav-links a:hover::after,
+  .nav-links a:focus-visible::after { transform: scaleX(1); }
+}
+.faq-q .ico { transition: transform var(--t-base, 320ms) var(--ease-padrao, ease), color var(--t-toque, 160ms) linear; }
+.faq-item.open .faq-q .ico { color: var(--accent-strong); }
+.field input, .field select, .field textarea {
+  transition:
+    border-color var(--t-toque, 160ms) var(--ease-padrao, ease),
+    box-shadow var(--t-toque, 160ms) var(--ease-padrao, ease);
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  box-shadow: 0 0 0 3px rgba(var(--glow), .16);
+}
+
+/* ============================================================
+   8. TELAS MENORES
+
+   Desenhado para o celular, não reduzido: a composição do hero muda
+   de proporção, a rede vira esteira e o percurso vira uma linha
+   vertical, que é como um percurso se lê numa tela estreita.
+   ============================================================ */
+
+/* Notebook estreito: os nós encostam na borda se não encolherem. */
+@media (max-width: 1200px) {
+  .hero .fnode { min-width: 112px; padding: 8px 10px; gap: 7px; }
+  .hero .fnode.hub { min-width: 120px; }
+  .hero .fnode .ic { width: 22px; height: 22px; }
+  .hero .fnode .ic svg { width: 13px; height: 13px; }
+  .conv .wrap { gap: 36px; }
+}
+
+@media (max-width: 980px) {
+  .logos .wrap { grid-template-columns: 1fr; gap: 26px; padding-block: 44px; }
+  .rede { height: 260px; }
+  .conv .wrap { grid-template-columns: 1fr; gap: 32px; }
+  .conv-palco { height: 250px; }
+  /* Três colunas não formam um percurso: sem linha, a etapa acesa
+     ainda conta a ordem. */
+  #como .steps::before, #como .steps::after { display: none; }
+}
+
+/* A rede FICA no celular. Ela sumia abaixo de 900px e a esteira assumia, e aí
+   o visitante de celular via um site diferente do de desktop. O que não cabia
+   era o tamanho dos chips, não a composição: encolhendo o chip e tirando o
+   "Google" de "Google Sheets", a mesma geometria entra em 346px. */
+@media (max-width: 900px) {
+  .logos .wrap { padding-block: 34px; }
+  .logos .lab { font-size: clamp(21px, 4.4vw, 27px); }
+  .rede { height: clamp(240px, 62vw, 300px); }
+  .rede-item { padding: 6px 8px; font-size: 11px; gap: 6px; }
+  .rede-centro { width: 62px; height: 62px; border-radius: 16px; }
+  .rede-centro svg { width: 31px; height: 31px; }
+  .rede-centro::after { inset: -7px; border-radius: 21px; }
+}
+
+@media (max-width: 560px) {
+  .rede-item { padding: 5px 7px; font-size: 10px; }
+  .so-amplo { display: none; }
+  .rede-centro { width: 54px; height: 54px; border-radius: 14px; }
+  .rede-centro svg { width: 27px; height: 27px; }
+}
+
+/* Abaixo de 340px nem o chip encolhido cabe, e aí a esteira é a resposta
+   certa: ela mostra os mesmos oito nomes sem cortar nenhum. */
+@media (max-width: 339px) {
+  .rede { display: none; }
+  .logos .items.marquee { display: block; }
+}
+
+/* A janela do hero troca de composição antes do resto: em 768px a grade do
+   hero ainda é de duas colunas, então a janela fica com 372px e três colunas
+   de nós não cabem. Medido: o hub invadia o vizinho em 15px. */
+@media (max-width: 840px) {
+  /* A janela da operação fica mais alta que larga: sobra altura para
+     o registro e os nós param de se atropelar. */
+  /* 360/380 e não 400/470. Medido no Safari do iPhone 14, cuja tela visível
+     tem 664px e não os 844px nominais: com a proporção antiga a janela tinha
+     461px, nascia abaixo da dobra e o visitante via só a barra de título e
+     dois nós. */
+  /* A altura da janela é uma conta, não um palpite. A barra de título tem 38px,
+     o nó tem 47px e o registro precisa de 26px de cabeçalho mais quatro linhas
+     de 21px. Com 380px a primeira fileira nascia DENTRO da barra de título, e
+     na captura só apareciam os subtítulos: o nome do nó ficava escondido.
+     360/430 é a menor proporção em que as quatro fileiras e o registro cabem
+     com 18px entre fileiras. */
+  .hero .flow-canvas { aspect-ratio: 360 / 430; }
+  .hero .fnode { min-width: 0; padding: 7px 9px; gap: 6px; }
+  .hero .fnode .nm { font-size: 11px; }
+  .hero .fnode .sb { font-size: 10px; }
+  .hero .fnode .ic { width: 20px; height: 20px; }
+  .hero .fnode .ic svg { width: 12px; height: 12px; }
+  .hv-registro { height: 27%; left: 4%; right: 4%; bottom: 3%; }
+
+  /* Duas colunas em vez de três. Em 346px de largura, três nós de texto
+     lado a lado se sobrepõem: medido em 11px de invasão sobre o vizinho.
+     Aqui a entrada fica em cima, o cérebro no meio e as saídas embaixo. */
+  .hero .flow-wires { display: none; }
+  .hero .flow-wires-mob { display: block; }
+  .hero [data-no="lead"]   { --x: 27%; --y: 15.9%; }
+  .hero [data-no="site"]   { --x: 73%; --y: 15.9%; }
+  .hero [data-no="hub"]    { --x: 50%; --y: 31.6%; }
+  .hero [data-no="crm"]    { --x: 27%; --y: 47.3%; }
+  .hero [data-no="follow"] { --x: 73%; --y: 47.3%; }
+  .hero [data-no="pag"]    { --x: 50%; --y: 63.1%; }
+  .hero .fnode.hub { min-width: 0; }
+  .hv-linha { font-size: 11px; height: 21px; transform: translate3d(0, calc(var(--s, 0) * 21px), 0); }
+  .hero .flow-bar { height: 38px; }
+}
+
+@media (max-width: 720px) {
+  .conv .wrap { gap: 20px; }
+  /* A composição vira de lado: as linhas descem do topo em vez de entrar pela
+     esquerda, e o selo de saída fica embaixo do centro. Sem isso as quatro
+     linhas nasciam fora do quadro e o centro ficava solto num vazio. */
+  .conv-palco { height: 260px; }
+  .conv-palco > svg { display: none; }
+  .conv-palco > .conv-svg-mob { display: block; }
+  .conv-rot { display: none; }
+  .conv-frentes { display: grid; margin-bottom: 4px; }
+  .conv-hub { left: 50%; top: 56%; }
+  .conv-fio, .conv-tronco { stroke-width: 1.5; }
+  /* O selo de saída fica embaixo do centro, que é onde a linha agora termina.
+     Ao lado dele, como na tela larga, ele invadia o centro em 38px medidos. */
+  .conv-saida {
+    right: auto;
+    left: 50%;
+    top: auto;
+    bottom: 0;
+    transform: translateX(-50%);
+    font-size: 10px;
+    padding: 6px 10px;
+  }
+  .conv-hub { width: 52px; height: 52px; border-radius: 15px; }
+  .conv-hub svg { width: 27px; height: 27px; }
+  .conv-saida { font-size: 10px; padding: 7px 10px; }
+
+  /* Percurso vertical: numa tela estreita a linha do tempo desce, e
+     aí ela volta a ser uma linha só. */
+  #como .steps { grid-template-columns: 1fr; gap: 0; }
+  #como .step { padding: 0 0 26px 46px; }
+  #como .step:last-child { padding-bottom: 0; }
+  #como .step .num { top: 0; left: 0; }
+  #como .steps::before, #como .steps::after {
+    display: block;
+    top: 17px; bottom: 17px; left: 17px;
+    right: auto;
+    width: 1px; height: auto;
+  }
+  #como .steps::after {
+    background: linear-gradient(180deg, var(--accent), var(--accent-strong));
+    transform: scaleY(var(--percurso, 0));
+    transform-origin: center top;
+  }
+  #como .step h4 { margin-top: 2px; }
+
+  .caso-antes h3 { font-size: 19px; }
+  .caso-como { font-size: 13px; }
+  .caso-depois p { font-size: 14px; }
+  .caso-meio { margin: 13px 0; padding: 12px 0; }
+}
+
+/* A copy do hero aperta na tela estreita. Não é estética: no iPhone 14 a tela
+   visível do Safari tem 664px, e o bloco de texto sozinho comia 480px antes de
+   a janela começar. Cada valor aqui foi medido, não arredondado no olho. */
+@media (max-width: 720px) {
+  .hero { padding-top: 16px; }
+  .hero h1 { font-size: clamp(38px, 9.4vw, 60px); margin: 16px 0 14px; }
+  .hero-sub { line-height: 1.6; }
+  .hero-cta { margin-top: 18px; }
+  .hero-trust { margin-top: 12px; }
+  .hero-copy { padding-top: 10px; }
+}
+
+@media (max-width: 520px) {
+  .hero .flow-canvas { aspect-ratio: 340 / 418; }
+}
+
+/* Abaixo de 360px a janela precisa ser ainda mais alta em proporção, senão a
+   mesma conta estoura de novo: medido em 340px, a primeira fileira voltava
+   para dentro da barra de título e o registro ficava 12px menor que as quatro
+   linhas que ele precisa mostrar. */
+@media (max-width: 360px) {
+  .hero .flow-canvas { aspect-ratio: 340 / 470; }
+}
+
+/* ============================================================
+   9. MOVIMENTO DESLIGADO
+
+   Os dois caminhos: a preferência do sistema e o botão de pausa.
+   A regra é sempre mostrar o ESTADO FINAL. Um visitante que pediu
+   menos movimento não pode receber menos conteúdo.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .hero .flow-canvas, .hero .hero-copy { opacity: 1; transform: none; }
+  html.anim .hero-anim .hero-copy > *,
+  html.anim .hero-anim .hero-visual { opacity: 1 !important; transform: none !important; }
+  html.anim .hero-anim .hero-copy h1 > span { clip-path: none !important; }
+  .conv-fio, .conv-tronco { stroke-dashoffset: 0; }
+  .conv-pulso, .hv-pulso, .rede-pulso { opacity: 0; }
+  .caso-trilho i { transform: translate3d(-110%, 0, 0); }
+  #como .steps::after { transform: none; }
+  #como .step:not(.ativo) h4 { color: var(--text); }
+}
+
+html[data-motion="paused"] .hero .flow-canvas,
+html[data-motion="paused"] .hero .hero-copy { opacity: 1; transform: none; }
+html[data-motion="paused"] .hero h1 > span { clip-path: none; }
+html[data-motion="paused"] .conv-fio,
+html[data-motion="paused"] .conv-tronco { stroke-dashoffset: 0; }
+html[data-motion="paused"] .conv-pulso,
+html[data-motion="paused"] .hv-pulso,
+html[data-motion="paused"] .rede-pulso { opacity: 0; }
+html[data-motion="paused"] #como .steps::after { transform: none; }
+html[data-motion="paused"] #como .step:not(.ativo) h4 { color: var(--text); }

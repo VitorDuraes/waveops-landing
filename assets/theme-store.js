@@ -1,4 +1,4 @@
-/* WaveOps — single source of truth for theme/accent/font/density.
+/* WaveOps: single source of truth for theme/accent/font/density.
    Both the nav toggle and the React Tweaks panel call into this. */
 (function () {
   const KEY = 'flowops:tweaks:v1';

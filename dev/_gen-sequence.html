@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark" data-accent="violet" data-font="a" data-density="regular">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gerador de sequencia, painel de fluxo WaveOps</title>
+<!--
+  Pagina de uso interno, nao faz parte da producao.
+  Desenha o mesmo painel de fluxo do hero (index.html, .flow-canvas) num
+  estado parametrizado pela query string ?t=0..1: em t=0 quase nada esta
+  montado, em t=1 o fluxo completo esta de pe, com os fios desenhados e
+  as contas correndo. O _gen_sequence.py na raiz varre t de 0 a 1, tira
+  um print por valor e converte em WebP.
+  Importa os estilos reais do site (fonts.css, styles.css, cinematic.css)
+  para reaproveitar os tokens de cor, fonte e espacamento: nenhuma cor ou
+  fonte e inventada aqui.
+-->
+<link rel="stylesheet" href="../assets/fonts.css" />
+<link rel="stylesheet" href="../assets/styles.css" />
+<link rel="stylesheet" href="../assets/cinematic.css" />
+<style>
+  /*
+    Este bloco existe so nesta pagina geradora, nunca em producao.
+    O progresso do quadro vem inteiro do t da query string, entao toda
+    animacao por tempo de relogio do CSS original fica desligada aqui:
+    senao o instante exato do print dependeria do relogio da maquina,
+    e cada captura sairia diferente.
+  */
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 960px;
+    height: 720px;
+    overflow: hidden;
+  }
+  body {
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .flow-canvas,
+  .flow-bar .live i,
+  .flow-wires path.flow,
+  .flow-toast {
+    animation: none !important;
+  }
+  .flow-canvas {
+    width: 820px;
+    transform: none !important;
+  }
+</style>
+</head>
+<body>
+  <div class="flow-canvas" role="img" aria-label="Painel de fluxo WaveOps, quadro gerado">
+    <div class="dots-bg" aria-hidden="true"></div>
+
+    <div class="flow-bar" id="flow-bar" style="opacity: 0">
+      <span class="t"><b>waveops</b> &middot; fluxo comercial</span>
+      <span class="live"><i></i> rodando</span>
+    </div>
+
+    <svg
+      class="flow-wires"
+      viewBox="0 0 520 440"
+      preserveAspectRatio="xMidYMid meet"
+      aria-hidden="true"
+    >
+      <path class="wire" id="wire-lead-hub" style="opacity: 0" d="M88,101 C175,135 190,185 260,216" />
+      <path class="wire" id="wire-form-hub" style="opacity: 0" d="M88,343 C175,305 190,250 260,216" />
+      <path class="wire" id="wire-hub-crm" style="opacity: 0" d="M260,216 C330,185 345,130 432,106" />
+      <path class="wire" id="wire-hub-follow" style="opacity: 0" d="M260,216 C330,250 345,300 432,339" />
+
+      <path class="flow" id="flow-lead-hub" style="opacity: 0" d="M88,101 C175,135 190,185 260,216" />
+      <path class="flow" id="flow-form-hub" style="opacity: 0" d="M88,343 C175,305 190,250 260,216" />
+      <path class="flow" id="flow-hub-crm" style="opacity: 0" d="M260,216 C330,185 345,130 432,106" />
+      <path class="flow" id="flow-hub-follow" style="opacity: 0" d="M260,216 C330,250 345,300 432,339" />
+
+      <circle class="bead" id="bead-lead-hub" r="4" cx="88" cy="101" style="opacity: 0"></circle>
+      <circle class="bead" id="bead-form-hub" r="4" cx="88" cy="343" style="opacity: 0"></circle>
+      <circle class="bead" id="bead-hub-crm" r="4" cx="260" cy="216" style="opacity: 0"></circle>
+      <circle class="bead" id="bead-hub-follow" r="4" cx="260" cy="216" style="opacity: 0"></circle>
+    </svg>
+
+    <div class="fnode" id="fn-lead" style="left: 17%; top: 23%; opacity: 0">
+      <span class="ic"
+        ><svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2a10 10 0 0 0-8.7 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2z" /></svg
+      ></span>
+      <div>
+        <div class="nm">Lead novo</div>
+        <div class="sb">WhatsApp</div>
+      </div>
+    </div>
+
+    <div class="fnode" id="fn-form" style="left: 17%; top: 78%; opacity: 0">
+      <span class="ic"
+        ><svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <rect x="3" y="4" width="18" height="16" rx="2" />
+          <path d="M3 9h18M8 14h6" /></svg
+      ></span>
+      <div>
+        <div class="nm">Form do site</div>
+        <div class="sb">captura</div>
+      </div>
+    </div>
+
+    <div class="fnode hub" id="fn-hub" style="left: 50%; top: 49%; opacity: 0">
+      <span class="ic"
+        ><svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M13 2L4.5 13.5H11L9 22l9-12h-6.5L13 2z" /></svg
+      ></span>
+      <div>
+        <div class="nm">IA qualifica</div>
+        <div class="sb">score &middot; roteia</div>
+      </div>
+    </div>
+
+    <div class="fnode" id="fn-crm" style="left: 83%; top: 24%; opacity: 0">
+      <span class="ic"
+        ><svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M22 11l-3 3-1.5-1.5" /></svg
+      ></span>
+      <div>
+        <div class="nm">CRM atualizado</div>
+        <div class="sb">negócio criado</div>
+      </div>
+    </div>
+
+    <div class="fnode" id="fn-follow" style="left: 83%; top: 77%; opacity: 0">
+      <span class="ic"
+        ><svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M3 12a9 9 0 1 0 9-9" />
+          <path d="M3 4v5h5" /></svg
+      ></span>
+      <div>
+        <div class="nm">Follow-up</div>
+        <div class="sb">automático</div>
+      </div>
+    </div>
+
+    <div class="flow-toast" id="toast" style="opacity: 0">
+      <span class="ic"
+        ><svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.4"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M20 6L9 17l-5-5" /></svg
+      ></span>
+      <span><b>Venda recuperada</b><br /><span class="dim">sem ninguém clicar</span></span>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      // t vem da query string, sempre um numero entre 0 e 1.
+      var params = new URLSearchParams(location.search);
+      var t = parseFloat(params.get('t'));
+      if (!isFinite(t)) t = 0;
+      t = Math.max(0, Math.min(1, t));
+
+      // Curva suave de entrada e saida (smoothstep), em vez de linear seco.
+      function ease(inicio, fim, valor) {
+        if (valor <= inicio) return 0;
+        if (valor >= fim) return 1;
+        var p = (valor - inicio) / (fim - inicio);
+        return p * p * (3 - 2 * p);
+      }
+
+      // Linha do tempo do fluxo se montando. Cada par e [inicio, fim] em t.
+      // Ordem: os dois nos de entrada, os fios ate o hub, o hub, os fios
+      // de saida, os dois nos de saida, e por fim o toast de confirmacao.
+      var T = {
+        barra: [0, 0.06],
+        lead: [0.05, 0.17],
+        form: [0.13, 0.25],
+        fioLeadHub: [0.17, 0.35],
+        fioFormHub: [0.25, 0.43],
+        hub: [0.37, 0.49],
+        fioHubCrm: [0.49, 0.65],
+        fioHubFollow: [0.53, 0.69],
+        crm: [0.61, 0.73],
+        follow: [0.65, 0.77],
+        toast: [0.85, 0.96]
+      };
+
+      function mostrarNo(id, faixa) {
+        var el = document.getElementById(id);
+        var p = ease(faixa[0], faixa[1], t);
+        var escala = 0.72 + 0.28 * p;
+        el.style.opacity = String(p);
+        el.style.transform = 'translate(-50%, -50%) scale(' + escala.toFixed(3) + ')';
+      }
+
+      mostrarNo('fn-lead', T.lead);
+      mostrarNo('fn-form', T.form);
+      mostrarNo('fn-hub', T.hub);
+      mostrarNo('fn-crm', T.crm);
+      mostrarNo('fn-follow', T.follow);
+
+      // Cada fio se desenha do inicio ao fim via stroke-dashoffset. O tracado
+      // cinza de fundo (wire) acompanha o mesmo progresso um passo a frente,
+      // como se abrisse caminho para o fio colorido (flow). Quando o fio
+      // termina de se desenhar, uma conta passa a correr nele em loop ate o
+      // ultimo quadro, dando a sensacao de fluxo vivo em vez de estatico.
+      function desenharFio(idFio, idTraco, idConta, faixa) {
+        var fio = document.getElementById(idFio);
+        var traco = document.getElementById(idTraco);
+        var conta = document.getElementById(idConta);
+        var comprimento = fio.getTotalLength();
+        var p = ease(faixa[0], faixa[1], t);
+
+        traco.style.opacity = String(p);
+        fio.style.strokeDasharray = String(comprimento);
+        fio.style.strokeDashoffset = String(comprimento * (1 - p));
+        fio.style.opacity = String(p);
+
+        if (p < 1) {
+          conta.style.opacity = '0';
+          return;
+        }
+        var restante = 1 - faixa[1];
+        var tLocal = restante > 0 ? (t - faixa[1]) / restante : 1;
+        var loops = 5;
+        var posicao = (tLocal * loops) % 1;
+        var ponto = fio.getPointAtLength(posicao * comprimento);
+        conta.setAttribute('cx', ponto.x.toFixed(2));
+        conta.setAttribute('cy', ponto.y.toFixed(2));
+        conta.style.opacity = '1';
+      }
+
+      desenharFio('flow-lead-hub', 'wire-lead-hub', 'bead-lead-hub', T.fioLeadHub);
+      desenharFio('flow-form-hub', 'wire-form-hub', 'bead-form-hub', T.fioFormHub);
+      desenharFio('flow-hub-crm', 'wire-hub-crm', 'bead-hub-crm', T.fioHubCrm);
+      desenharFio('flow-hub-follow', 'wire-hub-follow', 'bead-hub-follow', T.fioHubFollow);
+
+      // Toast final: confirmacao que so aparece com o fluxo praticamente pronto.
+      var toastP = ease(T.toast[0], T.toast[1], t);
+      var toast = document.getElementById('toast');
+      toast.style.opacity = String(toastP);
+      toast.style.transform = 'translateX(' + (16 * (1 - toastP)).toFixed(2) + 'px)';
+
+      // Barra superior: e so o chrome do painel, aparece quase de imediato.
+      document.getElementById('flow-bar').style.opacity = String(ease(T.barra[0], T.barra[1], t));
+
+      // Sinaliza para o script de captura que o quadro ja esta pronto.
+      document.documentElement.setAttribute('data-frame-ready', '1');
+    })();
+  </script>
+</body>
+</html>

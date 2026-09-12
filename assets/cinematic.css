@@ -32,7 +32,23 @@ body { font-size: 16px; }
 .wrap { padding-inline: 48px; }
 .section { padding-block: calc(112px * var(--dscale)); }
 .section-head { max-width: 790px; margin-bottom: 52px; }
-.section-head h2 { font-size: clamp(34px, 4vw, 54px); font-weight: 500; letter-spacing: -.045em; line-height: 1.12; }
+/* Uma só altura de manchete na página. A manchete da cena (.cena-manchete em
+   assets/cinema.css) usa exatamente esta escala: quando ela era menor que o h2
+   logo acima dela, o olho lia a cena como subitem da seção, não como a seção. */
+.section-head h2 { font-size: clamp(30px, 3.9vw, 56px); font-weight: 500; letter-spacing: -.045em; line-height: 1.12; }
+
+/* A seção da cena ganha campo próprio. A página inteira era chapada (o fundo do
+   corpo contra o da seção dava 1,04:1), e sem degrau de fundo a cena começava e
+   terminava sem ninguém perceber. As duas pontas voltam para --bg para o
+   encontro com as seções vizinhas não virar uma faixa dura. */
+#servicos {
+  background: linear-gradient(
+    180deg,
+    var(--bg) 0%,
+    color-mix(in srgb, var(--accent) 18%, var(--bg)) 34%,
+    color-mix(in srgb, var(--accent) 18%, var(--bg)) 80%,
+    var(--bg) 100%);
+}
 .section-head p { font-size: 17px; max-width: 580px; line-height: 1.75; }
 .section-head.center p { margin-inline: auto; }
 .soft-text { color: var(--dim); }
@@ -274,11 +290,11 @@ html[data-motion="paused"] { scroll-behavior: auto; }
   .hero-copy .eyebrow { font-size: 8px; padding: 7px 10px; }.hero h1 { font-size: clamp(44px, 10.4vw, 69px); margin: 25px 0 21px; line-height: 1.07; }
   .hero-sub { max-width: 440px; margin-inline: auto; font-size: 14px; line-height: 1.8; }.hero-sub strong { display: inline; }
   .hero-cta { justify-content: center; margin-top: 25px; gap: 9px; }.hero-cta .btn { font-size: 11px; padding: 14px 12px; }.hero-cta .btn svg { width: 14px; height: 14px; }
-  .hero-trust { justify-content: center; font-size: 9px; margin-top: 18px; }.hero-visual { width: 100%; margin: 10px auto 0; max-width: 460px; }
+  .hero-trust { justify-content: center; font-size: 10px; margin-top: 18px; }.hero-visual { width: 100%; margin: 10px auto 0; max-width: 460px; }
   .flow-stage { height: 390px; }.scene-tag { top: 22px; }.orbit-input { top: 59px; left: 0; }.orbit-ai { right: -3px; top: 174px; }.orbit-output { bottom: 36px; left: 8%; }
-  .scene-coordinate { bottom: 9px; }.hero-bottom { height: 65px; }.explore-link { font-size: 9px; gap: 8px; }.explore-link span { width: 22px; height: 22px; }.motion-toggle { font-size: 9px; gap: 5px; }
+  .scene-coordinate { bottom: 9px; }.hero-bottom { height: 65px; }.explore-link { font-size: 10px; gap: 8px; }.explore-link span { width: 22px; height: 22px; }.motion-toggle { font-size: 10px; gap: 5px; }
   .logos { padding-block: 28px; }.logos .items { gap: 15px 23px; }.logos .chip { font-size: 14px; }.logos .chip:nth-child(2), .logos .chip:nth-child(3) { font-size: 18px; }.logos .chip:nth-child(n+7) { font-size: 12px; }
-  .section { padding-block: 65px; }.hero { padding-top: 26px; padding-bottom: 0; }.section-head { margin-bottom: 32px; }.section-head h2 { font-size: 35px; margin-top: 18px; }.section-head p { font-size: 14px; line-height: 1.75; }.eyebrow { font-size: 9px; }
+  .section { padding-block: 65px; }.hero { padding-top: 26px; padding-bottom: 0; }.section-head { margin-bottom: 32px; }.section-head h2 { font-size: 35px; margin-top: 18px; }.section-head p { font-size: 14px; line-height: 1.75; }.eyebrow { font-size: 10px; }
   .pillars { grid-template-columns: 1fr; gap: 16px; }.pillar { padding: 26px; }.service-visual { height: 160px; }.pillar h3 { font-size: 23px; }.pillar > p { font-size: 13px; }.pillar .ex span { font-size: 9px; }
   .mini-connection { width: 55px; }.mini-node { width: 60px; height: 60px; }.sat-one { left: 5%; }.sat-two { right: 12%; }.sat-three { right: 5%; }.integration-ring { width: 250px; }.ai-message { max-width: 310px; }.ai-approval { font-size: 7px; }
   .case-card h3 { font-size: 22px; }.steps { gap: 30px 22px; }.step { padding-right: 0; }.step h4 { font-size: 17px; }.step p { font-size: 12px; }

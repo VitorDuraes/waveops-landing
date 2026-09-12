@@ -119,7 +119,7 @@
     transform var(--t-base, 320ms) var(--ease-padrao, ease);
 }
 .hero .fnode .nm { font-size: 11.5px; letter-spacing: -.01em; }
-.hero .fnode .sb { font-size: 9.5px; letter-spacing: .01em; }
+.hero .fnode .sb { font-size: 10px; letter-spacing: .01em; }
 .hero .fnode .ic { width: 25px; height: 25px; border-radius: 7px; }
 .hero .fnode .ic svg { width: 14px; height: 14px; }
 
@@ -867,7 +867,10 @@
   .logos .lab { font-size: clamp(21px, 4.4vw, 27px); }
 }
 
-@media (max-width: 720px) {
+/* A janela do hero troca de composição antes do resto: em 768px a grade do
+   hero ainda é de duas colunas, então a janela fica com 372px e três colunas
+   de nós não cabem. Medido: o hub invadia o vizinho em 15px. */
+@media (max-width: 840px) {
   /* A janela da operação fica mais alta que larga: sobra altura para
      o registro e os nós param de se atropelar. */
   .hero .flow-canvas { aspect-ratio: 400 / 470; }
@@ -892,7 +895,9 @@
   .hero .fnode.hub { min-width: 0; }
   .hv-linha { font-size: 11px; height: 21px; transform: translate3d(0, calc(var(--s, 0) * 21px), 0); }
   .hero .flow-bar { height: 38px; }
+}
 
+@media (max-width: 720px) {
   .conv .wrap { gap: 26px; }
   .conv-palco { height: 200px; }
   .conv-rot { display: none; }

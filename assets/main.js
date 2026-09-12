@@ -1,4 +1,4 @@
-/* WaveOps — interactions */
+/* WaveOps: interactions */
 (function () {
   'use strict';
 
@@ -351,11 +351,24 @@
   };
   if (!motionIsPaused() && 'IntersectionObserver' in window) {
     try {
+      /* Revelar também tudo que ficou para trás. Um salto instantâneo (tecla
+         End, âncora com movimento reduzido, restauração de rolagem do
+         navegador) pula seções inteiras sem o observador notar: o elemento
+         vai de "não cruza, está abaixo" para "não cruza, está acima" dentro
+         do mesmo quadro, e nenhuma soleira é atravessada. Sem isto, quem
+         salta para o fim da página encontra tudo que passou com opacidade
+         zero. Medido: saltar para o fim deixava 8 das 9 manchetes invisíveis. */
+      const revelarAte = (alvo) => {
+        const limite = revealEls.indexOf(alvo);
+        for (let k = 0; k <= limite; k += 1) {
+          revealEls[k].classList.add('is-visible');
+          revealObserver.unobserve(revealEls[k]);
+        }
+      };
       revealObserver = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting || entry.boundingClientRect.top < 0) {
-            entry.target.classList.add('is-visible');
-            revealObserver.unobserve(entry.target);
+            revelarAte(entry.target);
           }
         });
       }, { rootMargin: '0px 0px -48px 0px', threshold: 0 });

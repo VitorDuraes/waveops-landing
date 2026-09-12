@@ -1,4 +1,4 @@
-/* WaveOps — Plausible bootstrap (SPEC-02).
+/* WaveOps: Plausible bootstrap (SPEC-02).
    Movido para arquivo proprio para a CSP poder usar script-src 'self'
    (sem 'unsafe-inline'). O script externo plausible.io processa a fila. */
 (function () {

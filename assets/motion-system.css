@@ -38,8 +38,9 @@
 
   /* ---------- Ritmo ----------
      Atraso entre irmãos numa entrada escalonada. Multiplicado por --i,
-     que cada elemento declara. Acima de 8 itens o escalonamento vira
-     espera, então a regra .em-fila trava o acúmulo. */
+     que o assets/main.js escreve em cada filho de .stagger. Acima de 8
+     itens o escalonamento vira espera, então a regra de .stagger em
+     assets/styles.css trava o acúmulo com min(). */
   --passo: 70ms;
 
   /* ---------- Deslocamentos ----------
@@ -50,121 +51,39 @@
 }
 
 /* ============================================================
-   Primitivas de entrada
+   A primitiva em uso: revelação por máscara
 
-   Todas partem do estado final e só recuam quando o elemento ainda
-   não entrou. Assim, se o JavaScript falhar ou a classe nunca chegar,
-   o conteúdo fica visível. Movimento é melhoria, nunca requisito.
+   Para manchete grande, onde deslocar o texto inteiro chama mais
+   atenção que a própria frase. O clip-path é composto pela GPU e não
+   causa recálculo de layout.
+
+   Ela parte do estado final e só recua enquanto o elemento não entrou.
+   Se o JavaScript falhar, o conteúdo fica visível: movimento é
+   melhoria, nunca requisito.
+
+   As outras primitivas que este arquivo já teve (subir, entrar pelo
+   lado, assentar, escalonar em fila, superfície que responde ao toque)
+   saíram porque o projeto já resolve as mesmas coisas com .reveal e
+   .stagger, que o assets/main.js mantém. Duas formas de fazer a mesma
+   entrada é o problema que este arquivo existe para acabar, não para
+   duplicar. O que ficou aqui foi o vocabulário, e é ele que .reveal e
+   .stagger passaram a consumir.
    ============================================================ */
-
-/* Sobe e aparece. O caso mais comum, para bloco de texto e cartão. */
-.mv-sobe {
-  opacity: 0;
-  transform: translate3d(0, var(--desloca-y), 0);
-  transition:
-    opacity var(--t-calmo) var(--ease-entrada) var(--atraso, 0ms),
-    transform var(--t-calmo) var(--ease-entrada) var(--atraso, 0ms);
-}
-
-/* Entra pelo lado. Para elemento que chega de fora da composição. */
-.mv-entra-x {
-  opacity: 0;
-  transform: translate3d(var(--desloca-x), 0, 0);
-  transition:
-    opacity var(--t-calmo) var(--ease-entrada) var(--atraso, 0ms),
-    transform var(--t-calmo) var(--ease-entrada) var(--atraso, 0ms);
-}
-
-/* Revela por máscara, sem mover. Para manchete grande, onde deslocar
-   o texto inteiro chama mais atenção que a própria frase. O clip-path
-   é composto pela GPU e não causa recálculo de layout. */
 .mv-revela {
-  clip-path: inset(0 0 110% 0);
+  clip-path: inset(0 0 112% 0);
   transition: clip-path var(--t-cena) var(--ease-entrada) var(--atraso, 0ms);
 }
 
-/* Escala discreta. O teto de 1 é proposital: cresce até o tamanho
-   natural e para. Passar de 1 e voltar é o quique que o briefing proíbe. */
-.mv-assenta {
-  opacity: 0;
-  transform: scale(.985);
-  transition:
-    opacity var(--t-calmo) var(--ease-entrada) var(--atraso, 0ms),
-    transform var(--t-calmo) var(--ease-entrada) var(--atraso, 0ms);
-}
+/* A segunda forma existe porque a manchete de seção não é observada
+   sozinha: quem carrega .reveal é o bloco em volta dela. Assim a
+   primitiva pega carona no observador que já roda, sem inflar a lista
+   de elementos observados.
 
-/* O estado de chegada é um só para todas as primitivas. Quem liga a
-   classe é o IntersectionObserver que o assets/main.js já mantém. */
-.mv-sobe.is-visible,
-.mv-entra-x.is-visible,
-.mv-assenta.is-visible {
-  opacity: 1;
-  transform: none;
-}
-.mv-revela.is-visible { clip-path: inset(0 0 -10% 0); }
-
-/* ============================================================
-   Escalonamento
-
-   O filho declara --i e herda o compasso. Trava em 8 porque a partir
-   daí o último item entra depois de meio segundo, e isso deixa de ser
-   ritmo e vira atraso percebido.
-   ============================================================ */
-.em-fila > * { --atraso: calc(var(--passo) * min(var(--i, 0), 8)); }
-
-.em-fila > *:nth-child(1)  { --i: 0; }
-.em-fila > *:nth-child(2)  { --i: 1; }
-.em-fila > *:nth-child(3)  { --i: 2; }
-.em-fila > *:nth-child(4)  { --i: 3; }
-.em-fila > *:nth-child(5)  { --i: 4; }
-.em-fila > *:nth-child(6)  { --i: 5; }
-.em-fila > *:nth-child(7)  { --i: 6; }
-.em-fila > *:nth-child(8)  { --i: 7; }
-.em-fila > *:nth-child(n+9) { --i: 8; }
-
-/* ============================================================
-   Superfícies que respondem ao toque
-
-   Profundidade leve, borda que acende. Sem sombra crescendo, sem
-   levantar 8px, sem glow. O cartão reconhece o ponteiro, não comemora.
-   ============================================================ */
-.mv-superficie {
-  transition:
-    border-color var(--t-toque) var(--ease-padrao),
-    background-color var(--t-toque) var(--ease-padrao),
-    transform var(--t-base) var(--ease-padrao);
-}
-@media (hover: hover) {
-  .mv-superficie:hover {
-    border-color: var(--border-2);
-    transform: translate3d(0, -2px, 0);
-  }
-}
-
-/* Ícone que anda dentro do botão quando o ponteiro chega. 3px, o
-   bastante para o olho notar a intenção de avançar. */
-.mv-seta { transition: transform var(--t-toque) var(--ease-padrao); }
-@media (hover: hover) {
-  .mv-empurra:hover .mv-seta { transform: translate3d(3px, 0, 0); }
-}
-
-/* Sublinhado que se desenha da esquerda para a direita. Usa scaleX em
-   vez de width para não recalcular layout a cada quadro. */
-.mv-sublinha { position: relative; }
-.mv-sublinha::after {
-  content: "";
-  position: absolute;
-  left: 0; right: 0; bottom: -2px;
-  height: 1px;
-  background: currentColor;
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform var(--t-base) var(--ease-padrao);
-}
-@media (hover: hover) {
-  .mv-sublinha:hover::after,
-  .mv-sublinha:focus-visible::after { transform: scaleX(1); }
-}
+   Folga negativa nos dois lados: acento sobe acima da altura de caixa
+   alta e cedilha desce abaixo da linha de base. Com o corte em zero a
+   máscara comeria os dois. */
+.mv-revela.is-visible,
+.reveal.is-visible .mv-revela { clip-path: inset(-25% 0 -25% 0); }
 
 /* ============================================================
    Movimento desligado
@@ -183,16 +102,12 @@
     --t-toque: 1ms; --t-base: 1ms; --t-calmo: 1ms; --t-cena: 1ms;
     --passo: 0ms; --desloca-y: 0px; --desloca-x: 0px;
   }
-  .mv-sobe, .mv-entra-x, .mv-assenta { opacity: 1; transform: none; }
-  .mv-revela { clip-path: none; }
-  .mv-superficie:hover, .mv-empurra:hover .mv-seta { transform: none; }
+  .mv-revela, .reveal .mv-revela { clip-path: none; }
 }
 
 html[data-motion="paused"] {
   --t-toque: 1ms; --t-base: 1ms; --t-calmo: 1ms; --t-cena: 1ms;
   --passo: 0ms; --desloca-y: 0px; --desloca-x: 0px;
 }
-html[data-motion="paused"] .mv-sobe,
-html[data-motion="paused"] .mv-entra-x,
-html[data-motion="paused"] .mv-assenta { opacity: 1; transform: none; }
-html[data-motion="paused"] .mv-revela { clip-path: none; }
+html[data-motion="paused"] .mv-revela,
+html[data-motion="paused"] .reveal .mv-revela { clip-path: none; }

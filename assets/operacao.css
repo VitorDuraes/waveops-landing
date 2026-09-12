@@ -377,6 +377,12 @@
   100% { stroke-dashoffset: 110; opacity: 0; }
 }
 
+/* O "Google " de "Google Sheets" some na tela estreita. Medido: com ele o
+   chip pede 86px de meia largura e a coluna de fora só oferece 41px em 346px
+   de rede, ou seja ele saía da tela. Sem ele a rede inteira cabe no celular,
+   e a ferramenta continua reconhecível. */
+.so-amplo { display: inline; }
+
 .rede-item {
   position: absolute;
   transform: translate(-50%, -50%);
@@ -858,13 +864,32 @@
   #como .steps::before, #como .steps::after { display: none; }
 }
 
+/* A rede FICA no celular. Ela sumia abaixo de 900px e a esteira assumia, e aí
+   o visitante de celular via um site diferente do de desktop. O que não cabia
+   era o tamanho dos chips, não a composição: encolhendo o chip e tirando o
+   "Google" de "Google Sheets", a mesma geometria entra em 346px. */
 @media (max-width: 900px) {
-  /* Oito pontas e um centro não cabem numa tela estreita sem virar
-     sopa de letra. Aqui a esteira volta, e ela é melhor no celular. */
-  .rede { display: none; }
-  .logos .items.marquee { display: block; }
   .logos .wrap { padding-block: 34px; }
   .logos .lab { font-size: clamp(21px, 4.4vw, 27px); }
+  .rede { height: clamp(240px, 62vw, 300px); }
+  .rede-item { padding: 6px 8px; font-size: 11px; gap: 6px; }
+  .rede-centro { width: 62px; height: 62px; border-radius: 16px; }
+  .rede-centro svg { width: 31px; height: 31px; }
+  .rede-centro::after { inset: -7px; border-radius: 21px; }
+}
+
+@media (max-width: 560px) {
+  .rede-item { padding: 5px 7px; font-size: 10px; }
+  .so-amplo { display: none; }
+  .rede-centro { width: 54px; height: 54px; border-radius: 14px; }
+  .rede-centro svg { width: 27px; height: 27px; }
+}
+
+/* Abaixo de 340px nem o chip encolhido cabe, e aí a esteira é a resposta
+   certa: ela mostra os mesmos oito nomes sem cortar nenhum. */
+@media (max-width: 339px) {
+  .rede { display: none; }
+  .logos .items.marquee { display: block; }
 }
 
 /* A janela do hero troca de composição antes do resto: em 768px a grade do
@@ -873,25 +898,35 @@
 @media (max-width: 840px) {
   /* A janela da operação fica mais alta que larga: sobra altura para
      o registro e os nós param de se atropelar. */
-  .hero .flow-canvas { aspect-ratio: 400 / 470; }
+  /* 360/380 e não 400/470. Medido no Safari do iPhone 14, cuja tela visível
+     tem 664px e não os 844px nominais: com a proporção antiga a janela tinha
+     461px, nascia abaixo da dobra e o visitante via só a barra de título e
+     dois nós. */
+  /* A altura da janela é uma conta, não um palpite. A barra de título tem 38px,
+     o nó tem 47px e o registro precisa de 26px de cabeçalho mais quatro linhas
+     de 21px. Com 380px a primeira fileira nascia DENTRO da barra de título, e
+     na captura só apareciam os subtítulos: o nome do nó ficava escondido.
+     360/430 é a menor proporção em que as quatro fileiras e o registro cabem
+     com 18px entre fileiras. */
+  .hero .flow-canvas { aspect-ratio: 360 / 430; }
   .hero .fnode { min-width: 0; padding: 7px 9px; gap: 6px; }
   .hero .fnode .nm { font-size: 11px; }
   .hero .fnode .sb { font-size: 10px; }
   .hero .fnode .ic { width: 20px; height: 20px; }
   .hero .fnode .ic svg { width: 12px; height: 12px; }
-  .hv-registro { height: 24%; left: 4%; right: 4%; bottom: 4%; }
+  .hv-registro { height: 27%; left: 4%; right: 4%; bottom: 3%; }
 
   /* Duas colunas em vez de três. Em 346px de largura, três nós de texto
      lado a lado se sobrepõem: medido em 11px de invasão sobre o vizinho.
      Aqui a entrada fica em cima, o cérebro no meio e as saídas embaixo. */
   .hero .flow-wires { display: none; }
   .hero .flow-wires-mob { display: block; }
-  .hero [data-no="lead"]   { --x: 27%; --y: 12.92%; }
-  .hero [data-no="site"]   { --x: 73%; --y: 12.92%; }
-  .hero [data-no="hub"]    { --x: 50%; --y: 31.04%; }
-  .hero [data-no="crm"]    { --x: 27%; --y: 48.96%; }
-  .hero [data-no="follow"] { --x: 73%; --y: 48.96%; }
-  .hero [data-no="pag"]    { --x: 50%; --y: 63.96%; }
+  .hero [data-no="lead"]   { --x: 27%; --y: 15.9%; }
+  .hero [data-no="site"]   { --x: 73%; --y: 15.9%; }
+  .hero [data-no="hub"]    { --x: 50%; --y: 31.6%; }
+  .hero [data-no="crm"]    { --x: 27%; --y: 47.3%; }
+  .hero [data-no="follow"] { --x: 73%; --y: 47.3%; }
+  .hero [data-no="pag"]    { --x: 50%; --y: 63.1%; }
   .hero .fnode.hub { min-width: 0; }
   .hv-linha { font-size: 11px; height: 21px; transform: translate3d(0, calc(var(--s, 0) * 21px), 0); }
   .hero .flow-bar { height: 38px; }
@@ -902,9 +937,17 @@
   .conv-palco { height: 200px; }
   .conv-rot { display: none; }
   .conv-frentes { display: grid; }
-  /* Em 342px de palco o selo de saída invadia o centro em 38px medidos.
-     A frase já está no título, então aqui ele sai e a linha segue sozinha. */
-  .conv-saida { display: none; }
+  /* O selo de saída volta, embaixo do centro em vez de ao lado dele: em 342px
+     de palco, ao lado, ele invadia o centro em 38px medidos. Embaixo ele cabe,
+     e a linha continua chegando nele. */
+  .conv-saida {
+    right: auto;
+    left: 68.3%;
+    top: 78%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    padding: 6px 10px;
+  }
   .conv-hub { width: 52px; height: 52px; border-radius: 15px; }
   .conv-hub svg { width: 27px; height: 27px; }
   .conv-saida { font-size: 10px; padding: 7px 10px; }
@@ -934,8 +977,28 @@
   .caso-meio { margin: 13px 0; padding: 12px 0; }
 }
 
+/* A copy do hero aperta na tela estreita. Não é estética: no iPhone 14 a tela
+   visível do Safari tem 664px, e o bloco de texto sozinho comia 480px antes de
+   a janela começar. Cada valor aqui foi medido, não arredondado no olho. */
+@media (max-width: 720px) {
+  .hero { padding-top: 16px; }
+  .hero h1 { font-size: clamp(38px, 9.4vw, 60px); margin: 16px 0 14px; }
+  .hero-sub { line-height: 1.6; }
+  .hero-cta { margin-top: 18px; }
+  .hero-trust { margin-top: 12px; }
+  .hero-copy { padding-top: 10px; }
+}
+
 @media (max-width: 520px) {
-  .hero .flow-canvas { aspect-ratio: 360 / 480; }
+  .hero .flow-canvas { aspect-ratio: 340 / 418; }
+}
+
+/* Abaixo de 360px a janela precisa ser ainda mais alta em proporção, senão a
+   mesma conta estoura de novo: medido em 340px, a primeira fileira voltava
+   para dentro da barra de título e o registro ficava 12px menor que as quatro
+   linhas que ele precisa mostrar. */
+@media (max-width: 360px) {
+  .hero .flow-canvas { aspect-ratio: 340 / 470; }
 }
 
 /* ============================================================

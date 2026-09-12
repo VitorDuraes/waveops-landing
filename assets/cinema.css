@@ -551,11 +551,12 @@ body {
     align-self: center;
     min-height: 320px;
   }
-  /* Margem à direita igual à da esquerda do quadro: sem ela a maquete encosta
-     na borda da tela e volta a parecer cortada, que é exatamente o efeito que
-     não pode existir no celular. Ela também tira a maquete de baixo do
-     indicador de progresso. */
-  .cine-peca-caixa { left: 0; right: clamp(20px, 6vw, 30px); width: auto; height: auto; }
+  /* A maquete SANGRA no celular também. Ela não sangrava, e aí o visitante de
+     celular via um site diferente do de desktop: o corte pela borda direita é
+     a assinatura do efeito, é ele que faz a peça parecer print de produto.
+     Quem garante que o corte não come conteúdo é a mesma faixa decorativa do
+     item 16, aqui em porcentagem, declarada no bloco do item 17. */
+  .cine-peca-caixa { left: 0; right: -14.3%; width: auto; height: auto; }
   .cine-peca-3d { transform: none; width: 100%; height: auto; }
   /* Medida maior que a do desktop de propósito: em 390px uma manchete de
      13ch quebra em cinco linhas e vira parede. 16ch põe em quatro. */
@@ -2383,7 +2384,8 @@ body {
 
    Fora daqui, no celular, não existe sangria e portanto não existe faixa.
    ============================================================ */
-@media (min-width: 768px) and (max-width: 1279px) and (max-height: 939px) {
+@media (max-width: 767px),
+       (min-width: 768px) and (max-width: 1279px) and (max-height: 939px) {
   .mk { --mk-faixa: 14.5%; }
 
   .mk-jan > .mk-topo,
@@ -2405,6 +2407,23 @@ body {
   .mk5-cabeca,
   .mk5-hero,
   .mk5-proximo { padding-right: var(--mk-faixa); }
+}
+
+/* Tela muito estreita: duas fileiras passam a quebrar.
+
+   Medido em 340px e 360px: "conversa aberta" na maquete 02 e os dois selos da
+   maquete 04 caíam no corte. Não era falta de faixa, era transbordo de flex.
+   Nas duas fileiras o último item tem margin-left: auto e o primeiro tem
+   white-space: nowrap, então quando a linha não cabe o último é empurrado para
+   fora da caixa, passando por cima do padding da faixa. Deixar a fileira
+   quebrar resolve na origem: o item desce para a segunda linha e continua
+   inteiro dentro da tela. */
+@media (max-width: 420px) {
+  .mk2-reg { flex-wrap: wrap; }
+  .mk2-reg .mk-esticar { margin-left: 0; }
+  .mk4-cabeca { flex-wrap: wrap; }
+  .mk4-cabeca h4 { white-space: normal; }
+  .mk4-selos { margin-left: 0; }
 }
 
 /* ============================================================

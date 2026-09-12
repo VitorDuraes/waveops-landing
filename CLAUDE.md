@@ -11,49 +11,32 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 WaveOps is a single institutional landing page (cinematic aesthetic, dark theme by default with a light toggle, PT-BR) for an automation/dev/AI consultancy. All copy is Brazilian Portuguese. (The repo and GitHub Pages path are still named `flowops-landing` from the old name; the live brand is WaveOps.)
 
 There is **no build step and no package manager**. The production page is plain HTML + CSS + JS.
-Since 09/09/2026 it also loads React 19 as pre-compiled ESM, vendored in `assets/vendor/` and
-served from the same origin, to run the ported Framer Starfield component in the hero. Since
-10/09/2026 a second island, the ported Framer `ImageSequence`, reuses that same vendored React to
-raspar pelo scroll a sequência de quadros de "Como funciona". This is a deliberate, user-approved
-deviation from the previous "zero runtime dependencies" property.
+De 09/09/2026 a 11/09/2026 a página carregou React 19 como ESM pré-compilado, vendorizado em
+`assets/vendor/`, só para desenhar o campo de partículas do hero. Em **11/09/2026 o starfield foi
+portado para JavaScript puro** e o React saiu do caminho crítico. **Não há React em produção.**
 
-What the page actually downloads is measured over **two import graphs**, one per
-`<script type="module">` in `index.html` (`assets/starfield-mount.mjs` and
-`assets/sequence-mount.mjs`), followed recursively through every relative specifier and stripped
-of `?v=`. The two graphs share four `assets/vendor/` modules, so the number that matters is the
-**union, counted once**, not the sum of both. Measured on 10/09/2026 with `gzip -9` over each file:
+O único `<script type="module">` do `index.html` é `assets/starfield.mjs`, e o grafo de import dele
+tem dois arquivos. Medido em 11/09/2026 com `gzip -9` sobre cada arquivo:
 
-| Module | gzip | Quando carrega |
+| Módulo | gzip | Quando carrega |
 |---|---|---|
-| `assets/vendor/react-dom-client.mjs` | 56.6 KB | sempre (import estático de `starfield-mount.mjs`) |
-| `assets/starfield.mjs` | 6.7 KB | sempre |
-| `assets/vendor/react.mjs` | 3.8 KB | sempre |
-| `assets/motion-lite.mjs` | 2.8 KB | sempre (import estático de `sequence-mount.mjs`) |
-| `assets/image-sequence.mjs` | 2.6 KB | só quando `#como` se aproxima da viewport E a tela tem 768px ou mais |
-| `assets/sequence-mount.mjs` | 2.4 KB | sempre (é o próprio `<script type="module">`) |
-| `assets/starfield-mount.mjs` | 1.1 KB | sempre (é o próprio `<script type="module">`) |
-| `assets/vendor/framer-shim.mjs` | 0.9 KB | sempre |
-| `assets/vendor/jsx-runtime.mjs` | 0.8 KB | sempre |
-| `assets/scroll-signal.mjs` | 0.6 KB | sempre |
-| **Total único (pior caso: desktop que rola até "Como funciona")** | **78.4 KB** | |
+| `assets/starfield.mjs` | 8,5 KB | sempre (é o próprio `<script type="module">`) |
+| `assets/scroll-signal.mjs` | 0,6 KB | sempre |
+| **Total do island do hero** | **9,1 KB** | |
 
-Note a coluna "quando carrega": `assets/image-sequence.mjs` é o único módulo de fato condicional.
-Todos os outros, incluindo o `sequence-mount.mjs` e o `motion-lite.mjs` que ele importa
-estaticamente, chegam para **todo visitante, desktop ou mobile**, porque o `<script>` na raiz não
-tem gate de dispositivo; o gate mora dentro do módulo, no `IntersectionObserver` e no
-`matchMedia`. Quem nunca chega em `#como`, ou está abaixo de 768px, para em **75.8 KB**: os mesmos
-78.4 KB menos `image-sequence.mjs`. O `react-dom-client.mjs` e o `jsx-runtime.mjs` que
-`sequence-mount.mjs` importa de forma dinâmica na hora de montar já estão no cache de módulos do
-navegador, carregados antes pelo starfield: o delta real de chegar em `#como` no desktop é só os
-2,6 KB do `image-sequence.mjs`.
+Somando os scripts clássicos (`analytics.js`, `meta-pixel.js`, `theme-store.js`, `motion.js`,
+`main.js`, `cinema.js`), a página baixa **22,9 KB gzip de JavaScript próprio, em 8 arquivos**.
+Antes do porte eram **84,2 KB em 13 arquivos**. A queda foi de **61,4 KB gzip**, e 61,2 KB disso
+era React.
 
-`assets/vendor/framer-motion.mjs` e `assets/vendor/emotion-is-prop-valid.mjs` (50.9 KB gzip
-juntos) continuam vendorizados e **hoje não têm nenhum consumidor**, nem em produção nem na fase 2:
-o `ImageSequence` portado usa `assets/motion-lite.mjs`, nosso `useScroll`/`useTransform`/
-`useInView` escritos à mão, que substituiu o `framer-motion` inteiro por 2,8 KB gzip. O único
-arquivo que ainda importa `framer-motion.mjs` é `dev/smoke-react.html`, que não é produção. Os dois
-arquivos ficam no repo porque regenerar depois custa mais caro que manter parado; não cite o peso
-deles como custo de página, e não assuma mais nenhum plano de consumi-los.
+Ficaram vendorizados e **sem consumidor em produção**: `assets/vendor/react-dom-client.mjs`
+(56,6 KB gzip), `assets/vendor/react.mjs` (3,8 KB), `assets/vendor/jsx-runtime.mjs` (0,8 KB),
+`assets/vendor/framer-shim.mjs` (0,9 KB), `assets/vendor/framer-motion.mjs` (48,7 KB),
+`assets/vendor/emotion-is-prop-valid.mjs` (2,2 KB) e o antigo `assets/starfield-mount.mjs`
+(1,1 KB). Quem ainda importa esses arquivos é código fora da página: `assets/sequence-mount.mjs` e
+`assets/image-sequence.mjs` (o island da sequência de "Como funciona", que o `index.html` não
+carrega hoje) e `dev/smoke-react.html`. Eles ficam no repo porque regenerar depois custa mais caro
+que manter parado. Não cite o peso deles como custo de página, e apagar é decisão do dono.
 
 **A sequência de quadros em si** (`assets/sequence/`, 48 WebP) pesa **309,1 KB** em bytes brutos,
 medido em 10/09/2026, abaixo do teto de 400 KB do plano da fase 2. Gzip não ajuda nesses arquivos
@@ -79,34 +62,41 @@ In `<head>`, in order: the CSP `<meta>` (must come first, before any resource), 
 2. `assets/analytics.js` holds the Plausible queue stub + `init()` (moved out of an inline `<script>` so the CSP can use `script-src 'self'` without `'unsafe-inline'`). Do not re-inline it.
 3. `assets/main.js` at the end of `<body>` wires all DOM interactions.
 
-After `assets/main.js`, `assets/starfield-mount.mjs` loads as `<script type="module">`. It mounts the
-`#hero-starfield` React island inside `.flow-canvas`, reads colors from the CSS tokens through
-`FlowTheme` and pauses on the `waveops:motion` event. It has no import map on purpose: every
-specifier is relative, so the CSP stays at `script-src 'self'`. If the module fails, the CSS
-`.dots-bg` fallback stays visible.
+After `assets/main.js`, `assets/starfield.mjs` loads as `<script type="module">`. It is plain
+JavaScript, no React and no framework: it creates the `<canvas>` inside `#hero-starfield`, runs the
+particle loop, reads colors from the CSS tokens through `FlowTheme` and pauses on the
+`waveops:motion` event. The module exports `criarStarfield(container, opcoes)`, which returns
+`{ definirPausa, definirCores, destruir }`, and mounts itself at the bottom of the same file. It
+has no import map on purpose: every specifier is relative, so the CSP stays at `script-src 'self'`.
+If the module fails, the CSS `.dots-bg` fallback stays visible.
 
 Four rules that the island depends on and that are easy to break:
-1. **Cache-busting reaches the sub-imports.** The `<script>` tag carries `?v=20260910` like its
-   neighbours, but a query string on the tag does not reach relative sub-imports. So the version
-   also travels in the specifiers of our own mutable modules: `./starfield.mjs?v=` in
-   `starfield-mount.mjs` and `./scroll-signal.mjs?v=` in `starfield.mjs`. The `assets/vendor/`
-   modules are version pinned and immutable in practice, so they carry no query. Bump all three
-   together.
-2. **Paused must still paint.** `buildGrid()` sets `canvas.width`, which wipes the canvas. The
-   debounced `ResizeObserver` callback therefore repaints whenever no animation loop is running
-   (`isStaticRenderer || paused || !visivel`). Without that, a visitor with
-   `prefers-reduced-motion: reduce`, or anyone pressing `#motion-toggle`, gets an empty hero: the
-   `:has()` rule in `styles.css` keeps `.dots-bg` at `opacity: 0` as long as the canvas element
-   exists, so the CSS fallback does not come back.
+1. **Cache-busting reaches the sub-imports.** The `<script>` tag carries `?v=20260911a` like its
+   neighbours, but a query string on the tag does not reach relative sub-imports. The only
+   sub-import left is `./scroll-signal.mjs?v=`, which carries the version in the specifier itself.
+   Bump both together. The `assets/vendor/` modules are no longer in the graph.
+2. **Paused must still paint.** `construirGrade()` sets `canvas.width`, which wipes the canvas. So
+   `definirPausa(true)` repaints through `desenharQuadroEstatico()`, and the debounced
+   `ResizeObserver` callback repaints whenever no animation loop is running (`pausado || !visivel`).
+   Without that, a visitor with `prefers-reduced-motion: reduce`, or anyone pressing
+   `#motion-toggle`, gets an empty hero: the `:has()` rule in `styles.css` keeps `.dots-bg` at
+   `opacity: 0` as long as the canvas element exists, so the CSS fallback does not come back.
 3. **Cursor events are listened for on `window`, not on the island.** `#hero-starfield` keeps
    `pointer-events: none` so it never steals clicks from the nodes and the wires, and
    `svg.flow-wires` covers it anyway. `pointerToLocal()` converts page coordinates to container
    coordinates through `container.getBoundingClientRect()`.
 4. **The loop stops off screen.** An `IntersectionObserver` flips `visivel`; `animate()` returns
    early when it is false and the observer restarts the loop when the hero comes back. Every
-   listener and both observers are removed in the `useEffect` cleanup.
+   listener and both observers are removed in `destruir()`.
 
-No Babel, no build step. Production React usage is limited to the vendored starfield island described above. The only remaining third-party network request is the async Plausible script, everything else (fonts, CSS, JS, and the vendored React ESM) is self-hosted. The Tweaks panel and its React/Babel CDN scripts were removed from the page; the sources now live in `dev/`.
+Uma diferença de comportamento em relação à versão React, medida e aceita: no React, mudar a prop
+`paused` derrubava o efeito inteiro e reconstruía a grade, o que ressorteava as estrelas e zerava a
+rotação delas. Agora pausar só congela o quadro. A diferença de tinta no canvas foi de 0,19%.
+
+No Babel, no build step, **no React in production**. The only remaining third-party network requests
+are the async Plausible script and the Meta Pixel; everything else (fonts, CSS, JS) is self-hosted.
+The Tweaks panel and its React/Babel CDN scripts were removed from the page; the sources now live in
+`dev/`.
 
 ### Security hardening (HTTP/CSP, fonts, anti-bot)
 - **CSP** is a `<meta http-equiv="Content-Security-Policy">` at the very top of `<head>`. If you add a third-party origin (script, font, image, or a `fetch`/`connect` target), you must add it to the matching directive or the browser blocks it. `connect-src` currently allows the n8n webhook host and `plausible.io`; `script-src` allows `plausible.io`. `style-src` keeps `'unsafe-inline'` because the HTML uses inline `style=` attributes (low risk; not worth a full refactor). `frame-ancestors`/`X-Frame-Options` only work as HTTP headers, which GitHub Pages can't set, so clickjacking protection is pending a host that allows headers.

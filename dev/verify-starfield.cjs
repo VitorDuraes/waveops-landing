@@ -15,20 +15,37 @@ const check = (nome, fn) => {
   catch (e) { console.error('  FAIL ' + nome + ': ' + e.message); process.exitCode = 1; }
 };
 
-console.log('shim do pacote framer');
-check('exporta os 4 símbolos usados pelos componentes', () => {
-  // Validação por texto: check() é síncrono, então um callback async faria o
-  // try/catch dele nunca ver a falha.
-  const src = read('assets/vendor/framer-shim.mjs');
-  for (const s of ['addPropertyControls', 'ControlType', 'RenderTarget', 'useIsStaticRenderer']) {
-    assert.ok(new RegExp('export[^\\n]*\\b' + s + '\\b').test(src), 'falta export de ' + s);
+console.log('React fora do caminho critico');
+check('o index.html carrega o starfield puro, nao o mount React', () => {
+  const html = read('index.html');
+  assert.ok(!/starfield-mount\.mjs/.test(html),
+    'o index.html ainda carrega starfield-mount.mjs, que arrasta react, react-dom-client e jsx-runtime');
+  assert.ok(/<script type="module" src="assets\/starfield\.mjs\?v=[^"]+"><\/script>/.test(html),
+    'o index.html nao carrega assets/starfield.mjs com cache-busting no ?v=');
+});
+check('nenhum modulo alcancavel pelo script importa de assets/vendor/', () => {
+  const vistos = new Set();
+  const fila = ['assets/starfield.mjs'];
+  while (fila.length) {
+    const atual = fila.shift();
+    if (vistos.has(atual)) continue;
+    vistos.add(atual);
+    assert.ok(!/^assets\/vendor\//.test(atual),
+      'o grafo de import chegou em ' + atual + ': React voltou para o caminho critico');
+    const src = read(atual);
+    const dir = path.posix.dirname(atual);
+    for (const m of src.matchAll(/from\s*['"]([^'"]+)['"]/g)) {
+      const alvo = m[1].split('?')[0];
+      if (!alvo.startsWith('.')) continue;
+      fila.push(path.posix.normalize(path.posix.join(dir, alvo)));
+    }
   }
 });
-check('RenderTarget.current não devolve o valor de canvas', () => {
-  const src = read('assets/vendor/framer-shim.mjs');
-  assert.ok(/current\s*\(\s*\)/.test(src), 'RenderTarget precisa do metodo current()');
-  assert.ok(!/current\s*\(\s*\)\s*\{\s*return\s*['"]CANVAS/.test(src),
-    'current() não pode devolver CANVAS, senão o componente renderiza o placeholder estático');
+check('nao sobrou API de React no modulo', () => {
+  const src = read('assets/starfield.mjs');
+  for (const api of ['useState', 'useEffect', 'useMemo', 'useCallback', 'useRef', '_jsx', 'createRoot']) {
+    assert.ok(!new RegExp('\\b' + api + '\\s*\\(').test(src), 'ainda chama ' + api + '()');
+  }
 });
 
 console.log('\nsinal de scroll');
@@ -79,108 +96,141 @@ console.log('\nsinal de scroll');
   console.log('\nporte do starfield');
   check('nenhum specifier bare sobrou', () => {
     const src = read('assets/starfield.mjs');
-    const bare = [...src.matchAll(/from\s*"([^".][^"]*)"/g)]
+    const bare = [...src.matchAll(/from\s*['"]([^'"]+)['"]/g)]
       .map((m) => m[1])
-      .filter((s) => !s.startsWith('.') && !s.startsWith('/'));
+      .filter((x) => !x.startsWith('.') && !x.startsWith('/'));
     assert.deepStrictEqual(bare, [], 'sobrou specifier bare: ' + bare.join(', '));
   });
-  check('canvas é transparente, não pinta fundo opaco', () => {
+  check('o sub-import mutavel leva a versao no especificador', () => {
     const src = read('assets/starfield.mjs');
-    assert.ok(!/fillRect\(0,0,s\.W,s\.H\)/.test(src), 'ainda pinta fundo opaco com fillRect');
-    assert.ok(/clearRect\(0,0,s\.W,s\.H\)/.test(src), 'falta o clearRect');
+    assert.ok(/\.\/scroll-signal\.mjs\?v=\d{8}/.test(src),
+      'o import de scroll-signal.mjs perdeu o ?v=: o ?v= do script nao alcanca sub-import relativo');
+  });
+  check('canvas e transparente, nao pinta fundo opaco', () => {
+    const src = read('assets/starfield.mjs');
+    assert.ok(!/fillRect\(0,\s*0,\s*s\.W,\s*s\.H\)/.test(src), 'ainda pinta fundo opaco com fillRect');
+    assert.ok(/clearRect\(0,\s*0,\s*s\.W,\s*s\.H\)/.test(src), 'falta o clearRect');
   });
   check('o guard de pausa vem antes de agendar o frame', () => {
     const src = read('assets/starfield.mjs');
-    const m = src.match(/function animate\(\)\{([\s\S]{0,300})/);
-    assert.ok(m, 'não achou a função animate');
+    const m = src.match(/function animate\(\)\s*\{([\s\S]{0,400})/);
+    assert.ok(m, 'nao achou a funcao animate');
     const inicio = m[1].replace(/\s+/g, '');
-    const posGuard = inicio.indexOf('if(paused)');
+    const posGuard = inicio.indexOf('if(pausado)');
     const posAgenda = inicio.indexOf('requestAnimationFrame(animate)');
-    assert.ok(posGuard >= 0, 'falta o guard de paused em animate()');
-    assert.ok(posAgenda >= 0, 'não achou o agendamento de frame em animate()');
+    assert.ok(posGuard >= 0, 'falta o guard de pausado em animate()');
+    assert.ok(posAgenda >= 0, 'nao achou o agendamento de frame em animate()');
     assert.ok(posGuard < posAgenda,
-      'o guard de paused vem DEPOIS de agendar o frame, então a pausa não interrompe o laço');
+      'o guard de pausado vem DEPOIS de agendar o frame, entao a pausa nao interrompe o laco');
   });
-  check('a energia de scroll altera de fato as partículas', () => {
+  check('a energia de scroll altera de fato as particulas', () => {
     const src = read('assets/starfield.mjs');
-    assert.ok(/createScrollSignal/.test(src), 'não importa createScrollSignal');
-    assert.ok(/scroll\.sample\(\)/.test(src), 'não amostra o scroll no laço');
-    assert.ok(/if\(scrollE>0\)\{/.test(src), 'falta o bloco condicional da energia de scroll');
-    assert.ok(/targetY-=scrollDir\*scrollPush\*scrollE/.test(src),
-      'a energia de scroll não desloca targetY, então o acoplamento é decorativo');
-    assert.ok(/alpha=Math\.min\(1,alpha\+scrollE\*/.test(src), 'a energia de scroll não acende o brilho');
+    assert.ok(/createScrollSignal/.test(src), 'nao importa createScrollSignal');
+    assert.ok(/scroll\.sample\(\)/.test(src), 'nao amostra o scroll no laco');
+    assert.ok(/if\s*\(scrollE\s*>\s*0\)/.test(src), 'falta o bloco condicional da energia de scroll');
+    assert.ok(/alvoY\s*-=\s*scrollDir\s*\*\s*scrollPush\s*\*\s*scrollE/.test(src),
+      'a energia de scroll nao desloca o alvo em Y, entao o acoplamento e decorativo');
+    assert.ok(/alfa\s*=\s*Math\.min\(1,\s*alfa\s*\+\s*scrollE\s*\*/.test(src),
+      'a energia de scroll nao acende o brilho');
   });
-  check('mantém o perfil de performance por device', () => {
+  check('mantem o perfil de performance por device', () => {
     const src = read('assets/starfield.mjs');
-    assert.ok(/getDeviceProfile/.test(src), 'o porte removeu o getDeviceProfile');
+    assert.ok(/perfilDoDispositivo/.test(src), 'o porte removeu o perfil por dispositivo');
     assert.ok(/1500/.test(src), 'perdeu o teto de 1500 pontos do mobile');
-    assert.ok(/quantAlpha/.test(src), 'perdeu a quantização de alpha, que segura o custo por frame');
-    assert.ok(/spatialGrid/.test(src), 'perdeu o hash espacial da interação de mouse');
+    assert.ok(/quantizarAlfa/.test(src), 'perdeu a quantizacao de alpha, que segura o custo por frame');
+    assert.ok(/spatialGrid/.test(src), 'perdeu o hash espacial da interacao de mouse');
+  });
+  check('a calibracao do hero continua valendo', () => {
+    const src = read('assets/starfield.mjs');
+    const esperado = {
+      gap: '16', baseRadius: '1.1', influenceRadius: '110',
+      pushStrength: '16', glowBoost: '0.38', scrollPush: '26',
+    };
+    for (const chave of Object.keys(esperado)) {
+      const m = src.match(new RegExp(chave + ':\\s*([0-9.]+),'));
+      assert.ok(m, 'nao achou ' + chave + ' na montagem');
+      assert.strictEqual(m[1], esperado[chave], chave + ' saiu de ' + esperado[chave] + ' para ' + m[1]);
+    }
+    for (const flag of ['shootingStarsEnabled', 'breatheEnabled', 'twinkleEnabled']) {
+      assert.ok(new RegExp(flag + ':\\s*true').test(src), flag + ' deixou de ser passado como true');
+    }
   });
 
-  // As três verificações abaixo nasceram do review final de branch. Elas amarram
-  // efeito, não intenção: pausa tem que sobrar pixel, cursor tem que virar
-  // deslocamento, e o laço tem que parar fora do viewport.
-  check('pausa repinta: o ResizeObserver não repinta só no renderizador estático', () => {
+  // As tres verificacoes abaixo nasceram do review final de branch. Elas amarram
+  // efeito, nao intencao: pausa tem que sobrar pixel, cursor tem que virar
+  // deslocamento, e o laco tem que parar fora do viewport.
+  check('pausa repinta: o ResizeObserver repinta quando nenhum laco esta rodando', () => {
     const src = read('assets/starfield.mjs');
-    const m = src.match(/resizeTimer=setTimeout\(\(\)=>\{([\s\S]*?)\},100\);/);
-    assert.ok(m, 'não achou o callback debounced do ResizeObserver');
+    const m = src.match(/resizeTimer\s*=\s*setTimeout\(\(\)\s*=>\s*\{([\s\S]*?)\},\s*100\);/);
+    assert.ok(m, 'nao achou o callback debounced do ResizeObserver');
     const corpo = m[1];
-    assert.ok(/buildGrid\(/.test(corpo), 'o callback não reconstrói a grade');
-    assert.ok(/drawStaticFrame\(\)/.test(corpo),
-      'o callback limpa o canvas em buildGrid e nunca repinta');
-    const guarda = corpo.match(/if\(([^)]*)\)\{drawStaticFrame\(\)/);
-    assert.ok(guarda, 'a repintura do callback não tem guard identificável');
-    let expr = guarda[1];
+    assert.ok(/construirGrade\(/.test(corpo), 'o callback nao reconstroi a grade');
+    assert.ok(/desenharQuadroEstatico\(\)/.test(corpo),
+      'o callback limpa o canvas em construirGrade e nunca repinta');
+    const guarda = corpo.match(/if\s*\(([^)]*)\)\s*desenharQuadroEstatico\(\)/);
+    assert.ok(guarda, 'a repintura do callback nao tem guard identificavel');
+    let expr = guarda[1].trim();
     if (/^[A-Za-z_$][\w$]*$/.test(expr)) {
       const decl = corpo.match(new RegExp('(?:const|let|var)\\s+' + expr + '\\s*=\\s*([^;]+);'));
-      assert.ok(decl, 'o guard "' + expr + '" não tem declaração no callback');
+      assert.ok(decl, 'o guard "' + expr + '" nao tem declaracao no callback');
       expr = decl[1];
     }
-    assert.ok(/\bpaused\b/.test(expr),
-      'a repintura ignora o estado de pausa, então pausar deixa o hero em branco: ' + expr);
+    assert.ok(/\bpausado\b/.test(expr),
+      'a repintura ignora o estado de pausa, entao pausar deixa o hero em branco: ' + expr);
+  });
+  check('pausar repinta na hora, sem esperar resize', () => {
+    const src = read('assets/starfield.mjs');
+    const m = src.match(/function definirPausa\(valor\)\s*\{([\s\S]*?)\n  \}/);
+    assert.ok(m, 'nao achou definirPausa()');
+    assert.ok(/desenharQuadroEstatico\(\)/.test(m[1]),
+      'definirPausa nao repinta, entao pausar deixa o canvas no ultimo quadro');
+    assert.ok(/cancelAnimationFrame/.test(m[1]), 'definirPausa nao cancela o quadro agendado');
   });
 
   check('cursor vira deslocamento: escuta fora do island e converte a coordenada', () => {
     const src = read('assets/starfield.mjs');
-    assert.ok(!/container\.addEventListener\("mousemove"/.test(src),
+    assert.ok(!/container\.addEventListener\(['"]mousemove/.test(src),
       'ainda escuta mousemove no container, que herda pointer-events:none e nunca dispara');
-    assert.ok(/window\.addEventListener\("mousemove"/.test(src),
-      'ninguém escuta mousemove fora do island, então a repulsão nunca roda');
-    const i0 = src.indexOf('const pointerToLocal=');
-    assert.ok(i0 >= 0, 'não achou a conversão de coordenada de página para o container');
-    const i1 = src.indexOf('const onMouseMove=', i0);
-    const corpo = src.slice(i0, i1 > i0 ? i1 : i0 + 800);
+    assert.ok(/window\.addEventListener\(['"]mousemove/.test(src),
+      'ninguem escuta mousemove fora do island, entao a repulsao nunca roda');
+    const i0 = src.indexOf('const pointerToLocal');
+    assert.ok(i0 >= 0, 'nao achou a conversao de coordenada de pagina para o conteiner');
+    const i1 = src.indexOf('const onMouseMove', i0);
+    const corpo = src.slice(i0, i1 > i0 ? i1 : i0 + 900);
     assert.ok(/container\.getBoundingClientRect\(\)/.test(corpo),
-      'a conversão não usa o getBoundingClientRect do container');
-    assert.ok(/s\.mouseX=/.test(corpo) && /s\.mouseY=/.test(corpo),
-      'a conversão não alimenta a posição do mouse no estado');
-    assert.ok(/s\.mouseInside=true/.test(corpo), 'a conversão nunca marca o cursor como dentro');
-    assert.ok(/pointerToLocal\(e\.clientX,e\.clientY\)/.test(src),
-      'o handler de mouse não chama a conversão');
+      'a conversao nao usa o getBoundingClientRect do conteiner');
+    assert.ok(/s\.mouseX\s*=/.test(corpo) && /s\.mouseY\s*=/.test(corpo),
+      'a conversao nao alimenta a posicao do mouse no estado');
+    assert.ok(/s\.mouseInside\s*=\s*true/.test(corpo), 'a conversao nunca marca o cursor como dentro');
+    assert.ok(/pointerToLocal\(e\.clientX,\s*e\.clientY\)/.test(src),
+      'o handler de mouse nao chama a conversao');
     assert.ok(/pointerToLocal\(e\.touches\[0\]\.clientX/.test(src),
-      'o handler de toque não chama a conversão');
+      'o handler de toque nao chama a conversao');
   });
 
-  check('o laço para fora do viewport e o observer é desconectado na limpeza', () => {
+  check('o laco para fora do viewport e o observer e desconectado na limpeza', () => {
     const src = read('assets/starfield.mjs');
     assert.ok(/new IntersectionObserver\(/.test(src),
-      'não usa IntersectionObserver, contra a convenção do repo');
+      'nao usa IntersectionObserver, contra a convencao do repo');
     assert.ok(/io\.observe\(container\)/.test(src),
-      'o IntersectionObserver não observa o container do island');
-    const anim = src.match(/function animate\(\)\{([\s\S]{0,300})/);
-    assert.ok(anim, 'não achou a função animate');
+      'o IntersectionObserver nao observa o conteiner do island');
+    const anim = src.match(/function animate\(\)\s*\{([\s\S]{0,400})/);
+    assert.ok(anim, 'nao achou a funcao animate');
     const inicio = anim[1].replace(/\s+/g, '');
     const posVis = inicio.indexOf('if(!visivel)');
     const posAgenda = inicio.indexOf('requestAnimationFrame(animate)');
-    assert.ok(posVis >= 0, 'animate() não checa a visibilidade, então o laço roda fora da tela');
-    assert.ok(posAgenda >= 0, 'não achou o agendamento de frame em animate()');
+    assert.ok(posVis >= 0, 'animate() nao checa a visibilidade, entao o laco roda fora da tela');
+    assert.ok(posAgenda >= 0, 'nao achou o agendamento de frame em animate()');
     assert.ok(posVis < posAgenda,
-      'a checagem de visibilidade vem DEPOIS de agendar o frame, então o laço não para');
-    const limpeza = src.match(/return\(\)=>\{[\s\S]*?\};\},\[/);
-    assert.ok(limpeza, 'não achou a limpeza do useEffect');
-    assert.ok(/io\.disconnect\(\)/.test(limpeza[0]),
-      'o IntersectionObserver não é desconectado na limpeza do efeito');
+      'a checagem de visibilidade vem DEPOIS de agendar o frame, entao o laco nao para');
+    const limpeza = src.match(/function destruir\(\)\s*\{([\s\S]*?)\n  \}/);
+    assert.ok(limpeza, 'nao achou a funcao de limpeza destruir()');
+    assert.ok(/io\.disconnect\(\)/.test(limpeza[1]), 'o IntersectionObserver nao e desconectado na limpeza');
+    assert.ok(/ro\.disconnect\(\)/.test(limpeza[1]), 'o ResizeObserver nao e desconectado na limpeza');
+    for (const ev of ['mousemove', 'touchmove', 'touchend', 'touchcancel']) {
+      assert.ok(new RegExp("removeEventListener\\('" + ev + "'").test(limpeza[1]),
+        'a limpeza nao remove o ouvinte de ' + ev);
+    }
   });
 
   console.log('\ncalibração do scroll');
@@ -201,8 +251,8 @@ console.log('\nsinal de scroll');
       'e a página roda acima de 100 fps');
   });
   check('o empurrão de scroll é forte o bastante para ser visto', () => {
-    const m = read('assets/starfield-mount.mjs').match(/scrollPush:\s*(\d+)/);
-    assert.ok(m, 'não achou scrollPush em starfield-mount.mjs');
+    const m = read('assets/starfield.mjs').match(/scrollPush:\s*(\d+)/);
+    assert.ok(m, 'não achou scrollPush em starfield.mjs');
     assert.ok(parseInt(m[1], 10) >= 24,
       'scrollPush ' + m[1] + ' é fraco: com a calibração atual o deslocamento não ' +
       'passa do ruído do twinkle');

@@ -274,7 +274,7 @@ body.lab-recorte .lab-caixa .mk {
         </li>
       </ul>
       <div class="mk1-fila-pe">
-        <span class="mk-mono">próxima execução</span>
+        <span class="mk-mono">dispara</span>
         <span class="mk-mono mk-esticar">quando chegar mensagem nova</span>
       </div>
     </div>
@@ -501,44 +501,9 @@ body.lab-recorte .lab-caixa .mk {
     </div>
 
     <div class="mk-corpo">
-      <!-- Coluna do cliente e da fonte consultada -->
-      <div class="mk4-esq">
-        <span class="mk-rotulo mk-so-amplo">Cliente</span>
-        <div class="mk-fala">
-          <span class="mk-ava">A</span>
-          <div class="mk-balao">
-            <p>Bom dia. Vocês atendem fora do horário comercial?</p>
-            <span class="mk-hora">há 3 min</span>
-          </div>
-        </div>
-        <div class="mk-fala mk-so-amplo">
-          <span class="mk-ava">A</span>
-          <div class="mk-balao">
-            <p>A maioria das mensagens chega à noite.</p>
-            <span class="mk-hora">há 2 min</span>
-          </div>
-        </div>
-
-        <div class="mk4-dados mk-so-amplo">
-          <dl>
-            <div class="mk-campo"><dt>Canal</dt><dd>WhatsApp</dd></div>
-            <div class="mk-campo"><dt>Etapa</dt><dd><span class="mk-tag">Em contato</span></dd></div>
-            <div class="mk-campo"><dt>Na fila</dt><dd>há 2 min</dd></div>
-            <div class="mk-campo"><dt>Etiqueta</dt><dd><span class="mk-tag">fora de horário</span></dd></div>
-          </dl>
-        </div>
-
-        <div class="mk4-fonte mk-so-amplo">
-          <span class="mk-rotulo">fonte: base de conhecimento</span>
-          <ul>
-            <li class="mk4-doc"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 3.5H7.8A1.8 1.8 0 0 0 6 5.3v13.4a1.8 1.8 0 0 0 1.8 1.8h8.4a1.8 1.8 0 0 0 1.8-1.8V8z"/><path d="M13.5 3.5V8H18"/></svg>Horários de atendimento</li>
-            <li class="mk4-doc"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 3.5H7.8A1.8 1.8 0 0 0 6 5.3v13.4a1.8 1.8 0 0 0 1.8 1.8h8.4a1.8 1.8 0 0 0 1.8-1.8V8z"/><path d="M13.5 3.5V8H18"/></svg>Perguntas frequentes</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Coluna do rascunho e da aprovação -->
-      <div class="mk4-dir">
+      <!-- Coluna da resposta da IA e da aprovação: a prova do painel,
+                                 por isso vem primeiro e fica longe do corte. -->
+      <div class="mk4-resposta">
         <span class="mk-rotulo mk-so-amplo">Resposta</span>
 
         <div class="mk4-rascunho">
@@ -578,6 +543,42 @@ body.lab-recorte .lab-caixa .mk {
           <span class="mk-rotulo">Agente</span>
           <span class="mk-chip">escopo: dúvidas frequentes</span>
           <span class="mk-chip mk-chip-acento">saída: revisão humana</span>
+        </div>
+      </div>
+
+      <!-- Coluna do cliente: contexto. É ela que a tela corta. -->
+      <div class="mk4-cliente">
+        <span class="mk-rotulo mk-so-amplo">Cliente</span>
+        <div class="mk-fala">
+          <span class="mk-ava">A</span>
+          <div class="mk-balao">
+            <p>Bom dia. Vocês atendem fora do horário comercial?</p>
+            <span class="mk-hora">há 3 min</span>
+          </div>
+        </div>
+        <div class="mk-fala mk-so-amplo">
+          <span class="mk-ava">A</span>
+          <div class="mk-balao">
+            <p>A maioria das mensagens chega à noite.</p>
+            <span class="mk-hora">há 2 min</span>
+          </div>
+        </div>
+
+        <div class="mk4-dados mk-so-amplo">
+          <dl>
+            <div class="mk-campo"><dt>Canal</dt><dd>WhatsApp</dd></div>
+            <div class="mk-campo"><dt>Etapa</dt><dd><span class="mk-tag">Em contato</span></dd></div>
+            <div class="mk-campo"><dt>Na fila</dt><dd>há 2 min</dd></div>
+            <div class="mk-campo"><dt>Etiqueta</dt><dd><span class="mk-tag">fora de horário</span></dd></div>
+          </dl>
+        </div>
+
+        <div class="mk4-fonte mk-so-amplo">
+          <span class="mk-rotulo">fonte: base de conhecimento</span>
+          <ul>
+            <li class="mk4-doc"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 3.5H7.8A1.8 1.8 0 0 0 6 5.3v13.4a1.8 1.8 0 0 0 1.8 1.8h8.4a1.8 1.8 0 0 0 1.8-1.8V8z"/><path d="M13.5 3.5V8H18"/></svg>Horários de atendimento</li>
+            <li class="mk4-doc"><svg class="mk-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 3.5H7.8A1.8 1.8 0 0 0 6 5.3v13.4a1.8 1.8 0 0 0 1.8 1.8h8.4a1.8 1.8 0 0 0 1.8-1.8V8z"/><path d="M13.5 3.5V8H18"/></svg>Perguntas frequentes</li>
+          </ul>
         </div>
       </div>
     </div>

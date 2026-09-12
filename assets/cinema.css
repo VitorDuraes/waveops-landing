@@ -192,7 +192,14 @@ body {
   z-index: 2;
   height: 100%;
   display: grid;
-  grid-template-columns: minmax(0, 1.04fr) minmax(0, .96fr);
+  /* A peça leva 60% da largura útil, não 48%. A conta é da sangria: a maquete
+     tem 64em fixos, e para o corte ficar em 8em é a coluna dela que precisa ter
+     56em. Com 48% isso só acontecia acima de 1570px, e abaixo disso a trava
+     abria um corte de até 33% que comia rótulo, carimbo de hora e frase. Com
+     60% a conta fecha a partir de 1280px. O texto perde largura e ganha uma
+     linha de manchete, que é o preço certo: manchete quebrada continua legível,
+     texto de produto cortado pela metade não. */
+  grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
   align-items: center;
   column-gap: clamp(24px, 4vw, 64px);
   /* Padding generoso no conteúdo, zero na direita: é por ali que a peça sai. */
@@ -284,34 +291,37 @@ body {
      Toda a escala vem de --mk-fs, e como cada medida interna está em em, mudar
      essa única variável redimensiona a maquete inteira sem perder nitidez;
 
-   . a sangria é declarada, não herdada do acaso. 16.6em de 64em é 26% fora do
-     quadro, com os 47.4em da coluna segura da esquerda inteiros dentro da tela.
-     É essa conta que garante que o conteúdo que importa nunca caia no corte.
+   . a sangria é declarada, não herdada do acaso. São 8em de 64em, 12,5% fora do
+     quadro, e a faixa sacrificada é maior que a sangria de propósito: --mk-faixa
+     reserva 8.5em à direita de toda maquete como ZONA DECORATIVA. Ali só entram
+     borda, chapa, gradiente, sombra e continuação de coluna. Rótulo, carimbo de
+     hora e frase param antes. Medido em 1280, 1440, 1920 e 2560: nenhum
+     elemento de texto das maquetes cai no corte.
    ============================================================ */
 .cine-peca {
   position: relative;
   align-self: stretch;
 
-  /* Piso de escala. 12.5px de base põe o menor texto da maquete em 11.5px, e
-     nenhuma faixa de janela desce disso: a trava do right acima resolve a
+  /* Piso de escala. 12.5px de base põe o menor texto da maquete em 11.46px, e
+     nenhuma faixa de janela desce disso: a trava do right abaixo resolve a
      largura cortando a composição, que é o que pode ser sacrificado. */
   --mk-fs: 12.5px;
   --peca-w: 64em;
   --peca-h: 38em;
-  --peca-sangra: 16.6em;
+  --peca-sangra: 8em;
 }
 
 .cine-peca-caixa {
   position: absolute;
   top: 50%;
-  /* Duas regras numa linha. A primeira é a sangria de projeto: 16.6em de 64em,
-     26% fora do quadro. A segunda é a trava: 100% é a largura da coluna da
+  /* Duas regras numa linha. A primeira é a sangria de projeto: 8em de 64em,
+     12,5% fora do quadro. A segunda é a trava: 100% é a largura da coluna da
      peça, então calc(100% - 64em) é o recuo máximo que ainda deixa a borda
-     esquerda da maquete dentro da coluda. min() pega o que sangra mais, e o
+     esquerda da maquete dentro da coluna. min() pega o que sangra mais, e o
      resultado é que em janela estreita o corte cresce sozinho em vez de a
-     maquete avançar por cima da manchete. É isso que permite manter --mk-fs
-     alto em qualquer largura: quem cede é a composição, nunca o corpo do
-     texto. */
+     maquete avançar por cima da manchete. A faixa decorativa de 8.5em cobre
+     esse crescimento: medido de 768px a 2560px, a trava só passa de 8em em
+     1280px, e lá ela para em 8.1em, ainda dentro da faixa. */
   right: min(calc(-1 * var(--peca-sangra)), calc(100% - var(--peca-w)));
   width: var(--peca-w);
   height: var(--peca-h);
@@ -339,18 +349,42 @@ body {
 /* Escala por faixa de janela. A maquete tem largura fixa em em, então quem
    manda no tamanho é --mk-fs. Em janela estreita a coluna da peça encolhe e a
    maquete precisa encolher junto, senão ela invade a manchete, que é o
-   conteúdo. */
-@media (min-width: 1280px) { .cine-peca { --mk-fs: 13px; } }
-@media (min-width: 1600px) { .cine-peca { --mk-fs: 14px; } .cine-manchete { font-size: clamp(72px, 4.6vw, 86px); } }
+   conteúdo.
 
-/* ---------- Janela estreita E baixa: a peça entra inteira ao lado do texto ----------
-   Aqui a maquete já está em pilha (item 17). Pilha cortada pela borda ficaria
-   com os cartões fatiados ao meio, que lê como defeito e não como print. Então
-   nesta faixa, e só nela, a peça não sangra: ela entra inteira na coluna. */
-@media (min-width: 768px) and (max-width: 1099px) and (max-height: 939px) {
+   O degrau de 13px subiu de 1280px para 1440px: em 1280px a coluna da peça tem
+   699px e a maquete de 64em precisa caber ali com no máximo 8.1em de sangria.
+   Com 13px ela pediria 832px e a trava abriria um corte de 10em, que comeria
+   texto. Com 12.5px ela pede 800px e o corte para em 8.1em. */
+@media (min-width: 1440px) { .cine-peca { --mk-fs: 13px; } }
+@media (min-width: 1600px) { .cine-peca { --mk-fs: 14px; } .cine-manchete { font-size: clamp(72px, 4.6vw, 86px); } }
+/* Acima de 1800px a coluna da peça já sobra: a maquete de 64em cabe com o corte
+   de 8em mesmo com a divisão original de 48%. Devolver a largura ao texto aqui
+   fecha o vão entre a última letra da manchete e a borda esquerda da maquete,
+   que em 1920px cai de 274px para 133px. */
+@media (min-width: 1800px) { .cine-quadro { grid-template-columns: minmax(0, .96fr) minmax(0, 1.04fr); } }
+/* Monitor grande: a maquete cresce junto em vez de boiar no meio da coluna. A
+   trava de altura existe porque 38em a 16px dá 608px, e em janela baixa isso
+   não caberia entre as margens do painel. */
+@media (min-width: 2000px) and (min-height: 900px) { .cine-peca { --mk-fs: 16px; } }
+/* Tablet em pé e estreito: em 768px a coluna única tem 684px e a maquete de
+   64em a 12.5px pediria 800px, o que abriria 9.3em de corte. 12.2px fecha a
+   conta em 8em e mantém o menor texto em 11.19px, acima do piso de 11px. */
+@media (max-width: 830px) and (min-height: 940px) { .cine-peca { --mk-fs: 12.2px; } }
+
+/* ---------- Janela estreita E baixa: a peça em pilha, sangrando ----------
+   Aqui a maquete já está em pilha (item 17). A pilha também sangra, senão o
+   efeito sumiria justo na faixa de tablet deitado e de janela de desktop não
+   maximizada. O que muda em relação ao desktop é a unidade: a caixa é ancorada
+   nos dois lados, então o -14.3% do right resolve sobre a largura da coluna e
+   devolve exatamente 12,5% da maquete fora do quadro, em qualquer largura.
+
+   Os cartões não ficam fatiados ao meio porque o item 17 reserva a mesma faixa
+   decorativa, em porcentagem: o conteúdo para antes, e o que o corte pega é
+   chapa, borda e sombra. */
+@media (min-width: 768px) and (max-width: 1279px) and (max-height: 939px) {
   .cine-peca-caixa {
     left: 0;
-    right: clamp(12px, 1.6vw, 26px);
+    right: -14.3%;
     width: auto;
     height: auto;
   }
@@ -358,37 +392,40 @@ body {
 }
 
 /* ---------- Coluna única: tablet em pé ----------
-   Entre 768px e 1099px a coluna da peça fica com menos de 500px, e nessa
-   largura a maquete de 64em só caberia cortada quase pela metade. Com altura
-   de sobra, o painel troca de eixo: manchete em cima, maquete inteira embaixo,
-   ancorada à esquerda e saindo pela direita só o que não couber.
+   Abaixo de 1280px a coluna da peça fica com menos de 700px, e nessa largura a
+   maquete de 64em só caberia cortada em um terço. Com altura de sobra, o painel
+   troca de eixo: manchete em cima, maquete embaixo, ocupando a linha inteira e
+   saindo pela direita a mesma sangria de 12,5% do desktop.
 
    O corte de 940px de altura não é estética, é conta: texto mais maquete mais
    respiro dá cerca de 895px, então abaixo disso a coluna única estouraria o
    painel e a maquete apareceria cortada em cima e embaixo. Janela estreita e
-   baixa continua em duas colunas, com a composição cortada pela trava do
-   right. */
-@media (max-width: 1099px) and (min-height: 940px) {
+   baixa continua em duas colunas, com a maquete em pilha. */
+@media (max-width: 1279px) and (min-height: 940px) {
   .cine-quadro {
     grid-template-columns: minmax(0, 1fr);
     align-content: center;
     row-gap: clamp(20px, 3vh, 34px);
-    padding: clamp(30px, 4vh, 56px) clamp(24px, 4vw, 44px) clamp(30px, 4vh, 56px) clamp(52px, 7vw, 78px);
+    /* Zero na direita, igual ao desktop, porque é por ali que a peça sai. Com
+       padding aqui a sangria de 8em virava 59px de fato em 1024px: o recuo do
+       quadro comia metade do corte e o efeito ficava abaixo do mínimo. O
+       respiro da direita passou para o texto, que é quem precisa dele. */
+    padding: clamp(30px, 4vh, 56px) 0 clamp(30px, 4vh, 56px) clamp(52px, 7vw, 78px);
   }
-  .cine-texto { padding-right: 0; }
+  .cine-texto { padding-right: clamp(24px, 4vw, 44px); }
   .cine-manchete { font-size: clamp(34px, 5.6vw, 52px); max-width: 17ch; }
   .cine-peca {
     align-self: center;
     min-height: calc(38 * var(--mk-fs));
   }
-  /* Ancorada à esquerda: em coluna única o texto começa na esquerda e a
-     maquete continua dali, saindo pela direita só quando não cabe. */
-  .cine-peca-caixa { left: 0; right: auto; }
-  /* Origem à esquerda para acompanhar a âncora: a borda próxima passa a ser a
-     direita, que é a que sai de quadro, igual ao desktop. */
+  /* Ancorada à direita, como no desktop. Ancorar à esquerda deixava a sangria
+     ao acaso da largura: em 820px sobravam 4,7% fora do quadro e o efeito
+     sumia, em 1024px a maquete entrava inteira e não sangrava nada. Com a
+     âncora na direita a regra geral vale aqui também, e a sangria é sempre os
+     mesmos 8em. */
   .cine-peca-3d {
     transform: perspective(2400px) rotateY(-7deg) rotateX(2deg);
-    transform-origin: 0 50%;
+    transform-origin: 100% 50%;
   }
 }
 
@@ -552,6 +589,22 @@ body {
   position: relative;
   width: 100%;
 
+  /* ---------- Faixa decorativa da direita ----------
+     A maquete sangra pela borda direita da tela, e o corte não pode comer
+     conteúdo. --mk-faixa é a largura reservada na ponta direita de toda
+     superfície que atravessa o corte. Dentro dela só pode existir chapa,
+     borda, gradiente, sombra e continuação de coluna. Rótulo, carimbo de hora,
+     chip e frase param antes dela, empurrados por padding-right.
+
+     O valor é maior que a sangria de propósito: 8.5em contra 8em de corte. A
+     folga de meio em absorve o arredondamento do navegador e o 0.1em que a
+     trava do right acrescenta em 1280px.
+
+     Na pilha do item 17 a unidade vira porcentagem, porque ali a maquete não
+     tem largura fixa em em: a caixa é ancorada nos dois lados e cresce com a
+     coluna. 14.5% cobre os 12,5% de sangria com a mesma folga. */
+  --mk-faixa: 8.5em;
+
   /* Hierarquia de tinta. Deriva dos tokens do projeto em vez de inventar
      opacidade nova: --muted e --dim já foram calibrados para os dois temas. */
   --mk-t2: var(--muted);
@@ -648,6 +701,11 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Barra de título não quebra linha. A altura dela é fixa, então uma etiqueta em
+   duas linhas transborda e o chip do lado sobe. Só apareceu depois que a faixa
+   decorativa estreitou a barra da fila da maquete 01. */
+.mk-topo > .mk-rotulo { white-space: nowrap; }
 
 /* Empurra o que vem depois para a direita da barra. */
 .mk-esticar { margin-left: auto; }
@@ -1529,19 +1587,25 @@ body {
    A IA escreve, o humano aprova. O selo troca de "rascunho da IA" para
    "aprovado por Ana" dentro do laço, e o estado parado é o aprovado: é a
    assinatura humana que a peça precisa afirmar.
+
+   Ordem das colunas: a RESPOSTA vem primeiro, o CLIENTE depois. A inversão é
+   deliberada e é a correção de um defeito: com o cliente à esquerda, a tela
+   cortava justamente a resposta sugerida pela IA, que é a prova do painel. Os
+   nomes das classes dizem o papel, não o lado, para a ordem poder mudar de novo
+   sem o CSS virar mentira.
    ============================================================ */
 .mk-agente { display: grid; }
 
 .mk4-app .mk-corpo { padding: 0; gap: 0; flex-direction: row; }
 
-.mk4-esq {
+.mk4-cliente {
   flex: none;
-  width: 22.5em;
+  width: 27em;
   display: flex;
   flex-direction: column;
   gap: .75em;
   padding: .92em;
-  border-right: 1px solid var(--mk-l1);
+  border-left: 1px solid var(--mk-l1);
   background: color-mix(in srgb, var(--mk-chapa-2) 55%, var(--mk-chapa));
 }
 
@@ -1568,7 +1632,7 @@ body {
 }
 .mk4-doc .mk-ico { width: .92em; height: .92em; color: var(--mk-t3); }
 
-.mk4-dir {
+.mk4-resposta {
   flex: 1;
   min-width: 0;
   display: flex;
@@ -2057,15 +2121,19 @@ body {
    profundidades diferentes. É essa versão que atravessa a borda direita da tela.
 
    A condição tem duas pernas porque a peça precisa de LARGURA VISÍVEL, e a
-   largura visível depende da altura: acima de 1100px ela existe nas duas
-   colunas; entre 768px e 1099px ela só existe quando a janela é alta o
+   largura visível depende da altura: acima de 1280px ela existe nas duas
+   colunas; entre 768px e 1279px ela só existe quando a janela é alta o
    bastante para o painel virar coluna única. Janela estreita e baixa cai na
    pilha do item 17, e o motivo está lá.
 
-   Coluna segura: os primeiros 47.4em. O que estiver depois disso é
-   sacrificável, porque é a parte que a tela corta.
+   COLUNA SEGURA: os primeiros 55.5em. Os 8.5em finais são a faixa decorativa
+   (--mk-faixa): a tela corta ali, e ali só pode existir chapa, borda, gradiente,
+   sombra e continuação de coluna. Toda superfície que atravessa 55.5em empurra
+   o próprio conteúdo para dentro com padding-right: var(--mk-faixa). É por isso
+   que várias janelas abaixo ficaram MAIS largas: elas continuam sangrando, mas
+   o texto delas para antes do corte.
    ============================================================ */
-@media (min-width: 1100px), (min-width: 768px) and (min-height: 940px) {
+@media (min-width: 1280px), (min-width: 768px) and (min-height: 940px) {
   .mk {
     width: 64em;
     height: 38em;
@@ -2073,37 +2141,73 @@ body {
   }
   .mk-jan { position: absolute; }
 
-  /* ---------- 01 ---------- */
+  /* ---------- 01 ----------
+     O CRM e a fila cresceram para a direita e devolveram a diferença em
+     padding. Assim as duas continuam atravessando a borda da tela, mas o que
+     atravessa é a chapa delas, não o carimbo "agora" nem a linha da próxima
+     execução. */
   .mk1-conversa { z-index: 2; left: 0;    top: 4em;   width: 31em; height: 30em; }
-  .mk1-crm      { z-index: 1; left: 33em; top: 1.5em; width: 22em; height: 14.5em; }
-  .mk1-fila     { z-index: 3; left: 33em; top: 19em;  width: 28em; height: 15em; }
+  .mk1-crm      { z-index: 1; left: 33em; top: 1.5em; width: 24em; height: 14.5em; }
+  .mk1-fila     { z-index: 3; left: 33em; top: 19em;  width: 29em; height: 15em; }
+  /* O subtraendo é a distância entre a borda direita da janela e os 64em da
+     tela: 64 menos 57 no CRM, 64 menos 62 na fila. O que sobra é exatamente o
+     recuo que põe o conteúdo antes dos 55.5em. */
+  .mk1-crm  > .mk-topo, .mk1-crm  > .mk-corpo { padding-right: calc(var(--mk-faixa) - 7em); }
+  .mk1-fila > .mk-topo, .mk1-fila > .mk-corpo { padding-right: calc(var(--mk-faixa) - 2em); }
 
-  /* ---------- 02 ---------- */
+  /* ---------- 02 ----------
+     Pagamento e WhatsApp são as duas janelas que encostam no corte. Elas
+     mantêm posição e largura, para os fios não precisarem ser redesenhados, e
+     recuam só o conteúdo. */
   .mk-integra .mk2-jan { animation: mk-flutuar 9s ease-in-out infinite; animation-delay: var(--atraso, 0s); }
   .mk2-site { z-index: 2; left: 0;      top: 1em;    width: 21em; height: 13.5em; }
   .mk2-crm  { z-index: 2; left: 8.5em;  top: 17.5em; width: 25em; height: 18.5em; }
   .mk2-pag  { z-index: 3; left: 36em;   top: 2em;    width: 22em; height: 14.5em; }
-  .mk2-zap  { z-index: 4; left: 38.5em; top: 20.5em; width: 23em; height: 13.5em; }
+  .mk2-zap  { z-index: 4; left: 36.5em; top: 20.5em; width: 24.5em; height: 13.5em; }
+  .mk2-pag > .mk-topo, .mk2-pag > .mk-corpo { padding-right: calc(var(--mk-faixa) - 6em); }
+  .mk2-zap > .mk-topo, .mk2-zap > .mk-corpo { padding-right: calc(var(--mk-faixa) - 3em); }
 
   .mk2-fio { display: block; z-index: 1; }
   /* Cada fio é uma linha reta girada. O pacote anda só em translateX, então ele
      segue o fio sem o navegador precisar de path nem de layout por quadro. */
   .mk2-fio-a { left: 9.5em;  top: 14.5em; width: 6.7em; --fio-w: 6.7em; transform: rotate(26.6deg); }
   .mk2-fio-b { left: 30em;   top: 17.5em; width: 7.6em; --fio-w: 7.6em; transform: rotate(-7.6deg); }
-  .mk2-fio-c { left: 33.5em; top: 27em;   width: 5.1em; --fio-w: 5.1em; transform: rotate(-11.3deg); }
+  .mk2-fio-c { left: 33.5em; top: 27em;   width: 3.1em; --fio-w: 3.1em; transform: rotate(-11.3deg); }
 
   .mk2-tempo { display: inline-flex; left: 27.5em; top: 14.8em; }
 
-  /* ---------- 03 ---------- */
+  /* ---------- 03 ----------
+     A trilha da direita era 16em e ficava inteira depois do corte: "Fila de
+     hoje" e os seis itens estavam 100% fora da tela. Agora ela tem 24em, e os
+     8.5em finais são a faixa: os cartões da fila continuam atravessando a borda,
+     o texto deles para antes. A área principal cede a largura, e cede porque
+     ela já cabia: a tabela e os três indicadores são os mesmos. */
   .mk3-app { z-index: 1; left: 0; top: 0; width: 64em; height: 38em; }
-  .mk3-trilha { display: flex; }
+  .mk3-app > .mk-topo { padding-right: var(--mk-faixa); }
+  .mk3-trilha { display: flex; width: 24em; }
+  .mk3-trilha > .mk-rotulo { align-self: flex-start; }
+  .mk3-trilha .mk3-item,
+  .mk3-trilha .mk3-tab-pe { padding-right: calc(var(--mk-faixa) - .34em); }
 
-  /* ---------- 04 ---------- */
+  /* ---------- 04 ----------
+     A composição foi invertida: a resposta sugerida pela IA passou para a
+     ESQUERDA e o histórico do cliente para a direita. O painel precisa provar
+     que a IA escreve e o humano aprova, e era exatamente a resposta que o corte
+     comia. Agora o que a borda pega é contexto: o canal, a etapa e a fonte
+     consultada, que o visitante já entende sem ler inteiro. */
   .mk4-app { z-index: 1; left: 0; top: 0; width: 64em; height: 38em; }
+  .mk4-app > .mk-topo { padding-right: var(--mk-faixa); }
+  .mk4-cliente { padding-right: var(--mk-faixa); }
 
-  /* ---------- 05 ---------- */
+  /* ---------- 05 ----------
+     O site de dentro ganha a mesma faixa: a barra do navegador, o cabeçalho e a
+     segunda dobra param antes do corte. O que a tela pega é o arco do hero e a
+     chapa clara da segunda dobra, que são gradiente puro. */
   .mk5-navegador { z-index: 1; left: 0; top: 0; width: 64em; height: 38em; }
-  .mk4-cursor { display: block; left: 27.2em; top: 18em; animation: mk4-mover 10s ease-in-out infinite; }
+  .mk5-barra,
+  .mk5-cabeca,
+  .mk5-proximo { padding-right: var(--mk-faixa); }
+  .mk4-cursor { display: block; left: 4.6em; top: 18em; animation: mk4-mover 10s ease-in-out infinite; }
 
   /* O cursor entra por baixo e à esquerda, pousa no Aprovar e fica. O retorno
      acontece com ele invisível, senão o laço mostraria um salto para trás. */
@@ -2124,22 +2228,28 @@ body {
 
    Vale em dois lugares: no celular, e em janela estreita E baixa (1024x768 de
    iPad deitado, 1000x700 de janela de desktop não maximizada). Nos dois casos a
-   coluna da peça oferece menos de 380px úteis, e a composição ampla ali só
-   caberia cortada em mais da metade.
+   coluna da peça oferece menos de 700px úteis, e a composição ampla ali só
+   caberia cortada em um terço.
 
    Medido antes desta regra existir, em 1000x700: a maquete 01 perdia o cartão
    de CRM E a fila de três ações, ou seja, dois dos três elementos que o brief
    nomeia, justamente os que provam a frase "sem ninguém precisar lembrar de
    clicar". Cortar margem é aceitável, cortar o argumento não é. Então nessa
-   faixa a maquete entra INTEIRA, em pilha, sem sangrar.
+   faixa a maquete entra em pilha.
 
    Ela não encolhe por transform: ela perde peça. O que sai é sempre o que dá
    densidade, nunca o que dá sentido: some o rail de contatos, some a coluna
    lateral, somem as linhas repetidas. Tudo que sai carrega a classe
    .mk-so-amplo no HTML, para a decisão ficar visível em quem lê o markup.
+
+   A pilha SANGRA, ao contrário do que esta regra fazia antes. O corte é o que
+   faz a peça parecer print de produto, e desligá-lo na faixa de tablet matava o
+   efeito justo ali. Quem garante que o corte não come conteúdo é a mesma faixa
+   decorativa do item 16, aqui em porcentagem: 14.5% da janela, contra 12,5% de
+   sangria. O celular continua sem sangria, e o motivo está no item 7.
    ============================================================ */
 @media (max-width: 767px),
-       (min-width: 768px) and (max-width: 1099px) and (max-height: 939px) {
+       (min-width: 768px) and (max-width: 1279px) and (max-height: 939px) {
   .mk-so-amplo { display: none !important; }
 
   .mk-jan { border-radius: .75em; }
@@ -2214,16 +2324,57 @@ body {
   .mk5-proximo { padding: 1.17em 1em 1.5em; gap: .83em; }
   .mk5-tira i { height: 4.5em; }
 
-  .mk4-esq {
+  /* Na pilha a ordem volta a ser vertical. A resposta continua vindo primeiro,
+     então o cliente entra embaixo, com o fio em cima em vez de na lateral. */
+  .mk4-cliente {
     width: auto;
-    border-right: 0;
-    border-bottom: 1px solid var(--mk-l1);
+    border-left: 0;
+    border-top: 1px solid var(--mk-l1);
     padding: .67em;
     gap: .5em;
   }
-  .mk4-dir { padding: .67em; gap: .5em; }
+  .mk4-resposta { padding: .67em; gap: .5em; }
   .mk4-rascunho { padding: .67em; gap: .5em; }
   .mk4-texto { font-size: 1em; }
+}
+
+/* ============================================================
+   17b. A faixa decorativa da pilha
+
+   Mesma ideia do item 16, outra unidade. Na pilha a maquete não tem largura
+   fixa em em: a caixa é ancorada nos dois lados e cresce com a coluna, então a
+   reserva precisa ser proporcional. 14.5% da janela cobre os 12,5% que a tela
+   corta, com folga.
+
+   A porcentagem resolve sempre sobre a largura da janela (.mk-jan), porque só
+   filhos diretos dela recebem o recuo. No navegador da maquete 05 o corpo tem
+   padding zero por construção, então o recuo desce para as peças do cromo e
+   para as faixas do site, uma a uma.
+
+   Fora daqui, no celular, não existe sangria e portanto não existe faixa.
+   ============================================================ */
+@media (min-width: 768px) and (max-width: 1279px) and (max-height: 939px) {
+  .mk { --mk-faixa: 14.5%; }
+
+  .mk-jan > .mk-topo,
+  .mk-jan > .mk-corpo { padding-right: var(--mk-faixa); }
+
+  /* A maquete 02 é a única que vira grade de duas colunas aqui. A porcentagem
+     resolve sobre a janela, e a janela da coluna da direita tem metade da
+     largura da peça, então lá o recuo precisa ser o dobro para cobrir os mesmos
+     12,5% de corte. Sem isso o chip "Novo" do CRM e o "leads" do topo ficavam
+     fora da tela. */
+  .mk2-crm > .mk-topo, .mk2-crm > .mk-corpo,
+  .mk2-zap > .mk-topo, .mk2-zap > .mk-corpo { padding-right: calc(var(--mk-faixa) * 2); }
+
+  /* O corpo do navegador é só o encaixe do cromo: recuar ele encolheria a
+     tela do site inteira, e a tela do site precisa sangrar. */
+  .mk5-navegador > .mk-corpo { padding-right: 0; }
+  .mk5-abas,
+  .mk5-barra,
+  .mk5-cabeca,
+  .mk5-hero,
+  .mk5-proximo { padding-right: var(--mk-faixa); }
 }
 
 /* ============================================================

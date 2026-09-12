@@ -487,6 +487,7 @@
   height: clamp(280px, 27vw, 360px);
 }
 .conv-palco svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.conv-svg-mob { display: none; }
 
 .conv-fio,
 .conv-tronco {
@@ -933,17 +934,24 @@
 }
 
 @media (max-width: 720px) {
-  .conv .wrap { gap: 26px; }
-  .conv-palco { height: 200px; }
+  .conv .wrap { gap: 20px; }
+  /* A composição vira de lado: as linhas descem do topo em vez de entrar pela
+     esquerda, e o selo de saída fica embaixo do centro. Sem isso as quatro
+     linhas nasciam fora do quadro e o centro ficava solto num vazio. */
+  .conv-palco { height: 260px; }
+  .conv-palco > svg { display: none; }
+  .conv-palco > .conv-svg-mob { display: block; }
   .conv-rot { display: none; }
-  .conv-frentes { display: grid; }
-  /* O selo de saída volta, embaixo do centro em vez de ao lado dele: em 342px
-     de palco, ao lado, ele invadia o centro em 38px medidos. Embaixo ele cabe,
-     e a linha continua chegando nele. */
+  .conv-frentes { display: grid; margin-bottom: 4px; }
+  .conv-hub { left: 50%; top: 56%; }
+  .conv-fio, .conv-tronco { stroke-width: 1.5; }
+  /* O selo de saída fica embaixo do centro, que é onde a linha agora termina.
+     Ao lado dele, como na tela larga, ele invadia o centro em 38px medidos. */
   .conv-saida {
     right: auto;
-    left: 68.3%;
-    top: 78%;
+    left: 50%;
+    top: auto;
+    bottom: 0;
     transform: translateX(-50%);
     font-size: 10px;
     padding: 6px 10px;

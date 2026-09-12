@@ -346,7 +346,11 @@
   width: 100%;
   height: clamp(250px, 24vw, 330px);
 }
-.rede svg {
+/* Filho DIRETO, e não qualquer svg dentro da rede. Sem o sinal de maior esta
+   regra também pegava a marca dentro de .rede-centro: com position absolute,
+   inset zero e largura fixa, ela ia parar no canto superior esquerdo da chapa.
+   Medido: 19px fora do centro nos dois eixos, numa marca de 38px. */
+.rede > svg {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -383,10 +387,13 @@
    e a ferramenta continua reconhecível. */
 .so-amplo { display: inline; }
 
+/* Bloco, e nao flex. Com flex, o <span> do "Google " e o texto "Sheets"
+   viravam dois itens e o gap entrava entre eles como um espaço duplo. O chip
+   so tem texto, entao fluxo normal e o que ele precisa. */
 .rede-item {
   position: absolute;
   transform: translate(-50%, -50%);
-  display: flex; align-items: center; gap: 8px;
+  display: block;
   padding: 8px 13px;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -422,7 +429,9 @@
   box-shadow: 0 0 44px -14px rgba(var(--glow), .5);
   color: var(--accent-strong);
 }
-.rede-centro svg { width: 38px; height: 38px; }
+/* position static desfaz qualquer herança de posicionamento e devolve a marca
+   ao place-items: center da chapa. */
+.rede-centro svg { position: static; width: 38px; height: 38px; }
 /* O anel responde quando o sinal chega. Sem ele o centro so recebe e
    nunca confirma, e a rede fica com cara de mao unica. */
 .rede-centro::after {
@@ -486,7 +495,8 @@
   width: 100%;
   height: clamp(280px, 27vw, 360px);
 }
-.conv-palco svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* Mesmo cuidado da rede: filho direto, senão a regra pega a marca do centro. */
+.conv-palco > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .conv-svg-mob { display: none; }
 
 .conv-fio,
@@ -593,7 +603,7 @@
   box-shadow: 0 0 40px -12px rgba(var(--glow), .55);
   color: var(--accent-strong);
 }
-.conv-hub svg { width: 34px; height: 34px; }
+.conv-hub svg { position: static; width: 34px; height: 34px; }
 .conv-saida {
   position: absolute;
   right: 0; top: 50%;
@@ -873,7 +883,7 @@
   .logos .wrap { padding-block: 34px; }
   .logos .lab { font-size: clamp(21px, 4.4vw, 27px); }
   .rede { height: clamp(240px, 62vw, 300px); }
-  .rede-item { padding: 6px 8px; font-size: 11px; gap: 6px; }
+  .rede-item { padding: 6px 8px; font-size: 11px; }
   .rede-centro { width: 62px; height: 62px; border-radius: 16px; }
   .rede-centro svg { width: 31px; height: 31px; }
   .rede-centro::after { inset: -7px; border-radius: 21px; }

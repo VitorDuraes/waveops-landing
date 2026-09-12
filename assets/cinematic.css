@@ -32,7 +32,23 @@ body { font-size: 16px; }
 .wrap { padding-inline: 48px; }
 .section { padding-block: calc(112px * var(--dscale)); }
 .section-head { max-width: 790px; margin-bottom: 52px; }
-.section-head h2 { font-size: clamp(34px, 4vw, 54px); font-weight: 500; letter-spacing: -.045em; line-height: 1.12; }
+/* Uma só altura de manchete na página. A manchete da cena (.cena-manchete em
+   assets/cinema.css) usa exatamente esta escala: quando ela era menor que o h2
+   logo acima dela, o olho lia a cena como subitem da seção, não como a seção. */
+.section-head h2 { font-size: clamp(30px, 3.9vw, 56px); font-weight: 500; letter-spacing: -.045em; line-height: 1.12; }
+
+/* A seção da cena ganha campo próprio. A página inteira era chapada (o fundo do
+   corpo contra o da seção dava 1,04:1), e sem degrau de fundo a cena começava e
+   terminava sem ninguém perceber. As duas pontas voltam para --bg para o
+   encontro com as seções vizinhas não virar uma faixa dura. */
+#servicos {
+  background: linear-gradient(
+    180deg,
+    var(--bg) 0%,
+    color-mix(in srgb, var(--accent) 18%, var(--bg)) 34%,
+    color-mix(in srgb, var(--accent) 18%, var(--bg)) 80%,
+    var(--bg) 100%);
+}
 .section-head p { font-size: 17px; max-width: 580px; line-height: 1.75; }
 .section-head.center p { margin-inline: auto; }
 .soft-text { color: var(--dim); }

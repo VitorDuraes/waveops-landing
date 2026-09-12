@@ -444,12 +444,15 @@
 
    Nada mais se mexe nesta tela. A seção existe para isso.
    ============================================================ */
+/* O palco fica no fundo da página, entre duas seções levantadas. O momento
+   grande é o mais escuro de propósito: é assim que uma tela de cinema se
+   separa do resto da sala. */
 .conv {
   position: relative;
   border-block: 1px solid var(--border);
   background:
     radial-gradient(ellipse 70% 55% at 72% 50%, rgba(var(--glow), .09), transparent 72%),
-    var(--bg-soft);
+    var(--bg);
   overflow: hidden;
 }
 .conv .wrap {
@@ -733,15 +736,27 @@
    ============================================================ */
 
 /* ---------- Profundidade entre seções ----------
-   A medição do benchmark apontou 1,04:1 de contraste entre seções
-   vizinhas, ou seja, nenhuma. Sem degrau o scroll vira um bloco só e
-   o olho perde onde um assunto termina. Aqui o degrau é declarado. */
-:root { --camada: color-mix(in srgb, var(--surface) 45%, var(--bg)); }
-#casos { background: var(--camada); }
-#pacotes { background: var(--camada); }
-#faq { background: var(--camada); }
-#publicos, #como { background: var(--bg); }
-#como, #publicos { border-block: 1px solid var(--border); }
+   O benchmark apontou 1,04:1 de contraste entre seções vizinhas, ou
+   seja, nenhuma: o scroll virava um bloco só e o olho perdia onde um
+   assunto terminava.
+
+   A razão de contraste da WCAG é a métrica errada para separar dois
+   fundos escuros: entre #0a0b0e e um cinza bem mais claro ela continua
+   perto de 1,07, porque no pé da escala a luminância absoluta mal se
+   move. Quem mede degrau percebido é o L* do CIE. Medido no tema
+   escuro: o fundo da página tem L* 3,03 e esta camada tem L* 6,40,
+   um degrau de 3,37. A mistura anterior dava 1,29, que o olho não via.
+
+   No tema claro a conta inverte: --surface-2 e --bg são quase o mesmo
+   branco, então a camada desce para --bg-soft, com degrau de 3,0. */
+:root { --camada: color-mix(in srgb, var(--surface-2) 70%, var(--bg)); }
+[data-theme="light"] { --camada: var(--bg-soft); }
+/* Alternância estrita a partir de "Casos de uso": uma seção levantada,
+   a seguinte no fundo da página, e assim até o rodapé. Degrau medido de
+   3,42 em L* no tema escuro e 3,34 no claro, em cada emenda. */
+#casos, #como, #publicos, #contato { background: var(--camada); }
+#pacotes, #faq { background: var(--bg); }
+#como, #publicos, #pacotes, #faq { border-block: 1px solid var(--border); }
 
 /* Grade quase invisível. Só em duas seções, e some nas bordas para
    não virar papel de parede. */

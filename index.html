@@ -77,7 +77,7 @@
     <link rel="stylesheet" href="assets/fonts.css" />
     <link rel="stylesheet" href="assets/styles.css" />
     <link rel="stylesheet" href="assets/cinematic.css?v=20260906-marquee4" />
-    <link rel="stylesheet" href="assets/cinema.css?v=20260912-sangria" />
+    <link rel="stylesheet" href="assets/cinema.css?v=20260912-benchmark" />
     <link rel="stylesheet" href="assets/motion-system.css?v=20260911" />
     <link rel="stylesheet" href="assets/operacao.css?v=20260911" />
 
@@ -575,7 +575,7 @@
               <div class="cine-quadro">
                 <div class="cine-texto">
                   <span class="cine-selo">01</span>
-                  <span class="cine-rotulo">AUTOMAÇÃO DE PROCESSOS</span>
+                  <span class="cine-rotulo">Automação de processos</span>
                   <h3 class="cine-manchete">Tarefas repetitivas passam a acontecer sozinhas.</h3>
                   <p class="cine-apoio">Sem ninguém precisar lembrar de clicar.</p>
                   <div class="cine-etiquetas">
@@ -710,7 +710,7 @@
               <div class="cine-quadro">
                 <div class="cine-texto">
                   <span class="cine-selo">02</span>
-                  <span class="cine-rotulo">INTEGRAÇÃO DE SISTEMAS</span>
+                  <span class="cine-rotulo">Integração de sistemas</span>
                   <h3 class="cine-manchete">Suas ferramentas param de trabalhar separadas.</h3>
                   <p class="cine-apoio">Elas passam a conversar entre si, em tempo real.</p>
                   <div class="cine-etiquetas">
@@ -801,7 +801,7 @@
               <div class="cine-quadro">
                 <div class="cine-texto">
                   <span class="cine-selo">03</span>
-                  <span class="cine-rotulo">SISTEMAS E PAINÉIS SOB MEDIDA</span>
+                  <span class="cine-rotulo">Sistemas e painéis sob medida</span>
                   <h3 class="cine-manchete">Quando planilha não dá mais conta.</h3>
                   <p class="cine-apoio">Sistemas web e dashboards feitos para a sua operação.</p>
                   <div class="cine-etiquetas">
@@ -939,7 +939,7 @@
               <div class="cine-quadro">
                 <div class="cine-texto">
                   <span class="cine-selo">04</span>
-                  <span class="cine-rotulo">AGENTES DE IA COM SUPERVISÃO</span>
+                  <span class="cine-rotulo">Agentes de IA com supervisão</span>
                   <h3 class="cine-manchete">IA para tarefas específicas, com revisão humana.</h3>
                   <p class="cine-apoio">Função clara, fonte de dados definida. Nada de IA solta, sem regra e sem objetivo.</p>
                   <div class="cine-etiquetas">
@@ -1066,7 +1066,7 @@
               <div class="cine-quadro">
                 <div class="cine-texto">
                   <span class="cine-selo">05</span>
-                  <span class="cine-rotulo">CRIAÇÃO DE SITES SOB MEDIDA</span>
+                  <span class="cine-rotulo">Criação de sites sob medida</span>
                   <h3 class="cine-manchete">Seu site para de ser cartão de visita.</h3>
                   <p class="cine-apoio">Ele passa a capturar, qualificar e entregar o lead direto na sua operação.</p>
                   <div class="cine-etiquetas">
@@ -1145,12 +1145,44 @@
             </article>
 
             <!-- ---------- Indicador ---------- -->
-            <ol class="cine-indice" id="cine-indice" aria-hidden="true">
-              <li class="cine-marca"><b>01</b><span class="cine-trilho"><i></i></span></li>
-              <li class="cine-marca"><b>02</b><span class="cine-trilho"><i></i></span></li>
-              <li class="cine-marca"><b>03</b><span class="cine-trilho"><i></i></span></li>
-              <li class="cine-marca"><b>04</b><span class="cine-trilho"><i></i></span></li>
-              <li class="cine-marca"><b>05</b><span class="cine-trilho"><i></i></span></li>
+            <!-- O indicador é navegação, não enfeite: cada marca leva ao seu
+                 capítulo, e o motor escreve aria-current na que está em cena. -->
+            <ol class="cine-indice" id="cine-indice" aria-label="Capítulos de O que fazemos">
+              <li class="cine-marca">
+                <button type="button" class="cine-alvo" data-ir="0"
+                        aria-label="Ir para o capítulo 01 de 05: Automação de processos">
+                  <b>01</b>
+                  <span class="cine-trilho"><i></i></span>
+                </button>
+              </li>
+              <li class="cine-marca">
+                <button type="button" class="cine-alvo" data-ir="1"
+                        aria-label="Ir para o capítulo 02 de 05: Integração de sistemas">
+                  <b>02</b>
+                  <span class="cine-trilho"><i></i></span>
+                </button>
+              </li>
+              <li class="cine-marca">
+                <button type="button" class="cine-alvo" data-ir="2"
+                        aria-label="Ir para o capítulo 03 de 05: Sistemas e painéis sob medida">
+                  <b>03</b>
+                  <span class="cine-trilho"><i></i></span>
+                </button>
+              </li>
+              <li class="cine-marca">
+                <button type="button" class="cine-alvo" data-ir="3"
+                        aria-label="Ir para o capítulo 04 de 05: Agentes de IA com supervisão">
+                  <b>04</b>
+                  <span class="cine-trilho"><i></i></span>
+                </button>
+              </li>
+              <li class="cine-marca">
+                <button type="button" class="cine-alvo" data-ir="4"
+                        aria-label="Ir para o capítulo 05 de 05: Criação de sites sob medida">
+                  <b>05</b>
+                  <span class="cine-trilho"><i></i></span>
+                </button>
+              </li>
             </ol>
 
           </div>
@@ -2110,7 +2142,7 @@
     <script src="assets/motion.js?v=20260905"></script>
     <script src="assets/main.js?v=20260905"></script>
     <script src="assets/operacao.js?v=20260911"></script>
-    <script src="assets/cinema.js?v=20260911" defer></script>
+    <script src="assets/cinema.js?v=20260912-benchmark" defer></script>
     <script type="module" src="assets/starfield.mjs?v=20260911a"></script>
   </body>
 </html>

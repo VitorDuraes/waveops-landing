@@ -202,8 +202,11 @@ body {
   grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
   align-items: center;
   column-gap: clamp(24px, 4vw, 64px);
-  /* Padding generoso no conteúdo, zero na direita: é por ali que a peça sai. */
-  padding: clamp(30px, 5vh, 72px) 0 clamp(30px, 5vh, 72px) clamp(22px, 5vw, 92px);
+  /* Padding no conteúdo, zero na direita: é por ali que a peça sai. O respiro
+     vertical encolheu de 5vh para 3.4vh porque a composição ocupava 27,8% da
+     tela e o resto era margem. Quem paga uma tela inteira de rolagem por
+     capítulo precisa receber uma tela inteira de conteúdo. */
+  padding: clamp(24px, 3.4vh, 52px) 0 clamp(24px, 3.4vh, 52px) clamp(22px, 5vw, 92px);
 }
 
 .cine-texto {
@@ -225,11 +228,16 @@ body {
 }
 .cine-rail.viva .cine-selo { display: none; }
 
+/* O rótulo é afirmação, não etiqueta de pasta. Caixa normal, corpo de leitura
+   e sem o entreletras largo: em caixa alta a 10px ele lia como metadado de
+   arquivo, e o visitante pulava direto para a manchete sem saber de qual
+   frente o capítulo estava falando. */
 .cine-rotulo {
-  font-family: var(--font-mono);
-  font-size: clamp(10px, .95vw, 12.5px);
-  font-weight: 700;
-  letter-spacing: .2em;
+  font-family: var(--font-body);
+  font-size: clamp(12.5px, 1.05vw, 15px);
+  font-weight: 600;
+  letter-spacing: -.005em;
+  text-transform: none;
   color: var(--accent-strong);
 }
 
@@ -355,8 +363,12 @@ body {
    699px e a maquete de 64em precisa caber ali com no máximo 8.1em de sangria.
    Com 13px ela pediria 832px e a trava abriria um corte de 10em, que comeria
    texto. Com 12.5px ela pede 800px e o corte para em 8.1em. */
-@media (min-width: 1440px) { .cine-peca { --mk-fs: 13px; } }
-@media (min-width: 1600px) { .cine-peca { --mk-fs: 14px; } .cine-manchete { font-size: clamp(72px, 4.6vw, 86px); } }
+/* O degrau de 14px desceu de 1600px para 1440px. Em 1440 a coluna da peça tem
+   783px e a maquete de 64em a 14px pede 896px: a trava abre 8,1em de corte, ou
+   seja ainda dentro da faixa decorativa de 8,5em. O ganho é de ocupação: a
+   composição sai de 27,8% para 32,1% da tela. */
+@media (min-width: 1440px) { .cine-peca { --mk-fs: 14px; } }
+@media (min-width: 1600px) { .cine-peca { --mk-fs: 15px; } .cine-manchete { font-size: clamp(72px, 4.6vw, 86px); } }
 /* Acima de 1800px a coluna da peça já sobra: a maquete de 64em cabe com o corte
    de 8em mesmo com a divisão original de 48%. Devolver a largura ao texto aqui
    fecha o vão entre a última letra da manchete e a borda esquerda da maquete,
@@ -462,6 +474,24 @@ body {
 }
 .cine-rail:not(.viva) .cine-indice { display: none; }
 
+/* O indicador deixa de ser enfeite: cada marca é um botão que leva ao seu
+   capítulo. O alvo de toque tem 44px de altura mínima, que é o piso da
+   diretriz, e ele é transparente: quem cresce é a área clicável, não o
+   desenho. */
+.cine-alvo {
+  display: contents;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+}
+.cine-marca:focus-within b { opacity: 1; }
+.cine-alvo:focus-visible { outline: none; }
+.cine-marca:focus-within .cine-trilho {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 3px;
+}
 .cine-marca {
   display: grid;
   /* Espelhado: o fio na coluna de fora, o número na de dentro. O HTML segue na

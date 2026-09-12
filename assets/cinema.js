@@ -40,8 +40,8 @@
      a subir. ESPERA_SAIDA é o respiro com a pilha inteira montada antes de o
      bloco devolver a rolagem para a página. Sem os dois, o primeiro e o
      último painel nunca ficam parados tempo suficiente para serem lidos. */
-  var ESPERA_ENTRADA = 0.34;
-  var ESPERA_SAIDA   = 0.40;
+  var ESPERA_ENTRADA = 0.28;
+  var ESPERA_SAIDA   = 0.34;
 
   /* Quanto o painel coberto recua. Os quatro valores são multiplicados pelo
      acúmulo, não pela profundidade crua: o terceiro painel coberto recua bem
@@ -102,7 +102,12 @@
   var marcas = Array.prototype.slice.call(
     document.querySelectorAll('#cine-indice .cine-marca')
   ).map(function (li) {
-    return { num: li.querySelector('b'), fio: li.querySelector('i'), no: '', nf: '' };
+    return {
+      num: li.querySelector('b'),
+      fio: li.querySelector('i'),
+      botao: li.querySelector('.cine-alvo'),
+      no: '', nf: '', na: ''
+    };
   });
 
   /* Porta de instrumento. Fica de propósito: é por ela que a seção é medida no
@@ -129,9 +134,14 @@
 
     alturaPalco = stage.getBoundingClientRect().height || window.innerHeight || 800;
 
+    /* Unidade de percurso por capítulo. Desceu de 1,0 para 0,54 da altura do
+       palco: a seção cobrava 5,87 telas de rolagem para cinco capítulos, e o
+       visitante desistia antes do quarto. Medido em 1440x900: 5280px caem para
+       cerca de 3150px, 3,5 telas. Os pisos desceram junto, senão eram eles que
+       passariam a mandar e o 0,54 não valeria nada. */
     unidade = estreito
-      ? Math.max(430, Math.min(760, alturaPalco * 0.92))
-      : Math.max(620, Math.min(1000, alturaPalco * 1.0));
+      ? Math.max(360, Math.min(620, alturaPalco * 0.54))
+      : Math.max(400, Math.min(700, alturaPalco * 0.54));
 
     percurso = (ESPERA_ENTRADA + (N - 1) + ESPERA_SAIDA) * unidade;
     rail.style.height = Math.round(percurso + alturaPalco) + 'px';
@@ -225,6 +235,13 @@
 
       var nf = 'scaleY(' + f.toFixed(3) + ')';
       if (nf !== m.nf) { m.nf = nf; m.fio.style.transform = nf; }
+
+      /* aria-current diz ao leitor de tela em qual capítulo a cena está. Só
+         escreve quando muda, como todo o resto deste laço. */
+      if (m.botao) {
+        var na = i === frente ? 'true' : 'false';
+        if (na !== m.na) { m.na = na; m.botao.setAttribute('aria-current', na); }
+      }
     }
 
     estado.p = Math.round(p * 1000) / 1000;
@@ -247,6 +264,33 @@
       it.veu.style.opacity = '';  it.vo = '';
       if (it.peca) { it.peca.style.transform = ''; it.pt = ''; }
     }
+    for (var k = 0; k < marcas.length; k++) {
+      if (!marcas[k].num) { continue; }
+      marcas[k].num.style.opacity = '';
+      marcas[k].fio.style.transform = '';
+      marcas[k].no = ''; marcas[k].nf = '';
+      if (marcas[k].botao) { marcas[k].botao.removeAttribute('aria-current'); marcas[k].na = ''; }
+    }
+  }
+
+  /* ---------- Pular para um capítulo ----------
+     O indicador deixa de ser enfeite e vira navegação. O alvo é a posição de
+     rolagem em que p vale exatamente j, ou seja o capítulo parado no lugar.
+     Rolagem normal do navegador: nada de sequestro, e o visitante pode
+     interromper no meio. */
+  function irPara(j) {
+    if (!ligado) { return; }
+    var topoDoc = rail.getBoundingClientRect().top + (window.scrollY || window.pageYOffset || 0);
+    var alvo = topoDoc + (ESPERA_ENTRADA + j) * unidade;
+    var suave = !(reduzir && reduzir.matches) && !pausadoNaPagina();
+    window.scrollTo({ top: Math.round(alvo), behavior: suave ? 'smooth' : 'auto' });
+  }
+
+  for (var b = 0; b < marcas.length; b++) {
+    (function (j, alvo) {
+      if (!alvo) { return; }
+      alvo.addEventListener('click', function () { irPara(j); });
+    })(b, marcas[b].botao);
   }
 
   function preferencia() {

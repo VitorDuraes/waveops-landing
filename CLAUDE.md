@@ -230,7 +230,22 @@ The page is frontend-only today. Three places connect to a backend:
 
 - The brand is **WaveOps**, domain **waveops.com.br** (decided after FlowOps / Nodo / Operon / Trama were all taken). Two internal identifiers were intentionally NOT renamed: the `localStorage` key `flowops:tweaks:v1` (renaming resets visitors' saved theme) and the n8n webhook path `flowops-lead` (renaming breaks the live lead integration).
 - The footer email is `mailto:contato@waveops.com.br` (set up this mailbox; it is the intended address).
-- Custom domain is pending: the `CNAME` file and the canonical/OG/sitemap URLs still point at `vitorduraes.github.io/flowops-landing/`. Switch them to `https://waveops.com.br` only AFTER the domain's DNS points at GitHub Pages, otherwise the live site goes down.
+- **The custom domain is live.** `https://waveops.com.br/` serves the page (checked 13/09/2026: `200`, with the WaveOps `<title>`), and the canonical, the OG URLs, `robots.txt` and `sitemap.xml` all point at it. The `CNAME` file was missing from the repo until 13/09/2026, so the domain lived only in the GitHub Pages setting, with no versioned copy to restore it from. It is now committed at the repo root with the single line `waveops.com.br`. **Do not delete or rename it**: GitHub Pages rewrites the Pages setting from that file on every deploy, and removing it drops the custom domain.
+
+### SEO and crawler files (repo root)
+Three files serve crawlers, and all three must be updated in lockstep when the site's structure or
+its offering changes:
+- `robots.txt`: `Allow: /` plus the `Sitemap:` line. It carries a comment pointing at `llms.txt`;
+  there is no standard directive for that, so the comment is the pointer.
+- `sitemap.xml`: one `<url>`, the root. The page is a single page, so there is nothing else to list.
+  Bump `<lastmod>` when the page content changes in a way worth recrawling.
+- `llms.txt` (added 13/09/2026): a plain-text summary of the offering for LLMs, in PT-BR, following
+  the `llms.txt` convention (H1, blockquote summary, H2 sections of Markdown links). Its links are
+  anchors of the single page (`#servicos`, `#casos`, `#como`, `#pacotes`, `#faq`, `#contato`), so
+  **renaming a section id breaks `llms.txt`**. It is deliberately NOT listed in `sitemap.xml`: a
+  sitemap is for indexable pages, and search engines do nothing useful with a `.txt` entry there.
+  Every claim in it (3 to 7 business days, human review over AI agents, diagnosis at no cost) is
+  copied from the page's FAQ. Do not add a claim to `llms.txt` that the page itself does not make.
 
 ## Writing rules for this repo
 

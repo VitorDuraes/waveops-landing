@@ -1,0 +1,47 @@
+# WaveOps
+
+> A WaveOps entrega automação, integração de sistemas, dashboards sob medida e agentes de IA
+> supervisionados para a operação de quem vende. O modelo é assinatura mensal e inclui hospedagem,
+> monitoramento, correção de falha e evolução contínua do que está no ar.
+
+O site é uma página única em português do Brasil. Todas as seções abaixo são âncoras da mesma URL.
+
+Contato: WhatsApp +55 34 99177 5784. E-mail contato@waveops.com.br.
+
+## O que a WaveOps faz
+
+- [Automação de processos](https://waveops.com.br/#servicos): tarefa repetitiva passa a acontecer
+  sozinha. Gestão de lead, follow-up e cobrança saem das costas do time.
+- [Integração de sistemas](https://waveops.com.br/#servicos): WhatsApp, CRM, checkout, planilha e
+  APIs conectados em tempo real, em vez de trabalharem cada um por conta.
+- [Sistemas e dashboards sob medida](https://waveops.com.br/#servicos): substitui a planilha que
+  virou o sistema da empresa por uma plataforma web.
+- [Agentes de IA supervisionados](https://waveops.com.br/#servicos): tarefa específica, fonte de
+  dados definida, limite de atuação, registro de uso e revisão humana.
+- [Site que opera](https://waveops.com.br/#servicos): o site deixa de ser cartão de visita e passa a
+  alimentar a operação.
+
+## Como contratar e o que esperar
+
+- [Casos de uso](https://waveops.com.br/#casos): lead que chega e não recebe follow-up, ferramentas
+  desconectadas, planilha que virou sistema, time preso em atendimento e leitura de documento.
+- [Como funciona](https://waveops.com.br/#como): conversa, mapeamento, proposta, implantação,
+  validação e evolução.
+- [Planos](https://waveops.com.br/#pacotes): construir o projeto e manter o que está no ar. A
+  assinatura mensal cobre infra rodando, monitoramento, conserto das integrações, evolução contínua
+  e relatório mensal de valor.
+- [Perguntas frequentes](https://waveops.com.br/#faq): pré-requisito técnico, troca de ferramenta,
+  prazo, controle sobre a IA, suporte depois da entrega e como começar.
+- [Contato](https://waveops.com.br/#contato): formulário de diagnóstico e WhatsApp direto.
+
+## Fatos
+
+- Prazo: automação simples fica pronta em 3 a 7 dias úteis. Projeto maior depende do escopo e o
+  prazo fica definido na proposta.
+- Ferramentas: a WaveOps integra o que o cliente já usa. Só sugere trocar quando a ferramenta atual
+  é o gargalo.
+- IA: nenhum agente responde cliente sem supervisão. Todo agente tem função clara, fonte de dados
+  definida, limite de atuação, registro de uso e revisão humana.
+- Suporte: todo projeto entra com assinatura que mantém, monitora e evolui o que foi construído. O
+  tamanho da assinatura vem do que ficou no ar.
+- Diagnóstico inicial sem custo e sem compromisso.

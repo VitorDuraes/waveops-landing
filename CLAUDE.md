@@ -120,7 +120,7 @@ The Tweaks panel and its React/Babel CDN scripts were removed from the page; the
 `dev/`.
 
 ### Security hardening (HTTP/CSP, fonts, anti-bot)
-- **CSP** is a `<meta http-equiv="Content-Security-Policy">` at the very top of `<head>`. If you add a third-party origin (script, font, image, or a `fetch`/`connect` target), you must add it to the matching directive or the browser blocks it. `connect-src` currently allows the n8n webhook host and `plausible.io`; `script-src` allows `plausible.io`. `style-src` keeps `'unsafe-inline'` because the HTML uses inline `style=` attributes (low risk; not worth a full refactor). `frame-ancestors`/`X-Frame-Options` only work as HTTP headers, which GitHub Pages can't set, so clickjacking protection is pending a host that allows headers.
+- **CSP** is a `<meta http-equiv="Content-Security-Policy">` at the very top of `<head>`. If you add a third-party origin (script, font, image, or a `fetch`/`connect` target), you must add it to the matching directive or the browser blocks it. `connect-src` currently allows the n8n webhook host and `plausible.io`; `script-src` allows `plausible.io`. `style-src` keeps `'unsafe-inline'` because the HTML uses inline `style=` attributes (low risk; not worth a full refactor). `frame-ancestors`/`X-Frame-Options` only work as HTTP headers, and a `<meta>` CSP cannot carry them. This was blocked while the site was on GitHub Pages. **It is no longer blocked**: the site is on Netlify, which sets headers from a `[[headers]]` block in `netlify.toml`. As of 13/09/2026 that block does not exist and the live response carries only `Strict-Transport-Security`, so clickjacking protection is still open, but now for want of the work, not for want of a host.
 - **Fonts are self-hosted** in `assets/fonts/` (woff2) with `@font-face` in `assets/fonts.css`. Regenerate with `python _fetch_fonts.py` (downloads only the weights used; Sora was dropped as unused). Do not re-add the Google Fonts `<link>`.
 - **Anti-bot** on both lead forms: a hidden honeypot field (`website`/`#f-website`/`#cl-website`) plus a minimum fill-time gate (`MIN_FILL_MS` in `main.js`). Both only stop bots that render the page; bots posting straight to the webhook need server-side defense. See `docs/specs/SECURITY-n8n-hardening.md`.
 
@@ -230,7 +230,35 @@ The page is frontend-only today. Three places connect to a backend:
 
 - The brand is **WaveOps**, domain **waveops.com.br** (decided after FlowOps / Nodo / Operon / Trama were all taken). Two internal identifiers were intentionally NOT renamed: the `localStorage` key `flowops:tweaks:v1` (renaming resets visitors' saved theme) and the n8n webhook path `flowops-lead` (renaming breaks the live lead integration).
 - The footer email is `mailto:contato@waveops.com.br` (set up this mailbox; it is the intended address).
-- Custom domain is pending: the `CNAME` file and the canonical/OG/sitemap URLs still point at `vitorduraes.github.io/flowops-landing/`. Switch them to `https://waveops.com.br` only AFTER the domain's DNS points at GitHub Pages, otherwise the live site goes down.
+- **The custom domain is live, and the host is Netlify, not GitHub Pages.** `https://waveops.com.br/` serves the page (checked 13/09/2026: `200`, `Server: Netlify`), and the canonical, the OG URLs, `robots.txt` and `sitemap.xml` all point at it. The custom domain is configured in the Netlify panel plus DNS; **there is no `CNAME` file and adding one does nothing here**, because that file is a GitHub Pages mechanism. Anything in this file that still says "GitHub Pages" is talking about the old host: the repo and the Pages path are named `flowops-landing` for historical reasons only.
+
+### How the site is actually published (`netlify.toml`)
+Netlify's base directory is locked to `portal/` in the panel, so the build runs one level below the
+landing. The `[build] command` in `netlify.toml` therefore builds `_site` by copying **an explicit
+list of files** up from `../`. That list is the whole deploy: **a file at the repo root that is not
+named in that `cp` never reaches the live site**, no matter how correct it is locally. The list is
+currently `index.html`, `robots.txt`, `sitemap.xml`, `llms.txt` and `assets/`. Add a root file, add
+it there in the same commit.
+
+`netlify.toml` also holds six `301` redirects that bounce every portal route (`/cliente/*`,
+`/admin/*`, `/checkout`, `/api/*`, `/termos`, `/privacidade`) to `portal.waveops.com.br` on Railway.
+The comment at the top of the file explains why, and it is worth reading before touching it: one
+portal, one database.
+
+### SEO and crawler files (repo root)
+Three files serve crawlers, and all three must be updated in lockstep when the site's structure or
+its offering changes:
+- `robots.txt`: `Allow: /` plus the `Sitemap:` line. It carries a comment pointing at `llms.txt`;
+  there is no standard directive for that, so the comment is the pointer.
+- `sitemap.xml`: one `<url>`, the root. The page is a single page, so there is nothing else to list.
+  Bump `<lastmod>` when the page content changes in a way worth recrawling.
+- `llms.txt` (added 13/09/2026): a plain-text summary of the offering for LLMs, in PT-BR, following
+  the `llms.txt` convention (H1, blockquote summary, H2 sections of Markdown links). Its links are
+  anchors of the single page (`#servicos`, `#casos`, `#como`, `#pacotes`, `#faq`, `#contato`), so
+  **renaming a section id breaks `llms.txt`**. It is deliberately NOT listed in `sitemap.xml`: a
+  sitemap is for indexable pages, and search engines do nothing useful with a `.txt` entry there.
+  Every claim in it (3 to 7 business days, human review over AI agents, diagnosis at no cost) is
+  copied from the page's FAQ. Do not add a claim to `llms.txt` that the page itself does not make.
 
 ## Writing rules for this repo
 

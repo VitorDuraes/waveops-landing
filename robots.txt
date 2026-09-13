@@ -2,3 +2,5 @@ User-agent: *
 Allow: /
 
 Sitemap: https://waveops.com.br/sitemap.xml
+
+# Resumo para LLM: https://waveops.com.br/llms.txt

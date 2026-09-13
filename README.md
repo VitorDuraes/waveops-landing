@@ -112,4 +112,9 @@ O botão de sol/lua no topo e o painel de Tweaks usam a mesma fonte de verdade.
 ## Pendências de marca
 - Marca definida: **WaveOps**, domínio **waveops.com.br**.
 - E-mail do rodapé: `contato@waveops.com.br` (configurar essa caixa de entrada).
-- Domínio próprio pendente: o `CNAME` e as URLs canônicas só mudam para `waveops.com.br` depois que o DNS apontar para o GitHub Pages.
+- Domínio próprio no ar: `https://waveops.com.br/` responde pelo Netlify, e as URLs canônicas, o
+  `robots.txt` e o `sitemap.xml` já apontam para lá. O domínio é configurado no painel do Netlify
+  mais DNS. Não existe arquivo `CNAME` neste repo, e criar um não muda nada, porque `CNAME` é
+  mecanismo do GitHub Pages.
+- O que vai ao ar é a lista de arquivos do `[build] command` do `netlify.toml`. Arquivo novo na
+  raiz precisa entrar nessa lista no mesmo commit, senão fica só no repo.

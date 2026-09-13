@@ -1,4 +1,0 @@
-# So o CNAME. Nao normalizar mais nada, para nao remexer no resto do repo.
-# O GitHub Pages le este arquivo para reconfigurar o dominio a cada deploy,
-# e CRLF no fim da linha ja quebrou dominio em outros repos. Fixa em LF.
-CNAME text eol=lf

@@ -53,3 +53,25 @@
   to = "https://portal.waveops.com.br/privacidade"
   status = 301
   force = true
+
+# Headers de seguranca. A politica principal de CSP continua na <meta> do
+# index.html, e NAO e duplicada aqui: duas politicas valem ao mesmo tempo e o
+# navegador aplica a intersecao, entao duplicar so cria chance de divergir.
+#
+# O que entra aqui e o que a <meta> nao consegue fazer. frame-ancestors so vale
+# como header HTTP, e e por isso que a protecao contra clickjacking ficou aberta
+# enquanto o site esteve no GitHub Pages. Esta segunda politica declara SO
+# frame-ancestors: diretiva ausente nao restringe nada, entao ela nao mexe em
+# script-src, img-src nem no resto da <meta>.
+#
+# Strict-Transport-Security fica de fora de proposito. O Netlify ja manda
+# max-age=31536000, e acrescentar includeSubDomains alcancaria
+# portal.waveops.com.br no Railway. Isso e decisao de infra, nao de landing.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "frame-ancestors 'none'"
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(), usb=()"

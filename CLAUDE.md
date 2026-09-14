@@ -240,6 +240,15 @@ named in that `cp` never reaches the live site**, no matter how correct it is lo
 currently `index.html`, `robots.txt`, `sitemap.xml`, `llms.txt` and `assets/`. Add a root file, add
 it there in the same commit.
 
+That same locked base directory also decides **whether a build runs at all**. Netlify skips the build
+when nothing changed inside the base directory, and the landing lives one level above it, so until
+14/09/2026 a commit touching only `index.html` or `assets/` deployed nothing: it reached the live
+site by accident, whenever some later commit happened to touch `portal/` or `netlify.toml`. The
+`[build] ignore` line now states the rule instead. Its contract is inverted (**exit 0 skips the
+build, a non-zero exit builds**), so it is a `git diff --quiet` over the published paths: no
+difference, no deploy. Adding a published file means adding it to that list too, next to the `cp`.
+A broken ignore command exits non-zero and therefore builds, which is the safe direction.
+
 `netlify.toml` also holds six `301` redirects that bounce every portal route (`/cliente/*`,
 `/admin/*`, `/checkout`, `/api/*`, `/termos`, `/privacidade`) to `portal.waveops.com.br` on Railway.
 The comment at the top of the file explains why, and it is worth reading before touching it: one

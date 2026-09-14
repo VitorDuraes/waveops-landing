@@ -15,6 +15,23 @@
   command = "rm -rf _site && mkdir -p _site && cp ../index.html ../robots.txt ../sitemap.xml ../llms.txt _site/ && cp -r ../assets _site/"
   publish = "_site"
 
+  # O Netlify ignora o build quando nada muda dentro do base directory, que aqui
+  # e portal/. Como a landing mora na RAIZ, um commit que mexe so no index.html
+  # ou em assets/ nao dispararia deploy nenhum: ia ao ar de carona, quando outro
+  # commit tocasse portal/ ou netlify.toml.
+  #
+  # O contrato do ignore e invertido: exit 0 IGNORA o build, exit diferente de 0
+  # BUILDA. `git diff --quiet` sai 0 quando nao ha diferenca, entao ignorar
+  # acontece exatamente quando nenhum arquivo publicado mudou. O comando roda a
+  # partir do base directory, por isso os "../".
+  #
+  # O "." no fim e o proprio portal/, que nao muda o que e publicado mas fica na
+  # regra de proposito: hoje um commit nele dispara build, e esta regra so
+  # ACRESCENTA a landing. Nada passa a deployar menos do que ja deploya. E se o
+  # comando quebrar, o exit vira diferente de 0 e o Netlify builda: a falha erra
+  # para o lado de publicar demais, nunca para o lado de congelar a landing.
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ../index.html ../assets ../robots.txt ../sitemap.xml ../llms.txt ../netlify.toml ."
+
 # Rede de seguranca: qualquer rota de portal que caia aqui (bookmark antigo, link
 # indexado, URL digitada) salta pro Railway, pra nunca existir um 2o portal/banco
 # em waveops.com.br. Os botoes da landing ja apontam direto pro portal (absolutos).

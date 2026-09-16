@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { guard, ok, err } from "@/server/http";
 import { getRepo } from "@/server/repo";
 import { hashPassword, verifyPassword } from "@/server/auth";
+import { registrarPorCliente } from "@/server/evento";
 import { log } from "@/server/log";
 
 // Define a senha do cliente AUTENTICADO. Dois fluxos:
@@ -29,5 +30,8 @@ export async function POST(req: Request) {
   }
   await repo.setCustomerPassword(u.sub, hashPassword(password));
   log.info("senha.definida", { customerId: u.sub, troca: !activation });
+  // Ultima etapa do funil (SPEC-18): a conta saiu de "pagou" para "esta usando".
+  // So a ATIVACAO conta. Troca de senha de quem ja usa o portal nao e etapa nenhuma.
+  if (activation) await registrarPorCliente("ativacao", u.sub);
   return ok({ ok: true });
 }

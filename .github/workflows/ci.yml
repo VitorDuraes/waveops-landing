@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   portal:
-    name: Portal (typecheck, build, audit)
+    name: Portal (typecheck, testes, build, audit)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -36,6 +36,10 @@ jobs:
         run: npm ci
       - name: Typecheck
         run: npm run typecheck
+      # Testes unitarios das funcoes puras (node:test via tsx, sem banco e sem servidor).
+      # Rodam aqui porque teste que a esteira nao executa e teste que ninguem executa.
+      - name: Testes unitarios
+        run: npm run test:unit
       - name: Build
         run: npm run build
         env:

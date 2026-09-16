@@ -38,8 +38,12 @@ export default function PrivacidadePage() {
           <strong>Dados de uso e suporte:</strong> registros de acesso à conta, faturas, follow-ups e chamados.
         </li>
         <li>
-          <strong>Dados de navegação:</strong> métricas agregadas e anônimas de visita ao site, via Plausible
-          Analytics, que não usa cookies nem identifica pessoas.
+          <strong>Dados de navegação:</strong> medição própria de funil, feita pela WaveOps, sem ferramenta de
+          terceiro. Registramos o evento (visita, envio de formulário, abertura de checkout, pagamento,
+          ativação), a página e o domínio de origem. Não gravamos nada no seu dispositivo: não há cookie nem
+          armazenamento local para essa medição. Para agrupar os eventos de uma mesma sessão usamos um código
+          derivado do seu IP e do navegador, que muda todo dia e não permite identificar você nem recuperar o
+          IP. O IP em si não é armazenado. Esses registros são apagados após 180 dias.
         </li>
         <li>
           <strong>Dados de publicidade:</strong> no site institucional (waveops.com.br), o Meta Pixel registra

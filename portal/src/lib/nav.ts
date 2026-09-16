@@ -24,6 +24,7 @@ export const ADMIN_NAV: NavEntry[] = [
   { id: "/admin/clientes", label: "Clientes", icon: "users", href: "/admin/clientes" },
   { id: "/admin/faturas", label: "Faturas", icon: "invoice", href: "/admin/faturas" },
   { id: "/admin/followups", label: "Follow-ups", icon: "bell", href: "/admin/followups" },
+  { id: "/admin/funil", label: "Funil", icon: "trend", href: "/admin/funil" },
   { sec: "Configuração" },
   { id: "/admin/planos", label: "Planos", icon: "layers", href: "/admin/planos" },
   { id: "/admin/configuracoes", label: "Configurações", icon: "settings", href: "/admin/configuracoes" },
@@ -39,6 +40,7 @@ export const PAGE_META: Record<string, { title: string; crumb: string }> = {
   "/admin/clientes": { title: "Clientes", crumb: "Admin · Clientes" },
   "/admin/faturas": { title: "Faturas", crumb: "Admin · Faturas" },
   "/admin/followups": { title: "Follow-ups", crumb: "Admin · Follow-ups" },
+  "/admin/funil": { title: "Funil", crumb: "Admin · Funil" },
   "/admin/planos": { title: "Planos", crumb: "Admin · Planos" },
   "/admin/configuracoes": { title: "Configurações", crumb: "Admin · Configurações" },
 };

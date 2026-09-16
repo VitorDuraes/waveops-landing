@@ -1,6 +1,7 @@
 import "server-only";
 import { getRepo } from "./repo";
 import { notifyDiscord, sendEmail, notifyTeamNewCustomer } from "./integrations";
+import { registrarPorCliente } from "./evento";
 import { env } from "./env";
 import { log } from "./log";
 
@@ -19,6 +20,12 @@ export async function onPaymentApplied(result: AppliedPayment, source: "webhook"
   if (!(result.applied && result.invoiceId)) return;
   await notifyDiscord(`Pagamento confirmado (${source}) · fatura ${result.invoiceId} quitada e cliente reativado.`);
   if (!result.customerId) return;
+
+  // Etapa "pagamento confirmado" do funil (SPEC-18). Fica aqui, e nao no webhook,
+  // porque este e o unico ponto por onde passam os dois caminhos (webhook e
+  // reconciliacao) e porque a idempotencia ja e resolvida acima: onPaymentApplied
+  // so chega neste ponto quando o pagamento foi de fato aplicado.
+  await registrarPorCliente("pagamento_confirmado", result.customerId, { origem_do_evento: source });
 
   const target = await getRepo().getActivationTarget(result.customerId);
   if (!target) return; // ja ativou (tem senha): nada a fazer

@@ -12,18 +12,20 @@
   const MIN_FILL_MS = 1200;
   const fillTimeMs = () => Date.now() - pageLoadedAt;
 
-  /* ---- Analytics helper (SPEC-02). No-op até o Plausible carregar no <head>. ----
-     O mesmo evento vai para o Plausible (métrica interna) e para o Meta Pixel
-     (otimização de campanha). Só os eventos mapeados aqui viram conversão no Meta:
-     evento sem mapeamento segue apenas para o Plausible. Ver assets/meta-pixel.js. */
+  /* ---- Analytics helper (SPEC-18). No-op se assets/funil.js não tiver carregado. ----
+     O mesmo evento vai para a nossa medição de funil (métrica interna, POST /api/e
+     no portal) e para o Meta Pixel (otimização de campanha). Só os eventos mapeados
+     aqui viram conversão no Meta: evento sem mapeamento segue apenas para o funil.
+     O nome do evento precisa existir na lista fechada de portal/src/lib/funil.ts,
+     senão o servidor descarta em silêncio. Ver assets/meta-pixel.js. */
   const FB_EVENTS = {
-    lead_form_submit: 'Lead',
+    lead_enviado: 'Lead',
     whatsapp_click: 'Contact',
   };
 
   function track(event, props) {
     try {
-      if (window.plausible) window.plausible(event, { props: props || {} });
+      if (window.WaveFunil) window.WaveFunil.enviar(event, props);
     } catch (e) {}
     try {
       const fbEvent = FB_EVENTS[event];
@@ -302,13 +304,28 @@
     cvStart();
   }
 
-  /* ---- WhatsApp click tracking (SPEC-02) ---- */
+  /* ---- WhatsApp click tracking (SPEC-02, mantido na SPEC-18) ---- */
   document.querySelectorAll('a[href*="wa.me"]').forEach((a) => {
     a.addEventListener('click', () => {
       const local = a.closest('.hero') ? 'hero' : a.closest('footer') ? 'rodape' : (a.id === 'wa-btn' ? 'contato' : 'outro');
       track('whatsapp_click', { local: local });
     });
   });
+
+  /* ---- Interesse comercial: a seção de preços entrou na tela (SPEC-18). ----
+     Dispara uma vez só. Não é etapa do funil, é sinal lateral: serve para separar
+     quem passou pela página de quem chegou a olhar preço. Observador próprio e
+     descartado no primeiro disparo, para não competir com o de revelação. */
+  (function () {
+    const precos = document.getElementById('pacotes');
+    if (!precos || !('IntersectionObserver' in window)) return;
+    const obs = new IntersectionObserver((entries) => {
+      if (!entries.some((e) => e.isIntersecting)) return;
+      track('seccao_precos');
+      obs.disconnect();
+    }, { threshold: 0.25 });
+    obs.observe(precos);
+  })();
 
   /* ---- Entrada do hero no carregamento (sequência curta de fade + slide).
      A classe .hero-anim no <html> dispara a animação CSS uma vez, logo no load.
@@ -479,7 +496,7 @@
 
       try {
         await submitLead(data);
-        track('lead_form_submit', { dor: data.dor });
+        track('lead_enviado', { dor: data.dor });
         const name = (data.nome || 'pessoa').split(' ')[0];
         document.getElementById('success-name').textContent = name;
         form.style.display = 'none';

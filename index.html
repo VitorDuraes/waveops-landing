@@ -15,7 +15,7 @@
          não deixa configurar. Ver docs/specs/SECURITY-n8n-hardening.md. -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' https://plausible.io https://connect.facebook.net; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://www.facebook.com; connect-src 'self' https://plausible.io https://cowboyhouse.app.n8n.cloud https://www.facebook.com; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+      content="default-src 'self'; script-src 'self' https://connect.facebook.net; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://www.facebook.com; connect-src 'self' https://portal.waveops.com.br https://cowboyhouse.app.n8n.cloud https://www.facebook.com; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
     />
 
     <title>WaveOps · Automação, Sistemas e IA para sua operação</title>
@@ -169,13 +169,10 @@
       }
     </script>
 
-    <!-- ===== Analytics: Plausible (SPEC-02). Eventos custom (lead_form_submit, whatsapp_click, billing_toggle) no main.js. ===== -->
-    <!-- Privacy-friendly analytics by Plausible -->
-    <script
-      async
-      src="https://plausible.io/js/pa-3A-v5Qj43NcdwvJCaiw5T.js"
-    ></script>
-    <script src="assets/analytics.js"></script>
+    <!-- ===== Medição própria de funil (SPEC-18). Manda evento para POST /api/e no
+         portal, que é onde estão o banco e as faturas. Substituiu o Plausible, que
+         deixou de ser pago e media só a landing, sem alcançar o pagamento. ===== -->
+    <script src="assets/funil.js?v=20260916a"></script>
 
     <!-- ===== Meta Pixel (Facebook/Instagram Ads). Bootstrap em arquivo proprio por causa da CSP. ===== -->
     <script src="assets/meta-pixel.js"></script>

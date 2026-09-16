@@ -67,6 +67,9 @@ export interface CheckoutRecordInput {
   provider: string;
   gatewayCustomerId?: string;
   gatewaySubscriptionId?: string;
+  // Id do visitante do dia (SPEC-18). Guardado aqui porque o hash diario morre em
+  // 24h: e o que mantem o vinculo visita -> fatura quando o pagamento cai depois.
+  visitorId?: string;
 }
 export interface GatewayPaymentInput {
   gatewayPaymentId?: string;
@@ -586,6 +589,7 @@ function prismaRepoFactory(): Repo {
         monthlyAmount: cents,
         paymentMethod: input.method,
         gatewayCustomerId: input.gatewayCustomerId,
+        visitorId: input.visitorId,
       };
       const customer = existing
         ? await db.customer.update({

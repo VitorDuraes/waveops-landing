@@ -165,7 +165,24 @@ export async function runDunning(): Promise<DunningResult> {
     );
   }
 
+  // Retencao da medicao de funil (SPEC-18): evento com mais de 180 dias e apagado.
+  // Pega carona no job diario que ja roda, em vez de virar um cron novo. Falhar aqui
+  // nao pode derrubar a regua de cobranca, que e o que este job existe para fazer.
+  await expurgarEventos();
+
   return { mode: "db", steps, paused: toPause.length };
+}
+
+const RETENCAO_EVENTOS_DIAS = 180;
+
+async function expurgarEventos(): Promise<void> {
+  try {
+    const limite = new Date(Date.now() - RETENCAO_EVENTOS_DIAS * 24 * 60 * 60 * 1000);
+    const r = await getPrisma().evento.deleteMany({ where: { createdAt: { lt: limite } } });
+    if (r.count) log.info("eventos.expurgo", { apagados: r.count, dias: RETENCAO_EVENTOS_DIAS });
+  } catch (e) {
+    log.warn("eventos.expurgo_falhou", { erro: e instanceof Error ? e.message : "desconhecido" });
+  }
 }
 
 function signed(offset: number): string {

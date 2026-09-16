@@ -29,10 +29,23 @@ gerenciado). Observabilidade: OpenTelemetry exportando para Grafana Cloud (free)
    comandos custom `cd portal && npm run build` / `cd portal && npm start`.
 
 ## 3. Migracoes do banco
-Hoje usamos `prisma db push` (sem pasta de migrations). Opcoes no Railway:
-- Rapido (MVP): defina um **Deploy/Pre-Deploy Command** = `npx prisma db push`.
-- Recomendado depois: gere migrations (`prisma migrate dev` local, commitar
-  `prisma/migrations/`) e use `npm run db:deploy` (`prisma migrate deploy`).
+
+> **DIRECT_URL e obrigatoria, e a falta dela trava TUDO.** O `schema.prisma` declara
+> `directUrl = env("DIRECT_URL")`. Sem essa variavel, o Prisma nem chega a falar com o
+> banco: ele falha na validacao do schema com `P1012 Environment variable not found:
+> DIRECT_URL`, e isso derruba **qualquer** comando de schema, `migrate deploy` e
+> `db push` igual. Sintoma tipico: tabela nova nao existe em producao e a tela que a
+> consulta responde erro de servidor. Aconteceu em 16/09/2026 com a tabela `eventos`.
+>
+> Valor: a conexao DIRETA do Postgres (porta 5432), nao a do pooler (6543). Migration
+> por pooler em modo transaction falha por causa de prepared statement e advisory lock.
+> Para descobrir o host atual sem expor senha, rode no shell do Railway:
+> `node -e "const u=new URL(process.env.DATABASE_URL);console.log(u.hostname,u.port)"`.
+
+Ha migrations versionadas em `prisma/migrations/`. No Railway:
+- Defina um **Deploy/Pre-Deploy Command** = `npm run db:deploy` (`prisma migrate deploy`).
+- `prisma db push` so para prototipo local. Em producao ele diverge do historico de
+  migrations e depois quebra o `migrate deploy`.
 - Seed (opcional, so 1a vez): rode `npm run db:seed` via Railway shell.
 
 ## 4. Variaveis de ambiente do app
@@ -40,6 +53,7 @@ No servico do app, em Variables:
 ```
 APP_URL=https://<seu-dominio>.up.railway.app   # ou dominio custom
 DATABASE_URL=${{Postgres.DATABASE_URL}}
+DIRECT_URL=<conexao direta, porta 5432>       # OBRIGATORIA: sem ela, migration nenhuma roda
 SESSION_SECRET=<string aleatoria 32+ chars>
 AUTH_ENFORCED=true          # producao exige login (so use false em demo)
 ADMIN_EMAIL=financeiro@waveops.com.br
@@ -98,7 +112,8 @@ O endpoint `/api/jobs/dunning` e protegido por `CRON_SECRET`. Agende um cron:
 
 ## Checklist pos-deploy
 - [ ] App sobe e `/` mostra a landing; `/cliente` e `/admin` respondem.
-- [ ] `DATABASE_URL` conectado (schema aplicado via db push/migrate).
+- [ ] `DATABASE_URL` e `DIRECT_URL` configuradas, e `npm run db:deploy` roda sem `P1012`.
+- [ ] Schema aplicado: a tabela da ultima migration existe no banco.
 - [ ] Login admin funciona com `AUTH_ENFORCED=true`.
 - [ ] Trace aparece no Grafana Tempo apos um checkout (filtrar por service.name).
 - [ ] Webhook do MP chega e baixa a fatura (testar com pagamento sandbox primeiro).

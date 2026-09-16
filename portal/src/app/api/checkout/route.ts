@@ -4,6 +4,7 @@ import { getRepo } from "@/server/repo";
 import { getGateway } from "@/server/payments";
 import { notifyDiscord } from "@/server/integrations";
 import { rateLimit, clientIp } from "@/server/ratelimit";
+import { registrarNoServidor } from "@/server/evento";
 import { log } from "@/server/log";
 
 // Publica: inicia a assinatura no gateway e devolve a URL de pagamento.
@@ -49,6 +50,12 @@ export async function POST(req: NextRequest) {
     boleto: "boleto",
   };
   const pay = methodMap[String(method || "").toLowerCase()] || "pix";
+
+  // Medicao de funil (SPEC-18). Roda DEPOIS das validacoes e ANTES do gateway: so
+  // conta como "checkout enviado" o que chegou inteiro. O visitorId volta daqui e
+  // vai para o recordCheckout, que e o que torna o vinculo visita -> fatura
+  // permanente. registrarNoServidor nunca lanca.
+  const visitorId = await registrarNoServidor("checkout_enviado", req.headers, { plano: plan.id, metodo: pay }, "/checkout");
   try {
     const result = await gateway.createSubscription({
       customer: { name, email, phone, document },
@@ -70,6 +77,7 @@ export async function POST(req: NextRequest) {
       provider: result.provider,
       gatewayCustomerId: result.gatewayCustomerId,
       gatewaySubscriptionId: result.gatewaySubscriptionId,
+      visitorId,
     });
     log.info("checkout.iniciado", {
       ref: result.gatewaySubscriptionId,

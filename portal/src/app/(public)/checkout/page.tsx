@@ -1,6 +1,6 @@
 "use client";
 // 02 . Checkout (/checkout)
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Icon } from "@/components/icons";
@@ -9,6 +9,7 @@ import { useToast } from "@/components/providers";
 import { plans } from "@/lib/data";
 import { whatsappUrl } from "@/lib/contact";
 import { fmt, fmtFull } from "@/lib/format";
+import { enviarEvento } from "@/lib/funil-cliente";
 
 type Method = "pix" | "card" | "boleto";
 
@@ -26,6 +27,13 @@ function CheckoutInner() {
   // entao o padrao e desmarcado. [varredura 2026-08-10]
   const [terms, setTerms] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Etapa "checkout aberto" do funil (SPEC-18). Dispara uma vez por montagem, com o
+  // plano escolhido. Quem conclui vira "checkout enviado", na rota /api/checkout: a
+  // distancia entre os dois numeros e o atrito do formulario de pagamento.
+  useEffect(() => {
+    enviarEvento("checkout_aberto", { plano: plan.id });
+  }, [plan.id]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

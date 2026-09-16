@@ -1,6 +1,6 @@
 /* WaveOps: Meta Pixel (Facebook/Instagram Ads).
    Movido para arquivo proprio para a CSP poder usar script-src 'self'
-   (sem 'unsafe-inline'), igual ao analytics.js. Nao re-inline no HTML.
+   (sem 'unsafe-inline'), igual ao funil.js. Nao re-inline no HTML.
 
    Origens que precisam estar liberadas na CSP do index.html:
      script-src  https://connect.facebook.net

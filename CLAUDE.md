@@ -24,9 +24,11 @@ tem dois arquivos. Medido em 11/09/2026 com `gzip -9` sobre cada arquivo:
 | `assets/scroll-signal.mjs` | 0,6 KB | sempre |
 | **Total do island do hero** | **9,1 KB** | |
 
-Somando os scripts clássicos (`analytics.js`, `meta-pixel.js`, `theme-store.js`, `motion.js`,
-`main.js`, `cinema.js`, `operacao.js`), a página baixa **27,5 KB gzip de JavaScript próprio,
-em 9 arquivos**, e **55,3 KB gzip de CSS em 6 arquivos**. Medido em 12/09/2026. O CSS é hoje
+Somando os scripts clássicos (`funil.js`, `meta-pixel.js`, `theme-store.js`, `motion.js`,
+`main.js`, `cinema.js`, `operacao.js`), a página baixa **28,9 KB gzip de JavaScript próprio,
+em 9 arquivos**, e **55,3 KB gzip de CSS em 6 arquivos**. JavaScript medido em 16/09/2026, CSS
+em 12/09/2026. Em 16/09/2026 `analytics.js` (0,3 KB, bootstrap do Plausible) saiu e
+`assets/funil.js` (1,1 KB, medição própria, SPEC-18) entrou. O CSS é hoje
 o dobro do JavaScript, e metade dele é `assets/cinema.css` (22,8 KB gzip), que desenha as
 cinco maquetes de produto de "O que fazemos".
 Antes do porte eram **84,2 KB em 13 arquivos**. A queda foi de **61,4 KB gzip**, e 61,2 KB disso
@@ -62,8 +64,8 @@ The entry file is `index.html` (renamed from `FlowOps Landing.html` so GitHub Pa
 ### Script load order (intentional, do not reorder)
 In `<head>`, in order: the CSP `<meta>` (must come first, before any resource), then
 `assets/fonts.css` + `assets/styles.css` + `assets/cinematic.css` + `assets/cinema.css` +
-`assets/motion-system.css` + `assets/operacao.css`, then the async Plausible script
-(`plausible.io`), then `assets/analytics.js` (Plausible bootstrap), then `assets/theme-store.js`.
+`assets/motion-system.css` + `assets/operacao.css`, then `assets/funil.js` (medição própria de
+funil, SPEC-18), then `assets/meta-pixel.js`, then `assets/theme-store.js`.
 At the end of `<body>`: `assets/motion.js`, `assets/main.js`, `assets/operacao.js`,
 `assets/cinema.js` (defer), `assets/starfield.mjs` (module).
 
@@ -76,7 +78,14 @@ os `var(--t-calmo, 550ms)` caem nos fallbacks e a página perde o ritmo comum.
 `operacao.css` carrega por último de propósito: ele sobrescreve `styles.css`, `cinematic.css`
 e `cinema.css` sem precisar de `!important`.
 1. `assets/theme-store.js` in `<head>` applies the theme attributes before paint (prevents a flash of the wrong theme).
-2. `assets/analytics.js` holds the Plausible queue stub + `init()` (moved out of an inline `<script>` so the CSP can use `script-src 'self'` without `'unsafe-inline'`). Do not re-inline it.
+2. `assets/funil.js` expõe `window.WaveFunil.enviar(nome, props)` e dispara `visita` sozinho. Ele
+   manda o evento para `POST /api/e` no portal (`portal.waveops.com.br`), que é onde estão o banco e
+   as faturas: é isso que permite ligar a visita anônima à fatura paga, coisa que nenhuma ferramenta
+   hospedada faz. Duas coisas que parecem detalhe e não são: **o corpo vai como `text/plain`** (com
+   `application/json` o navegador dispara preflight entre origens, e preflight morre quando a página
+   está sendo descarregada), e **o nome do evento precisa existir na lista fechada de
+   `portal/src/lib/funil.ts`**, senão o servidor descarta em silêncio. Substituiu o Plausible, que
+   deixou de ser pago (SPEC-18, 16/09/2026). Não re-inline o arquivo.
 3. `assets/main.js` at the end of `<body>` wires all DOM interactions.
 4. `assets/operacao.js` carrega depois do `main.js` e antes do `cinema.js`. Ele depende de
    `data-motion` já estar escrito no `<html>` (quem escreve é o `motion.js`) e escuta
@@ -114,13 +123,14 @@ Uma diferença de comportamento em relação à versão React, medida e aceita: 
 `paused` derrubava o efeito inteiro e reconstruía a grade, o que ressorteava as estrelas e zerava a
 rotação delas. Agora pausar só congela o quadro. A diferença de tinta no canvas foi de 0,19%.
 
-No Babel, no build step, **no React in production**. The only remaining third-party network requests
-are the async Plausible script and the Meta Pixel; everything else (fonts, CSS, JS) is self-hosted.
+No Babel, no build step, **no React in production**. The only remaining third-party network request
+is the Meta Pixel; everything else (fonts, CSS, JS) is self-hosted, e a medição de funil bate no
+nosso próprio portal.
 The Tweaks panel and its React/Babel CDN scripts were removed from the page; the sources now live in
 `dev/`.
 
 ### Security hardening (HTTP/CSP, fonts, anti-bot)
-- **CSP** is a `<meta http-equiv="Content-Security-Policy">` at the very top of `<head>`. If you add a third-party origin (script, font, image, or a `fetch`/`connect` target), you must add it to the matching directive or the browser blocks it. `connect-src` currently allows the n8n webhook host and `plausible.io`; `script-src` allows `plausible.io`. `style-src` keeps `'unsafe-inline'` because the HTML uses inline `style=` attributes (low risk; not worth a full refactor). `frame-ancestors`/`X-Frame-Options` only work as HTTP headers, and a `<meta>` CSP cannot carry them. This was blocked while the site was on GitHub Pages. **It is no longer blocked**: the site is on Netlify, which sets headers from a `[[headers]]` block in `netlify.toml`. As of 13/09/2026 that block does not exist and the live response carries only `Strict-Transport-Security`, so clickjacking protection is still open, but now for want of the work, not for want of a host.
+- **CSP** is a `<meta http-equiv="Content-Security-Policy">` at the very top of `<head>`. If you add a third-party origin (script, font, image, or a `fetch`/`connect` target), you must add it to the matching directive or the browser blocks it. `connect-src` currently allows the n8n webhook host, `portal.waveops.com.br` (medição de funil) e `www.facebook.com`; `script-src` allows `connect.facebook.net`. `style-src` keeps `'unsafe-inline'` because the HTML uses inline `style=` attributes (low risk; not worth a full refactor). `frame-ancestors`/`X-Frame-Options` only work as HTTP headers, and a `<meta>` CSP cannot carry them. This was blocked while the site was on GitHub Pages. **It is no longer blocked**: the site is on Netlify, which sets headers from a `[[headers]]` block in `netlify.toml`. As of 13/09/2026 that block does not exist and the live response carries only `Strict-Transport-Security`, so clickjacking protection is still open, but now for want of the work, not for want of a host.
 - **Fonts are self-hosted** in `assets/fonts/` (woff2) with `@font-face` in `assets/fonts.css`. Regenerate with `python _fetch_fonts.py` (downloads only the weights used; Sora was dropped as unused). Do not re-add the Google Fonts `<link>`.
 - **Anti-bot** on both lead forms: a hidden honeypot field (`website`/`#f-website`/`#cl-website`) plus a minimum fill-time gate (`MIN_FILL_MS` in `main.js`). Both only stop bots that render the page; bots posting straight to the webhook need server-side defense. See `docs/specs/SECURITY-n8n-hardening.md`.
 

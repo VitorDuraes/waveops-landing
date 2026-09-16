@@ -119,6 +119,10 @@ model Customer {
   phone             String?
   email             String
   status            CustomerStatus  @default(lead)
+  // Id do visitante (hash diario, SPEC-18) no momento do checkout. O hash morre em
+  // 24h, entao guardar aqui e o que mantem o vinculo visita -> fatura quando o
+  // pagamento cai dias depois. Nao identifica pessoa: e pseudonimo e nao reversivel.
+  visitorId         String?         @map("visitor_id")
   // Senha do cliente (scrypt). Null = conta ainda nao ativada (lead so paga,
   // recebe e-mail de ativacao e define a senha). Login por e-mail ou documento.
   passwordHash      String?         @map("password_hash")
@@ -138,6 +142,7 @@ model Customer {
   createdAt         DateTime        @default(now()) @map("created_at")
   updatedAt         DateTime        @updatedAt @map("updated_at")
 
+  @@index([visitorId])
   @@map("customers")
 }
 
@@ -244,4 +249,23 @@ model SupportTicket {
   updatedAt     DateTime       @updatedAt @map("updated_at")
 
   @@map("support_tickets")
+}
+
+// Medicao propria de funil (SPEC-18). Uma linha por evento, sem cookie e sem PII:
+// nem IP, nem e-mail, nem nome entram aqui. O visitorId e o hash diario calculado
+// no servidor (src/server/visitante.ts), igual nos dois dominios no mesmo dia, o
+// que e exatamente o que faz o funil atravessar a landing e o portal.
+model Evento {
+  id           String   @id @default(cuid())
+  nome         String
+  visitorId    String   @map("visitor_id")
+  origem       String // "landing" | "portal"
+  path         String?
+  referrerHost String?  @map("referrer_host")
+  props        Json?
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([nome, createdAt])
+  @@index([visitorId])
+  @@map("eventos")
 }

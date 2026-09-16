@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { Icon, type IconName } from "@/components/icons";
 import { readSession } from "@/server/auth";
 import { env } from "@/server/env";
-import { lerFunil, MINIMO_PARA_DIAGNOSTICO, type LinhaFunil } from "@/server/funil";
+import { lerFunil, lerOrigens, MINIMO_PARA_DIAGNOSTICO, type LinhaFunil } from "@/server/funil";
 
 // Server Component de propósito: lê o banco direto, sem passar por rota de API.
 // A barreira de autorização é ESTA checagem, não o proxy: o proxy é otimista e a
@@ -41,7 +41,7 @@ export default async function FunilPage({
 
   const sp = await searchParams;
   const dias = PERIODOS.includes(Number(sp.dias)) ? Number(sp.dias) : 30;
-  const funil = await lerFunil(dias);
+  const [funil, origens] = await Promise.all([lerFunil(dias), lerOrigens(dias)]);
 
   const degraus = funil.linhas.filter((l) => l.etapa);
   const laterais = funil.linhas.filter((l) => !l.etapa);
@@ -197,6 +197,43 @@ export default async function FunilPage({
                 </div>
               </div>
             ))}
+          </div>
+        )}
+      </div>
+
+      <div className="card" style={{ marginTop: "var(--gap)" }}>
+        <h3 style={{ fontSize: 17 }}>Por onde chegam</h3>
+        <p className="lead" style={{ marginTop: 4, marginBottom: 12, fontSize: 13.5 }}>
+          UTM quando o link foi carimbado por nós, senão o site que encaminhou. "Direto" mistura URL
+          digitada, favorito, aplicativo e e-mail: não dá para separar esses quatro, e fingir que dá
+          seria pior. A atribuição casa visita e pagamento do mesmo dia.
+        </p>
+        {origens.length === 0 ? (
+          <p className="lead" style={{ fontSize: 13.5 }}>Nenhuma visita no período.</p>
+        ) : (
+          <div className="table-wrap">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Canal</th>
+                  <th style={{ textAlign: "right" }}>Visitas</th>
+                  <th style={{ textAlign: "right" }}>Leads</th>
+                  <th style={{ textAlign: "right" }}>Pagantes</th>
+                  <th style={{ textAlign: "right" }}>Conversão</th>
+                </tr>
+              </thead>
+              <tbody>
+                {origens.map((o) => (
+                  <tr key={o.fonte}>
+                    <td className="cell-strong">{o.fonte}</td>
+                    <td style={{ textAlign: "right" }} className="cell-mono">{num(o.visitas)}</td>
+                    <td style={{ textAlign: "right" }} className="cell-mono">{num(o.leads)}</td>
+                    <td style={{ textAlign: "right" }} className="cell-mono">{num(o.pagantes)}</td>
+                    <td style={{ textAlign: "right" }} className="cell-mono">{taxa(o.taxa)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>

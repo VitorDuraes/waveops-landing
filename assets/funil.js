@@ -27,9 +27,32 @@
     }
   }
 
+  /* De onde a pessoa veio. Precedência: UTM vence referrer, porque UTM é o que nós
+     carimbamos no link e é o único que separa campanha de campanha. Sem os dois é
+     "direto", que mistura URL digitada, favorito, app e e-mail: não dá para separar,
+     e fingir que dá seria pior. */
+  function fonte() {
+    try {
+      var p = new URLSearchParams(location.search);
+      var src = (p.get('utm_source') || '').trim();
+      if (src) {
+        var med = (p.get('utm_medium') || '').trim();
+        return (med ? src + '/' + med : src).slice(0, 64);
+      }
+      var r = refHost();
+      return r ? r.slice(0, 64) : 'direto';
+    } catch (e) {
+      return 'direto';
+    }
+  }
+
+  // Uma vez por carregamento: por evento, um clique depois de trocar de aba cairia
+  // em "direto" e sujaria a atribuição.
+  var FONTE = fonte();
+
   function enviar(nome, props) {
     try {
-      var corpo = JSON.stringify({ n: nome, p: props || undefined, u: location.pathname, r: refHost() });
+      var corpo = JSON.stringify({ n: nome, p: props || undefined, u: location.pathname, r: refHost(), f: FONTE });
       if (navigator.sendBeacon) {
         var blob = new Blob([corpo], { type: 'text/plain;charset=UTF-8' });
         if (navigator.sendBeacon(URL_EVENTO, blob)) return;

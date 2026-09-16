@@ -264,6 +264,10 @@ model Evento {
   nome         String
   visitorId    String   @map("visitor_id")
   origem       String // "landing" | "portal"
+  // De onde a pessoa veio: "instagram/cpc" (UTM), "google.com" (referrer) ou
+  // "direto". Coluna propria, e nao dentro de props, porque "qual canal traz
+  // pagante" e pergunta de agregacao: em JSON ela nao usa indice.
+  fonte        String?
   path         String?
   referrerHost String?  @map("referrer_host")
   props        Json?
@@ -271,5 +275,6 @@ model Evento {
 
   @@index([nome, createdAt])
   @@index([visitorId])
+  @@index([fonte])
   @@map("eventos")
 }

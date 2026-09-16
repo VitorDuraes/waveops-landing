@@ -2,7 +2,7 @@ import "server-only";
 import { getPrisma } from "./db";
 import { env } from "./env";
 import { log } from "./log";
-import { ETAPAS, EVENTOS, ROTULO_ETAPA, type NomeEvento } from "@/lib/funil";
+import { ETAPAS, EVENTOS, EVENTOS_DA_LANDING, ROTULO_ETAPA, type NomeEvento } from "@/lib/funil";
 
 // Leitura do funil para a tela do admin (SPEC-18).
 //
@@ -106,10 +106,10 @@ export async function lerOrigens(dias = 30): Promise<LinhaOrigem[]> {
         COUNT(DISTINCT p.visitor_id) AS pagantes
       FROM eventos v
       LEFT JOIN eventos l
-        ON l.visitor_id = v.visitor_id AND l.nome = 'lead_enviado' AND l.created_at >= ${desde}
+        ON l.visitor_id = v.visitor_id AND l.nome = 'lead_enviado' AND l.origem = 'landing' AND l.created_at >= ${desde}
       LEFT JOIN eventos p
         ON p.visitor_id = v.visitor_id AND p.nome = 'pagamento_confirmado' AND p.created_at >= ${desde}
-      WHERE v.nome = 'visita' AND v.created_at >= ${desde}
+      WHERE v.nome = 'visita' AND v.origem = 'landing' AND v.created_at >= ${desde}
       GROUP BY COALESCE(v.fonte, 'direto')
       ORDER BY 2 DESC
       LIMIT 15
@@ -147,6 +147,7 @@ export async function lerFunil(dias = 30): Promise<Funil> {
       SELECT nome, COUNT(DISTINCT visitor_id) AS visitantes, COUNT(*) AS eventos
       FROM eventos
       WHERE created_at >= ${desde}
+        AND (origem = 'landing' OR NOT (nome = ANY(${EVENTOS_DA_LANDING})))
       GROUP BY nome
     `;
   } catch (e) {

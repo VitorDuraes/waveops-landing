@@ -44,6 +44,14 @@ export const ROTULO_ETAPA: Record<NomeEvento, string> = {
   ativacao: "Conta ativada",
 };
 
+// Eventos que NASCEM na landing. So contam quando chegam com origem "landing".
+//
+// Motivo concreto: o portal serve uma copia da landing na propria raiz (ver
+// portal/scripts/sync-landing.mjs), entao abrir portal.waveops.com.br para conferir
+// qualquer coisa dispara uma "visita" identica a de um visitante real. Sem esta
+// regra, o topo do funil mistura trafego de verdade com a gente navegando no painel.
+export const EVENTOS_DA_LANDING: NomeEvento[] = ["visita", "seccao_precos", "lead_enviado", "whatsapp_click"];
+
 export const LIMITES = {
   corpoBytes: 2048,
   props: 5,

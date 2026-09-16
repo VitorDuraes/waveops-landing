@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { rateLimit, clientIp } from "@/server/ratelimit";
 import { idDoVisitante, registrarEvento } from "@/server/evento";
 import { normalizarEvento, LIMITES } from "@/lib/funil";
+import { ehRobo } from "@/lib/robo";
 
 // Coleta de evento de funil (SPEC-18). Rota PUBLICA, chamada pela landing estatica
 // (waveops.com.br, outra origem) e pelas telas do portal (mesma origem).
@@ -35,6 +36,10 @@ export async function POST(req: NextRequest) {
   const origin = req.headers.get("origin");
   // Sem Origin = mesma origem (as telas do portal). Com Origin, tem que ser a landing.
   if (origin && !ORIGENS.includes(origin)) return vazio(null);
+
+  // Robo fora, antes de qualquer trabalho. Googlebot executa JavaScript, entao sem
+  // isso ele entra no topo do funil como pessoa. Ver src/lib/robo.ts.
+  if (ehRobo(req.headers.get("user-agent"))) return vazio(origin);
 
   // Corte por tamanho ANTES de ler o corpo, para um corpo gigante nao virar trabalho.
   const tamanho = Number(req.headers.get("content-length") || 0);

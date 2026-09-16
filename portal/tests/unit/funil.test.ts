@@ -1,7 +1,8 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import { calcularId, diaUtc } from "../../src/lib/funil";
-import { normalizarEvento, normalizarFonte, ETAPAS, EVENTOS } from "../../src/lib/funil";
+import { normalizarEvento, normalizarFonte, ETAPAS, EVENTOS, EVENTOS_DA_LANDING } from "../../src/lib/funil";
+import { ehRobo } from "../../src/lib/robo";
 
 // Testes das funcoes puras da medicao de funil (SPEC-18). Rodam sem banco e sem
 // servidor: `npm run test:unit`. O que depende de Postgres e coberto pelos
@@ -152,5 +153,53 @@ describe("normalizarFonte: entrada de borda", () => {
     const ev = normalizarEvento({ n: "visita", f: "Google.com" });
     assert.equal(ev?.fonte, "google.com");
     assert.equal(normalizarEvento({ n: "visita" })?.fonte, null);
+  });
+});
+
+describe("ehRobo: quem nao entra na conta", () => {
+  test("navegador de verdade passa", () => {
+    assert.equal(
+      ehRobo("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36"),
+      false
+    );
+    assert.equal(ehRobo("Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1"), false);
+  });
+
+  test("robo de busca e de IA e barrado", () => {
+    // Googlebot executa JavaScript: sem esta barreira ele entra no topo do funil
+    // como pessoa, e a taxa de conversao desaba sem ninguem ter desistido de nada.
+    assert.equal(ehRobo("Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"), true);
+    assert.equal(ehRobo("Mozilla/5.0 (compatible; GPTBot/1.1; +https://openai.com/gptbot)"), true);
+    assert.equal(ehRobo("Mozilla/5.0 (compatible; AhrefsBot/7.0)"), true);
+  });
+
+  test("previa de link de mensageiro e barrada", () => {
+    // Um link colado no WhatsApp gera uma busca de previa. Sem filtro, cada link
+    // compartilhado viraria uma visita que nunca existiu.
+    assert.equal(ehRobo("WhatsApp/2.23.20.0"), true);
+    assert.equal(ehRobo("facebookexternalhit/1.1"), true);
+  });
+
+  test("ferramenta de linha de comando e barrada", () => {
+    assert.equal(ehRobo("curl/8.4.0"), true);
+    assert.equal(ehRobo("python-requests/2.31.0"), true);
+  });
+
+  test("sem user-agent e tratado como robo", () => {
+    // Navegador de verdade sempre manda user-agent. Ausencia e script.
+    assert.equal(ehRobo(null), true);
+    assert.equal(ehRobo(""), true);
+  });
+});
+
+describe("eventos da landing", () => {
+  test("a lista so tem evento que existe", () => {
+    for (const e of EVENTOS_DA_LANDING) assert.ok(EVENTOS.includes(e), `${e} fora da lista fechada`);
+  });
+
+  test("etapa que nasce no portal nao esta na lista", () => {
+    for (const e of ["checkout_aberto", "checkout_enviado", "pagamento_confirmado", "ativacao"] as const) {
+      assert.ok(!EVENTOS_DA_LANDING.includes(e), `${e} nao nasce na landing`);
+    }
   });
 });

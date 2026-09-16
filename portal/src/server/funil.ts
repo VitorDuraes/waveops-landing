@@ -18,11 +18,24 @@ export interface LinhaFunil {
   eventos: number;
   taxaAnterior: number | null; // % em relacao ao degrau anterior
   taxaTopo: number | null; // % em relacao a visita
+  perdidos: number; // quantos ficaram pelo caminho desde o degrau anterior
+}
+
+export interface Resumo {
+  visitas: number;
+  leads: number;
+  pagamentos: number;
+  ativacoes: number;
+  conversaoGeral: number | null; // % de visita que virou pagamento
 }
 
 export interface Funil {
   desde: Date;
   linhas: LinhaFunil[];
+  resumo: Resumo;
+  // Degrau onde mais gente ficou pelo caminho. E por onde comeca qualquer conversa
+  // sobre conversao, entao a tela marca em vez de deixar o leitor procurar.
+  piorQueda: NomeEvento | null;
   semBanco: boolean;
   // Mensagem quando a consulta falha (tipicamente: tabela ainda nao existe porque a
   // migration nao rodou). A tela mostra isso em vez de estourar erro de servidor.
@@ -38,7 +51,23 @@ function zeradas(): LinhaFunil[] {
     eventos: 0,
     taxaAnterior: null,
     taxaTopo: null,
+    perdidos: 0,
   }));
+}
+
+const RESUMO_ZERO: Resumo = { visitas: 0, leads: 0, pagamentos: 0, ativacoes: 0, conversaoGeral: null };
+
+function resumoDe(linhas: LinhaFunil[]): Resumo {
+  const q = (nome: NomeEvento) => linhas.find((l) => l.nome === nome)?.visitantes ?? 0;
+  const visitas = q("visita");
+  const pagamentos = q("pagamento_confirmado");
+  return {
+    visitas,
+    leads: q("lead_enviado"),
+    pagamentos,
+    ativacoes: q("ativacao"),
+    conversaoGeral: pct(pagamentos, visitas),
+  };
 }
 
 function pct(parte: number, total: number): number | null {
@@ -48,7 +77,7 @@ function pct(parte: number, total: number): number | null {
 
 export async function lerFunil(dias = 30): Promise<Funil> {
   const desde = new Date(Date.now() - dias * 24 * 60 * 60 * 1000);
-  if (!env.hasDb()) return { desde, semBanco: true, linhas: zeradas() };
+  if (!env.hasDb()) return { desde, semBanco: true, linhas: zeradas(), resumo: RESUMO_ZERO, piorQueda: null };
 
   // Uma consulta so, agrupada no banco. Duas contagens por evento: linhas (volume
   // bruto) e visitantes distintos (o numero que vale para conversao).
@@ -72,6 +101,8 @@ export async function lerFunil(dias = 30): Promise<Funil> {
       desde,
       semBanco: false,
       linhas: zeradas(),
+      resumo: RESUMO_ZERO,
+      piorQueda: null,
       erro: semTabela
         ? "A tabela eventos ainda nao existe. Rode a migration no ambiente (npm run db:deploy). Se ela falhar com P1012, falta a variavel DIRECT_URL: veja portal/docs/deploy-railway.md."
         : "Nao foi possivel consultar os eventos. Detalhe no log do servidor.",
@@ -91,8 +122,9 @@ export async function lerFunil(dias = 30): Promise<Funil> {
     // compara-lo com o degrau anterior daria um numero sem significado.
     const taxaAnterior = etapa && nome !== "visita" ? pct(visitantes, anterior) : null;
     const taxaTopo = pct(visitantes, topo);
+    const perdidos = etapa && nome !== "visita" ? Math.max(0, anterior - visitantes) : 0;
     if (etapa) anterior = visitantes;
-    return { nome, rotulo: ROTULO_ETAPA[nome], etapa, visitantes, eventos, taxaAnterior, taxaTopo };
+    return { nome, rotulo: ROTULO_ETAPA[nome], etapa, visitantes, eventos, taxaAnterior, taxaTopo, perdidos };
   });
 
   // Degraus primeiro, na ordem do funil; sinais laterais depois.
@@ -102,5 +134,16 @@ export async function lerFunil(dias = 30): Promise<Funil> {
     return 0;
   });
 
-  return { desde, linhas: saida, semBanco: false };
+  // Maior queda em NUMERO de pessoas, nao em porcentagem: 60% de 5 visitantes e
+  // ruido, 20% de 400 e o problema de verdade.
+  const degraus = saida.filter((l) => l.etapa);
+  const pior = degraus.reduce<LinhaFunil | null>((p, l) => (l.perdidos > (p?.perdidos ?? 0) ? l : p), null);
+
+  return {
+    desde,
+    linhas: saida,
+    resumo: resumoDe(saida),
+    piorQueda: pior && pior.perdidos > 0 ? pior.nome : null,
+    semBanco: false,
+  };
 }

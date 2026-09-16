@@ -539,6 +539,165 @@ table.tbl tbody tr:last-child td { border-bottom: none; }
   .pay-methods { grid-template-columns: 1fr; }
 }
 
+/* ---------- Funil (/admin/funil) ----------
+   O funil e desenhado como fluxo que estreita, nao como tabela: a largura da barra
+   E o dado. Entre duas etapas entra o conector, que carrega a PERDA, porque perda e
+   a resposta que a tela existe para dar. A etapa de maior queda ganha marcador
+   proprio: e por onde comeca qualquer conversa sobre conversao. */
+.funnel { display: flex; flex-direction: column; }
+
+.fstage {
+  display: grid;
+  grid-template-columns: 30px minmax(150px, 210px) 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 13px 4px;
+  border-radius: var(--radius-sm);
+  transition: background 0.16s;
+}
+.fstage:hover { background: var(--hover); }
+
+.fstage .fnum {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--dim);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.fstage .flabel { font-weight: 600; font-size: 14.5px; letter-spacing: -0.01em; }
+.fstage .fsub { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+
+/* Trilho sempre visivel: sem ele, uma etapa com zero desapareceria da tela e o
+   leitor perderia a nocao de quanto do topo sobrou. */
+.fbar {
+  position: relative;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  min-width: 80px;
+}
+/* O preenchimento e CENTRADO: e o que desenha a silhueta de funil estreitando.
+   Alinhado a esquerda, seis barras viram seis riscos e o formato se perde. */
+.fbar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent-press), var(--accent-strong), var(--accent-press));
+  width: var(--w, 0%);
+  min-width: 6px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateX(-50%);
+  animation: fbar-in 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+  animation-delay: var(--d, 0ms);
+}
+/* Etapa final: verde, porque e a unica que significa dinheiro entrando e conta em uso. */
+.fstage.fim .fbar::after { background: linear-gradient(90deg, #15803d, #4ade80, #15803d); }
+.fstage.zero .fbar::after { background: var(--surface-3); box-shadow: none; }
+
+@keyframes fbar-in {
+  from { transform: translateX(-50%) scaleX(0.04); opacity: 0.3; }
+  to { transform: translateX(-50%) scaleX(1); opacity: 1; }
+}
+
+.fstage .fnums { text-align: right; min-width: 108px; }
+.fstage .fqtd {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 21px;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.fstage .fpct {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Conector: a linha vertical amarra as etapas e o chip carrega a perda. */
+.fdrop {
+  display: grid;
+  grid-template-columns: 30px minmax(150px, 210px) 1fr auto;
+  align-items: center;
+  gap: 16px;
+  min-height: 30px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--muted);
+}
+/* A perda mora na coluna da barra, centrada, entre os dois degraus: e o vao do
+   funil. Fora dessa coluna ela vira legenda solta e o olho nao liga as duas pontas. */
+.fdrop .fvao {
+  grid-column: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  position: relative;
+}
+.fdrop .fvao::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -4px;
+  bottom: -4px;
+  border-left: 2px dotted var(--border-2);
+  transform: translateX(-50%);
+}
+.fdrop .fperda {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+  color: var(--text-2);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.fdrop .fnota { position: relative; background: var(--surface); padding: 0 4px; }
+.fdrop.pior .fperda {
+  color: var(--danger);
+  background: var(--danger-bg);
+  border-color: var(--danger-bd);
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.08);
+}
+.fdrop .fnota { color: var(--dim); }
+
+/* Sinais laterais: mesma gramatica, meia altura, sem numero grande. Eles nao sao
+   degrau, entao nao podem competir visualmente com o funil. */
+.fside { display: flex; flex-direction: column; gap: 4px; }
+.fside-row { display: grid; grid-template-columns: minmax(120px, 170px) 1fr auto; align-items: center; gap: 14px; padding: 9px 4px; }
+.fside-row .fbar { height: 20px; border-radius: 7px; }
+/* Sinal lateral cresce da ESQUERDA, nao do centro. A diferenca nao e enfeite: o
+   funil e centrado porque estreita, e esses nao estreitam nada. Formatos diferentes
+   para coisas diferentes. */
+.fside-row .fbar::after {
+  left: 0;
+  transform: none;
+  background: linear-gradient(90deg, var(--surface-3), var(--border-2));
+  animation: none;
+}
+.fside-row .fv { font-family: var(--font-mono); font-size: 13px; color: var(--text-2); font-variant-numeric: tabular-nums; min-width: 92px; text-align: right; }
+
+@media (max-width: 720px) {
+  .fstage { grid-template-columns: 22px 1fr auto; gap: 11px; }
+  .fstage .fbar { grid-column: 1 / -1; }
+  .fdrop { grid-template-columns: 1fr; }
+  .fdrop .fvao { grid-column: 1; justify-content: flex-start; }
+  .fdrop .fvao::before { display: none; }
+  .fside-row { grid-template-columns: 1fr auto; }
+  .fside-row .fbar { grid-column: 1 / -1; }
+}
+
 /* Acessibilidade: respeita prefers-reduced-motion. O framer-motion ja reduz os
    transforms via <MotionConfig reducedMotion="user">; aqui zeramos transicoes e
    animacoes em CSS, sem deixar nada invisivel. */

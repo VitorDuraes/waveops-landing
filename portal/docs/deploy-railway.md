@@ -41,6 +41,12 @@ gerenciado). Observabilidade: OpenTelemetry exportando para Grafana Cloud (free)
 > por pooler em modo transaction falha por causa de prepared statement e advisory lock.
 > Para descobrir o host atual sem expor senha, rode no shell do Railway:
 > `node -e "const u=new URL(process.env.DATABASE_URL);console.log(u.hostname,u.port)"`.
+>
+> **Na infra atual (conferido em 16/09/2026) a resposta e `postgres.railway.internal 5432`:**
+> o banco e o Postgres do proprio Railway, na rede privada, sem pooler nenhum. Ou seja, o
+> `DATABASE_URL` JA e a conexao direta, e `DIRECT_URL` recebe exatamente o mesmo valor. Nao
+> ha Supabase em producao, apesar do comentario antigo no `schema.prisma`. A distincao entre
+> as duas URLs so passa a importar se o banco mudar para um provedor com pooler.
 
 Ha migrations versionadas em `prisma/migrations/`. No Railway:
 - Defina um **Deploy/Pre-Deploy Command** = `npm run db:deploy` (`prisma migrate deploy`).
@@ -53,7 +59,9 @@ No servico do app, em Variables:
 ```
 APP_URL=https://<seu-dominio>.up.railway.app   # ou dominio custom
 DATABASE_URL=${{Postgres.DATABASE_URL}}
-DIRECT_URL=<conexao direta, porta 5432>       # OBRIGATORIA: sem ela, migration nenhuma roda
+DIRECT_URL=${{Postgres.DATABASE_URL}}         # OBRIGATORIA: sem ela, migration nenhuma roda
+                                              # (mesmo valor do DATABASE_URL: o Postgres do
+                                              #  Railway ja e conexao direta, sem pooler)
 SESSION_SECRET=<string aleatoria 32+ chars>
 AUTH_ENFORCED=true          # producao exige login (so use false em demo)
 ADMIN_EMAIL=financeiro@waveops.com.br

@@ -70,6 +70,9 @@ function resumoDe(linhas: LinhaFunil[]): Resumo {
   };
 }
 
+// Abaixo deste volume no topo, a tela mostra os numeros mas nao tira conclusao.
+export const MINIMO_PARA_DIAGNOSTICO = 30;
+
 function pct(parte: number, total: number): number | null {
   if (!total) return null;
   return Math.round((parte / total) * 1000) / 10;
@@ -143,7 +146,11 @@ export async function lerFunil(dias = 30): Promise<Funil> {
     desde,
     linhas: saida,
     resumo: resumoDe(saida),
-    piorQueda: pior && pior.perdidos > 0 ? pior.nome : null,
+    // O marcador so aparece com amostra que sustenta a conclusao. Sem esse piso, no
+    // primeiro dia de medicao (1 visita, 1 lead, 0 checkout) a tela apontaria "maior
+    // perda: checkout aberto" com base em UMA pessoa. Apontar o dedo para o lugar
+    // errado com ar de certeza e pior do que nao apontar.
+    piorQueda: topo >= MINIMO_PARA_DIAGNOSTICO && pior && pior.perdidos > 0 ? pior.nome : null,
     semBanco: false,
   };
 }

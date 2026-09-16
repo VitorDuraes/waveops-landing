@@ -13,10 +13,14 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  // DATABASE_URL: em producao (Supabase) e a string do pooler (porta 6543,
-  // transaction mode, ?pgbouncer=true). Local = conexao direta do Docker.
+  // DATABASE_URL: em producao e o Postgres do proprio Railway, na rede privada
+  // (postgres.railway.internal:5432), SEM pooler. Local = conexao direta do Docker.
+  // O comentario antigo falava em pooler do Supabase: nao e mais o caso (16/09/2026).
   url       = env("DATABASE_URL")
-  // DIRECT_URL: conexao direta (porta 5432) usada pelas migrations. Local = igual.
+  // DIRECT_URL: conexao usada pelas migrations. Hoje e IGUAL ao DATABASE_URL nos dois
+  // ambientes, porque nao ha pooler em lugar nenhum. Ela existe para o dia em que
+  // houver. ATENCAO: se a variavel nao estiver definida, o Prisma falha na validacao do
+  // schema (P1012) e NENHUM comando de schema roda, nem migrate deploy nem db push.
   directUrl = env("DIRECT_URL")
 }
 

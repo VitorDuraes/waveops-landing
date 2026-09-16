@@ -1,6 +1,7 @@
 import "server-only";
 import { getPrisma } from "./db";
 import { env } from "./env";
+import { log } from "./log";
 import { ETAPAS, EVENTOS, ROTULO_ETAPA, type NomeEvento } from "@/lib/funil";
 
 // Leitura do funil para a tela do admin (SPEC-18).
@@ -23,6 +24,21 @@ export interface Funil {
   desde: Date;
   linhas: LinhaFunil[];
   semBanco: boolean;
+  // Mensagem quando a consulta falha (tipicamente: tabela ainda nao existe porque a
+  // migration nao rodou). A tela mostra isso em vez de estourar erro de servidor.
+  erro?: string;
+}
+
+function zeradas(): LinhaFunil[] {
+  return EVENTOS.map((nome) => ({
+    nome,
+    rotulo: ROTULO_ETAPA[nome],
+    etapa: ETAPAS.includes(nome),
+    visitantes: 0,
+    eventos: 0,
+    taxaAnterior: null,
+    taxaTopo: null,
+  }));
 }
 
 function pct(parte: number, total: number): number | null {
@@ -32,30 +48,35 @@ function pct(parte: number, total: number): number | null {
 
 export async function lerFunil(dias = 30): Promise<Funil> {
   const desde = new Date(Date.now() - dias * 24 * 60 * 60 * 1000);
-  if (!env.hasDb()) {
-    return {
-      desde,
-      semBanco: true,
-      linhas: EVENTOS.map((nome) => ({
-        nome,
-        rotulo: ROTULO_ETAPA[nome],
-        etapa: ETAPAS.includes(nome),
-        visitantes: 0,
-        eventos: 0,
-        taxaAnterior: null,
-        taxaTopo: null,
-      })),
-    };
-  }
+  if (!env.hasDb()) return { desde, semBanco: true, linhas: zeradas() };
 
   // Uma consulta so, agrupada no banco. Duas contagens por evento: linhas (volume
   // bruto) e visitantes distintos (o numero que vale para conversao).
-  const linhas = await getPrisma().$queryRaw<{ nome: string; visitantes: bigint; eventos: bigint }[]>`
-    SELECT nome, COUNT(DISTINCT visitor_id) AS visitantes, COUNT(*) AS eventos
-    FROM eventos
-    WHERE created_at >= ${desde}
-    GROUP BY nome
-  `;
+  //
+  // O try/catch existe por um motivo concreto: se a migration nao rodou, a tabela nao
+  // existe e a consulta estoura. Sem isso, a tela responde erro de servidor generico e
+  // nao diz o que fazer. Aconteceu em 16/09/2026, por DIRECT_URL ausente no Railway.
+  let linhas: { nome: string; visitantes: bigint; eventos: bigint }[];
+  try {
+    linhas = await getPrisma().$queryRaw<{ nome: string; visitantes: bigint; eventos: bigint }[]>`
+      SELECT nome, COUNT(DISTINCT visitor_id) AS visitantes, COUNT(*) AS eventos
+      FROM eventos
+      WHERE created_at >= ${desde}
+      GROUP BY nome
+    `;
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "";
+    const semTabela = /eventos/i.test(msg) && /(does not exist|rela..o|relation)/i.test(msg);
+    log.error("funil.consulta_falhou", { erro: msg.slice(0, 300) });
+    return {
+      desde,
+      semBanco: false,
+      linhas: zeradas(),
+      erro: semTabela
+        ? "A tabela eventos ainda nao existe. Rode a migration no ambiente (npm run db:deploy). Se ela falhar com P1012, falta a variavel DIRECT_URL: veja portal/docs/deploy-railway.md."
+        : "Nao foi possivel consultar os eventos. Detalhe no log do servidor.",
+    };
+  }
   const porNome = new Map(linhas.map((l) => [l.nome, l]));
 
   const topo = Number(porNome.get("visita")?.visitantes ?? 0);

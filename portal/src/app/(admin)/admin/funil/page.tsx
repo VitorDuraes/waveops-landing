@@ -40,6 +40,12 @@ export default async function FunilPage() {
         </div>
       )}
 
+      {funil.erro && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <strong>A medição não está gravando.</strong> {funil.erro}
+        </div>
+      )}
+
       <div className="card">
         <table className="table">
           <thead>

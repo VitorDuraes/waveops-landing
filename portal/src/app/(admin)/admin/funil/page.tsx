@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { Icon, type IconName } from "@/components/icons";
 import { readSession } from "@/server/auth";
 import { env } from "@/server/env";
-import { lerFunil, type LinhaFunil } from "@/server/funil";
+import { lerFunil, MINIMO_PARA_DIAGNOSTICO, type LinhaFunil } from "@/server/funil";
 
 // Server Component de propósito: lê o banco direto, sem passar por rota de API.
 // A barreira de autorização é ESTA checagem, não o proxy: o proxy é otimista e a
@@ -14,6 +14,9 @@ export const dynamic = "force-dynamic";
 const PERIODOS = [7, 30, 90];
 
 const num = (n: number) => n.toLocaleString("pt-BR");
+// "1 eventos" e "1 saíram" sao erro de portugues que a tela mostra no primeiro dia de
+// medicao, justamente quando os numeros sao 1. Concordancia e barata, entao e feita.
+const plural = (n: number, um: string, muitos: string) => `${num(n)} ${n === 1 ? um : muitos}`;
 const taxa = (n: number | null) => (n === null ? "—" : `${n.toLocaleString("pt-BR")}%`);
 
 // A largura usa RAIZ QUADRADA da proporcao, nao a proporcao direta. Motivo: um funil
@@ -119,11 +122,19 @@ export default async function FunilPage({
       <div className="card">
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 14, marginBottom: 10 }}>
           <h3 style={{ fontSize: 17 }}>Onde as pessoas param</h3>
-          {funil.piorQueda && (
+          {funil.piorQueda ? (
             <span className="badge danger">
               <span className="d" />
               maior perda: {degraus.find((l) => l.nome === funil.piorQueda)?.rotulo}
             </span>
+          ) : (
+            topo > 0 &&
+            topo < MINIMO_PARA_DIAGNOSTICO && (
+              <span className="badge neutral" title={`Abaixo de ${MINIMO_PARA_DIAGNOSTICO} visitas no período`}>
+                <span className="d" />
+                amostra pequena para diagnóstico
+              </span>
+            )
           )}
         </div>
         <p className="lead" style={{ marginTop: 0, marginBottom: 16, fontSize: 12.5 }}>
@@ -149,10 +160,19 @@ export default async function FunilPage({
                 {i > 0 && (
                   <div className={`fdrop${funil.piorQueda === l.nome ? " pior" : ""}`}>
                     <span className="fvao">
-                      <span className="fperda">
-                        {l.perdidos > 0 ? `− ${num(l.perdidos)} saíram` : "sem perda"}
-                      </span>
-                      <span className="fnota">{taxa(l.taxaAnterior)} seguiram</span>
+                      {degraus[i - 1].visitantes === 0 && l.visitantes === 0 ? (
+                        // Etapa vazia depois de etapa vazia: nao houve perda nem passagem,
+                        // simplesmente nao chegou ninguem. Dizer "sem perda" aqui sugeriria
+                        // que alguem passou inteiro, que e o oposto do que aconteceu.
+                        <span className="fnota">ninguém chegou até aqui</span>
+                      ) : (
+                        <>
+                          <span className="fperda">
+                            {l.perdidos > 0 ? `− ${plural(l.perdidos, "saiu", "saíram")}` : "sem perda"}
+                          </span>
+                          <span className="fnota">{taxa(l.taxaAnterior)} seguiram</span>
+                        </>
+                      )}
                     </span>
                   </div>
                 )}
@@ -162,7 +182,7 @@ export default async function FunilPage({
                   <div className="fnum">{String(i + 1).padStart(2, "0")}</div>
                   <div>
                     <div className="flabel">{l.rotulo}</div>
-                    <div className="fsub">{num(l.eventos)} eventos</div>
+                    <div className="fsub">{plural(l.eventos, "evento", "eventos")}</div>
                   </div>
                   <div
                     className="fbar"

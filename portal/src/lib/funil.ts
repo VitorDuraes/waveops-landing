@@ -50,12 +50,14 @@ export const LIMITES = {
   valor: 64,
   path: 128,
   referrer: 64,
+  fonte: 64,
 };
 
 export interface EventoNormalizado {
   nome: NomeEvento;
   path: string | null;
   referrerHost: string | null;
+  fonte: string | null;
   props: Record<string, string> | null;
 }
 
@@ -97,6 +99,19 @@ function normalizarProps(bruto: unknown): Record<string, string> | null {
   return n ? saida : null;
 }
 
+// A fonte vem do navegador, entao e entrada de borda: minuscula, conjunto restrito
+// de caracteres e tamanho fixo. Sem isso, um terceiro escreve o que quiser numa
+// coluna que a gente agrupa e mostra na tela do admin.
+export function normalizarFonte(bruto: unknown): string | null {
+  if (typeof bruto !== "string") return null;
+  const limpo = bruto
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9._/-]/g, "")
+    .slice(0, LIMITES.fonte);
+  return limpo || null;
+}
+
 export function normalizarEvento(bruto: unknown): EventoNormalizado | null {
   if (!bruto || typeof bruto !== "object" || Array.isArray(bruto)) return null;
   const b = bruto as Record<string, unknown>;
@@ -105,6 +120,7 @@ export function normalizarEvento(bruto: unknown): EventoNormalizado | null {
     nome: b.n,
     path: apenasPath(b.u),
     referrerHost: apenasHost(b.r),
+    fonte: normalizarFonte(b.f),
     props: normalizarProps(b.p),
   };
 }

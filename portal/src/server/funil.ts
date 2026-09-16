@@ -78,6 +78,59 @@ function pct(parte: number, total: number): number | null {
   return Math.round((parte / total) * 1000) / 10;
 }
 
+export interface LinhaOrigem {
+  fonte: string;
+  visitas: number;
+  leads: number;
+  pagantes: number;
+  taxa: number | null; // % de visita que virou pagamento, por canal
+}
+
+// "Qual canal traz pagante". A pergunta so fica de pe porque o visitorId e o MESMO
+// nos dois dominios no mesmo dia: a visita chega marcada com a fonte na landing, e o
+// pagamento acontece no portal, sem fonte nenhuma. O join por visitor_id costura os
+// dois. Atribuicao de ULTIMO toque dentro do dia, que e o que este desenho sustenta:
+// o hash troca a meia-noite, entao visita de segunda e pagamento de quarta nao se
+// encontram aqui. Para esse caso existe Customer.visitorId, que e outro caminho.
+export async function lerOrigens(dias = 30): Promise<LinhaOrigem[]> {
+  if (!env.hasDb()) return [];
+  const desde = new Date(Date.now() - dias * 24 * 60 * 60 * 1000);
+  try {
+    const linhas = await getPrisma().$queryRaw<
+      { fonte: string | null; visitas: bigint; leads: bigint; pagantes: bigint }[]
+    >`
+      SELECT
+        COALESCE(v.fonte, 'direto') AS fonte,
+        COUNT(DISTINCT v.visitor_id) AS visitas,
+        COUNT(DISTINCT l.visitor_id) AS leads,
+        COUNT(DISTINCT p.visitor_id) AS pagantes
+      FROM eventos v
+      LEFT JOIN eventos l
+        ON l.visitor_id = v.visitor_id AND l.nome = 'lead_enviado' AND l.created_at >= ${desde}
+      LEFT JOIN eventos p
+        ON p.visitor_id = v.visitor_id AND p.nome = 'pagamento_confirmado' AND p.created_at >= ${desde}
+      WHERE v.nome = 'visita' AND v.created_at >= ${desde}
+      GROUP BY COALESCE(v.fonte, 'direto')
+      ORDER BY 2 DESC
+      LIMIT 15
+    `;
+    return linhas.map((l) => {
+      const visitas = Number(l.visitas);
+      const pagantes = Number(l.pagantes);
+      return {
+        fonte: l.fonte || "direto",
+        visitas,
+        leads: Number(l.leads),
+        pagantes,
+        taxa: pct(pagantes, visitas),
+      };
+    });
+  } catch (e) {
+    log.error("origens.consulta_falhou", { erro: e instanceof Error ? e.message : "desconhecido" });
+    return [];
+  }
+}
+
 export async function lerFunil(dias = 30): Promise<Funil> {
   const desde = new Date(Date.now() - dias * 24 * 60 * 60 * 1000);
   if (!env.hasDb()) return { desde, semBanco: true, linhas: zeradas(), resumo: RESUMO_ZERO, piorQueda: null };

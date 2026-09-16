@@ -36,6 +36,7 @@ export async function registrarEvento(
         origem,
         path: ev.path,
         referrerHost: ev.referrerHost,
+        fonte: ev.fonte,
         props: ev.props ?? undefined,
       },
     });
@@ -61,7 +62,7 @@ export async function registrarPorCliente(
   try {
     const c = await getPrisma().customer.findUnique({ where: { id: customerId }, select: { visitorId: true } });
     await registrarEvento(
-      { nome, path: null, referrerHost: null, props: props ?? null },
+      { nome, path: null, referrerHost: null, fonte: null, props: props ?? null },
       c?.visitorId || `cliente:${customerId}`,
       "portal"
     );
@@ -79,6 +80,6 @@ export async function registrarNoServidor(
   path?: string
 ): Promise<string> {
   const visitorId = idDoVisitante(headers);
-  await registrarEvento({ nome, path: path ?? null, referrerHost: null, props: props ?? null }, visitorId, "portal");
+  await registrarEvento({ nome, path: path ?? null, referrerHost: null, fonte: null, props: props ?? null }, visitorId, "portal");
   return visitorId;
 }

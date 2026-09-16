@@ -1,7 +1,7 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import { calcularId, diaUtc } from "../../src/lib/funil";
-import { normalizarEvento, ETAPAS, EVENTOS } from "../../src/lib/funil";
+import { normalizarEvento, normalizarFonte, ETAPAS, EVENTOS } from "../../src/lib/funil";
 
 // Testes das funcoes puras da medicao de funil (SPEC-18). Rodam sem banco e sem
 // servidor: `npm run test:unit`. O que depende de Postgres e coberto pelos
@@ -115,5 +115,42 @@ describe("etapas do funil", () => {
   test("a ordem comeca em visita e termina em ativacao", () => {
     assert.equal(ETAPAS[0], "visita");
     assert.equal(ETAPAS[ETAPAS.length - 1], "ativacao");
+  });
+});
+
+describe("normalizarFonte: entrada de borda", () => {
+  test("UTM composta passa em minuscula", () => {
+    assert.equal(normalizarFonte("Instagram/CPC"), "instagram/cpc");
+  });
+
+  test("host de referrer passa", () => {
+    assert.equal(normalizarFonte("www.google.com"), "www.google.com");
+  });
+
+  test("caractere fora do conjunto e removido, nao escapado", () => {
+    // A fonte vai para uma coluna que o admin agrupa e exibe. Injecao de marcacao
+    // ou de aspas nao pode chegar la, e cortar e mais simples do que escapar.
+    // A barra sobrevive porque e separador legitimo de "origem/meio". O que morre e
+    // tudo que da poder a string: sinal de marcacao, aspas, ponto e virgula, espaco.
+    assert.equal(normalizarFonte('insta<script>alert(1)</script>'), "instascriptalert1/script");
+    assert.equal(normalizarFonte("a'b\"c;d"), "abcd");
+  });
+
+  test("corta em 64 caracteres", () => {
+    assert.equal(normalizarFonte("x".repeat(200))?.length, 64);
+  });
+
+  test("vazio, espaco e tipo errado viram null", () => {
+    assert.equal(normalizarFonte(""), null);
+    assert.equal(normalizarFonte("   "), null);
+    assert.equal(normalizarFonte("!!!"), null);
+    assert.equal(normalizarFonte(42), null);
+    assert.equal(normalizarFonte(undefined), null);
+  });
+
+  test("o evento carrega a fonte normalizada", () => {
+    const ev = normalizarEvento({ n: "visita", f: "Google.com" });
+    assert.equal(ev?.fonte, "google.com");
+    assert.equal(normalizarEvento({ n: "visita" })?.fonte, null);
   });
 });

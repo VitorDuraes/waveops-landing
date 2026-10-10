@@ -1,5 +1,7 @@
 # n8n do site v2: lead de contato e lista de interesse
 
+> **Aviso (10/10/2026):** desde esta data, os formulários do site gravam no portal, e não mais no n8n: `POST https://portal.waveops.com.br/api/site/contato` e `POST https://portal.waveops.com.br/api/site/interesse`, com o mesmo contrato descrito neste guia (corpo, respostas e CORS). Este guia e os dois JSON desta pasta ficam como referência do contrato e da decisão anterior.
+
 | Campo | Valor |
 |---|---|
 | Dono | Vitor Duraes |

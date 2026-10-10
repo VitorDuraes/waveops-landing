@@ -82,17 +82,19 @@ Desligado nas páginas novas até existir mecanismo de consentimento e revisão 
 
 | Fluxo | Destino | Estado |
 |---|---|---|
-| Contato | n8n da WaveOps (`n8n.waveops.com.br`), `waveops-lead-v2` | O webhook ainda não existe. O site NÃO aponta para o `flowops-lead` que roda hoje (em `cowboyhouse.app.n8n.cloud`, que não é da WaveOps; não versionado; o JSON de `n8n/` é esqueleto) porque ele só lê as 15 chaves antigas: um lead pelo canal E-mail chegaria sem o e-mail. Até o v2 existir, o envio falha de forma visível, com os dados preservados e saída pelo WhatsApp |
-| Lista de interesse | n8n da WaveOps (`n8n.waveops.com.br`), `waveops-interesse` | O webhook ainda não existe. Até ser criado, o envio cai no estado de falha sem perder o e-mail |
+| Contato | Portal da WaveOps (`portal.waveops.com.br`): `POST /api/site/contato`, tabela `leads`, tela "Leads" no admin | Rotas no portal; o site só envia quando for publicado. O site NÃO aponta para o `flowops-lead` antigo (em `cowboyhouse.app.n8n.cloud`, que não é da WaveOps; não versionado): ele só lê as 15 chaves antigas e um lead pelo canal E-mail chegaria sem o e-mail. Sem a rota no ar, o envio falha de forma visível, com os dados preservados e saída pelo WhatsApp |
+| Lista de interesse | Portal da WaveOps (`portal.waveops.com.br`): `POST /api/site/interesse`, tabela `leads`, tela "Leads" no admin | Rotas no portal; o site só envia quando for publicado. Sem a rota no ar, o envio cai no estado de falha sem perder o e-mail |
 
-Endpoints por ambiente em `assets/site/config.js`: produção só em `waveops.com.br`; o host dos formulários e o `connect-src` da CSP andam juntos (`tests/site/unit/envio.test.mjs` falha se divergirem); `localhost` usa `/__dev/lead` e `/__dev/interesse` do servidor local; Deploy Preview do Netlify fica desligado. Rascunho dos workflows, colunas da planilha, roteiro de publicação e exclusão de dado: `docs/integrations/n8n-site-v2.md`. O roteiro de homologação e os parâmetros de operação do n8n ficam fora do git, em `docs/specs/2026-10-10-n8n-site-v2-operacao-restrita.md`, porque o repo é público; os workflows publicados trazem `__DEFINIR__` no lugar dos valores do limite de volume. Nada no n8n de produção muda sem aprovação do Vitor.
+Endpoints por ambiente em `assets/site/config.js`: produção só em `waveops.com.br`, onde os dois formulários enviam para o portal (`https://portal.waveops.com.br/api/site/contato` e `/api/site/interesse`), o mesmo host do funil. O `connect-src` da CSP libera só `'self'` e o portal, sem o n8n: `tests/site/unit/envio.test.mjs` falha se o host dos formulários e a CSP divergirem. `localhost` usa `/__dev/lead` e `/__dev/interesse` do servidor local. Deploy Preview do Netlify fica desligado. O site só pode ir ao ar depois do deploy das rotas no portal.
+
+Desde 10/10/2026 (decisão do Vitor) o lead não passa mais pelo n8n. Os JSON dos dois workflows e o guia `docs/integrations/n8n-site-v2.md` (contrato, colunas da planilha, roteiro de publicação e exclusão de dado) ficam como referência histórica do contrato e da decisão anterior. O roteiro de homologação e os parâmetros de operação do n8n seguem fora do git, em `docs/specs/2026-10-10-n8n-site-v2-operacao-restrita.md`, porque o repo é público; os JSON do repo trazem `__DEFINIR__` no lugar dos valores do limite de volume. Nada no n8n de produção muda sem aprovação do Vitor.
 
 Privacidade: ciência da Política de Privacidade (obrigatória) separada do consentimento de marketing (opcional). O contrato grava a versão da política (`POLITICA_VERSAO`), a versão do texto de ciência (`TEXTO_CIENCIA`) e a do texto de marketing (`TEXTO_MARKETING`), todas em `assets/site/config.js`: mudou o texto, mude a versão. Os textos de aceite são rascunho até a revisão jurídica. Termos e Política vivem no portal (`/termos`, `/privacidade`).
 
 ## Segurança
-- CSP `<meta>` em toda página, vinda do parcial `head`. Origem nova de script, fonte, imagem ou `fetch` entra na diretiva certa, senão o navegador bloqueia. Hoje `connect-src` libera o portal (funil) e o n8n (formulários). `style-src` mantém `'unsafe-inline'` por causa do `<noscript><style>` e de atributos `style`.
+- CSP `<meta>` em toda página, vinda do parcial `head`. Origem nova de script, fonte, imagem ou `fetch` entra na diretiva certa, senão o navegador bloqueia. Hoje `connect-src` libera só `'self'` e o portal (funil e formulários). `style-src` mantém `'unsafe-inline'` por causa do `<noscript><style>` e de atributos `style`.
 - `[[headers]]` no `netlify.toml` (desde o commit `3f66779`): `frame-ancestors 'none'`, `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy` e `Permissions-Policy`. Clickjacking está fechado.
-- Anti-robô nos formulários: honeypot e trava de tempo no navegador. O workflow n8n em rascunho (`docs/integrations/`) repete as duas travas e vai validar e deduplicar no servidor quando for publicado.
+- Anti-robô nos formulários: honeypot e trava de tempo no navegador. As rotas do portal seguem o contrato do guia `docs/integrations/n8n-site-v2.md`, que prevê as duas travas no servidor (robô recebe 200 sem gravar).
 
 ## Marca (Sine Nodes)
 Onda senoidal simétrica cruzando um núcleo vazado, com dois nós sólidos nas pontas. Kit completo em `assets/brand/` (`waveops-icon.svg`, `waveops-symbol.svg`, `waveops-symbol-mono.svg`, `waveops-lockup.svg`, `png/`, `README.md`). Geometria canônica, `viewBox="0 0 100 100"`, `stroke-width="5"`:
@@ -120,7 +122,7 @@ Ficam no repo, sem carregar em nenhuma página nova, até o Vitor decidir apagar
 
 ## Pendências conhecidas
 - Links do portal para o site usam as âncoras antigas (`https://waveops.com.br/#contato` e `#pacotes`) e a raiz, porque portal e site publicam em momentos diferentes e as âncoras funcionam nos dois sites. Depois que o site novo estiver no ar: trocar pelas URLs diretas e relaxar `portal/tests/unit/links-site.test.ts`.
-- Workflow n8n de leads ao vivo não verificado; webhook da lista de interesse a criar (gate H2).
+- Rotas `/api/site/contato` e `/api/site/interesse` do portal (tabela `leads`, tela "Leads" no admin): o site só pode ser publicado depois do deploy delas. Depois de publicar, conferir um envio real de cada formulário, de ponta a ponta.
 - `contato@waveops.com.br` sem MX nem SPF (conferido em 09/10/2026): não recebe e-mail, e o site o publica no rodapé e na página de contato.
 - Política de Privacidade e Termos em rascunho; textos de aceite e compromissos ("sem custo e sem compromisso", "Resposta em até 1 dia útil") dependem de revisão (gate H4).
 - O webhook n8n `flowops-lead` e a chave `flowops:tweaks:v1` mantêm o nome antigo de propósito: renomear quebra a integração e o tema salvo.

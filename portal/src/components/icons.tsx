@@ -194,6 +194,12 @@ const ICONS = {
     </>
   ),
   plus: stroke(<path d="M12 5v14M5 12h14" />, 2.2),
+  trash: stroke(
+    <>
+      <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" />
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M10 11v6M14 11v6" />
+    </>
+  ),
   logout: stroke(<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />),
   trend: stroke(
     <>

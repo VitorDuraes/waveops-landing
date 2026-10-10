@@ -78,7 +78,7 @@ function CheckoutInner() {
     <>
       <PublicNav />
       <div className="pub-wrap" style={{ maxWidth: 1000 }}>
-        <Link className="btn btn-quiet btn-sm" href="/#pacotes" style={{ marginBottom: 18 }}>
+        <Link className="btn btn-quiet btn-sm" href="https://waveops.com.br/projetos-sob-medida/#modelos" style={{ marginBottom: 18 }}>
           <Icon name="chevronLeft" /> Voltar ao site
         </Link>
         {sobProposta ? (
@@ -109,7 +109,7 @@ function CheckoutInner() {
               </a>
               <p className="hint center" style={{ marginTop: 12 }}>
                 Prefere ver como a gente cobra antes?{" "}
-                <Link href="/#pacotes" style={{ color: "var(--accent-strong)" }}>
+                <Link href="https://waveops.com.br/projetos-sob-medida/#modelos" style={{ color: "var(--accent-strong)" }}>
                   Construir e manter
                 </Link>
                 .

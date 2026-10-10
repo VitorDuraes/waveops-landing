@@ -67,7 +67,10 @@ try {
   for (const nome of alvos) {
     const pagina = PAGINAS[nome];
     for (const { pasta, largura, densidade, coluna } of LARGURAS) {
-      const contexto = await navegador.newContext({ viewport: { width: largura, height: 900 }, deviceScaleFactor: densidade });
+      // A captura sai em densidade 1: em 2x, uma página de celular passa dos 16384 px que
+      // o Chrome consegue capturar de uma vez e a metade de baixo sai repetida. A altura em
+      // px CSS não muda, e a folha reduz as duas imagens para a mesma largura de coluna.
+      const contexto = await navegador.newContext({ viewport: { width: largura, height: 900 }, deviceScaleFactor: 1 });
       const aba = await contexto.newPage();
       const resposta = await aba.goto(`http://127.0.0.1:${porta}${pagina.url}`);
       if (!resposta || resposta.status() !== 200) {
@@ -83,12 +86,12 @@ try {
       const arquivoDesign = path.join(pastaDesign, pasta, pagina.design);
       const impl = alturaPng(captura);
       if (!fs.existsSync(arquivoDesign)) {
-        linhas.push(`${nome} | ${largura} | sem captura de design | ${Math.round(impl.altura / densidade)} | n/a`);
+        linhas.push(`${nome} | ${largura} | sem captura de design | ${impl.altura} | n/a`);
         continue;
       }
       const design = alturaPng(arquivoDesign);
       const alturaDesign = Math.round(design.altura / densidade);
-      const alturaImpl = Math.round(impl.altura / densidade);
+      const alturaImpl = impl.altura;
       const diferenca = (((alturaImpl - alturaDesign) / alturaDesign) * 100).toFixed(1);
       linhas.push(`${nome} | ${largura} | ${alturaDesign} | ${alturaImpl} | ${diferenca}%`);
 

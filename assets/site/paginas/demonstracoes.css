@@ -1,0 +1,242 @@
+/* WaveOps · peças que só a página Demonstrações técnicas usa: hero com aviso e filtro por
+   frente, e a lista de fluxos (entrada, regra e saída). Depende de tokens.css, base.css e
+   components.css.
+
+   Cor que o design usa e que ainda não tem token (borda e fundo suaves do aviso azul, fundo
+   suave do passo de saída) fica aqui como rgba, com o valor exato do design. */
+
+/* ---------- Hero ---------- */
+/* overflow: hidden prende o brilho de 1000 px dentro do hero. Sem isso ele vaza 340 px
+   para a direita e a página rola na horizontal. */
+.wo-demonstracoes__hero {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(48px, 6vw, 88px) 0 clamp(36px, 4vw, 56px);
+}
+
+.wo-demonstracoes__brilho {
+  position: absolute;
+  top: -620px;
+  right: -340px;
+  width: 1000px;
+  height: 1000px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(162, 139, 249, 0.22), transparent 62%);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* Posicionado de propósito: o brilho absoluto pintaria por cima de conteúdo que não é. */
+.wo-demonstracoes__corpo {
+  position: relative;
+}
+
+.wo-demonstracoes__h1 {
+  margin-top: 20px;
+  max-width: 900px;
+  font-size: clamp(38px, 4.7vw, 68px);
+  line-height: 1.055;
+  letter-spacing: -0.06em;
+}
+
+.wo-demonstracoes__lead {
+  margin-top: 24px;
+  max-width: 620px;
+  line-height: 1.8;
+}
+
+.wo-demonstracoes__aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  max-width: 760px;
+  margin-top: 28px;
+  padding: 16px 18px;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 14px;
+  background: rgba(56, 189, 248, 0.07);
+}
+
+.wo-demonstracoes__aviso svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--wo-info);
+}
+
+.wo-demonstracoes__aviso p {
+  color: var(--wo-texto-2);
+  font-size: 14.5px;
+  line-height: 1.65;
+}
+
+.wo-demonstracoes__aviso strong {
+  color: var(--wo-texto);
+  font-weight: 600;
+}
+
+/* ---------- Filtro por frente ---------- */
+.wo-demonstracoes__filtro {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 34px;
+}
+
+.wo-demonstracoes__opcao {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--wo-alvo);
+  padding: 0 16px;
+  border: 1px solid var(--wo-borda);
+  border-radius: var(--wo-raio-btn);
+  background: var(--wo-superficie-2);
+  color: var(--wo-texto-2);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  /* O design não define altura de linha no botão, então vale a do navegador. Com os 1,6 do
+     corpo (base.css manda o botão herdar) o texto sobe 1 px dentro da caixa. */
+  line-height: normal;
+  cursor: pointer;
+  transition: background-color var(--wo-transicao), border-color var(--wo-transicao), color var(--wo-transicao);
+}
+
+.wo-demonstracoes__opcao:hover {
+  border-color: var(--wo-borda-forte);
+  color: var(--wo-texto);
+}
+
+.wo-demonstracoes__opcao[aria-pressed='true'] {
+  border-color: var(--wo-acento-borda);
+  background: var(--wo-acento-fundo);
+  color: var(--wo-acento-texto);
+}
+
+/* Alto contraste: o sistema troca as cores do autor e o botão ativo ficaria igual aos outros.
+   As cores de seleção do sistema mantêm a diferença. O forced-color-adjust é necessário: sem
+   ele o Chrome pinta uma base clara atrás do texto e o HighlightText (branco) some. */
+@media (forced-colors: active) {
+  .wo-demonstracoes__opcao[aria-pressed='true'] {
+    forced-color-adjust: none;
+    border-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
+  }
+}
+
+/* ---------- Lista de fluxos ---------- */
+.wo-demonstracoes__secao {
+  padding: 0 0 var(--wo-secao);
+}
+
+.wo-demonstracoes__lista {
+  border-bottom: 1px solid var(--wo-borda);
+}
+
+.wo-demonstracoes__fluxo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 22px 56px;
+  padding: 34px 0;
+  border-top: 1px solid var(--wo-borda);
+}
+
+/* display: flex acima vence o [hidden] do navegador: sem esta regra o filtro não esconde. */
+.wo-demonstracoes__fluxo[hidden] {
+  display: none;
+}
+
+.wo-demonstracoes__texto {
+  flex: 1 1 380px;
+  min-width: 0;
+}
+
+.wo-demonstracoes__rotulos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.wo-demonstracoes__categoria {
+  color: var(--wo-acento-texto);
+  font-family: var(--wo-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.wo-demonstracoes__selo {
+  padding: 4px 9px;
+  border: 1px solid var(--wo-borda-forte);
+  border-radius: var(--wo-raio-pilula);
+  color: var(--wo-texto-3);
+  font-family: var(--wo-mono);
+  font-size: 10.5px;
+}
+
+.wo-demonstracoes__h2 {
+  margin-top: 14px;
+  font-size: clamp(22px, 2.1vw, 30px);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.wo-demonstracoes__partida {
+  max-width: 480px;
+  margin-top: 12px;
+  color: var(--wo-texto-3);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.wo-demonstracoes__partida .wo-rotulo-mono {
+  margin-bottom: 4px;
+}
+
+.wo-demonstracoes__passos {
+  display: flex;
+  flex: 1.5 1 520px;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+.wo-demonstracoes__passo {
+  display: flex;
+  flex: 1 1 170px;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--wo-borda);
+  border-radius: var(--wo-raio-sm);
+  background: var(--wo-superficie);
+}
+
+.wo-demonstracoes__passo-texto {
+  color: var(--wo-texto-2);
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+
+.wo-demonstracoes__passo--saida {
+  border-color: var(--wo-acento-borda);
+  background: rgba(162, 139, 249, 0.08);
+}
+
+.wo-demonstracoes__passo--saida .wo-demonstracoes__passo-texto {
+  color: var(--wo-texto);
+}
+
+.wo-demonstracoes__fecho {
+  margin-top: 26px;
+  color: var(--wo-texto-3);
+  font-size: 15.5px;
+  line-height: 1.7;
+}

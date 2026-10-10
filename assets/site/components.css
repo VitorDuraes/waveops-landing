@@ -129,7 +129,8 @@
   color: var(--wo-acento-texto);
 }
 
-.wo-topo__cta {
+/* 0,2,0 de propósito: .wo-btn vem depois no arquivo e devolveria o tamanho padrão. */
+.wo-topo .wo-topo__cta {
   min-height: var(--wo-alvo);
   padding: 0 18px;
   font-size: 13px;
@@ -248,6 +249,7 @@
 }
 
 .wo-btn--primario {
+  border-width: 0;
   background: var(--wo-acento);
   color: var(--wo-sobre-acento);
   box-shadow: var(--wo-sombra-btn);
@@ -740,6 +742,13 @@
   color: var(--wo-texto);
 }
 
+/* Alto contraste do sistema apaga fundo e cor: o escolhido ganha borda de destaque. */
+@media (forced-colors: active) {
+  .wo-seletor__opcao[aria-pressed='true'] {
+    border: 2px solid Highlight;
+  }
+}
+
 .wo-seletor__paineis {
   flex: 3 1 520px;
   min-width: 0;
@@ -1059,6 +1068,10 @@
   height: 18px;
   flex-shrink: 0;
   color: var(--wo-acento-texto);
+}
+
+.wo-cta .wo-btn {
+  font-size: 13px;
 }
 
 /* ---------- Rodapé ---------- */

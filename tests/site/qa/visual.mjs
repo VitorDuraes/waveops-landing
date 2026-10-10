@@ -8,8 +8,11 @@
 
    Uso (de tests/site):
      PW_CHANNEL=chrome node qa/visual.mjs [home solucoes ...]
-   Variáveis: DESIGN_CAPTURAS (pasta com computador_1440/, tablet_768/, celular_390/)
-   Saída: .tmp-qa/capturas/ e .tmp-qa/comparacao/ na raiz do repo. */
+   Variáveis: DESIGN_CAPTURAS (obrigatória: pasta com computador_1440/, tablet_768/,
+   celular_390/); SITE_URL (opcional) compara um site publicado fora de produção, como o
+   Deploy Preview, em vez do servidor local, e bloqueia todo pedido para fora dele.
+   Saída: .tmp-qa/capturas/ e .tmp-qa/comparacao/ na raiz do repo (com SITE_URL,
+   .tmp-qa/capturas-remoto/ e .tmp-qa/comparacao-remoto/). */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -18,9 +21,11 @@ import { criarServidor } from '../../../dev/site/serve.mjs';
 
 const aqui = path.dirname(fileURLToPath(import.meta.url));
 const raizRepo = path.resolve(aqui, '..', '..', '..');
-const pastaDesign =
-  process.env.DESIGN_CAPTURAS ??
-  '';
+const pastaDesign = process.env.DESIGN_CAPTURAS ?? '';
+if (!pastaDesign) {
+  console.error('defina DESIGN_CAPTURAS com a pasta das capturas do design (computador_1440/, tablet_768/, celular_390/)');
+  process.exit(2);
+}
 
 /** @type {Record<string, { url: string, design: string }>} */
 const PAGINAS = {
@@ -50,15 +55,26 @@ function alturaPng(arquivo) {
 
 const pedidas = process.argv.slice(2).filter((a) => a in PAGINAS);
 const alvos = pedidas.length ? pedidas : Object.keys(PAGINAS);
-const saidaCapturas = path.join(raizRepo, '.tmp-qa', 'capturas');
-const saidaComparacao = path.join(raizRepo, '.tmp-qa', 'comparacao');
+const remoto = (process.env.SITE_URL ?? '').replace(/\/$/, '');
+// Abrir a produção dispararia eventos de funil reais: a comparação remota é só para preview.
+if (remoto && /^(www\.)?waveops\.com\.br$/.test(new URL(remoto).hostname.toLowerCase().replace(/\.$/, ''))) {
+  console.error('recusado: a comparação remota só roda fora de produção');
+  process.exit(2);
+}
+const origemRemota = remoto ? new URL(remoto).origin : '';
+const sufixo = remoto ? '-remoto' : '';
+const saidaCapturas = path.join(raizRepo, '.tmp-qa', `capturas${sufixo}`);
+const saidaComparacao = path.join(raizRepo, '.tmp-qa', `comparacao${sufixo}`);
 fs.mkdirSync(saidaCapturas, { recursive: true });
 fs.mkdirSync(saidaComparacao, { recursive: true });
 
-const servidor = criarServidor({ raiz: raizRepo });
-await new Promise((ok) => servidor.listen(0, '127.0.0.1', () => ok(undefined)));
-const endereco = servidor.address();
-const porta = typeof endereco === 'object' && endereco ? endereco.port : 0;
+const servidor = remoto ? null : criarServidor({ raiz: raizRepo });
+let base = remoto;
+if (servidor) {
+  await new Promise((ok) => servidor.listen(0, '127.0.0.1', () => ok(undefined)));
+  const endereco = servidor.address();
+  base = `http://127.0.0.1:${typeof endereco === 'object' && endereco ? endereco.port : 0}`;
+}
 const navegador = await chromium.launch({ channel: process.env.PW_CHANNEL || undefined });
 
 /** @type {string[]} */
@@ -71,8 +87,15 @@ try {
       // o Chrome consegue capturar de uma vez e a metade de baixo sai repetida. A altura em
       // px CSS não muda, e a folha reduz as duas imagens para a mesma largura de coluna.
       const contexto = await navegador.newContext({ viewport: { width: largura, height: 900 }, deviceScaleFactor: 1 });
+      if (origemRemota) {
+        // Nada sai da origem do preview, nem por engano.
+        await contexto.route('**/*', (rota) => {
+          const url = rota.request().url();
+          return url.startsWith('data:') || new URL(url).origin === origemRemota ? rota.continue() : rota.abort('blockedbyclient');
+        });
+      }
       const aba = await contexto.newPage();
-      const resposta = await aba.goto(`http://127.0.0.1:${porta}${pagina.url}`);
+      const resposta = await aba.goto(`${base}${pagina.url}`);
       if (!resposta || resposta.status() !== 200) {
         linhas.push(`${nome} | ${largura} | página não existe ainda`);
         await contexto.close();
@@ -118,7 +141,7 @@ try {
   }
 } finally {
   await navegador.close();
-  servidor.close();
+  servidor?.close();
 }
 console.log(linhas.join('\n'));
 console.log(`\nfolhas em ${path.relative(raizRepo, saidaComparacao)}`);

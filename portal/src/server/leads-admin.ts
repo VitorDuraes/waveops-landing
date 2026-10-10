@@ -2,7 +2,16 @@ import "server-only";
 import type { Prisma } from "@prisma/client";
 import { getPrisma } from "./db";
 import { env } from "./env";
-import { LIMITE_LEADS, type LeadDto, type LeadStatus, type LeadTipo } from "@/lib/leads-admin";
+import {
+  LIMITE_LEADS,
+  escaparCuringasLike,
+  interpretarBusca,
+  type FiltroLeads,
+  type LeadDto,
+  type LeadStatus,
+  type LeadTipo,
+  type ListaLeads,
+} from "@/lib/leads-admin";
 
 // Lado do admin dos leads do site: listar, marcar atendido, reabrir e apagar. A entrada
 // pública (rotas /api/site/*) mora em outro arquivo. Lead é dado pessoal: nada dele vai
@@ -93,10 +102,14 @@ function registroNaoExiste(e: unknown): boolean {
   return typeof e === "object" && e !== null && (e as { code?: unknown }).code === "P2025";
 }
 
-// Texto curto para o log do servidor. Nenhuma consulta deste arquivo leva dado pessoal do
-// lead nos argumentos (só id, status e o e-mail do admin), então a mensagem do erro é segura.
+// Texto curto para o log do servidor. A busca e a exclusão por titular levam e-mail ou
+// telefone nos argumentos, e o erro de validação do Prisma imprime os argumentos da
+// consulta: esse sai sem detalhe. Os demais erros (conexão, tabela, restrição) só trazem
+// o texto do banco, sem o valor buscado.
 export function descreverErro(e: unknown): string {
-  return e instanceof Error ? e.message.slice(0, 300) : "desconhecido";
+  if (!(e instanceof Error)) return "desconhecido";
+  if (e.name === "PrismaClientValidationError") return "consulta recusada pelo Prisma, detalhe omitido";
+  return e.message.slice(0, 300);
 }
 
 // O que a auditoria guarda do lead: tipo e hora de chegada, nunca nome, e-mail ou telefone.
@@ -104,16 +117,54 @@ function detalheDe(lead: { tipo: LeadTipo; createdAt: Date }): Prisma.InputJsonO
   return { tipo: lead.tipo, recebidoEm: lead.createdAt.toISOString() };
 }
 
-// Os mais recentes primeiro, até LIMITE_LEADS. Sem banco devolve vazio. Falha de banco
-// é lançada de propósito: lista vazia por erro faria o admin achar que não chegou lead.
-export async function listarLeads(): Promise<LeadDto[]> {
-  if (!env.hasDb()) return [];
-  const linhas = await getPrisma().lead.findMany({
-    select: CAMPOS,
-    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-    take: LIMITE_LEADS,
-  });
-  return linhas.map(paraDto);
+// Condição do banco para os filtros da tela. A busca olha para o formato do que foi
+// digitado (ver interpretarBusca): e-mail e telefone são igualdade, que usa os índices
+// leads_email_idx e leads_telefone_idx e acha o titular por mais antigo que seja; o resto
+// é parte do nome ou da empresa, sem diferenciar maiúscula (o acento conta). Os três não
+// entram juntos num OR: um ILIKE no meio impediria o uso dos índices.
+function onde(filtro: FiltroLeads): Prisma.LeadWhereInput {
+  const condicoes: Prisma.LeadWhereInput[] = [];
+  if (filtro.tipo !== "todos") condicoes.push({ tipo: filtro.tipo });
+  if (filtro.status !== "todos") condicoes.push({ status: filtro.status });
+  const busca = interpretarBusca(filtro.busca);
+  if (busca?.tipo === "email") {
+    condicoes.push({ email: busca.valor });
+  } else if (busca?.tipo === "telefone") {
+    condicoes.push({ telefone: busca.valor });
+  } else if (busca) {
+    // O Prisma não escapa os curingas do ILIKE: sem isso, "%" casaria todo nome.
+    const trecho = escaparCuringasLike(busca.valor);
+    condicoes.push({
+      OR: [
+        { nome: { contains: trecho, mode: "insensitive" } },
+        { empresa: { contains: trecho, mode: "insensitive" } },
+      ],
+    });
+  }
+  return condicoes.length ? { AND: condicoes } : {};
+}
+
+// Os mais recentes primeiro, até LIMITE_LEADS, com o total e os novos de tudo o que
+// combina com os filtros (não só dos 500 devolvidos). Sem banco devolve vazio. Falha de
+// banco é lançada de propósito: lista vazia por erro faria o admin achar que não chegou lead.
+export async function listarLeads(filtro: FiltroLeads): Promise<ListaLeads> {
+  if (!env.hasDb()) return { leads: [], total: 0, novos: 0 };
+  const db = getPrisma();
+  const where = onde(filtro);
+  const [linhas, porStatus] = await Promise.all([
+    db.lead.findMany({
+      where,
+      select: CAMPOS,
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: LIMITE_LEADS,
+    }),
+    db.lead.groupBy({ by: ["status"], where, _count: { _all: true } }),
+  ]);
+  return {
+    leads: linhas.map(paraDto),
+    total: porStatus.reduce((soma, g) => soma + g._count._all, 0),
+    novos: porStatus.find((g) => g.status === "novo")?._count._all ?? 0,
+  };
 }
 
 // "atendido" grava a hora em atendidoEm, "novo" zera. O updateMany só casa com o lead que

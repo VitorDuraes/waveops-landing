@@ -1,17 +1,16 @@
 "use client";
 // 19 . Leads (/admin/leads)
-import { useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { Icon } from "@/components/icons";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Loading, LoadError } from "@/components/ui/Loading";
 import { LeadModalContent } from "@/components/admin/LeadModal";
 import { useModal, useToast } from "@/components/providers";
-import { useApi } from "@/lib/useApi";
+import { useConsultaLeads } from "@/lib/useConsultaLeads";
+import { CABECALHO_JSON, chamar } from "@/lib/leads-client";
 import {
-  LIMITE_LEADS,
   assuntosDoLead,
-  filtrarLeads,
   formatarDataHora,
   formatarTelefone,
   linkWhatsappDoLead,
@@ -63,14 +62,6 @@ const ICONE_BUSCA: CSSProperties = { width: 16, height: 16, flexShrink: 0 };
 
 // Botão travado enquanto uma ação roda. O design system não tem estilo para :disabled.
 const TRAVADO: CSSProperties = { opacity: 0.55, cursor: "not-allowed" };
-
-// Chama a API do admin. Falha vira Error com o texto que a API devolveu, pronto para o toast.
-async function chamar(url: string, init: RequestInit): Promise<void> {
-  const res = await fetch(url, init);
-  if (res.ok) return;
-  const corpo = (await res.json().catch(() => ({}))) as { error?: string };
-  throw new Error(corpo.error || "Não foi possível concluir a ação. Tente de novo.");
-}
 
 interface LinhaProps {
   lead: LeadDto;
@@ -203,27 +194,42 @@ function LinhaLead({ lead: l, travado, onAbrir, onStatus, onApagar }: LinhaProps
   );
 }
 
+// Pausa na digitação antes de a busca ir para o servidor.
+const ATRASO_DA_BUSCA_MS = 350;
+
 export default function LeadsPage() {
   const { openModal } = useModal();
   const toast = useToast();
-  const req = useApi<LeadDto[]>("/api/leads");
   const [tipo, setTipo] = useState<FiltroTipo>("todos");
   const [status, setStatus] = useState<FiltroStatus>("todos");
+  // O que está digitado e o que já foi para o servidor: a busca só sai depois de uma
+  // pausa na digitação (ou do Enter), para não gerar uma consulta por tecla.
   const [busca, setBusca] = useState("");
+  const [buscaEnviada, setBuscaEnviada] = useState("");
   // Id do lead com ação em andamento. Trava os botões para não repetir o pedido.
   const [ocupado, setOcupado] = useState<string | null>(null);
 
-  // Só a primeira carga troca a tela por "Carregando". Nos reloads depois de uma ação a
-  // tabela fica no lugar, sem piscar e sem perder a posição da rolagem.
-  if (req.loading && !req.data) return <Loading />;
-  if (req.error || !req.data)
-    return <LoadError message={req.error || "Não foi possível carregar os leads."} onRetry={req.reload} />;
+  useEffect(() => {
+    const espera = window.setTimeout(() => setBuscaEnviada(busca.trim()), ATRASO_DA_BUSCA_MS);
+    return () => window.clearTimeout(espera);
+  }, [busca]);
 
-  const leads = req.data;
-  const lista = filtrarLeads(leads, { tipo, status, busca });
-  const novos = leads.filter((l) => l.status === "novo").length;
+  // Filtros e busca são do servidor: cada mudança é outra consulta (POST, com a busca no
+  // corpo, nunca na URL). O teto de 500 vale depois do filtro, então um lead antigo se acha
+  // pela busca.
+  const req = useConsultaLeads({ tipo, status, busca: buscaEnviada });
+
+  // Só a primeira carga troca a tela por "Carregando". Depois, a tabela fica no lugar
+  // enquanto a próxima consulta roda: sem piscar e sem perder a posição da rolagem.
+  if (req.loading && !req.data) return <Loading />;
+  if (!req.data) {
+    return <LoadError message={req.error || "Não foi possível carregar os leads."} onRetry={req.reload} />;
+  }
+
+  const { leads, total, novos } = req.data;
+  const filtrando = tipo !== "todos" || status !== "todos" || buscaEnviada !== "";
+  const semLeads = !filtrando && total === 0;
   const travado = ocupado !== null || req.loading;
-  const semLeads = leads.length === 0;
 
   async function mudarStatus(lead: LeadDto, novo: LeadStatus) {
     if (travado) return;
@@ -231,7 +237,7 @@ export default function LeadsPage() {
     try {
       await chamar(`/api/leads/${encodeURIComponent(lead.id)}/status`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: CABECALHO_JSON,
         body: JSON.stringify({ status: novo }),
       });
       toast(novo === "atendido" ? "Lead marcado como atendido" : "Lead reaberto");
@@ -264,7 +270,9 @@ export default function LeadsPage() {
       <div className="page-head">
         <div>
           <h2>Leads</h2>
-          <div className="lead">{resumoDaLista(leads.length, lista.length, novos)}</div>
+          <div className="lead" aria-live="polite">
+            {resumoDaLista(total, novos, filtrando)}
+          </div>
         </div>
       </div>
 
@@ -318,65 +326,75 @@ export default function LeadsPage() {
             <Icon name="search" style={ICONE_BUSCA} />
             <input
               type="text"
-              aria-label="Buscar lead por nome, empresa, e-mail ou telefone"
-              placeholder="Nome, empresa, e-mail ou telefone..."
+              aria-label="Buscar lead por nome, e-mail completo ou telefone"
+              placeholder="Nome, e-mail completo ou telefone..."
               autoComplete="off"
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") setBuscaEnviada(busca.trim());
+              }}
               style={{ background: "none", border: "none", color: "var(--text)", outline: "none", width: 260 }}
             />
           </div>
         </div>
       )}
 
-      <div className="card flush">
-        {lista.length === 0 ? (
-          <EmptyState
-            icon="inbox"
-            title={semLeads ? "Nenhum lead ainda" : "Nenhum lead aqui"}
-            desc={
-              semLeads
-                ? "Os contatos e as inscrições da lista de interesse do site chegam aqui assim que forem enviados."
-                : "Nenhum lead combina com esse tipo, esse status ou essa busca. Ajuste os filtros."
-            }
-          />
+      <div aria-busy={req.loading} style={{ opacity: req.loading ? 0.6 : 1, transition: "opacity 0.15s" }}>
+        {req.error ? (
+          <LoadError message={req.error} onRetry={req.reload} />
         ) : (
-          <div className="table-wrap">
-            <table className="tbl">
-              <caption className="sr-only">Leads recebidos pelo site, do mais recente para o mais antigo</caption>
-              <thead>
-                <tr>
-                  <th>Recebido</th>
-                  <th>Tipo</th>
-                  <th>Pessoa</th>
-                  <th>Contato</th>
-                  <th>Assunto</th>
-                  <th>Status</th>
-                  <th className="right">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {lista.map((l) => (
-                  <LinhaLead
-                    key={l.id}
-                    lead={l}
-                    travado={travado}
-                    onAbrir={(lead) => openModal(<LeadModalContent lead={lead} />)}
-                    onStatus={mudarStatus}
-                    onApagar={apagar}
-                  />
-                ))}
-              </tbody>
-            </table>
+          <div className="card flush">
+            {leads.length === 0 ? (
+              <EmptyState
+                icon="inbox"
+                title={semLeads ? "Nenhum lead ainda" : "Nenhum lead aqui"}
+                desc={
+                  semLeads
+                    ? "Os contatos e as inscrições da lista de interesse do site chegam aqui assim que forem enviados."
+                    : "Nenhum lead combina com esses filtros. A busca por e-mail e por telefone pede o dado completo; a de nome aceita só um pedaço."
+                }
+              />
+            ) : (
+              <div className="table-wrap">
+                <table className="tbl">
+                  <caption className="sr-only">Leads recebidos pelo site, do mais recente para o mais antigo</caption>
+                  <thead>
+                    <tr>
+                      <th>Recebido</th>
+                      <th>Tipo</th>
+                      <th>Pessoa</th>
+                      <th>Contato</th>
+                      <th>Assunto</th>
+                      <th>Status</th>
+                      <th className="right">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {leads.map((l) => (
+                      <LinhaLead
+                        key={l.id}
+                        lead={l}
+                        travado={travado}
+                        onAbrir={(lead) => openModal(<LeadModalContent lead={lead} />)}
+                        onStatus={mudarStatus}
+                        onApagar={apagar}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
-      </div>
 
-      {leads.length >= LIMITE_LEADS && (
-        <p className="hint">
-          Mostrando os {LIMITE_LEADS} leads mais recentes. Os filtros e a busca valem só para eles.
-        </p>
-      )}
+        {!req.error && total > leads.length && (
+          <p className="hint">
+            Mostrando os {leads.length.toLocaleString("pt-BR")} leads mais recentes de {total.toLocaleString("pt-BR")}.
+            Para achar um mais antigo, busque pelo e-mail completo ou pelo telefone.
+          </p>
+        )}
+      </div>
     </>
   );
 }

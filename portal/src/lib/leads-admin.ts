@@ -8,8 +8,9 @@ import { normalizarEmail, normalizarTelefone, soDigitos, validarEmail, validarTe
 export type LeadTipo = "contato" | "interesse";
 export type LeadStatus = "novo" | "atendido";
 
-// Quantos leads a lista traz, do mais recente para o mais antigo. A busca e os filtros
-// da tela olham só para esses: acima disso a tela avisa em vez de esconder o corte.
+// Teto de leads por resposta de POST /api/leads/consulta, do mais recente para o mais antigo. O
+// servidor aplica os filtros e a busca antes do corte, e o total do que combina volta
+// junto: um lead antigo se acha pela busca, e a tela avisa quando algo ficou de fora.
 export const LIMITE_LEADS = 500;
 
 // Lead como a tela do admin enxerga: plano e serializável (datas em ISO). Não leva
@@ -48,7 +49,7 @@ export interface LeadDto {
   atendidoEm: string | null;
 }
 
-// Resposta de GET /api/leads. `leads` vem limitado a LIMITE_LEADS; `total` e `novos`
+// Resposta de POST /api/leads/consulta. `leads` vem limitado a LIMITE_LEADS; `total` e `novos`
 // contam tudo o que combina com os filtros, inclusive o que passou do teto.
 export interface ListaLeads {
   leads: LeadDto[];
@@ -194,54 +195,30 @@ export function resumoUtm(
   return pares.flatMap(([chave, valor]) => (valor && valor.trim() ? [`${chave}: ${valor.trim()}`] : [])).join("\n");
 }
 
-// "12 leads · 3 novos" na lista inteira, "5 de 12 leads" quando há filtro ou busca.
-export function resumoDaLista(total: number, visiveis: number, novos: number): string {
-  const leads = (n: number) => `${n} ${n === 1 ? "lead" : "leads"}`;
-  if (visiveis !== total) return `${visiveis} de ${leads(total)}`;
-  return `${leads(total)} · ${novos} ${novos === 1 ? "novo" : "novos"}`;
+// Contagem do topo da tela: "12 leads · 3 novos" sem filtro, "5 leads encontrados · 2
+// novos" com filtro ou busca. Os números são os do servidor, não os da página de 500.
+export function resumoDaLista(total: number, novos: number, filtrando: boolean): string {
+  const numero = (n: number) => n.toLocaleString("pt-BR");
+  const leads = `${numero(total)} ${total === 1 ? "lead" : "leads"}`;
+  const achados = filtrando ? (total === 1 ? " encontrado" : " encontrados") : "";
+  return `${leads}${achados} · ${numero(novos)} ${novos === 1 ? "novo" : "novos"}`;
 }
 
-/* ---------------- filtro da lista ---------------- */
+/* ---------------- filtros e busca no servidor ---------------- */
 
 export type FiltroTipo = "todos" | LeadTipo;
 export type FiltroStatus = "todos" | LeadStatus;
 
+// Os filtros da tela, que viajam no corpo de POST /api/leads/consulta. "todos" e busca vazia
+// não filtram.
 export interface FiltroLeads {
   tipo: FiltroTipo;
   status: FiltroStatus;
   busca: string;
 }
 
-// Sem acento e sem caixa: quem busca "joao" acha "João".
-function normalizar(valor: string | null | undefined): string {
-  return (valor ?? "")
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .trim();
-}
-
-// Busca que só tem dígito e pontuação de telefone também é lida como telefone.
+// Só dígitos e pontuação de telefone: parênteses, espaço, ponto, mais e hífen.
 const PARECE_TELEFONE = /^[\d\s().+-]+$/;
-
-// Filtra por tipo, status e busca (nome, empresa, e-mail ou telefone). A busca por
-// telefone ignora máscara e aceita o 55 na frente, e só vale para texto que parece
-// telefone: "joao2" não pode achar todo número que tem um 2.
-export function filtrarLeads(leads: readonly LeadDto[], filtro: FiltroLeads): LeadDto[] {
-  const termo = normalizar(filtro.busca);
-  const digitos = PARECE_TELEFONE.test(filtro.busca.trim()) ? soDigitos(filtro.busca) : "";
-  const numero = digitos.length > 11 && digitos.startsWith("55") ? digitos.slice(2) : digitos;
-
-  return leads.filter((lead) => {
-    if (filtro.tipo !== "todos" && lead.tipo !== filtro.tipo) return false;
-    if (filtro.status !== "todos" && lead.status !== filtro.status) return false;
-    if (!termo) return true;
-    if ([lead.nome, lead.empresa, lead.email].some((v) => normalizar(v).includes(termo))) return true;
-    return numero !== "" && soDigitos(lead.telefone).includes(numero);
-  });
-}
-
-/* ---------------- busca no servidor ---------------- */
 
 // Teto do texto da busca. O maior campo pesquisável é o e-mail, de até 160 caracteres.
 export const TAMANHO_MAXIMO_BUSCA = 200;
@@ -269,32 +246,46 @@ export function interpretarBusca(bruta: string): BuscaInterpretada | null {
   return { tipo: "texto", valor: termo };
 }
 
-export type LeituraDoFiltro = { ok: true; filtro: FiltroLeads } | { ok: false; erro: string };
-
-// Lê tipo, status e busca da URL de GET /api/leads. Ausente ou "todos" não filtra. Valor
-// fora da lista é erro (400), para um typo não passar por "sem filtro".
-export function lerFiltroDaBusca(params: Pick<URLSearchParams, "get">): LeituraDoFiltro {
-  const tipo = (params.get("tipo") ?? "").trim() || "todos";
-  const status = (params.get("status") ?? "").trim() || "todos";
-  if (tipo !== "todos" && tipo !== "contato" && tipo !== "interesse") {
-    return { ok: false, erro: "Tipo inválido. Use: contato ou interesse." };
-  }
-  if (status !== "todos" && !ehStatusLead(status)) {
-    return { ok: false, erro: "Status inválido. Use: novo ou atendido." };
-  }
-  const busca = (params.get("busca") ?? "").trim().slice(0, TAMANHO_MAXIMO_BUSCA).trim();
-  return { ok: true, filtro: { tipo, status, busca } };
+// O Prisma monta o contains como ILIKE '%termo%' sem escapar nada: o % e o _ viram
+// curinga e a barra invertida escapa o caractere seguinte. Escapados aqui, eles voltam
+// a ser o texto digitado, e buscar "100%" não acha todo mundo que tem 100 no nome.
+export function escaparCuringasLike(texto: string): string {
+  return texto.replace(/[\\%_]/g, "\\$&");
 }
 
-// URL de GET /api/leads para os filtros da tela. O que não filtra fica fora da URL.
-export function montarUrlDeLeads(filtro: FiltroLeads): string {
-  const params = new URLSearchParams();
-  if (filtro.tipo !== "todos") params.set("tipo", filtro.tipo);
-  if (filtro.status !== "todos") params.set("status", filtro.status);
-  const busca = filtro.busca.trim();
-  if (busca) params.set("busca", busca);
-  const consulta = params.toString();
-  return consulta ? `/api/leads?${consulta}` : "/api/leads";
+export type LeituraDoFiltro = { ok: true; filtro: FiltroLeads } | { ok: false; erro: string };
+
+function ehFiltroTipo(valor: unknown): valor is FiltroTipo {
+  return valor === "todos" || valor === "contato" || valor === "interesse";
+}
+
+function ehFiltroStatus(valor: unknown): valor is FiltroStatus {
+  return valor === "todos" || ehStatusLead(valor);
+}
+
+// Texto aparado. Nulo, indefinido e texto vazio viram undefined, que é "sem valor".
+function valorOuNada(valor: unknown): unknown {
+  const v = typeof valor === "string" ? valor.trim() : valor;
+  return v === null || v === "" ? undefined : v;
+}
+
+// Lê o corpo de POST /api/leads/consulta: { busca?, tipo?, status? }. A busca vai no corpo
+// e nunca na URL, porque pode ser o e-mail ou o telefone de um titular, e a URL fica em log
+// de acesso do proxy e no histórico do navegador. Ausente, nulo, vazio ou "todos" não
+// filtra. Valor fora da lista, ou busca que não é texto, é erro (400): um typo não pode
+// passar por "sem filtro".
+export function lerConsulta(corpo: unknown): LeituraDoFiltro {
+  if (typeof corpo !== "object" || corpo === null || Array.isArray(corpo)) {
+    return { ok: false, erro: "Corpo inválido. Envie um objeto JSON com busca, tipo e status." };
+  }
+  const bruto = corpo as { busca?: unknown; tipo?: unknown; status?: unknown };
+  const tipo = valorOuNada(bruto.tipo) ?? "todos";
+  const status = valorOuNada(bruto.status) ?? "todos";
+  if (!ehFiltroTipo(tipo)) return { ok: false, erro: "Tipo inválido. Use: contato ou interesse." };
+  if (!ehFiltroStatus(status)) return { ok: false, erro: "Status inválido. Use: novo ou atendido." };
+  const buscaBruta = valorOuNada(bruto.busca) ?? "";
+  if (typeof buscaBruta !== "string") return { ok: false, erro: "Busca inválida. Envie texto." };
+  return { ok: true, filtro: { tipo, status, busca: buscaBruta.slice(0, TAMANHO_MAXIMO_BUSCA).trim() } };
 }
 
 /* ---------------- apagar tudo de um titular ---------------- */

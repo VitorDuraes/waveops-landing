@@ -7,15 +7,14 @@ import {
   confirmacaoDoTitular,
   ehJson,
   ehStatusLead,
-  filtrarLeads,
+  escaparCuringasLike,
   formatarDataHora,
   formatarTelefone,
   interpretarBusca,
   lerAlvoDoTitular,
-  lerFiltroDaBusca,
+  lerConsulta,
   linkWhatsapp,
   linkWhatsappDoLead,
-  montarUrlDeLeads,
   resumoDaLista,
   resumoUtm,
   rotuloCanal,
@@ -220,20 +219,25 @@ describe("resumoUtm: detalhe da origem", () => {
 
 describe("resumoDaLista: linha de contagem do topo", () => {
   test("deve contar leads e novos quando não há filtro", () => {
-    assert.equal(resumoDaLista(12, 12, 3), "12 leads · 3 novos");
+    assert.equal(resumoDaLista(12, 3, false), "12 leads · 3 novos");
   });
 
   test("deve usar o singular quando há um lead e um novo", () => {
-    assert.equal(resumoDaLista(1, 1, 1), "1 lead · 1 novo");
+    assert.equal(resumoDaLista(1, 1, false), "1 lead · 1 novo");
   });
 
   test("deve mostrar zeros quando a lista está vazia", () => {
-    assert.equal(resumoDaLista(0, 0, 0), "0 leads · 0 novos");
+    assert.equal(resumoDaLista(0, 0, false), "0 leads · 0 novos");
   });
 
-  test("deve mostrar quantos aparecem do total quando há filtro ou busca", () => {
-    assert.equal(resumoDaLista(12, 5, 3), "5 de 12 leads");
-    assert.equal(resumoDaLista(1, 0, 1), "0 de 1 lead");
+  test("deve dizer encontrados quando há filtro ou busca", () => {
+    assert.equal(resumoDaLista(5, 2, true), "5 leads encontrados · 2 novos");
+    assert.equal(resumoDaLista(1, 0, true), "1 lead encontrado · 0 novos");
+    assert.equal(resumoDaLista(0, 0, true), "0 leads encontrados · 0 novos");
+  });
+
+  test("deve separar os milhares quando o total passa de mil", () => {
+    assert.equal(resumoDaLista(1234, 1000, false), "1.234 leads · 1.000 novos");
   });
 });
 
@@ -262,98 +266,6 @@ describe("status do lead e corpo da rota", () => {
     assert.equal(statusDoCorpo(undefined), null);
     assert.equal(statusDoCorpo("atendido"), null);
     assert.equal(statusDoCorpo([{ status: "novo" }]), null);
-  });
-});
-
-describe("filtrarLeads: tipo, status e busca", () => {
-  const joao = lead({ id: "a" });
-  const maria = lead({
-    id: "b",
-    nome: "Maria Souza",
-    empresa: null,
-    email: "maria@souza.com",
-    telefone: "21987654321",
-    status: "atendido",
-  });
-  const inscrito = lead({
-    id: "c",
-    tipo: "interesse",
-    nome: null,
-    empresa: null,
-    email: "ana@exemplo.com.br",
-    telefone: null,
-    canalRetorno: null,
-    procura: null,
-    dor: null,
-    finalidade: "aviso_abertura_plataforma",
-  });
-  const todos = [joao, maria, inscrito];
-  const ids = (leads: LeadDto[]) => leads.map((l) => l.id);
-  const sem = { tipo: "todos", status: "todos", busca: "" } as const;
-
-  test("deve devolver todos os leads quando não há filtro nem busca", () => {
-    assert.deepEqual(ids(filtrarLeads(todos, sem)), ["a", "b", "c"]);
-  });
-
-  test("deve filtrar por tipo quando o tipo é contato ou interesse", () => {
-    assert.deepEqual(ids(filtrarLeads(todos, { ...sem, tipo: "contato" })), ["a", "b"]);
-    assert.deepEqual(ids(filtrarLeads(todos, { ...sem, tipo: "interesse" })), ["c"]);
-  });
-
-  test("deve filtrar por status quando o status é novo ou atendido", () => {
-    assert.deepEqual(ids(filtrarLeads(todos, { ...sem, status: "novo" })), ["a", "c"]);
-    assert.deepEqual(ids(filtrarLeads(todos, { ...sem, status: "atendido" })), ["b"]);
-  });
-
-  test("deve combinar tipo, status e busca quando os três estão ativos", () => {
-    assert.deepEqual(ids(filtrarLeads(todos, { tipo: "contato", status: "novo", busca: "silva" })), ["a"]);
-    assert.deepEqual(ids(filtrarLeads(todos, { tipo: "interesse", status: "atendido", busca: "" })), []);
-  });
-
-  test("deve achar o nome sem diferenciar acento nem caixa", () => {
-    assert.deepEqual(ids(filtrarLeads(todos, { ...sem, busca: "joao" })), ["a"]);
-    assert.deepEqual(ids(filtrarLeads(todos, { ...sem, busca: "JOÃO DA" })), ["a"]);
-  });
-
-  test("deve achar pelo e-mail e pela empresa quando a busca é parte deles", () => {
-    assert.deepEqual(ids(filtrarLeads(todos, { ...sem, busca: "souza.com" })), ["b"]);
-    assert.deepEqual(ids(filtrarLeads(todos, { ...sem, busca: "exemplo" })), ["c"]);
-    assert.deepEqual(ids(filtrarLeads(todos, { ...sem, busca: "consultoria" })), ["a"]);
-  });
-
-  test("deve achar pelo telefone quando a busca vem com máscara", () => {
-    assert.deepEqual(ids(filtrarLeads(todos, { ...sem, busca: "(11) 91234" })), ["a"]);
-    assert.deepEqual(ids(filtrarLeads(todos, { ...sem, busca: "98765-4321" })), ["b"]);
-  });
-
-  test("deve achar pelo telefone quando a busca vem com o 55 na frente", () => {
-    assert.deepEqual(ids(filtrarLeads(todos, { ...sem, busca: "+55 21 98765-4321" })), ["b"]);
-    assert.deepEqual(ids(filtrarLeads(todos, { ...sem, busca: "5511912345678" })), ["a"]);
-  });
-
-  test("deve ler como texto, e não como telefone, a busca que mistura letra e número", () => {
-    // O telefone do João tem "2", mas "joao2" não é número de telefone.
-    assert.deepEqual(ids(filtrarLeads(todos, { ...sem, busca: "joao2" })), []);
-  });
-
-  test("deve ignorar espaços nas pontas quando a busca é só espaço", () => {
-    assert.deepEqual(ids(filtrarLeads(todos, { ...sem, busca: "   " })), ["a", "b", "c"]);
-    assert.deepEqual(ids(filtrarLeads(todos, { ...sem, busca: "  maria  " })), ["b"]);
-  });
-
-  test("deve seguir sem erro quando o lead não tem telefone nem nome", () => {
-    assert.deepEqual(ids(filtrarLeads(todos, { ...sem, busca: "11" })), ["a"]);
-  });
-
-  test("deve devolver lista vazia quando nada combina", () => {
-    assert.deepEqual(filtrarLeads(todos, { ...sem, busca: "zzz" }), []);
-  });
-
-  test("deve devolver uma lista nova e deixar a original intacta", () => {
-    const original = [joao, maria, inscrito];
-    const r = filtrarLeads(original, { ...sem, tipo: "contato" });
-    assert.notEqual(r, original);
-    assert.equal(original.length, 3);
   });
 });
 
@@ -454,69 +366,93 @@ describe("interpretarBusca: o que o servidor procura", () => {
   });
 });
 
-describe("lerFiltroDaBusca: parâmetros de GET /api/leads", () => {
-  const ler = (consulta: string) => lerFiltroDaBusca(new URLSearchParams(consulta));
+describe("escaparCuringasLike: o texto digitado vira texto no ILIKE", () => {
+  test("deve escapar o percentual, o sublinhado e a barra invertida", () => {
+    assert.equal(escaparCuringasLike("100%"), "100\\%");
+    assert.equal(escaparCuringasLike("loja_24"), "loja\\_24");
+    assert.equal(escaparCuringasLike("a\\b"), "a\\\\b");
+    assert.equal(escaparCuringasLike("x\\%y"), "x\\\\\\%y");
+    assert.equal(escaparCuringasLike("%_%"), "\\%\\_\\%");
+  });
 
-  test("deve devolver tudo como todos quando não há parâmetro", () => {
-    assert.deepEqual(ler(""), { ok: true, filtro: { tipo: "todos", status: "todos", busca: "" } });
+  test("deve deixar como está o texto sem curinga", () => {
+    assert.equal(escaparCuringasLike("Silva & Filhos"), "Silva & Filhos");
+    assert.equal(escaparCuringasLike("João D'Ávila"), "João D'Ávila");
+    assert.equal(escaparCuringasLike(""), "");
+  });
+});
+
+describe("lerConsulta: corpo de POST /api/leads/consulta", () => {
+  test("deve devolver tudo como todos quando o corpo não tem campo", () => {
+    assert.deepEqual(lerConsulta({}), { ok: true, filtro: { tipo: "todos", status: "todos", busca: "" } });
   });
 
   test("deve ler tipo, status e busca quando os valores são válidos", () => {
-    assert.deepEqual(ler("tipo=contato&status=novo&busca=maria"), {
+    assert.deepEqual(lerConsulta({ tipo: "contato", status: "novo", busca: "maria" }), {
       ok: true,
       filtro: { tipo: "contato", status: "novo", busca: "maria" },
     });
-    assert.deepEqual(ler("tipo=interesse&status=atendido"), {
+    assert.deepEqual(lerConsulta({ tipo: "interesse", status: "atendido" }), {
       ok: true,
       filtro: { tipo: "interesse", status: "atendido", busca: "" },
     });
   });
 
-  test("deve tratar vazio e todos como sem filtro", () => {
-    assert.deepEqual(ler("tipo=&status=todos"), { ok: true, filtro: { tipo: "todos", status: "todos", busca: "" } });
+  test("deve tratar nulo, vazio, só espaço e todos como sem filtro", () => {
+    const sem = { ok: true, filtro: { tipo: "todos", status: "todos", busca: "" } };
+    assert.deepEqual(lerConsulta({ tipo: null, status: null, busca: null }), sem);
+    assert.deepEqual(lerConsulta({ tipo: "", status: "  ", busca: "   " }), sem);
+    assert.deepEqual(lerConsulta({ tipo: "todos", status: "todos", busca: "" }), sem);
+  });
+
+  test("deve tirar os espaços de tipo, status e busca", () => {
+    assert.deepEqual(lerConsulta({ tipo: " contato ", status: " novo", busca: "  joao  " }), {
+      ok: true,
+      filtro: { tipo: "contato", status: "novo", busca: "joao" },
+    });
   });
 
   test("deve recusar tipo e status fora da lista, para um typo não virar sem filtro", () => {
-    assert.deepEqual(ler("tipo=lista"), { ok: false, erro: "Tipo inválido. Use: contato ou interesse." });
-    assert.deepEqual(ler("status=NOVO"), { ok: false, erro: "Status inválido. Use: novo ou atendido." });
+    assert.deepEqual(lerConsulta({ tipo: "lista" }), { ok: false, erro: "Tipo inválido. Use: contato ou interesse." });
+    assert.deepEqual(lerConsulta({ status: "NOVO" }), { ok: false, erro: "Status inválido. Use: novo ou atendido." });
   });
 
-  test("deve tirar os espaços da busca e cortar no tamanho máximo", () => {
-    assert.deepEqual(ler("busca=%20%20joao%20%20"), { ok: true, filtro: { tipo: "todos", status: "todos", busca: "joao" } });
-    const longa = ler("busca=" + "a".repeat(TAMANHO_MAXIMO_BUSCA + 10));
-    assert.ok(longa.ok && longa.filtro.busca.length === TAMANHO_MAXIMO_BUSCA);
-  });
-});
-
-describe("montarUrlDeLeads: URL que a tela chama", () => {
-  const sem: FiltroLeads = { tipo: "todos", status: "todos", busca: "" };
-
-  test("deve devolver a rota pura quando nada filtra", () => {
-    assert.equal(montarUrlDeLeads(sem), "/api/leads");
-    assert.equal(montarUrlDeLeads({ ...sem, busca: "   " }), "/api/leads");
+  test("deve recusar tipo e status que não são texto", () => {
+    assert.equal(lerConsulta({ tipo: 1 }).ok, false);
+    assert.equal(lerConsulta({ tipo: ["contato"] }).ok, false);
+    assert.equal(lerConsulta({ status: false }).ok, false);
+    assert.equal(lerConsulta({ status: {} }).ok, false);
   });
 
-  test("deve incluir só o que filtra", () => {
-    assert.equal(montarUrlDeLeads({ ...sem, tipo: "contato" }), "/api/leads?tipo=contato");
-    assert.equal(montarUrlDeLeads({ ...sem, status: "novo", busca: "maria" }), "/api/leads?status=novo&busca=maria");
+  test("deve recusar busca que não é texto", () => {
+    const erro = { ok: false, erro: "Busca inválida. Envie texto." };
+    assert.deepEqual(lerConsulta({ busca: 123 }), erro);
+    assert.deepEqual(lerConsulta({ busca: ["a@b.com"] }), erro);
+    assert.deepEqual(lerConsulta({ busca: { email: "a@b.com" } }), erro);
+    assert.deepEqual(lerConsulta({ busca: false }), erro);
   });
 
-  test("deve codificar a busca quando tem arroba, espaço, e comercial ou acento", () => {
-    assert.equal(montarUrlDeLeads({ ...sem, busca: "joao@silva.com.br" }), "/api/leads?busca=joao%40silva.com.br");
-    assert.equal(montarUrlDeLeads({ ...sem, busca: "Silva & Filhos" }), "/api/leads?busca=Silva+%26+Filhos");
+  test("deve cortar a busca no tamanho máximo", () => {
+    const r = lerConsulta({ busca: "a".repeat(TAMANHO_MAXIMO_BUSCA + 10) });
+    assert.ok(r.ok && r.filtro.busca.length === TAMANHO_MAXIMO_BUSCA);
   });
 
-  test("deve voltar igual depois de lida pela rota", () => {
+  test("deve recusar corpo que não é objeto", () => {
+    for (const corpo of [null, undefined, "maria", 42, ["maria"], true]) {
+      assert.equal(lerConsulta(corpo).ok, false, JSON.stringify(corpo));
+    }
+  });
+
+  test("deve ler igual o que a tela manda, depois de passar por JSON", () => {
     const filtros: FiltroLeads[] = [
-      sem,
+      { tipo: "todos", status: "todos", busca: "" },
       { tipo: "contato", status: "atendido", busca: "João D'Ávila & Cia" },
       { tipo: "interesse", status: "todos", busca: "joao@silva.com.br" },
       { tipo: "todos", status: "novo", busca: "+55 (11) 91234-5678" },
       { tipo: "todos", status: "todos", busca: "100% 50_50 a+b=c?" },
     ];
     for (const filtro of filtros) {
-      const url = new URL(montarUrlDeLeads(filtro), "http://localhost");
-      assert.deepEqual(lerFiltroDaBusca(url.searchParams), { ok: true, filtro });
+      assert.deepEqual(lerConsulta(JSON.parse(JSON.stringify(filtro))), { ok: true, filtro });
     }
   });
 });

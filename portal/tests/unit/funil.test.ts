@@ -1,7 +1,7 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import { calcularId, diaUtc } from "../../src/lib/funil";
-import { normalizarEvento, normalizarFonte, ETAPAS, EVENTOS, EVENTOS_DA_LANDING } from "../../src/lib/funil";
+import { normalizarEvento, normalizarFonte, ETAPAS, EVENTOS, EVENTOS_DA_LANDING, ROTULO_ETAPA } from "../../src/lib/funil";
 import { ehRobo } from "../../src/lib/robo";
 
 // Testes das funcoes puras da medicao de funil (SPEC-18). Rodam sem banco e sem
@@ -71,6 +71,19 @@ describe("normalizarEvento: o que entra na tabela", () => {
     assert.equal(normalizarEvento([{ n: "visita" }]), null);
   });
 
+  test("interesse_plataforma é aceito, com o path da página", () => {
+    const ev = normalizarEvento({ n: "interesse_plataforma", u: "/plataforma/" });
+    assert.equal(ev?.nome, "interesse_plataforma");
+    assert.equal(ev?.path, "/plataforma/");
+  });
+
+  test("nome parecido com interesse_plataforma continua descartado", () => {
+    // A checagem é por igualdade exata. O evento novo não pode afrouxar a lista fechada.
+    for (const n of ["INTERESSE_PLATAFORMA", "interesse_plataforma ", "interesse", "interesse_site"]) {
+      assert.equal(normalizarEvento({ n }), null, `"${n}" deveria ser descartado`);
+    }
+  });
+
   test("querystring some do path (pode carregar dado pessoal)", () => {
     const ev = normalizarEvento({ n: "visita", u: "/contato?email=joao@empresa.com.br" });
     assert.equal(ev?.path, "/contato");
@@ -116,6 +129,17 @@ describe("etapas do funil", () => {
   test("a ordem comeca em visita e termina em ativacao", () => {
     assert.equal(ETAPAS[0], "visita");
     assert.equal(ETAPAS[ETAPAS.length - 1], "ativacao");
+  });
+
+  test("interesse_plataforma é sinal lateral: existe, mas fica fora das etapas", () => {
+    // Quem entra na lista de interesse não avançou para o checkout, pegou outro caminho.
+    assert.ok(EVENTOS.includes("interesse_plataforma"), "interesse_plataforma fora da lista fechada");
+    assert.ok(!ETAPAS.includes("interesse_plataforma"), "interesse_plataforma não é degrau do funil");
+  });
+
+  test("todo evento tem rótulo, e o novo se chama Lista de interesse da Plataforma", () => {
+    for (const e of EVENTOS) assert.ok(ROTULO_ETAPA[e], `${e} sem rótulo`);
+    assert.equal(ROTULO_ETAPA.interesse_plataforma, "Lista de interesse da Plataforma");
   });
 });
 
@@ -201,5 +225,11 @@ describe("eventos da landing", () => {
     for (const e of ["checkout_aberto", "checkout_enviado", "pagamento_confirmado", "ativacao"] as const) {
       assert.ok(!EVENTOS_DA_LANDING.includes(e), `${e} nao nasce na landing`);
     }
+  });
+
+  test("interesse_plataforma nasce na landing", () => {
+    // Fora desta lista, o admin contaria também o evento com origem "portal" (a cópia
+    // da landing servida pelo painel), e a equipe navegando viraria interessado.
+    assert.ok(EVENTOS_DA_LANDING.includes("interesse_plataforma"));
   });
 });

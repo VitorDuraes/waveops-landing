@@ -61,6 +61,42 @@ export const EVENTOS_DA_LANDING: NomeEvento[] = [
   "interesse_plataforma",
 ];
 
+// Origens do site que podem mandar evento (CORS da rota /api/e).
+export const ORIGENS_DA_LANDING = ["https://waveops.com.br", "https://www.waveops.com.br"];
+
+// Quem mandou o evento, pelo cabeçalho Origin. O navegador põe Origin em todo POST,
+// inclusive de mesma origem (sendBeacon e fetch), então "sem Origin" não identifica
+// as telas do portal: sem esta regra, o checkout_aberto do próprio portal era
+// descartado. Mesma origem vale pelo Sec-Fetch-Site, que página nenhuma consegue
+// forjar, ou pelo Origin igual ao APP_URL (navegador que não manda Sec-Fetch-Site).
+// Sem Origin continua valendo como portal: quem forja fora do navegador já podia
+// omitir o cabeçalho. null = descartar.
+export function origemDoEvento(
+  origin: string | null,
+  secFetchSite: string | null,
+  appUrl: string
+): "landing" | "portal" | null {
+  if (!origin) return "portal";
+  if (ORIGENS_DA_LANDING.includes(origin)) return "landing";
+  if (secFetchSite === "same-origin" || origin === origemDaUrl(appUrl)) return "portal";
+  return null;
+}
+
+// A mesma regra, lida dos cabeçalhos da requisição: o nome dos cabeçalhos também fica testado.
+export function origemDaRequisicao(headers: Headers, appUrl: string): "landing" | "portal" | null {
+  return origemDoEvento(headers.get("origin"), headers.get("sec-fetch-site"), appUrl);
+}
+
+// Origem de uma URL, ou null quando ela não tem origem utilizável (inválida ou opaca).
+function origemDaUrl(url: string): string | null {
+  try {
+    const origem = new URL(url).origin;
+    return origem === "null" ? null : origem;
+  } catch {
+    return null;
+  }
+}
+
 export const LIMITES = {
   corpoBytes: 2048,
   props: 5,

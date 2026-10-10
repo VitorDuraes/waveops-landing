@@ -2,6 +2,7 @@ import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import { calcularId, diaUtc } from "../../src/lib/funil";
 import { normalizarEvento, normalizarFonte, ETAPAS, EVENTOS, EVENTOS_DA_LANDING, ROTULO_ETAPA } from "../../src/lib/funil";
+import { origemDoEvento, origemDaRequisicao } from "../../src/lib/funil";
 import { ehRobo } from "../../src/lib/robo";
 
 // Testes das funcoes puras da medicao de funil (SPEC-18). Rodam sem banco e sem
@@ -273,5 +274,52 @@ describe("eventos da landing", () => {
     // Fora desta lista, o admin contaria também o evento com origem "portal" (a cópia
     // da landing servida pelo painel), e a equipe navegando viraria interessado.
     assert.ok(EVENTOS_DA_LANDING.includes("interesse_plataforma"));
+  });
+});
+
+describe("origemDoEvento: quem mandou o evento", () => {
+  const PORTAL = "https://portal.waveops.com.br";
+
+  test("o site é a landing", () => {
+    assert.equal(origemDoEvento("https://waveops.com.br", "same-site", PORTAL), "landing");
+    assert.equal(origemDoEvento("https://www.waveops.com.br", "same-site", PORTAL), "landing");
+  });
+
+  test("POST de mesma origem chega com Origin e é do portal", () => {
+    // sendBeacon e fetch mandam Origin mesmo na mesma origem. Era aqui que o
+    // checkout_aberto das telas do portal sumia.
+    assert.equal(origemDoEvento(PORTAL, "same-origin", PORTAL), "portal");
+    assert.equal(origemDoEvento(PORTAL, null, PORTAL), "portal", "navegador sem Sec-Fetch-Site, Origin igual ao APP_URL");
+    assert.equal(origemDoEvento(PORTAL, null, `${PORTAL}/`), "portal", "APP_URL com barra no fim");
+  });
+
+  test("APP_URL errado não derruba o portal enquanto o navegador disser mesma origem", () => {
+    assert.equal(origemDoEvento(PORTAL, "same-origin", "http://localhost:3000"), "portal");
+    assert.equal(origemDoEvento(PORTAL, "same-origin", "lixo"), "portal");
+  });
+
+  test("sem Origin continua valendo como portal", () => {
+    assert.equal(origemDoEvento(null, null, PORTAL), "portal");
+  });
+
+  test("Origin null com same-origin é o portal (página com Referrer-Policy no-referrer)", () => {
+    assert.equal(origemDoEvento("null", "same-origin", PORTAL), "portal");
+  });
+
+  test("outra origem é descartada", () => {
+    assert.equal(origemDoEvento("https://golpe.com", "cross-site", PORTAL), null);
+    assert.equal(origemDoEvento("https://golpe.com", null, PORTAL), null);
+    assert.equal(origemDoEvento("null", null, PORTAL), null);
+    assert.equal(origemDoEvento(PORTAL, null, "lixo"), null, "APP_URL inválido sem Sec-Fetch-Site não vira aceite");
+    assert.equal(origemDoEvento("https://portal.waveops.com.br.golpe.com", "cross-site", PORTAL), null);
+    assert.equal(origemDoEvento("https://x.waveops.com.br", "same-site", PORTAL), null, "subdomínio irmão não é o portal");
+    assert.equal(origemDoEvento("null", null, "file:///x"), null, "APP_URL opaco não aceita Origin null");
+  });
+
+  test("lê Origin e Sec-Fetch-Site dos cabeçalhos da requisição", () => {
+    assert.equal(origemDaRequisicao(new Headers({ origin: PORTAL, "sec-fetch-site": "same-origin" }), "lixo"), "portal");
+    assert.equal(origemDaRequisicao(new Headers({ origin: "https://waveops.com.br" }), PORTAL), "landing");
+    assert.equal(origemDaRequisicao(new Headers({ origin: "https://golpe.com", "sec-fetch-site": "cross-site" }), PORTAL), null);
+    assert.equal(origemDaRequisicao(new Headers(), PORTAL), "portal");
   });
 });

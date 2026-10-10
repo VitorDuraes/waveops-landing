@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit, clientIp } from "@/server/ratelimit";
 import { idDoVisitante, registrarEvento } from "@/server/evento";
-import { normalizarEvento, LIMITES } from "@/lib/funil";
+import { env } from "@/server/env";
+import { log } from "@/server/log";
+import { normalizarEvento, origemDaRequisicao, ORIGENS_DA_LANDING, LIMITES } from "@/lib/funil";
 import { ehRobo } from "@/lib/robo";
 
 // Coleta de evento de funil (SPEC-18). Rota PUBLICA, chamada pela landing estatica
@@ -21,21 +23,35 @@ import { ehRobo } from "@/lib/robo";
 // 3. NENHUM DADO PESSOAL ENTRA. O IP e usado para o hash do visitante e para o rate
 //    limit, e nao e gravado. A sanitizacao de path, referrer e props vive em lib/funil.
 
-const ORIGENS = ["https://waveops.com.br", "https://www.waveops.com.br"];
-
 function vazio(origin: string | null): NextResponse {
   const res = new NextResponse(null, { status: 204 });
-  if (origin && ORIGENS.includes(origin)) {
+  if (origin && ORIGENS_DA_LANDING.includes(origin)) {
     res.headers.set("Access-Control-Allow-Origin", origin);
     res.headers.set("Vary", "Origin");
   }
   return res;
 }
 
+// O descarte por origem é calado para quem chama (204), mas não para a gente: foi um
+// descarte calado que escondeu o checkout_aberto por semanas. No máximo um aviso por
+// minuto, para robô nenhum encher o log.
+let ultimoAvisoDeOrigem = 0;
+function avisarOrigemDescartada(origin: string | null): void {
+  const agora = Date.now();
+  if (agora - ultimoAvisoDeOrigem < 60_000) return;
+  ultimoAvisoDeOrigem = agora;
+  log.warn("evento.origem_descartada", { origin: (origin ?? "").slice(0, 80) });
+}
+
 export async function POST(req: NextRequest) {
   const origin = req.headers.get("origin");
-  // Sem Origin = mesma origem (as telas do portal). Com Origin, tem que ser a landing.
-  if (origin && !ORIGENS.includes(origin)) return vazio(null);
+  // Landing, telas do portal (que mandam Origin mesmo na mesma origem) ou descarte.
+  // A regra vive em lib/funil (origemDaRequisicao), com teste.
+  const origem = origemDaRequisicao(req.headers, env.appUrl);
+  if (!origem) {
+    avisarOrigemDescartada(origin);
+    return vazio(null);
+  }
 
   // Robo fora, antes de qualquer trabalho. Googlebot executa JavaScript, entao sem
   // isso ele entra no topo do funil como pessoa. Ver src/lib/robo.ts.
@@ -60,7 +76,7 @@ export async function POST(req: NextRequest) {
   const ev = normalizarEvento(bruto);
   if (!ev) return vazio(origin);
 
-  await registrarEvento(ev, idDoVisitante(req.headers), origin ? "landing" : "portal");
+  await registrarEvento(ev, idDoVisitante(req.headers), origem);
   return vazio(origin);
 }
 
@@ -69,7 +85,7 @@ export async function POST(req: NextRequest) {
 export async function OPTIONS(req: NextRequest) {
   const origin = req.headers.get("origin");
   const res = vazio(origin);
-  if (origin && ORIGENS.includes(origin)) {
+  if (origin && ORIGENS_DA_LANDING.includes(origin)) {
     res.headers.set("Access-Control-Allow-Methods", "POST, OPTIONS");
     res.headers.set("Access-Control-Allow-Headers", "content-type");
     res.headers.set("Access-Control-Max-Age", "86400");

@@ -47,8 +47,18 @@ jobs:
           # Dummy: o build nao conecta no banco (rotas sao dinamicas e assertProdEnv e
           # pulado na fase de build), mas garante o formato caso algo leia a env no build.
           DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
-      - name: Audit de dependencias (falha em high/critical)
-        run: npm audit --audit-level=high
+      # O audit que bloqueia olha só a árvore de produção, que é o que roda no Railway.
+      # As ferramentas de build entram no audit completo logo abaixo, que avisa sem
+      # derrubar o job. Motivo (10/2026): o braces GHSA-vfj7-8cjw-p6xm, alto e sem versão
+      # corrigida publicada, só entra pelo Tailwind 3 e deixava todo PR vermelho. Quando
+      # sair a correção, volte o audit completo a bloquear.
+      - name: Audit de produção (falha em high/critical)
+        run: npm audit --omit=dev --audit-level=high
+      - name: Audit completo, com dependências de build (só avisa)
+        run: |
+          if ! npm audit --audit-level=high; then
+            echo "::warning title=npm audit completo::Vulnerabilidade alta ou crítica em dependência de build. Detalhes no log deste passo."
+          fi
 
   # Site institucional estatico (raiz do repo). As dependencias ficam so em
   # tests/site/ e nunca vao para o ar: o Netlify publica apenas o que o cp do

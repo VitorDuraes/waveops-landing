@@ -286,10 +286,11 @@ Netlify: publicar o deploy anterior no painel e `git revert` do merge. n8n: path
 **Páginas e navegação**
 
 - [x] 6 páginas e 404 no build simulado do Netlify: Playwright sobre `.tmp-site`, 160 passaram, 77 pulados por projeto, 0 falhas
-- [ ] 6 páginas e 404 no Deploy Preview: depende do push e do PR em rascunho (aprovação do Vitor)
+- [x] 6 páginas e 404 no Deploy Preview (PR #76, 10/10/2026): `qa/preview.mjs` nas 18 combinações de página e largura, 0 falhas; status 200, sem rolagem horizontal, sem erro de console do site
+- [x] Deploy Preview não escreve em produção: os dois formulários mostram o envio desligado, nenhum pedido sai da origem do preview (o verificador bloqueia e registra) e toda resposta leva `X-Robots-Tag: noindex, nofollow`
 - [x] Topo, rodapé e chamada final idênticos nas páginas, item ativo correto: parciais carimbadas, `build --check` e `topo.spec`
 - [x] Âncoras antigas: `legado.spec`, as 8 levam à página nova
-- [x] 301 do portal no `netlify.toml`: `netlify.test`. A resposta real só aparece no Deploy Preview
+- [x] 301 do portal: `netlify.test` e, no Deploy Preview, os 6 respondem 301 para o portal; `/solucoes` responde 301 para `/solucoes/`
 - [x] `/index.html` sem redirect, por decisão registrada abaixo (o canonical resolve a duplicidade)
 - [x] Links externos respondem: portal (login, termos, privacidade) 200, WhatsApp 302 para o número certo nas 8 mensagens, LinkedIn 200
 - [ ] LinkedIn: confirmar que `linkedin.com/company/waveops` é a página da WaveOps, e não de outra empresa com o mesmo nome (Vitor)
@@ -310,6 +311,8 @@ Netlify: publicar o deploy anterior no painel e `git revert` do merge. n8n: path
 - [x] 360 a 1440 sem rolagem horizontal: `responsivo.spec`, 7 páginas
 - [ ] Aparelhos reais (iPhone e Android): não verificado, exige aparelho
 - [x] Lighthouse celular no build simulado: desempenho 97 a 99; acessibilidade, boas práticas e SEO 100; CLS 0; TBT 0 ms
+- [x] Lighthouse celular no Deploy Preview: desempenho e acessibilidade 100 nas 6 páginas; boas práticas 93 só pela barra do Netlify bloqueada pela CSP, e SEO 69 só pelo `noindex` do preview, os dois inexistentes em produção
+- [x] Comparação visual no Deploy Preview contra as capturas do design: altura de -0,4% a +2,4%, 9 das 18 combinações em 0,0%
 - [x] Orçamento de peso: `peso.test` (JS 15 KB, 20 KB com formulário; CSS 25 KB; gzip)
 - [x] Zero erro de console: `fumaca.spec`, 7 páginas nos 3 tamanhos
 

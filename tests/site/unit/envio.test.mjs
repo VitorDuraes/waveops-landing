@@ -151,7 +151,7 @@ test('reenvio com os mesmos dados reaproveita o idEnvio; dado editado gera id no
 
 test('endpoints: produção só em waveops.com.br; localhost simulado; preview desligado', () => {
   assert.equal(endpoints('waveops.com.br').ambiente, 'producao');
-  assert.match(endpoints('www.waveops.com.br').lead, /^https:\/\/n8n\.waveops\.com\.br\/webhook\//);
+  assert.match(endpoints('www.waveops.com.br').lead, /^https:\/\/portal\.waveops\.com\.br\/api\/site\//);
   assert.deepEqual(endpoints('localhost'), { ambiente: 'local', lead: '/__dev/lead', interesse: '/__dev/interesse' });
   assert.equal(endpoints('127.0.0.1', 'falha').lead, '/__dev/lead?simular=falha');
   assert.equal(endpoints('127.0.0.1', '<script>').lead, '/__dev/lead');
@@ -199,18 +199,20 @@ test('limites do envio: 12 s de tempo limite e 1,2 s de trava anti-robô', () =>
 test('produção não manda o contrato v2 ao workflow antigo, que descartaria e-mail e consentimento', () => {
   const { lead, interesse } = endpoints('waveops.com.br');
   assert.doesNotMatch(lead, /flowops-lead/);
-  assert.match(lead, /^https:\/\/n8n\.waveops\.com\.br\/webhook\/waveops-lead-v2$/);
-  assert.match(interesse, /^https:\/\/n8n\.waveops\.com\.br\/webhook\/waveops-interesse$/);
+  assert.match(lead, /^https:\/\/portal\.waveops\.com\.br\/api\/site\/contato$/);
+  assert.match(interesse, /^https:\/\/portal\.waveops\.com\.br\/api\/site\/interesse$/);
 });
 
-test('a CSP libera exatamente o portal e o host dos formulários de produção', () => {
+test('a CSP libera exatamente o portal, que é também o host dos dois formulários de produção', () => {
   // Trocar o host em config.js sem trocar a CSP faz o navegador bloquear o envio, calado.
   // Origem nova no connect-src precisa passar por aqui de propósito.
+  const PORTAL = 'https://portal.waveops.com.br';
   const head = readFileSync(new URL('../../../dev/site/parciais/head.html', import.meta.url), 'utf8');
   const diretiva = /connect-src ([^;"]+)/.exec(head)?.[1] ?? '';
   const { lead, interesse } = endpoints('waveops.com.br');
-  assert.equal(new URL(lead).origin, new URL(interesse).origin, 'os dois formulários no mesmo host');
-  assert.deepEqual(diretiva.trim().split(/\s+/).sort(), ["'self'", 'https://portal.waveops.com.br', new URL(lead).origin].sort());
+  assert.equal(new URL(lead).origin, PORTAL, 'o contato envia para o portal');
+  assert.equal(new URL(interesse).origin, PORTAL, 'a lista de interesse envia para o portal');
+  assert.deepEqual(diretiva.trim().split(/\s+/).sort(), ["'self'", PORTAL].sort());
 });
 
 test('telefone sai num formato só, sem o +55', () => {

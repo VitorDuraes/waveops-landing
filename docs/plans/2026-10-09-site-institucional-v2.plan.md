@@ -184,12 +184,12 @@ Uma tarefa por página, cada uma dona só dos próprios arquivos: `<slug>/index.
 
 - **Contexto:** o workflow que roda hoje não está versionado. A pasta `n8n/` é ignorada pelo git.
 - **Objetivo:** workflow `waveops-lead-v2` e workflow da lista de interesse (se D2 = n8n) em JSON sanitizado, validados, com roteiro de publicação e de teste. Nada publicado sem H2.
-- **Arquivos:** criar `docs/integrations/n8n-site-v2.md` (contrato, colunas da planilha, CORS, validação, deduplicação, respostas, roteiro de publicação, roteiro de teste, roteiro de exclusão de dado de titular), `docs/integrations/n8n-waveops-lead-v2.json`, `docs/integrations/n8n-waveops-interesse-v1.json`.
+- **Arquivos:** criar `docs/integrations/n8n-site-v2.md` (contrato, colunas da planilha, CORS, validação, deduplicação, respostas, roteiro de publicação, roteiro de exclusão de dado de titular), `docs/integrations/n8n-waveops-lead-v2.json`, `docs/integrations/n8n-waveops-interesse-v1.json`. O roteiro de homologação fica no documento local `docs/specs/2026-10-10-n8n-site-v2-operacao-restrita.md`, porque o repo é público.
 - **Aceite:** JSON passa na skill `n8n-validate`; todo campo do contrato chega a uma coluna; ramo de erro responde 5xx; resposta 200 só depois do nó da planilha; credencial só por nome de referência; revisão do agente `workflow-reviewer` sem bloqueio.
 - **Dependência de entrada:** JSON exportado do `flowops-lead` atual ou um envio real conferido pelo Vitor.
 - **Estimativa:** 2 a 3 h.
 
-**F2. PR do portal (branch própria, `feat/funil-interesse-e-links-do-site`)**
+**F2. PR do portal (branch própria; em 10/10/2026 separado em `feat/portal-funil-interesse`, que entra antes do site, e `feat/portal-links-site-novo`, que entra depois)**
 
 - **Arquivos:** modificar `portal/src/lib/funil.ts` (`EVENTOS`, `ROTULO_ETAPA`, `EVENTOS_DA_LANDING`), `portal/tests/unit/` (teste do evento novo), `portal/src/components/PublicNav.tsx:18`, `portal/src/app/checkout/page.tsx:81,112`, `portal/src/app/cliente/login/page.tsx:178,206`.
 - **Aceite:** `interesse_plataforma` aceito pela rota `/api/e`; links absolutos para `https://waveops.com.br/contato/` e `https://waveops.com.br/projetos-sob-medida/#modelos`.
@@ -279,22 +279,46 @@ Uma tarefa por página, cada uma dona só dos próprios arquivos: `<slug>/index.
 
 Netlify: publicar o deploy anterior no painel e `git revert` do merge. n8n: path antigo ativo por 2 semanas. Portal: `git revert` do PR.
 
-## Checklist de homologação (rascunho, preenchido em E)
+## Checklist de homologação (preenchido em 10/10/2026)
 
-- [ ] 6 páginas e 404 no build simulado e no Deploy Preview
-- [ ] Topo, rodapé e chamada final idênticos nas páginas, item ativo correto
-- [ ] Formulário: 5 estados, canal condicional, timeout, reenvio sem duplicar
-- [ ] Envio real grava todas as colunas na planilha e dispara o aviso interno
-- [ ] Lista de interesse grava, deduplica e confirma
-- [ ] Funil: `visita`, `lead_enviado`, `interesse_plataforma`, `whatsapp_click` em `/admin/funil`
-- [ ] Pixel: `PageView`, `Lead`, `Contact`
-- [ ] Âncoras antigas, `/index.html` e 301 do portal
-- [ ] axe zero sério ou crítico; teclado em todas as interações; leitor de tela no formulário
-- [ ] 360 a 1440 sem rolagem horizontal; aparelhos reais (iPhone, Android)
-- [ ] Lighthouse e orçamento de peso
-- [ ] Zero erro de console
-- [ ] Copy sem travessão, com acento; nenhum módulo como disponível; maquetes marcadas
-- [ ] Pendências de publicação da spec, seção 12, resolvidas
+`[x]` verificado, com a evidência ao lado. `[ ]` falta, com o gate e de quem depende.
+
+**Páginas e navegação**
+
+- [x] 6 páginas e 404 no build simulado do Netlify: Playwright sobre `.tmp-site`, 160 passaram, 77 pulados por projeto, 0 falhas
+- [ ] 6 páginas e 404 no Deploy Preview: depende do push e do PR em rascunho (aprovação do Vitor)
+- [x] Topo, rodapé e chamada final idênticos nas páginas, item ativo correto: parciais carimbadas, `build --check` e `topo.spec`
+- [x] Âncoras antigas: `legado.spec`, as 8 levam à página nova
+- [x] 301 do portal no `netlify.toml`: `netlify.test`. A resposta real só aparece no Deploy Preview
+- [x] `/index.html` sem redirect, por decisão registrada abaixo (o canonical resolve a duplicidade)
+- [x] Links externos respondem: portal (login, termos, privacidade) 200, WhatsApp 302 para o número certo nas 8 mensagens, LinkedIn 200
+- [ ] LinkedIn: confirmar que `linkedin.com/company/waveops` é a página da WaveOps, e não de outra empresa com o mesmo nome (Vitor)
+
+**Formulários, integrações e medição**
+
+- [x] Formulário: 5 estados, canal condicional, tempo limite, reenvio com o mesmo `idEnvio`, recusa 422 marcada no campo: `contato.spec`, `interesse.spec` e `envio.test`
+- [ ] Envio real grava todas as colunas na planilha e dispara o aviso interno: H2. Os workflows ainda não existem no n8n; roteiro T1 a T20 no documento local `docs/specs/2026-10-10-n8n-site-v2-operacao-restrita.md`
+- [ ] Lista de interesse grava, deduplica e confirma de verdade: H2. No simulado, `n8n-site-v2.test` cobre gravação, repetição e consentimento
+- [ ] Funil em `/admin/funil` (`visita`, `lead_enviado`, `interesse_plataforma`, `whatsapp_click`): H3. `interesse_plataforma` só passa a contar com o PR do portal `feat/portal-funil-interesse`, que precisa estar no ar antes do site. O lado do site está em `funil.test`
+- [x] Meta Pixel fora da página até existir consentimento (pedido do Vitor): nenhum script do Meta carrega e a CSP não libera o domínio
+
+**Acessibilidade, layout e desempenho**
+
+- [x] axe sem violação séria ou crítica, inclusive nos estados de erro e confirmação: `a11y.spec` e `a11y-estados.spec`
+- [x] Teclado: menu com Esc e retorno de foco, seletor com `aria-pressed`, pular para o conteúdo: `topo.spec`
+- [ ] Leitor de tela no formulário (NVDA ou VoiceOver): não verificado, exige teste manual
+- [x] 360 a 1440 sem rolagem horizontal: `responsivo.spec`, 7 páginas
+- [ ] Aparelhos reais (iPhone e Android): não verificado, exige aparelho
+- [x] Lighthouse celular no build simulado: desempenho 97 a 99; acessibilidade, boas práticas e SEO 100; CLS 0; TBT 0 ms
+- [x] Orçamento de peso: `peso.test` (JS 15 KB, 20 KB com formulário; CSS 25 KB; gzip)
+- [x] Zero erro de console: `fumaca.spec`, 7 páginas nos 3 tamanhos
+
+**Conteúdo e publicação**
+
+- [x] Copy sem travessão: `lint.mjs`, no HTML e nos textos publicados
+- [x] Acentuação: nenhuma das 95 formas sem acento mais comuns no texto visível nem nas mensagens dos módulos (heurística de lista fechada, não substitui leitura humana)
+- [x] Nenhum módulo da Plataforma como disponível e toda maquete com aviso de ilustração: `conteudo.test`
+- [ ] Pendências de publicação da spec, seção 12: H4 (política, termos, textos de aceite, e-mail do domínio, claims do design)
 
 ---
 
@@ -312,3 +336,4 @@ Ondas A, B, C, D, F1, F2, I, R e E executadas no worktree `feat/site-institucion
 | JS até 15 KB por página | 20 KB nas páginas com formulário | Dez módulos pequenos de validação, contrato, atribuição e envio; Contato em 15,9 KB |
 | Meta Pixel mantido | Desligado | Pedido do Vitor até existir consentimento |
 | `cienciaTextoVersao` | Acrescentado ao contrato | Registrar a versão do texto de ciência, separada da de marketing |
+| Página funciona sem os módulos | Só com JavaScript desligado | O `<noscript>` não entra quando o JavaScript está ligado e um módulo falha (rede ou bloqueador). Nesse caso o menu do celular não abre, o seletor da Home fica no primeiro painel e o botão do formulário segue desabilitado. Os links do rodapé e o WhatsApp no topo do Contato continuam funcionando. Limitação aceita na revisão adversarial |

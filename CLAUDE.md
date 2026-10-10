@@ -38,7 +38,8 @@ node dev/site/build.mjs --check            # o que o CI roda
 node dev/site/lint.mjs
 npm ci --prefix tests/site && npm --prefix tests/site run typecheck && npm --prefix tests/site run test:unit
 cd tests/site && PW_CHANNEL=chrome npx playwright test
-PW_CHANNEL=chrome node qa/visual.mjs       # comparação com as capturas do design
+DESIGN_CAPTURAS=<pasta> PW_CHANNEL=chrome node qa/visual.mjs   # comparação com as capturas do design
+SITE_URL=<deploy preview> PW_CHANNEL=chrome node qa/preview.mjs  # conferência do Deploy Preview (recusa produção)
 ```
 
 `PW_CHANNEL=chrome` usa o Chrome instalado. No Git Bash, argumento que começa com `/` precisa de `MSYS_NO_PATHCONV=1`. As dependências de `tests/site/` (Playwright, axe, TypeScript, `@types/node`) são só de teste e nunca vão para o ar.
@@ -72,7 +73,7 @@ CSP `<meta>` logo depois de charset e viewport, antes de qualquer recurso; ícon
 - Tudo é melhoria progressiva: sem JS, o conteúdo aparece inteiro e os formulários dão lugar a um aviso com saída pelo WhatsApp (nenhum dado vai para a URL).
 
 ### Medição de funil (`assets/funil.js`)
-Manda evento para `POST /api/e` no portal, como `text/plain` (com JSON o navegador faria preflight, que morre no descarregamento da página). O nome do evento precisa existir na lista fechada de `portal/src/lib/funil.ts`, senão o servidor descarta em silêncio. Desde o site de várias páginas, o primeiro toque fica em `sessionStorage["waveops:origem:v1"]` e vale para todos os eventos da sessão, e `visita` sai uma vez por sessão (de novo só se chegar outra campanha). O próprio site e `*.waveops.com.br` (o portal) são internos: aba nova aberta de outra página herda a UTM da URL de origem sem contar outra visita, e voltar do portal não reescreve o primeiro toque. Os formulários leem o mesmo registro para mandar UTM com o lead. Com `sessionStorage` bloqueado, volta à fonte por carregamento. `interesse_plataforma` depende do PR do portal `feat/funil-interesse-e-links-do-site`.
+Manda evento para `POST /api/e` no portal, como `text/plain` (com JSON o navegador faria preflight, que morre no descarregamento da página). O nome do evento precisa existir na lista fechada de `portal/src/lib/funil.ts`, senão o servidor descarta em silêncio. Desde o site de várias páginas, o primeiro toque fica em `sessionStorage["waveops:origem:v1"]` e vale para todos os eventos da sessão, e `visita` sai uma vez por sessão (de novo só se chegar outra campanha). O próprio site e `*.waveops.com.br` (o portal) são internos: aba nova aberta de outra página herda a UTM da URL de origem sem contar outra visita, e voltar do portal não reescreve o primeiro toque. Os formulários leem o mesmo registro para mandar UTM com o lead. Com `sessionStorage` bloqueado, volta à fonte por carregamento. Só mede em `waveops.com.br`, no próprio portal e no dev local: no Deploy Preview, na cópia do GitHub Pages ou em qualquer outro host, nada sai (`tests/site/unit/funil.test.mjs`). `interesse_plataforma` depende do PR do portal `feat/portal-funil-interesse`, que entra no ar antes do site.
 
 ### Meta Pixel
 Desligado nas páginas novas até existir mecanismo de consentimento e revisão de privacidade (decisão do Vitor em 09/10/2026). `assets/meta-pixel.js` fica no repo sem ser carregado, e a CSP das páginas novas não libera mais as origens do Facebook.
@@ -84,14 +85,14 @@ Desligado nas páginas novas até existir mecanismo de consentimento e revisão 
 | Contato | n8n Cloud, `waveops-lead-v2` | O webhook ainda não existe. O site NÃO aponta para o `flowops-lead` que roda hoje (não versionado; o JSON de `n8n/` é esqueleto) porque ele só lê as 15 chaves antigas: um lead pelo canal E-mail chegaria sem o e-mail. Até o v2 existir, o envio falha de forma visível, com os dados preservados e saída pelo WhatsApp |
 | Lista de interesse | n8n Cloud, `waveops-interesse` | O webhook ainda não existe. Até ser criado, o envio cai no estado de falha sem perder o e-mail |
 
-Endpoints por ambiente em `assets/site/config.js`: produção só em `waveops.com.br`; `localhost` usa `/__dev/lead` e `/__dev/interesse` do servidor local; Deploy Preview do Netlify fica desligado. Rascunho dos workflows, colunas da planilha, roteiro de publicação, teste e exclusão de dado: `docs/integrations/n8n-site-v2.md`. Nada no n8n de produção muda sem aprovação do Vitor.
+Endpoints por ambiente em `assets/site/config.js`: produção só em `waveops.com.br`; `localhost` usa `/__dev/lead` e `/__dev/interesse` do servidor local; Deploy Preview do Netlify fica desligado. Rascunho dos workflows, colunas da planilha, roteiro de publicação e exclusão de dado: `docs/integrations/n8n-site-v2.md`. O roteiro de homologação e os parâmetros de operação do n8n ficam fora do git, em `docs/specs/2026-10-10-n8n-site-v2-operacao-restrita.md`, porque o repo é público; os workflows publicados trazem `__DEFINIR__` no lugar dos valores do limite de volume. Nada no n8n de produção muda sem aprovação do Vitor.
 
 Privacidade: ciência da Política de Privacidade (obrigatória) separada do consentimento de marketing (opcional). O contrato grava a versão da política (`POLITICA_VERSAO`), a versão do texto de ciência (`TEXTO_CIENCIA`) e a do texto de marketing (`TEXTO_MARKETING`), todas em `assets/site/config.js`: mudou o texto, mude a versão. Os textos de aceite são rascunho até a revisão jurídica. Termos e Política vivem no portal (`/termos`, `/privacidade`).
 
 ## Segurança
 - CSP `<meta>` em toda página, vinda do parcial `head`. Origem nova de script, fonte, imagem ou `fetch` entra na diretiva certa, senão o navegador bloqueia. Hoje `connect-src` libera o portal (funil) e o n8n (formulários). `style-src` mantém `'unsafe-inline'` por causa do `<noscript><style>` e de atributos `style`.
 - `[[headers]]` no `netlify.toml` (desde o commit `3f66779`): `frame-ancestors 'none'`, `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy` e `Permissions-Policy`. Clickjacking está fechado.
-- Anti-robô nos formulários: honeypot e trava de tempo no navegador. Validação, deduplicação e bloqueio no servidor dependem do workflow n8n (`docs/specs/SECURITY-n8n-hardening.md`, local).
+- Anti-robô nos formulários: honeypot e trava de tempo no navegador. O workflow n8n em rascunho (`docs/integrations/`) repete as duas travas e vai validar e deduplicar no servidor quando for publicado.
 
 ## Marca (Sine Nodes)
 Onda senoidal simétrica cruzando um núcleo vazado, com dois nós sólidos nas pontas. Kit completo em `assets/brand/` (`waveops-icon.svg`, `waveops-symbol.svg`, `waveops-symbol-mono.svg`, `waveops-lockup.svg`, `png/`, `README.md`). Geometria canônica, `viewBox="0 0 100 100"`, `stroke-width="5"`:
@@ -107,8 +108,10 @@ O topo e o rodapé usam o selo 3D em 128 px (`assets/brand/waveops-badge-3d-128.
 ## Publicação (`netlify.toml`)
 O base directory do Netlify está travado em `portal/` no painel, então o build roda um nível abaixo e copia de `../`. O `[build] command` copia uma lista explícita: `index.html`, `404.html`, `robots.txt`, `sitemap.xml`, `llms.txt`, `assets/` e as cinco pastas de página. **Arquivo ou pasta fora dessa lista não vai ao ar.** O mesmo base directory decide se há build: o `ignore` é um `git diff --quiet` sobre os caminhos publicados (contrato invertido: exit 0 pula o build). Página nova entra no `cp` e no `ignore` no mesmo commit; `tests/site/unit/netlify.test.mjs` confere as duas listas contra `dev/site/paginas.json`. Pastas proibidas, por causa dos 301 com `force` para o portal: `api`, `admin`, `cliente`, `checkout`, `termos`, `privacidade`. Não existe `CNAME`: o domínio é configurado no painel do Netlify mais DNS.
 
+Deploy Preview e branch deploy usam o comando de produção, letra por letra, mais um `_headers` com `X-Robots-Tag: noindex, nofollow` (`[context.deploy-preview]` e `[context.branch-deploy]`; o teste confere que os comandos só diferem nisso). Fora de `waveops.com.br`, os formulários ficam desligados (`config.js`) e o funil não manda evento (`funil.js`): preview nunca escreve em serviço de produção.
+
 ## SEO e arquivos de crawler
-- Por página: title até 60 caracteres, description até 155, canonical, Open Graph com `og:image:alt`, Twitter Card e JSON-LD (`ProfessionalService` e `WebSite` na Home, `BreadcrumbList` nas internas, `FAQPage` em Projetos sob medida). O lint confere title, description, canonical e JSON-LD.
+- Por página: title até 60 caracteres, description até 155, canonical, Open Graph com `og:image:alt`, Twitter Card e JSON-LD (`Organization` com `contactPoint` e `WebSite` na Home, sem `ProfessionalService`, que pede endereço público; `BreadcrumbList` nas internas, `FAQPage` em Projetos sob medida). O lint confere title, description, canonical e JSON-LD.
 - `sitemap.xml`: as 6 URLs indexáveis. `robots.txt`: `Allow: /` e a linha do sitemap. `llms.txt`: resumo para LLM com links das páginas, só com o que as páginas afirmam (o teste barra "3 a 7 dias úteis", "preço fechado" e "sem fidelidade", que o refino retirou).
 - Âncoras da página única antiga (`/#contato`, `/#pacotes`, `/#servicos`, `/#casos`, `/#como`, `/#faq`, `/#publicos`, `/#operacao`) são redirecionadas no navegador pela Home: servidor não vê o `#`. Renomear um `id` de destino quebra esse mapa (`assets/site/lib/legado.js`) e o `llms.txt`.
 

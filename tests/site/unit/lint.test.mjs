@@ -112,6 +112,12 @@ test('link interno para página, âncora ou asset que não existe', () => {
   assert.ok(regras(trocar('/assets/brand/selo.webp', '/assets/brand/sumiu.webp')).includes('link-interno'));
 });
 
+test('link para página prevista em paginas.json e ainda não escrita não é erro', () => {
+  const ctx = { ...contexto, pendentes: new Set(['/plataforma/']) };
+  assert.deepEqual(regras(trocar('/solucoes/#vender', '/plataforma/#lista'), ctx), []);
+  assert.ok(regras(trocar('/solucoes/#vender', '/outra/'), ctx).includes('link-interno'));
+});
+
 test('travessão e meia-risca são proibidos', () => {
   assert.ok(regras(trocar('Seção', 'Seção — nova')).includes('travessao'));
   assert.ok(regras(trocar('Seção', '1–2')).includes('travessao'));

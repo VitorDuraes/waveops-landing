@@ -21,7 +21,12 @@ import { lerPaginas, executadoDireto } from './build.mjs';
  *   dominio: string,
  *   paginas: Map<string, Set<string>>,
  *   arquivos: Set<string>,
+ *   pendentes?: Set<string>,
  * }} ContextoLint
+ *
+ * pendentes: URLs que estão em dev/site/paginas.json mas cujo arquivo ainda não existe.
+ * Link para elas não é erro enquanto o site está sendo montado; a fumaça do Playwright
+ * e o build simulado acusam se alguma continuar faltando no fim.
  */
 
 const TITULO_MAX = 70;
@@ -229,6 +234,7 @@ function verificarLinkInterno(valor, ctx, idsPagina) {
   if (!valor.startsWith('/') || valor.startsWith('//')) return undefined;
   const [semHash, ancora] = valor.split('#');
   const caminho = semHash.split('?')[0];
+  if (ctx.pendentes?.has(caminho)) return undefined;
   const ehPagina = ctx.paginas.has(caminho) || caminho === ctx.url;
   if (ehPagina) {
     if (!ancora) return undefined;
@@ -268,10 +274,14 @@ if (executadoDireto(import.meta.url)) {
   const arquivos = listarArquivosPublicos(raiz);
   /** @type {Map<string, Set<string>>} */
   const paginas = new Map();
+  /** @type {Set<string>} */
+  const pendentes = new Set();
   for (const p of config.paginas) {
     const abs = path.join(raiz, p.arquivo);
     if (fs.existsSync(abs)) paginas.set(p.url, coletarIds(fs.readFileSync(abs, 'utf8')));
+    else pendentes.add(p.url);
   }
+  if (pendentes.size) console.warn(`aviso: links para páginas ainda não escritas não contam como erro: ${[...pendentes].join(', ')}`);
   /** @type {ErroLint[]} */
   const erros = [];
   let lidas = 0;
@@ -284,7 +294,7 @@ if (executadoDireto(import.meta.url)) {
     }
     lidas += 1;
     erros.push(...lintarHtml(fs.readFileSync(abs, 'utf8'), {
-      arquivo: p.arquivo, url: p.url, indexavel: p.indexavel, dominio: config.dominio, paginas, arquivos,
+      arquivo: p.arquivo, url: p.url, indexavel: p.indexavel, dominio: config.dominio, paginas, arquivos, pendentes,
     }));
   }
   for (const e of erros) console.log(`${e.arquivo}:${e.linha}: ${e.regra}: ${e.mensagem}`);

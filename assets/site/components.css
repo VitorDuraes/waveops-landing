@@ -1,0 +1,1558 @@
+/* WaveOps · componentes compartilhados do site institucional.
+   Cada bloco corresponde a uma peça do design aprovado. Componente que só uma página usa
+   mora em assets/site/paginas/<pagina>.css. Depende de tokens.css e base.css. */
+
+/* ---------- Marca ---------- */
+.wo-marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--wo-alvo);
+  color: var(--wo-texto);
+  font-size: 23px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.wo-marca:hover {
+  color: var(--wo-texto);
+}
+
+.wo-marca__selo {
+  position: relative;
+  display: block;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+}
+
+.wo-marca__selo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.wo-marca__selo svg {
+  position: absolute;
+  left: 19%;
+  top: 19%;
+  width: 62%;
+  height: 62%;
+}
+
+.wo-marca__ops {
+  font-weight: 400;
+}
+
+.wo-marca--rodape {
+  align-self: flex-start;
+  font-size: 21px;
+}
+
+.wo-marca--rodape .wo-marca__selo {
+  width: 38px;
+  height: 38px;
+}
+
+/* ---------- Topo ---------- */
+.wo-topo {
+  position: relative;
+  z-index: 5;
+  background: var(--wo-fundo);
+  border-bottom: 1px solid var(--wo-borda);
+}
+
+.wo-topo__barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  width: 100%;
+  max-width: var(--wo-conteiner);
+  height: var(--wo-topo-altura);
+  margin: 0 auto;
+  padding: 0 var(--wo-margem);
+}
+
+.wo-topo__links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.wo-topo__links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--wo-alvo);
+  padding: 0 13px;
+  border-radius: var(--wo-raio-btn);
+  color: var(--wo-texto-2);
+  font-size: 13.5px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color var(--wo-transicao);
+}
+
+.wo-topo__links a:hover,
+.wo-topo__painel a:hover {
+  color: var(--wo-texto);
+}
+
+.wo-topo__links a[aria-current='page'],
+.wo-topo__painel a[aria-current='page'] {
+  color: var(--wo-acento-texto);
+}
+
+.wo-topo__acoes {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.wo-topo__cliente {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--wo-alvo);
+  padding: 0 6px;
+  color: var(--wo-texto);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.wo-topo__cliente:hover {
+  color: var(--wo-acento-texto);
+}
+
+.wo-topo__cta {
+  min-height: var(--wo-alvo);
+  padding: 0 18px;
+  font-size: 13px;
+}
+
+.wo-topo__menu {
+  display: none;
+  place-items: center;
+  width: var(--wo-alvo);
+  height: var(--wo-alvo);
+  padding: 0;
+  border: 1px solid var(--wo-borda-forte);
+  border-radius: 10px;
+  background: var(--wo-superficie);
+  color: var(--wo-texto);
+  cursor: pointer;
+}
+
+.wo-topo__menu svg {
+  width: 18px;
+  height: 18px;
+}
+
+.wo-topo__menu .wo-topo__icone-fechar,
+.wo-topo__menu[aria-expanded='true'] .wo-topo__icone-abrir {
+  display: none;
+}
+
+.wo-topo__menu[aria-expanded='true'] .wo-topo__icone-fechar {
+  display: block;
+}
+
+.wo-topo__painel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px var(--wo-margem) 20px;
+  border-top: 1px solid var(--wo-borda);
+  background: var(--wo-fundo);
+}
+
+.wo-topo__painel[hidden] {
+  display: none;
+}
+
+.wo-topo__painel a {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  color: var(--wo-texto-2);
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.wo-topo__painel .wo-btn {
+  justify-content: center;
+  min-height: 50px;
+  margin-top: 10px;
+  color: var(--wo-sobre-acento);
+  font-size: 14px;
+}
+
+@media (max-width: 1180px) {
+  .wo-topo__links {
+    display: none;
+  }
+
+  .wo-topo__menu {
+    display: grid;
+  }
+}
+
+@media (min-width: 1181px) {
+  .wo-topo__painel {
+    display: none !important;
+  }
+}
+
+/* Especificidade 0,2,0 de propósito: .wo-btn (0,1,0) vem depois no arquivo e,
+   com a mesma especificidade, devolveria o display: inline-flex ao botão. */
+@media (max-width: 720px) {
+  .wo-topo .wo-topo__cliente,
+  .wo-topo .wo-topo__cta {
+    display: none;
+  }
+}
+
+/* ---------- Botões e links de ação ---------- */
+.wo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 50px;
+  padding: 0 20px;
+  border: 1px solid transparent;
+  border-radius: var(--wo-raio-btn);
+  background: transparent;
+  color: var(--wo-texto);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--wo-transicao), border-color var(--wo-transicao), color var(--wo-transicao);
+}
+
+.wo-btn svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+
+.wo-btn--primario {
+  background: var(--wo-acento);
+  color: var(--wo-sobre-acento);
+  box-shadow: var(--wo-sombra-btn);
+}
+
+.wo-btn--primario:hover {
+  background: #b29ffa;
+  color: var(--wo-sobre-acento);
+}
+
+.wo-btn--secundario {
+  border-color: var(--wo-borda-forte);
+  color: var(--wo-texto);
+}
+
+.wo-btn--secundario:hover {
+  border-color: var(--wo-acento-borda);
+  color: var(--wo-texto);
+}
+
+.wo-btn--grande {
+  min-height: 52px;
+  padding: 0 22px;
+  font-size: 14px;
+}
+
+.wo-btn[aria-disabled='true'] {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.wo-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.wo-link-seta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--wo-alvo);
+  color: var(--wo-acento-texto);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.wo-link-seta svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  transition: transform var(--wo-transicao);
+}
+
+.wo-link-seta:hover svg {
+  transform: translateX(2px);
+}
+
+/* ---------- Rótulos ---------- */
+.wo-sobretitulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--wo-acento-texto);
+  font-family: var(--wo-mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.wo-sobretitulo::before {
+  content: '';
+  width: 15px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.7;
+}
+
+.wo-etiqueta-hero {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 12px;
+  border: 1px solid var(--wo-borda-forte);
+  border-radius: var(--wo-raio-xs);
+  color: var(--wo-texto-2);
+  font-family: var(--wo-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.wo-etiqueta-hero::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--wo-acento);
+}
+
+.wo-rotulo-mono {
+  display: block;
+  color: var(--wo-texto-3);
+  font-family: var(--wo-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.wo-rotulo-mono--acento {
+  color: var(--wo-acento-texto);
+}
+
+.wo-nota-mono {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--wo-texto-3);
+  font-family: var(--wo-mono);
+  font-size: 11.5px;
+}
+
+.wo-nota-mono--ponto::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.wo-cabeca-selo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ---------- Selo de situação ----------
+   A forma do marcador muda junto com a cor, para a situação não depender só de cor:
+   círculo cheio = disponível, quadrado = em desenvolvimento, círculo vazado = planejado. */
+.wo-selo {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 10px;
+  border-radius: var(--wo-raio-pilula);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.wo-selo::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.wo-selo--disponivel {
+  background: var(--wo-sucesso-fundo);
+  color: var(--wo-sucesso);
+}
+
+.wo-selo--desenvolvimento {
+  background: var(--wo-alerta-fundo);
+  color: var(--wo-alerta);
+}
+
+.wo-selo--desenvolvimento::before {
+  border-radius: 2px;
+}
+
+.wo-selo--planejado {
+  background: var(--wo-neutro-fundo);
+  color: var(--wo-texto-2);
+}
+
+.wo-selo--planejado::before {
+  background: transparent;
+  border: 2px solid currentColor;
+}
+
+/* ---------- Chip de contratação (link em pílula com marcador de situação) ---------- */
+.wo-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+}
+
+.wo-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--wo-alvo);
+  padding: 0 14px;
+  border: 1px solid var(--wo-borda-forte);
+  border-radius: var(--wo-raio-pilula);
+  color: var(--wo-texto);
+  font-size: 13.5px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: border-color var(--wo-transicao);
+}
+
+.wo-chip:hover {
+  border-color: var(--wo-acento-borda);
+  color: var(--wo-texto);
+}
+
+.wo-chip::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--wo-sucesso-ponto);
+}
+
+.wo-chip--desenvolvimento::before {
+  border-radius: 2px;
+  background: var(--wo-alerta-ponto);
+}
+
+.wo-chip--planejado::before {
+  background: transparent;
+  border: 2px solid var(--wo-texto-3);
+}
+
+/* ---------- Hero de duas colunas ---------- */
+/* overflow: hidden prende o brilho de 1000 px dentro do hero. Sem isso ele vaza
+   340 px para a direita e a página rola na horizontal em qualquer largura. */
+.wo-hero {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(40px, 5vw, 76px) 0 clamp(52px, 6vw, 92px);
+}
+
+.wo-hero__brilho {
+  position: absolute;
+  top: -560px;
+  right: -340px;
+  width: 1000px;
+  height: 1000px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(162, 139, 249, 0.22), transparent 62%);
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.wo-hero__grade {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 48px 56px;
+}
+
+.wo-hero__texto {
+  flex: 1.15 1 520px;
+  min-width: 0;
+}
+
+.wo-hero__visual {
+  flex: 1 1 480px;
+  min-width: 0;
+}
+
+.wo-hero .wo-h1 {
+  margin-top: 26px;
+}
+
+.wo-hero__lead {
+  margin-top: 24px;
+  max-width: 560px;
+  color: var(--wo-texto-2);
+  font-size: 17.5px;
+  line-height: 1.75;
+  text-wrap: pretty;
+}
+
+.wo-hero .wo-acoes {
+  margin-top: 30px;
+}
+
+.wo-hero .wo-nota-mono {
+  margin-top: 22px;
+}
+
+/* ---------- Duas colunas genéricas (texto + painel) ---------- */
+.wo-duas-colunas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 44px 64px;
+}
+
+.wo-duas-colunas--topo {
+  align-items: flex-start;
+  gap: 48px 72px;
+}
+
+.wo-coluna {
+  flex: 1 1 440px;
+  min-width: 0;
+}
+
+/* ---------- Maquete ilustrativa (painel que imita interface) ---------- */
+.wo-maquete {
+  display: flex;
+  flex-direction: column;
+  padding: clamp(16px, 1.6vw, 22px);
+  border: 1px solid var(--wo-borda-forte);
+  border-radius: var(--wo-raio-xl);
+  background: linear-gradient(180deg, var(--wo-superficie-2), var(--wo-superficie));
+}
+
+.wo-maquete--sombra {
+  box-shadow: var(--wo-sombra-card);
+}
+
+.wo-maquete__cabeca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.wo-maquete__titulo {
+  color: var(--wo-texto-3);
+  font-family: var(--wo-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.wo-maquete__aviso {
+  padding: 4px 10px;
+  border: 1px solid var(--wo-borda-forte);
+  border-radius: var(--wo-raio-pilula);
+  color: var(--wo-texto-3);
+  font-family: var(--wo-mono);
+  font-size: 10.5px;
+}
+
+/* ---------- Três entradas (cartões-link separados por fio) ---------- */
+.wo-entradas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  margin-top: 30px;
+  border: 1px solid var(--wo-borda-forte);
+  border-radius: var(--wo-raio-md);
+  background: var(--wo-borda-forte);
+  overflow: hidden;
+}
+
+.wo-entrada {
+  display: flex;
+  flex: 1 1 250px;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: clamp(24px, 2.6vw, 34px);
+  background: var(--wo-faixa);
+  color: var(--wo-texto);
+  text-decoration: none;
+  transition: background-color var(--wo-transicao);
+}
+
+.wo-entrada:hover {
+  background: var(--wo-superficie);
+  color: var(--wo-texto);
+}
+
+.wo-entrada__topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 26px;
+  color: var(--wo-acento-texto);
+  font-family: var(--wo-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.wo-entrada__topo .wo-selo {
+  font-family: var(--wo-fonte);
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.wo-entrada__titulo {
+  font-size: 23px;
+  font-weight: 500;
+  line-height: 1.22;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.wo-entrada__texto {
+  color: var(--wo-texto-3);
+  font-size: 14.5px;
+  line-height: 1.65;
+}
+
+.wo-entrada__acao {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  margin-top: auto;
+  padding-top: 10px;
+  color: var(--wo-acento-texto);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.wo-entrada__acao svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* ---------- Seletor (botões à esquerda, um painel por vez) ----------
+   Sem JavaScript, todos os painéis aparecem em sequência e os botões somem
+   (regra no <noscript> do <head>). Com JavaScript, o site.js marca data-pronto e
+   controla hidden e aria-pressed. */
+.wo-seletor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 20px;
+  margin-top: 44px;
+}
+
+.wo-seletor__opcoes {
+  display: flex;
+  flex: 1 1 280px;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.wo-seletor__opcao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 56px;
+  padding: 0 18px;
+  border: 1px solid var(--wo-borda);
+  border-radius: var(--wo-raio-sm);
+  background: transparent;
+  color: var(--wo-texto-2);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--wo-transicao), border-color var(--wo-transicao), color var(--wo-transicao);
+}
+
+.wo-seletor__opcao svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.wo-seletor__opcao:hover {
+  border-color: var(--wo-borda-forte);
+  color: var(--wo-texto);
+}
+
+.wo-seletor__opcao[aria-pressed='true'] {
+  border-color: var(--wo-acento-borda);
+  background: var(--wo-acento-fundo);
+  color: var(--wo-texto);
+}
+
+.wo-seletor__paineis {
+  flex: 3 1 520px;
+  min-width: 0;
+  padding: clamp(24px, 2.8vw, 38px);
+  border: 1px solid var(--wo-borda-forte);
+  border-radius: var(--wo-raio-painel);
+  background: var(--wo-superficie);
+}
+
+[data-seletor]:not([data-pronto]) [data-painel]:not([data-painel='0']),
+[data-painel][hidden] {
+  display: none;
+}
+
+/* ---------- Resultado de negócio (painel do seletor e seções de Soluções) ---------- */
+.wo-resultado {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.wo-resultado__titulo {
+  font-size: var(--wo-h3-painel);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+}
+
+.wo-resultado__texto {
+  margin-top: 10px;
+  max-width: 620px;
+  color: var(--wo-texto-2);
+  font-size: 16.5px;
+  line-height: 1.7;
+}
+
+.wo-resultado__grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  gap: 26px 40px;
+}
+
+.wo-resultado__rodape {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--wo-borda);
+}
+
+.wo-sinais {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 14px;
+  color: var(--wo-texto);
+  font-size: 15.5px;
+  line-height: 1.55;
+}
+
+.wo-sinais li {
+  padding-left: 14px;
+  border-left: 2px solid var(--wo-acento-borda);
+}
+
+.wo-lista-check {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: var(--wo-texto-2);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.wo-lista-check li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.wo-lista-check svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  margin-top: 3px;
+  color: var(--wo-acento-texto);
+}
+
+.wo-lista-check--espacada {
+  gap: 12px;
+}
+
+/* ---------- Definições em grade (recursos da plataforma) ---------- */
+.wo-definicoes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  gap: 18px 32px;
+  max-width: 580px;
+  margin-top: 30px;
+}
+
+.wo-definicoes dt {
+  color: var(--wo-texto);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.wo-definicoes dd {
+  margin-top: 4px;
+  color: var(--wo-texto-3);
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+/* ---------- Passos verticais (como trabalhamos) ---------- */
+.wo-passos {
+  display: flex;
+  flex-direction: column;
+  margin-top: 22px;
+}
+
+.wo-passo {
+  display: flex;
+  gap: 20px;
+}
+
+.wo-passo__trilho {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.wo-passo__numero {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--wo-acento-borda);
+  border-radius: 50%;
+  background: var(--wo-acento-fundo);
+  color: var(--wo-acento-texto);
+  font-family: var(--wo-mono);
+  font-size: 13px;
+}
+
+.wo-passo__trilho::after {
+  content: '';
+  flex: 1;
+  width: 1px;
+  margin: 8px 0;
+  background: var(--wo-borda-forte);
+}
+
+.wo-passo:last-child .wo-passo__trilho::after {
+  display: none;
+}
+
+.wo-passo__corpo {
+  min-width: 0;
+  padding: 5px 0 30px;
+}
+
+.wo-passo:last-child .wo-passo__corpo {
+  padding-bottom: 0;
+}
+
+.wo-passo__titulo {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.03em;
+}
+
+.wo-passo__texto {
+  margin-top: 6px;
+  color: var(--wo-texto-3);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.wo-passo__recebe {
+  margin-top: 10px;
+  color: var(--wo-texto-2);
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+.wo-passo__recebe .wo-rotulo-mono {
+  display: inline;
+  margin-right: 10px;
+  color: var(--wo-acento-texto);
+}
+
+/* ---------- Modelos de contratação ---------- */
+.wo-modelos {
+  margin-top: 40px;
+  border-top: 1px solid var(--wo-borda-forte);
+}
+
+.wo-modelo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px 40px;
+  padding: 26px 0;
+  border-bottom: 1px solid var(--wo-borda);
+}
+
+.wo-modelo__nome {
+  display: flex;
+  flex: 1 1 200px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.wo-modelo__nome h3 {
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.035em;
+}
+
+.wo-modelo__campo {
+  flex: 1.5 1 210px;
+  min-width: 0;
+}
+
+.wo-modelo__campo p {
+  margin-top: 6px;
+  color: var(--wo-texto-2);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.wo-modelos__rodape {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 32px;
+  margin-top: 22px;
+}
+
+.wo-modelos__rodape p {
+  color: var(--wo-texto-3);
+  font-size: 15.5px;
+  line-height: 1.7;
+}
+
+/* ---------- Chamada final ---------- */
+.wo-cta {
+  padding: clamp(56px, 6.6vw, 96px) 0 clamp(65px, 7.8vw, 112px);
+}
+
+.wo-cta__caixa {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 40px 64px;
+  padding: clamp(28px, 4vw, 56px);
+  border: 1px solid rgba(162, 139, 249, 0.3);
+  border-radius: var(--wo-raio-lg);
+  background: radial-gradient(ellipse at 0 100%, rgba(162, 139, 249, 0.1), var(--wo-superficie) 65%);
+}
+
+.wo-cta__texto {
+  flex: 1 1 440px;
+  min-width: 0;
+}
+
+.wo-cta__titulo {
+  margin-top: 16px;
+  font-size: clamp(28px, 3.2vw, 46px);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+
+.wo-cta__lead {
+  margin-top: 16px;
+  max-width: 480px;
+  color: var(--wo-texto-3);
+  font-size: 15px;
+  line-height: 1.75;
+  text-wrap: pretty;
+}
+
+.wo-cta__lado {
+  display: flex;
+  flex: 1 1 360px;
+  flex-direction: column;
+  gap: 26px;
+  min-width: 0;
+}
+
+.wo-cta__lista {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.wo-cta__lista li {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-size: 14px;
+}
+
+.wo-cta__lista svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--wo-acento-texto);
+}
+
+/* ---------- Rodapé ---------- */
+.wo-rodape {
+  padding: 54px 0 36px;
+  border-top: 1px solid var(--wo-borda);
+  background: var(--wo-faixa);
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+.wo-rodape__grade {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 36px 32px;
+}
+
+.wo-rodape__marca {
+  display: flex;
+  flex: 0 1 250px;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.wo-rodape__descricao {
+  max-width: 320px;
+  color: var(--wo-texto-3);
+}
+
+.wo-rodape__coluna {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.wo-rodape__coluna--solucoes {
+  flex: 1 1 210px;
+}
+
+.wo-rodape__coluna--plataforma {
+  flex: 0 1 140px;
+}
+
+.wo-rodape__coluna--sobmedida {
+  flex: 1.6 1 320px;
+}
+
+.wo-rodape__coluna--empresa {
+  flex: 0 1 176px;
+}
+
+.wo-rodape__titulo {
+  margin: 0 0 6px;
+  color: var(--wo-texto-4);
+  font-family: var(--wo-mono);
+  font-size: 11.5px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.wo-rodape__duas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
+  column-gap: 20px;
+}
+
+.wo-rodape a:not(.wo-marca) {
+  display: flex;
+  align-items: center;
+  min-height: var(--wo-alvo);
+  color: var(--wo-texto-3);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.wo-rodape__marca > a:not(.wo-marca) {
+  align-self: flex-start;
+}
+
+.wo-rodape a:not(.wo-marca):hover {
+  color: var(--wo-texto);
+}
+
+.wo-rodape__base {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 44px;
+  padding-top: 24px;
+  border-top: 1px solid var(--wo-borda);
+  color: var(--wo-texto-4);
+  font-size: 13px;
+}
+
+.wo-rodape__legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+
+.wo-rodape .wo-rodape__legal a {
+  display: inline-flex;
+  color: var(--wo-texto-4);
+}
+
+/* ---------- Formulário ---------- */
+.wo-form__titulo {
+  margin-bottom: 8px;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+}
+
+.wo-form__intro {
+  margin-bottom: 22px;
+  color: var(--wo-texto-3);
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+.wo-form__grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: 16px 12px;
+  margin-bottom: 18px;
+}
+
+.wo-form__bloco {
+  margin-bottom: 18px;
+}
+
+.wo-campo[hidden] {
+  display: none;
+}
+
+.wo-rotulo {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.wo-opcional {
+  color: var(--wo-texto-3);
+  font-weight: 400;
+}
+
+.wo-controle {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid var(--wo-borda-campo);
+  border-radius: var(--wo-raio-campo);
+  background: var(--wo-superficie-2);
+  color: var(--wo-texto);
+  font-family: var(--wo-fonte);
+  font-size: 16px;
+  transition: border-color var(--wo-transicao);
+}
+
+.wo-controle:hover {
+  border-color: rgba(208, 200, 237, 0.6);
+}
+
+.wo-controle:focus-visible {
+  border-color: var(--wo-acento-texto);
+  outline-offset: 1px;
+}
+
+.wo-controle[aria-invalid='true'] {
+  border-color: var(--wo-erro);
+}
+
+select.wo-controle {
+  appearance: none;
+  padding-right: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b9b4c9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px;
+}
+
+textarea.wo-controle {
+  min-height: 104px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.wo-erro-campo {
+  display: block;
+  margin-top: 6px;
+  color: var(--wo-erro);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.wo-erro-campo[hidden] {
+  display: none;
+}
+
+.wo-dica {
+  margin-top: 8px;
+  color: var(--wo-texto-3);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Canal de retorno: rádio nativo com aparência de botão. */
+.wo-opcoes-canal {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.wo-opcoes-canal legend {
+  padding: 0;
+}
+
+.wo-opcoes-canal__grade {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.wo-opcao-canal {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 8px;
+  border: 1px solid var(--wo-borda-campo);
+  border-radius: var(--wo-raio-campo);
+  background: var(--wo-superficie-2);
+  color: var(--wo-texto-2);
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--wo-transicao), border-color var(--wo-transicao), color var(--wo-transicao);
+}
+
+.wo-opcao-canal input {
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  margin: 0;
+  flex-shrink: 0;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.wo-opcao-canal input:checked {
+  background: currentColor;
+}
+
+.wo-opcao-canal input:focus-visible {
+  outline: none;
+}
+
+.wo-opcao-canal:has(input:focus-visible) {
+  outline: 2px solid var(--wo-acento-texto);
+  outline-offset: 2px;
+}
+
+.wo-opcao-canal:has(input:checked) {
+  border-color: var(--wo-acento-borda-forte);
+  background: var(--wo-acento-fundo-forte);
+  color: var(--wo-texto);
+}
+
+/* Caixa de marcar: nativa, com alvo de toque de 44 px no rótulo inteiro. */
+.wo-marcar {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: var(--wo-alvo);
+  color: var(--wo-texto-2);
+  font-size: 14px;
+  line-height: 1.55;
+  cursor: pointer;
+}
+
+.wo-marcar input {
+  appearance: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  flex-shrink: 0;
+  border: 1.5px solid var(--wo-borda-campo);
+  border-radius: var(--wo-raio-xs);
+  background: var(--wo-superficie-2);
+  cursor: pointer;
+}
+
+.wo-marcar input::after {
+  content: '';
+  width: 6px;
+  height: 11px;
+  margin-top: -2px;
+  border: solid var(--wo-sobre-acento);
+  border-width: 0 2.4px 2.4px 0;
+  transform: rotate(45deg);
+  opacity: 0;
+}
+
+.wo-marcar input:checked {
+  border-color: var(--wo-acento);
+  background: var(--wo-acento);
+}
+
+.wo-marcar input:checked::after {
+  opacity: 1;
+}
+
+.wo-marcar input[aria-invalid='true'] {
+  border-color: var(--wo-erro);
+}
+
+.wo-form__aceites {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+/* Honeypot: fora da tela e da ordem de tabulação. Robô preenche, gente não vê. */
+.wo-isca {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.wo-alerta {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border: 1px solid var(--wo-erro-borda);
+  border-radius: var(--wo-raio-sm);
+  background: var(--wo-erro-fundo);
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+
+.wo-alerta[hidden] {
+  display: none;
+}
+
+.wo-alerta svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--wo-erro);
+}
+
+.wo-alerta strong {
+  font-weight: 600;
+}
+
+.wo-alerta__secundario {
+  color: var(--wo-texto-2);
+}
+
+.wo-alerta--falha {
+  display: block;
+  margin-bottom: 18px;
+  padding: 16px 18px;
+}
+
+.wo-alerta--falha p:first-child {
+  font-size: 15.5px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.wo-alerta--falha p + p {
+  margin-top: 6px;
+  color: var(--wo-texto-2);
+}
+
+.wo-form__envio {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+}
+
+.wo-form__privacidade {
+  flex: 1 1 200px;
+  color: var(--wo-texto-3);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.wo-girar {
+  width: 17px;
+  height: 17px;
+  animation: wo-girar 0.8s linear infinite;
+}
+
+@keyframes wo-girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wo-girar {
+    animation: none;
+  }
+}
+
+.wo-confirmacao {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  padding: clamp(8px, 2vw, 28px) 0;
+}
+
+.wo-confirmacao[hidden] {
+  display: none;
+}
+
+.wo-confirmacao__icone {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--wo-sucesso-fundo);
+  color: var(--wo-sucesso);
+}
+
+.wo-confirmacao__icone svg {
+  width: 24px;
+  height: 24px;
+}
+
+.wo-confirmacao__titulo {
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.035em;
+}
+
+.wo-confirmacao__titulo:focus {
+  outline: none;
+}
+
+.wo-confirmacao__texto {
+  max-width: 480px;
+  color: var(--wo-texto-2);
+  font-size: 16.5px;
+  line-height: 1.75;
+}
+
+.wo-confirmacao__dados {
+  width: 100%;
+  max-width: 480px;
+  margin-top: 4px;
+  border-top: 1px solid var(--wo-borda);
+}
+
+.wo-confirmacao__dados div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--wo-borda);
+  font-size: 14.5px;
+}
+
+.wo-confirmacao__dados dt {
+  color: var(--wo-texto-3);
+}
+
+.wo-confirmacao__dados dd {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  text-align: right;
+}

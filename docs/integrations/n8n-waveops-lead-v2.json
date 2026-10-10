@@ -1,0 +1,1207 @@
+{
+  "name": "WaveOps · Lead do site (contrato v2)",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## WaveOps · Lead do site (contrato v2)\nRASCUNHO. Não ativar antes do gate H2 (aprovação do dono). Spec: docs/specs/2026-10-09-site-institucional-v2.md, seção 5.7. Guia completo: docs/integrations/n8n-site-v2.md.\n\nRecebe o POST do formulário de contato, valida no servidor, deduplica por idEnvio, grava na planilha e só então responde 200.\n\n### Caminhos\n1. Origin fora das duas origens do site: 403.\n2. Robô (campo isca preenchido ou menos de 1200 ms): 200 sem gravar e sem avisar.\n3. Dado inválido: 422 com a lista de campos.\n4. Acima do limite de volume: 429 (valores no topo do nó Code).\n5. idEnvio já gravado (reenvio): 200 sem gravar de novo.\n6. Lead novo: grava, responde 200 e avisa o time por e-mail.\n7. Leitura ou gravação da planilha com falha: 503, falha registrada e aviso de falha ao time.\n\n### Antes de ativar\n1. Credenciais: \"WaveOps Google Sheets\" e \"WaveOps Gmail\".\n2. Nos 2 nós Sheets: escolher o documento e a aba de leads, a MESMA nos dois (reescolher a aba sempre que trocar o documento).\n3. Nos 2 nós Gmail: trocar __DEFINIR__ pelo destinatário.\n4. Criar na aba as 16 colunas novas, no fim (lista no guia).\n5. Testar primeiro numa cópia da planilha.\n6. Conferir em Settings que o Error Workflow é este próprio workflow.\n7. No topo do nó Code: Validar e normalizar, trocar o __DEFINIR__ de LIMITE_POR_MINUTO e LIMITE_POR_HORA pelos valores do documento de operação restrita. Sem eles, todo envio recebe 503.",
+        "height": 660,
+        "width": 820,
+        "color": 5
+      },
+      "id": "7a1e0001-0000-4000-8000-000000000001",
+      "name": "Nota: Leia-me",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -800
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Falhas\nPlanilha fora, credencial vencida ou erro no Code: o site recebe 503 e a execução termina com erro de propósito (Stop and Error), com a etapa e um detalhe curto na mensagem. Isso aciona o Error Trigger, que envia o e-mail \"Falha no site\".\n\nO e-mail não leva dado pessoal. O corpo recebido fica na execução com erro, para recuperar o registro.\nO aviso usa a mesma credencial Gmail do aviso normal. Se o token do Google vencer, gravação e aviso caem juntos: confira as execuções com erro toda semana.",
+        "height": 340,
+        "width": 620,
+        "color": 3
+      },
+      "id": "7a1e0001-0000-4000-8000-000000000002",
+      "name": "Nota: Falhas e aviso ao time",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "waveops-lead-v2",
+        "authentication": "none",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "https://waveops.com.br,https://www.waveops.com.br",
+          "ignoreBots": false,
+          "rawBody": false
+        }
+      },
+      "id": "7a1e0001-0000-4000-8000-000000000004",
+      "name": "Webhook: Receber lead v2",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "7a1e0001-0000-4000-8000-000000000003"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// WaveOps · Lead do site, contrato v2.\n// Valida e normaliza o corpo. Este nó não grava e não responde: quem faz isso são os nós seguintes.\n// Saída: UM item com decisao igual a gravar, descartar, invalido, origem ou limite.\n// Regra de ouro: nunca ser mais rígido que o formulário do site (assets/site/lib/validacao.js),\n// para um lead real não virar 422. Metadado longo é cortado, não recusado.\n\nconst ORIGENS_PERMITIDAS = ['https://waveops.com.br', 'https://www.waveops.com.br'];\nconst TEMPO_MINIMO_MS = 1200;\nconst VERSAO_CONTRATO = 2;\nconst ORIGEM_ACEITA = 'contato';\n// Limite de envios válidos por minuto e por hora. Protege a cota da API do Google e a caixa de e-mail.\n// Os valores ficam no documento de operação restrita (local) e entram aqui ao importar. 0 desliga.\n// Sem valor inteiro, o nó falha de propósito e o site recebe 503: o limite não vai ao ar esquecido.\nconst LIMITE_POR_MINUTO = Number('__DEFINIR__');\nconst LIMITE_POR_HORA = Number('__DEFINIR__');\nif (![LIMITE_POR_MINUTO, LIMITE_POR_HORA].every((v) => Number.isInteger(v) && v >= 0)) {\n  throw new Error('Defina LIMITE_POR_MINUTO e LIMITE_POR_HORA no topo deste nó Code.');\n}\nconst CANAIS = ['whatsapp', 'email', 'ligacao'];\nconst ROTULO_CANAL = { whatsapp: 'WhatsApp', email: 'E-mail', ligacao: 'Ligação' };\nconst CHAVES_DO_CONTRATO = [\n  'nome', 'empresa', 'whatsapp', 'dor', 'mensagem', 'origem', 'enviadoEm', 'preenchidoEmMs',\n  'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'referrer', 'landingUrl',\n  'versaoContrato', 'idEnvio', 'canalRetorno', 'telefone', 'email', 'melhorHorario', 'procura',\n  'politicaCiente', 'politicaVersao', 'politicaCienteEm', 'cienciaTextoVersao', 'marketingAceito', 'marketingTextoVersao',\n  'primeiraFonte', 'pagina', 'website',\n];\n\nconst ID_ENVIO = /^[A-Za-z0-9][A-Za-z0-9_-]{7,63}$/;\nconst DATA_ISO = /^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?(Z|[+-]\\d{2}:\\d{2})$/;\n// Separadores de linha e de parágrafo (código 8232 e 8233) entram por código de caractere:\n// escritos direto, quebrariam a leitura da expressão regular.\nconst SEPARADORES = String.fromCharCode(8232, 8233);\nconst CONTROLE_LINHA = new RegExp('[\\\\x00-\\\\x1F\\\\x7F\\\\x85' + SEPARADORES + ']+', 'g');\nconst CONTROLE_TEXTO = new RegExp('[\\\\x00-\\\\x08\\\\x0B\\\\x0C\\\\x0E-\\\\x1F\\\\x7F\\\\x85' + SEPARADORES + ']', 'g');\nconst INVALIDO_NO_EMAIL = new RegExp('[\\\\s\\\\x00-\\\\x1F\\\\x7F]');\n\nconst texto = (v) => (typeof v === 'string' ? v : '');\nconst umaLinha = (v) => texto(v).replace(CONTROLE_LINHA, ' ').trim();\nconst variasLinhas = (v) => texto(v).replace(/\\r\\n?/g, '\\n').replace(CONTROLE_TEXTO, '').trim();\nconst cortar = (v, maximo) => (v.length > maximo ? v.slice(0, maximo) : v);\nconst soDigitos = (v) => texto(v).replace(/\\D/g, '');\nconst dataIsoValida = (v) => DATA_ISO.test(v) && !Number.isNaN(Date.parse(v));\nconst telefoneValido = (digitos) => digitos.length >= 10 && digitos.length <= 13;\n// O site tira o +55 antes de enviar (normalizarTelefone em validacao.js). Aqui vale o mesmo, para quem chama direto.\nconst semPais = (digitos) => ((digitos.length === 12 || digitos.length === 13) && digitos.startsWith('55') ? digitos.slice(2) : digitos);\n// Mesma regra do formulário: algo antes do arroba, ponto depois do domínio, sem espaço.\n// Acrescenta só o limite de tamanho (o campo do site já tem 160) e a recusa de caractere de controle.\nconst emailValido = (e) => {\n  const arroba = e.indexOf('@');\n  const ponto = e.lastIndexOf('.');\n  return e.length <= 160 && arroba > 0 && ponto > arroba + 1 && e.length > ponto + 1\n    && e.indexOf('@', arroba + 1) === -1 && !INVALIDO_NO_EMAIL.test(e);\n};\n// Valor que começa com = + - ou @ vira fórmula quando a planilha é exportada para CSV ou Excel.\n// O apóstrofo na frente trava isso. Só vale para o que vai à planilha: o aviso por e-mail usa o texto original.\nconst seguro = (v) => (/^[=+\\-@]/.test(v) ? \"'\" + v : v);\n\nconst entrada = $input.first().json || {};\nconst cabecalhos = entrada.headers || {};\nconst corpo = entrada.body;\nconst agora = typeof $now !== 'undefined' && $now && typeof $now.toISO === 'function'\n  ? $now.toISO()\n  : new Date().toISOString();\n\nfunction resultado(decisao, motivo, extra) {\n  const base = { decisao, motivo, campos: [], protocolo: '', linha: null, alerta: null, chavesDesconhecidas: [] };\n  return [{ json: Object.assign(base, extra || {}) }];\n}\n\n// 1. Origem: só as duas origens do site. O CORS do Webhook já filtra o navegador, isto filtra quem chama direto sem Origin.\nif (!ORIGENS_PERMITIDAS.includes(texto(cabecalhos.origin))) {\n  return resultado('origem', 'origem_nao_permitida');\n}\n\n// 2. Corpo precisa ser um objeto JSON.\nif (!corpo || typeof corpo !== 'object' || Array.isArray(corpo)) {\n  return resultado('invalido', 'corpo_invalido', { campos: ['corpo'] });\n}\n\n// 3. Anti-spam. Robô recebe 200 e nada é gravado. Vem antes da validação para não ensinar as regras.\nconst idRecebido = texto(corpo.idEnvio);\nconst protocoloDescartado = ID_ENVIO.test(idRecebido) ? idRecebido : 'descartado';\nconst isca = corpo.website;\nconst iscaPreenchida = !(isca === undefined || isca === null || (typeof isca === 'string' && isca.trim() === ''));\nif (iscaPreenchida) {\n  return resultado('descartar', 'honeypot', { protocolo: protocoloDescartado });\n}\nconst bruto = corpo.preenchidoEmMs;\nconst tempo = typeof bruto === 'number' ? bruto : (typeof bruto === 'string' && bruto.trim() !== '' ? Number(bruto) : NaN);\n// Só número abaixo do mínimo é robô. Chave ausente ou não numérica é problema de contrato e vira 422 mais\n// adiante: se o site perder essa chave, o erro aparece na hora em vez de confirmar lead que nunca foi gravado.\nif (Number.isFinite(tempo) && tempo < TEMPO_MINIMO_MS) {\n  return resultado('descartar', 'tempo_de_preenchimento', { protocolo: protocoloDescartado });\n}\n\n// 4. Validação. Os nomes em campos são as chaves do contrato.\nconst campos = [];\n\nif (Number(corpo.versaoContrato) !== VERSAO_CONTRATO) campos.push('versaoContrato');\n\nconst idEnvio = idRecebido;\nif (!ID_ENVIO.test(idEnvio)) campos.push('idEnvio');\n\nif (corpo.origem !== ORIGEM_ACEITA) campos.push('origem');\nif (!Number.isFinite(tempo)) campos.push('preenchidoEmMs');\n\nconst nome = umaLinha(corpo.nome);\nif (nome.length < 2 || nome.length > 120) campos.push('nome');\n\nconst empresa = umaLinha(corpo.empresa);\nif (empresa.length > 120) campos.push('empresa');\n\nconst canal = texto(corpo.canalRetorno);\nconst canalValido = CANAIS.includes(canal);\nif (!canalValido) campos.push('canalRetorno');\n\nconst telefoneBruto = soDigitos(corpo.telefone);\nconst telefone = semPais(telefoneBruto);\nconst email = texto(corpo.email).trim().toLowerCase();\nconst querTelefone = canalValido && canal !== 'email';\nconst querEmail = canalValido && canal === 'email';\nif (querTelefone ? !telefoneValido(telefoneBruto) : telefoneBruto.length > 0 && !telefoneValido(telefoneBruto)) campos.push('telefone');\nif (querEmail ? !emailValido(email) : email.length > 0 && !emailValido(email)) campos.push('email');\n\nconst mensagem = variasLinhas(corpo.mensagem);\nif (mensagem.length > 2000) campos.push('mensagem');\n\nif (corpo.politicaCiente !== true) campos.push('politicaCiente');\nconst politicaVersao = umaLinha(corpo.politicaVersao);\nif (politicaVersao.length < 1 || politicaVersao.length > 60) campos.push('politicaVersao');\nconst politicaCienteEm = texto(corpo.politicaCienteEm).trim();\nif (!dataIsoValida(politicaCienteEm)) campos.push('politicaCienteEm');\n// Versão do texto da caixa de ciência que a pessoa viu. Prova do aceite, mas opcional: um navegador com\n// o JavaScript antigo em cache não manda, e isso não pode derrubar um lead real.\nconst cienciaTextoVersao = cortar(umaLinha(corpo.cienciaTextoVersao), 60);\n\n// Marketing é opt-in separado. Ausente vale falso: nunca se presume consentimento.\nlet marketingAceito = false;\nif (corpo.marketingAceito === true) {\n  marketingAceito = true;\n} else if (corpo.marketingAceito !== undefined && corpo.marketingAceito !== null && corpo.marketingAceito !== false) {\n  campos.push('marketingAceito');\n}\nconst textoMarketing = umaLinha(corpo.marketingTextoVersao);\nif (marketingAceito && (textoMarketing.length < 1 || textoMarketing.length > 60)) campos.push('marketingTextoVersao');\nconst marketingTextoVersao = cortar(textoMarketing, 60);\n\nif (campos.length > 0) {\n  return resultado('invalido', 'validacao', { campos });\n}\n\n// 5. Limite de volume, só para envio válido. A contagem fica nos dados estáticos do workflow.\nif (LIMITE_POR_MINUTO > 0 || LIMITE_POR_HORA > 0) {\n  try {\n    const memoria = typeof $getWorkflowStaticData === 'function' ? $getWorkflowStaticData('global') : {};\n    const agoraMs = Date.now();\n    const recentes = (Array.isArray(memoria.envios) ? memoria.envios : []).filter((t) => typeof t === 'number' && agoraMs - t < 3600000);\n    const noUltimoMinuto = recentes.filter((t) => agoraMs - t < 60000).length;\n    const estourou = (LIMITE_POR_MINUTO > 0 && noUltimoMinuto >= LIMITE_POR_MINUTO)\n      || (LIMITE_POR_HORA > 0 && recentes.length >= LIMITE_POR_HORA);\n    if (!estourou) recentes.push(agoraMs);\n    memoria.envios = recentes;\n    if (estourou) return resultado('limite', 'limite_de_volume');\n  } catch (erro) {\n    // Contagem indisponível: segue sem contar.\n  }\n}\n\n// 6. Metadado e campos de rótulo: cortados no limite, nunca recusados.\nconst dor = cortar(umaLinha(corpo.dor), 120);\nconst procura = cortar(umaLinha(corpo.procura), 120);\nconst melhorHorario = cortar(umaLinha(corpo.melhorHorario), 120);\nconst enviadoEmBruto = texto(corpo.enviadoEm).trim();\nconst enviadoEm = dataIsoValida(enviadoEmBruto) ? enviadoEmBruto : '';\nconst utmSource = cortar(umaLinha(corpo.utm_source), 200);\nconst utmMedium = cortar(umaLinha(corpo.utm_medium), 200);\nconst utmCampaign = cortar(umaLinha(corpo.utm_campaign), 200);\nconst utmContent = cortar(umaLinha(corpo.utm_content), 200);\nconst utmTerm = cortar(umaLinha(corpo.utm_term), 200);\nconst referrer = cortar(umaLinha(corpo.referrer), 500);\nconst landingUrl = cortar(umaLinha(corpo.landingUrl), 500);\nconst primeiraFonte = cortar(umaLinha(corpo.primeiraFonte), 100);\nconst pagina = cortar(umaLinha(corpo.pagina), 100);\n\n// A coluna whatsapp nasce do telefone, só no canal WhatsApp. O valor enviado em whatsapp não é usado.\nconst linha = {\n  nome: seguro(nome),\n  empresa: seguro(empresa),\n  whatsapp: canal === 'whatsapp' ? telefone : '',\n  dor: seguro(dor),\n  mensagem: seguro(mensagem),\n  origem: ORIGEM_ACEITA,\n  enviadoEm,\n  utm_source: seguro(utmSource),\n  utm_medium: seguro(utmMedium),\n  utm_campaign: seguro(utmCampaign),\n  utm_content: seguro(utmContent),\n  utm_term: seguro(utmTerm),\n  referrer: seguro(referrer),\n  landingUrl: seguro(landingUrl),\n  recebidoEm: agora,\n  versaoContrato: VERSAO_CONTRATO,\n  idEnvio,\n  canalRetorno: canal,\n  telefone,\n  email: seguro(email),\n  melhorHorario: seguro(melhorHorario),\n  procura: seguro(procura),\n  preenchidoEmMs: Math.round(tempo),\n  politicaCiente: true,\n  politicaVersao: seguro(politicaVersao),\n  politicaCienteEm,\n  cienciaTextoVersao: seguro(cienciaTextoVersao),\n  marketingAceito,\n  marketingTextoVersao: seguro(marketingTextoVersao),\n  primeiraFonte: seguro(primeiraFonte),\n  pagina: seguro(pagina),\n};\n\n// Chave que o contrato não conhece não vira coluna. Ela aparece no aviso por e-mail, para ninguém perder campo novo sem saber.\nconst conhecidas = new Set(CHAVES_DO_CONTRATO);\nconst chavesDesconhecidas = Object.keys(corpo).filter((chave) => !conhecidas.has(chave));\n\n// Texto do aviso interno. Fica aqui para o e-mail sair sempre no mesmo formato.\nconst vazio = '(não informado)';\nconst partes = [\n  'Novo contato pelo site da WaveOps.',\n  '',\n  'Nome: ' + nome,\n  'Empresa: ' + (empresa || vazio),\n  'Retorno por: ' + ROTULO_CANAL[canal],\n  'Telefone: ' + (telefone || vazio),\n  'E-mail: ' + (email || vazio),\n];\nif (canal === 'ligacao') partes.push('Melhor horário: ' + (melhorHorario || vazio));\npartes.push(\n  'O que procura: ' + (procura || vazio),\n  'O que mais pesa: ' + (dor || vazio),\n  '',\n  'Mensagem:',\n  mensagem || '(vazia)',\n  '',\n  'Origem',\n  'Página: ' + (pagina || vazio),\n  'Primeira fonte: ' + (primeiraFonte || vazio),\n  'UTM: source=' + (utmSource || '-') + ' | medium=' + (utmMedium || '-') + ' | campaign=' + (utmCampaign || '-')\n    + ' | content=' + (utmContent || '-') + ' | term=' + (utmTerm || '-'),\n  'Referrer: ' + (referrer || vazio),\n  'Landing: ' + (landingUrl || vazio),\n  '',\n  'Consentimento',\n  'Política de Privacidade: ciente, versão ' + politicaVersao + ', texto ' + (cienciaTextoVersao || vazio) + ', em ' + politicaCienteEm,\n  'Marketing: ' + (marketingAceito ? 'aceito (texto ' + marketingTextoVersao + ')' : 'não aceito'),\n  '',\n  'Registro',\n  'Protocolo: ' + idEnvio,\n  'Enviado em (navegador): ' + (enviadoEm || vazio),\n  'Recebido em (servidor): ' + agora,\n  'Tempo até enviar: ' + Math.round(tempo) + ' ms',\n);\nif (chavesDesconhecidas.length > 0) {\n  partes.push('', 'Atenção: o corpo trouxe chaves que não viram coluna: ' + chavesDesconhecidas.slice(0, 10).map((c) => cortar(c, 40)).join(', '));\n}\nconst alerta = {\n  assunto: cortar('Novo contato pelo site: ' + nome + (empresa ? ' (' + empresa + ')' : ''), 150),\n  corpo: partes.join('\\n'),\n};\n\nreturn resultado('gravar', 'ok', { protocolo: idEnvio, linha, alerta, chavesDesconhecidas });\n"
+      },
+      "id": "7a1e0001-0000-4000-8000-000000000005",
+      "name": "Code: Validar e normalizar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        0
+      ],
+      "onError": "continueErrorOutput",
+      "notes": "Valida, normaliza e decide. Não grava e não responde. Regras no doc n8n-site-v2.md.",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000006",
+              "name": "etapa",
+              "value": "validação",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000007",
+              "name": "detalhe",
+              "value": "={{ String(typeof $json.error === 'string' ? $json.error : (($json.error && $json.error.message) || '')).replace(/\\s+/g, ' ').trim().slice(0, 50) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7a1e0001-0000-4000-8000-000000000008",
+      "name": "Set: Etapa validação",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        260,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000009",
+              "leftValue": "={{ $json.decisao }}",
+              "rightValue": "gravar",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7a1e0001-0000-4000-8000-000000000010",
+      "name": "IF: Pode gravar?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        520,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000011",
+              "leftValue": "={{ $json.decisao }}",
+              "rightValue": "descartar",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7a1e0001-0000-4000-8000-000000000012",
+      "name": "IF: Descarte silencioso?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        780,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000013",
+              "leftValue": "={{ $json.decisao }}",
+              "rightValue": "origem",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7a1e0001-0000-4000-8000-000000000014",
+      "name": "IF: Origem recusada?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1040,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000015",
+              "leftValue": "={{ $json.decisao }}",
+              "rightValue": "limite",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7a1e0001-0000-4000-8000-000000000016",
+      "name": "IF: Limite excedido?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1300,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, protocolo: $('Code: Validar e normalizar').first().json.protocolo } }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Cache-Control",
+                "value": "no-store"
+              }
+            ]
+          }
+        }
+      },
+      "id": "7a1e0001-0000-4000-8000-000000000017",
+      "name": "Respond: 200 descartado",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1040,
+        100
+      ],
+      "notes": "Robô descartado em silêncio. Sem gravação e sem aviso, de propósito: o robô não deve aprender a regra.",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: false, erro: 'origem' } }}",
+        "options": {
+          "responseCode": 403,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Cache-Control",
+                "value": "no-store"
+              }
+            ]
+          }
+        }
+      },
+      "id": "7a1e0001-0000-4000-8000-000000000018",
+      "name": "Respond: 403 origem",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1300,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: false, erro: 'limite' } }}",
+        "options": {
+          "responseCode": 429,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Cache-Control",
+                "value": "no-store"
+              },
+              {
+                "name": "Retry-After",
+                "value": "60"
+              }
+            ]
+          }
+        }
+      },
+      "id": "7a1e0001-0000-4000-8000-000000000019",
+      "name": "Respond: 429 limite",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1560,
+        400
+      ],
+      "notes": "Acima do limite de volume. Os valores ficam no topo do nó Code.",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: false, erro: 'validacao', campos: $('Code: Validar e normalizar').first().json.campos } }}",
+        "options": {
+          "responseCode": 422,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Cache-Control",
+                "value": "no-store"
+              }
+            ]
+          }
+        }
+      },
+      "id": "7a1e0001-0000-4000-8000-000000000020",
+      "name": "Respond: 422 validação",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1560,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "sheet",
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "__DEFINIR__",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "__DEFINIR__",
+          "mode": "id"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "idEnvio",
+              "lookupValue": "={{ $('Code: Validar e normalizar').first().json.linha.idEnvio }}"
+            }
+          ]
+        },
+        "combineFilters": "AND",
+        "options": {
+          "returnFirstMatch": true,
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "detectAutomatically",
+              "readRowsUntil": "lastRowInSheet",
+              "headerRow": 1,
+              "firstDataRow": 2
+            }
+          },
+          "outputFormatting": {
+            "values": {
+              "general": "UNFORMATTED_VALUE",
+              "date": "FORMATTED_STRING"
+            }
+          }
+        }
+      },
+      "id": "7a1e0001-0000-4000-8000-000000000021",
+      "name": "Sheets: Buscar idEnvio",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        780,
+        -180
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "WaveOps Google Sheets"
+        }
+      },
+      "alwaysOutputData": true,
+      "retryOnFail": false,
+      "onError": "continueRegularOutput",
+      "notes": "Consulta a coluna idEnvio da aba de leads. Sem resultado, devolve um item vazio (alwaysOutputData). O nó trata o erro por dentro (Continue) e não repete sozinho: o Code seguinte classifica o resultado.",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Lê o que a busca devolveu e decide: falha, repetida ou gravar.\n// Falha fechada. O formato do item de erro do nó Google Sheets varia (erro em json.error, erro fora do json,\n// eco do item de entrada), então a regra é positiva: só item vazio (nada achado) ou linha com a coluna-chave\n// vale como resposta de busca. Qualquer outra coisa é falha, e o fluxo nunca grava sem ter checado a repetição.\nconst CHAVE = 'idEnvio';\n\ntry {\n  const esperado = $('Code: Validar e normalizar').first().json.linha;\n  const itens = $input.all().map((item) => item.json || {});\n  const temErro = (j) => j.error !== undefined && j.error !== null && j.error !== '';\n  const ehLinha = (j) => typeof j[CHAVE] === 'string' || typeof j[CHAVE] === 'number';\n  const ehVazio = (j) => Object.keys(j).length === 0;\n  const respostaValida = (j) => !temErro(j) && (ehVazio(j) || ehLinha(j));\n  const culpado = itens.find((j) => !respostaValida(j));\n\n  if (itens.length === 0 || culpado !== undefined) {\n    const descrever = (j) => {\n      const e = j.error;\n      if (typeof e === 'string') return e;\n      if (e && typeof e === 'object') return String(e.message || e.description || '');\n      return 'resposta inesperada da planilha';\n    };\n    const motivo = culpado === undefined ? 'sem resposta da planilha' : descrever(culpado);\n    return [{ json: { acao: 'falha', etapa: 'leitura', detalhe: String(motivo).replace(/\\s+/g, ' ').trim().slice(0, 50) } }];\n  }\n\n  const repetida = itens.some((j) => ehLinha(j) && String(j[CHAVE]) === String(esperado[CHAVE]));\n  return [{ json: { acao: repetida ? 'repetida' : 'gravar', etapa: '', detalhe: '' } }];\n} catch (erro) {\n  return [{ json: { acao: 'falha', etapa: 'leitura', detalhe: 'erro ao ler a resposta da busca' } }];\n}\n"
+      },
+      "id": "7a1e0001-0000-4000-8000-000000000022",
+      "name": "Code: Decidir pela leitura",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        -180
+      ],
+      "notes": "Decide pelo resultado da busca. Falha fechada: item que não parece resposta de busca vira falha e nunca grava sem checar a repetição.",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000023",
+              "leftValue": "={{ $json.acao === 'falha' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7a1e0001-0000-4000-8000-000000000024",
+      "name": "IF: Leitura falhou?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1300,
+        -180
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000025",
+              "leftValue": "={{ $json.acao === 'repetida' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7a1e0001-0000-4000-8000-000000000026",
+      "name": "IF: Já gravado?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1560,
+        -180
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, protocolo: $('Code: Validar e normalizar').first().json.protocolo } }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Cache-Control",
+                "value": "no-store"
+              }
+            ]
+          }
+        }
+      },
+      "id": "7a1e0001-0000-4000-8000-000000000027",
+      "name": "Respond: 200 duplicado",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1820,
+        -320
+      ],
+      "notes": "Reenvio do mesmo idEnvio. O lead já está na planilha, então responde 200 sem gravar de novo e sem novo aviso.",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000028",
+              "name": "nome",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.nome }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000029",
+              "name": "empresa",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.empresa }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000030",
+              "name": "whatsapp",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.whatsapp }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000031",
+              "name": "dor",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.dor }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000032",
+              "name": "mensagem",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.mensagem }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000033",
+              "name": "origem",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.origem }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000034",
+              "name": "enviadoEm",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.enviadoEm }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000035",
+              "name": "utm_source",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.utm_source }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000036",
+              "name": "utm_medium",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.utm_medium }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000037",
+              "name": "utm_campaign",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.utm_campaign }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000038",
+              "name": "utm_content",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.utm_content }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000039",
+              "name": "utm_term",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.utm_term }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000040",
+              "name": "referrer",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.referrer }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000041",
+              "name": "landingUrl",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.landingUrl }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000042",
+              "name": "recebidoEm",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.recebidoEm }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000043",
+              "name": "versaoContrato",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.versaoContrato }}",
+              "type": "number"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000044",
+              "name": "idEnvio",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.idEnvio }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000045",
+              "name": "canalRetorno",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.canalRetorno }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000046",
+              "name": "telefone",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.telefone }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000047",
+              "name": "email",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.email }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000048",
+              "name": "melhorHorario",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.melhorHorario }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000049",
+              "name": "procura",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.procura }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000050",
+              "name": "preenchidoEmMs",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.preenchidoEmMs }}",
+              "type": "number"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000051",
+              "name": "politicaCiente",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.politicaCiente }}",
+              "type": "boolean"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000052",
+              "name": "politicaVersao",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.politicaVersao }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000053",
+              "name": "politicaCienteEm",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.politicaCienteEm }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000054",
+              "name": "cienciaTextoVersao",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.cienciaTextoVersao }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000055",
+              "name": "marketingAceito",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.marketingAceito }}",
+              "type": "boolean"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000056",
+              "name": "marketingTextoVersao",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.marketingTextoVersao }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000057",
+              "name": "primeiraFonte",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.primeiraFonte }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000058",
+              "name": "pagina",
+              "value": "={{ $('Code: Validar e normalizar').first().json.linha.pagina }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7a1e0001-0000-4000-8000-000000000059",
+      "name": "Set: Montar linha do lead",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1820,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "sheet",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "__DEFINIR__",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "__DEFINIR__",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {
+          "cellFormat": "RAW",
+          "handlingExtraData": "error",
+          "useAppend": true,
+          "locationDefine": {
+            "values": {
+              "headerRow": 1
+            }
+          }
+        }
+      },
+      "id": "7a1e0001-0000-4000-8000-000000000060",
+      "name": "Sheets: Gravar lead",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2080,
+        -120
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "WaveOps Google Sheets"
+        }
+      },
+      "retryOnFail": false,
+      "onError": "continueErrorOutput",
+      "notes": "Append com cellFormat RAW (sem fórmula) e handlingExtraData error: coluna que falta na aba vira erro, nunca dado perdido em silêncio. Sem repetição automática: se a resposta da planilha se perder, o reenvio do site (mesmo idEnvio) passa pela busca e não duplica.",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, protocolo: $('Code: Validar e normalizar').first().json.protocolo } }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Cache-Control",
+                "value": "no-store"
+              }
+            ]
+          }
+        }
+      },
+      "id": "7a1e0001-0000-4000-8000-000000000061",
+      "name": "Respond: 200 gravado",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        2340,
+        -200
+      ],
+      "notes": "Único 200 que depende da gravação: só é alcançado pela saída de sucesso do nó de gravação.",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "__DEFINIR__",
+        "subject": "={{ $('Code: Validar e normalizar').first().json.alerta.assunto }}",
+        "emailType": "text",
+        "message": "={{ $('Code: Validar e normalizar').first().json.alerta.corpo }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "7a1e0001-0000-4000-8000-000000000062",
+      "name": "Gmail: Avisar novo lead",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2600,
+        -200
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "name": "WaveOps Gmail"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "onError": "stopWorkflow",
+      "notes": "Roda depois da resposta 200. Se falhar, o registro já está na planilha e o aviso de falha avisa o time.",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000063",
+              "name": "etapa",
+              "value": "gravação",
+              "type": "string"
+            },
+            {
+              "id": "7a1e0001-0000-4000-8000-000000000064",
+              "name": "detalhe",
+              "value": "={{ String(typeof $json.error === 'string' ? $json.error : (($json.error && $json.error.message) || '')).replace(/\\s+/g, ' ').trim().slice(0, 50) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7a1e0001-0000-4000-8000-000000000065",
+      "name": "Set: Etapa gravação",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2340,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: false, erro: 'indisponivel' } }}",
+        "options": {
+          "responseCode": 503,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Cache-Control",
+                "value": "no-store"
+              }
+            ]
+          }
+        }
+      },
+      "id": "7a1e0001-0000-4000-8000-000000000066",
+      "name": "Respond: 503 falha",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        2600,
+        120
+      ],
+      "notes": "Alcançado pelas falhas do Code de validação, da leitura da planilha e da gravação.",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "errorType": "errorMessage",
+        "errorMessage": "={{ 'Falha na ' + ($json.etapa || 'planilha') + '. O site recebeu 503.' + ($json.detalhe ? ' ' + $json.detalhe : '') }}"
+      },
+      "id": "7a1e0001-0000-4000-8000-000000000067",
+      "name": "Stop and Error: Registrar falha",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        2860,
+        120
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "7a1e0001-0000-4000-8000-000000000068",
+      "name": "Error Trigger: Falha no workflow",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        700
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "__DEFINIR__",
+        "subject": "=Falha no site: {{ $json.workflow.name }}",
+        "emailType": "text",
+        "message": "=O workflow {{ $json.workflow.name }} falhou.\n\nErro: {{ $json.execution.error.message }}\nÚltimo nó executado: {{ $json.execution.lastNodeExecuted }}\nExecução: {{ $json.execution.url }}\n\nSe o erro for de planilha, o site mostrou o estado de falha e quem enviou pode tentar de novo com os mesmos dados. Se for do aviso por e-mail, o registro já está na planilha.\nAbra a execução para ver o nó com erro e o corpo recebido.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "7a1e0001-0000-4000-8000-000000000069",
+      "name": "Gmail: Avisar falha ao time",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        260,
+        700
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "name": "WaveOps Gmail"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "onError": "stopWorkflow"
+    }
+  ],
+  "connections": {
+    "Webhook: Receber lead v2": {
+      "main": [
+        [
+          {
+            "node": "Code: Validar e normalizar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Validar e normalizar": {
+      "main": [
+        [
+          {
+            "node": "IF: Pode gravar?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set: Etapa validação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set: Etapa validação": {
+      "main": [
+        [
+          {
+            "node": "Respond: 503 falha",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Pode gravar?": {
+      "main": [
+        [
+          {
+            "node": "Sheets: Buscar idEnvio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IF: Descarte silencioso?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Descarte silencioso?": {
+      "main": [
+        [
+          {
+            "node": "Respond: 200 descartado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IF: Origem recusada?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Origem recusada?": {
+      "main": [
+        [
+          {
+            "node": "Respond: 403 origem",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IF: Limite excedido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Limite excedido?": {
+      "main": [
+        [
+          {
+            "node": "Respond: 429 limite",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond: 422 validação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sheets: Buscar idEnvio": {
+      "main": [
+        [
+          {
+            "node": "Code: Decidir pela leitura",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Decidir pela leitura": {
+      "main": [
+        [
+          {
+            "node": "IF: Leitura falhou?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Leitura falhou?": {
+      "main": [
+        [
+          {
+            "node": "Respond: 503 falha",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IF: Já gravado?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Já gravado?": {
+      "main": [
+        [
+          {
+            "node": "Respond: 200 duplicado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set: Montar linha do lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set: Montar linha do lead": {
+      "main": [
+        [
+          {
+            "node": "Sheets: Gravar lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sheets: Gravar lead": {
+      "main": [
+        [
+          {
+            "node": "Respond: 200 gravado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set: Etapa gravação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set: Etapa gravação": {
+      "main": [
+        [
+          {
+            "node": "Respond: 503 falha",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond: 200 gravado": {
+      "main": [
+        [
+          {
+            "node": "Gmail: Avisar novo lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond: 503 falha": {
+      "main": [
+        [
+          {
+            "node": "Stop and Error: Registrar falha",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Trigger: Falha no workflow": {
+      "main": [
+        [
+          {
+            "node": "Gmail: Avisar falha ao time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Sao_Paulo",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": false,
+    "executionTimeout": 60
+  },
+  "tags": []
+}

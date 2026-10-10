@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <!-- parcial:head -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self' https://portal.waveops.com.br https://cowboyhouse.app.n8n.cloud; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests" />
+    <meta name="theme-color" content="#0a0b0e" />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
+    <link rel="preload" href="/assets/fonts/hanken-variavel-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="/assets/site/tokens.css?v=dc02737f" />
+    <link rel="stylesheet" href="/assets/site/base.css?v=77810b0f" />
+    <link rel="stylesheet" href="/assets/site/components.css?v=75406572" />
+    <script defer src="/assets/funil.js?v=2842b2e3"></script>
+    <script type="module" src="/assets/site/site.js?v=00ed62c5"></script>
+    <noscript><style>[data-seletor] [data-painel]{display:block!important}[data-seletor] [data-opcoes],[data-sem-js-oculto]{display:none!important}@media (max-width:1180px){.wo-topo__painel[hidden]{display:flex!important}.wo-topo__menu{display:none!important}}</style></noscript>
+    <!-- /parcial:head -->
+    <link rel="stylesheet" href="/assets/site/paginas/demonstracoes.css?v=b12fd276" />
+    <script type="module" src="/assets/site/paginas/demonstracoes.js?v=777fe5b5"></script>
+    <title>Demonstrações técnicas: cenários simulados · WaveOps</title>
+    <meta name="description" content="Seis fluxos que mostram como a WaveOps liga entrada, regra e saída. Cenários simulados, com situações e dados fictícios. Não são casos de clientes." />
+    <link rel="canonical" href="https://waveops.com.br/demonstracoes-tecnicas/" />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="WaveOps" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:url" content="https://waveops.com.br/demonstracoes-tecnicas/" />
+    <meta property="og:title" content="Demonstrações técnicas: cenários simulados · WaveOps" />
+    <meta property="og:description" content="Seis fluxos simulados mostram como a WaveOps liga entrada, regra e saída. As situações e os dados são fictícios." />
+    <meta property="og:image" content="https://waveops.com.br/assets/og-waveops.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="WaveOps: engenharia de software, automação e IA" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Demonstrações técnicas: cenários simulados · WaveOps" />
+    <meta name="twitter:description" content="Seis fluxos simulados mostram como a WaveOps liga entrada, regra e saída. As situações e os dados são fictícios." />
+    <meta name="twitter:image" content="https://waveops.com.br/assets/og-waveops.png" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Início", "item": "https://waveops.com.br/" },
+          { "@type": "ListItem", "position": 2, "name": "Demonstrações técnicas", "item": "https://waveops.com.br/demonstracoes-tecnicas/" }
+        ]
+      }
+    </script>
+  </head>
+  <body data-pagina="demonstracoes">
+    <a class="wo-pular" href="#conteudo">Pular para o conteúdo</a>
+    <!-- parcial:topo ativo="demonstracoes" -->
+    <header class="wo-topo">
+      <div class="wo-topo__barra">
+        <a class="wo-marca" href="/" aria-label="WaveOps, início">
+          <span class="wo-marca__selo">
+            <img src="/assets/brand/waveops-badge-3d-128.webp" alt="" width="42" height="42" />
+            <svg width="1em" height="1em" viewBox="0 0 100 100" fill="none" aria-hidden="true" focusable="false"><g stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 50 Q 30 33 41 50" /><path d="M59 50 Q 70 67 82 50" /></g><circle cx="50" cy="50" r="9" fill="none" stroke="#fff" stroke-width="5" /><circle cx="18" cy="50" r="7.5" fill="#fff" /><circle cx="82" cy="50" r="7.5" fill="#fff" /></svg>
+          </span>
+          <span>Wave<span class="wo-marca__ops">Ops</span></span>
+        </a>
+        <nav class="wo-topo__links" aria-label="Principal">
+          <a href="/solucoes/">Soluções</a>
+          <a href="/plataforma/">Plataforma</a>
+          <a href="/projetos-sob-medida/">Projetos sob medida</a>
+          <a href="/contato/">Contato</a>
+        </nav>
+        <div class="wo-topo__acoes">
+          <a class="wo-topo__cliente" href="https://portal.waveops.com.br/cliente/login">Área do cliente</a>
+          <a class="wo-btn wo-btn--primario wo-topo__cta" href="/contato/">Falar com especialista</a>
+          <button class="wo-topo__menu" type="button" aria-controls="menu-movel" aria-expanded="false" aria-label="Abrir menu">
+            <svg width="1em" height="1em" class="wo-topo__icone-abrir" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+            <svg width="1em" height="1em" class="wo-topo__icone-fechar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18" /></svg>
+          </button>
+        </div>
+      </div>
+      <nav class="wo-topo__painel" id="menu-movel" aria-label="Menu" hidden>
+        <a href="/solucoes/">Soluções</a>
+        <a href="/plataforma/">Plataforma</a>
+        <a href="/projetos-sob-medida/">Projetos sob medida</a>
+        <a href="/contato/">Contato</a>
+        <a href="https://portal.waveops.com.br/cliente/login">Área do cliente</a>
+        <a class="wo-btn wo-btn--primario" href="/contato/">Falar com especialista</a>
+      </nav>
+    </header>
+    <!-- /parcial:topo -->
+    <main id="conteudo" tabindex="-1">
+      <section class="wo-demonstracoes__hero" aria-labelledby="demonstracoes-titulo">
+        <div class="wo-demonstracoes__brilho" aria-hidden="true"></div>
+        <div class="wo-conteiner wo-demonstracoes__corpo">
+          <span class="wo-sobretitulo">Demonstrações técnicas</span>
+          <h1 class="wo-h1 wo-demonstracoes__h1" id="demonstracoes-titulo"><span class="wo-linha">Do repetitivo</span><span class="wo-linha wo-destaque">ao resolvido.</span></h1>
+          <p class="wo-lead wo-demonstracoes__lead">Seis fluxos que mostram como a WaveOps liga entrada, regra e saída em cada frente. Servem para você reconhecer a sua operação.</p>
+          <div class="wo-demonstracoes__aviso" role="note">
+            <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" /><path d="M12 11v6M12 7.5v.5" /></svg>
+            <p><strong>Cenários simulados.</strong> As situações e os dados desta página são fictícios e servem para explicar o funcionamento. Não são casos de clientes.</p>
+          </div>
+          <div class="wo-demonstracoes__filtro" role="group" aria-label="Filtrar por frente" data-filtro data-sem-js-oculto>
+            <button class="wo-demonstracoes__opcao" type="button" data-categoria="todas" aria-pressed="true" aria-controls="demonstracoes-lista">Todas</button>
+            <button class="wo-demonstracoes__opcao" type="button" data-categoria="automacao" aria-pressed="false" aria-controls="demonstracoes-lista">Automação</button>
+            <button class="wo-demonstracoes__opcao" type="button" data-categoria="integracao" aria-pressed="false" aria-controls="demonstracoes-lista">Integração</button>
+            <button class="wo-demonstracoes__opcao" type="button" data-categoria="sistemas" aria-pressed="false" aria-controls="demonstracoes-lista">Sistemas e painéis</button>
+            <button class="wo-demonstracoes__opcao" type="button" data-categoria="agentes" aria-pressed="false" aria-controls="demonstracoes-lista">Agentes de IA</button>
+            <button class="wo-demonstracoes__opcao" type="button" data-categoria="ecommerce" aria-pressed="false" aria-controls="demonstracoes-lista">E-commerce</button>
+            <button class="wo-demonstracoes__opcao" type="button" data-categoria="consultoria" aria-pressed="false" aria-controls="demonstracoes-lista">Consultoria</button>
+          </div>
+          <p class="wo-oculto" role="status" aria-live="polite" aria-atomic="true" data-filtro-status></p>
+        </div>
+      </section>
+
+      <section class="wo-demonstracoes__secao" aria-label="Demonstrações">
+        <div class="wo-conteiner">
+          <div class="wo-demonstracoes__lista" id="demonstracoes-lista">
+            <article class="wo-demonstracoes__fluxo" data-categorias="automacao" aria-labelledby="demonstracao-automacao-titulo">
+              <div class="wo-demonstracoes__texto">
+                <div class="wo-demonstracoes__rotulos">
+                  <span class="wo-demonstracoes__categoria">Automação de processos</span>
+                  <span class="wo-demonstracoes__selo">Demonstração · cenário simulado</span>
+                </div>
+                <h2 class="wo-demonstracoes__h2" id="demonstracao-automacao-titulo">Cobrança e relatório recorrentes, sem clique manual.</h2>
+                <p class="wo-demonstracoes__partida"><span class="wo-rotulo-mono">Situação de partida</span>O pedido entra, a cobrança não sai e o relatório fica para depois.</p>
+              </div>
+              <ol class="wo-demonstracoes__passos" aria-label="Fluxo da demonstração">
+                <li class="wo-demonstracoes__passo"><span class="wo-rotulo-mono">1 · Entrada</span><span class="wo-demonstracoes__passo-texto">Pedido aprovado no sistema de vendas</span></li>
+                <li class="wo-demonstracoes__passo"><span class="wo-rotulo-mono">2 · Regra</span><span class="wo-demonstracoes__passo-texto">Gera a cobrança, agenda o lembrete e registra a execução</span></li>
+                <li class="wo-demonstracoes__passo wo-demonstracoes__passo--saida"><span class="wo-rotulo-mono wo-rotulo-mono--acento">3 · Saída</span><span class="wo-demonstracoes__passo-texto">Cobrança enviada e relatório semanal na caixa da diretoria</span></li>
+              </ol>
+            </article>
+            <article class="wo-demonstracoes__fluxo" data-categorias="integracao" aria-labelledby="demonstracao-integracao-titulo">
+              <div class="wo-demonstracoes__texto">
+                <div class="wo-demonstracoes__rotulos">
+                  <span class="wo-demonstracoes__categoria">Integração de sistemas</span>
+                  <span class="wo-demonstracoes__selo">Demonstração · cenário simulado</span>
+                </div>
+                <h2 class="wo-demonstracoes__h2" id="demonstracao-integracao-titulo">Um cadastro, vários sistemas atualizados.</h2>
+                <p class="wo-demonstracoes__partida"><span class="wo-rotulo-mono">Situação de partida</span>Site, CRM, ERP e pagamento trabalham cada um por conta.</p>
+              </div>
+              <ol class="wo-demonstracoes__passos" aria-label="Fluxo da demonstração">
+                <li class="wo-demonstracoes__passo"><span class="wo-rotulo-mono">1 · Entrada</span><span class="wo-demonstracoes__passo-texto">Novo cliente cadastrado no site</span></li>
+                <li class="wo-demonstracoes__passo"><span class="wo-rotulo-mono">2 · Regra</span><span class="wo-demonstracoes__passo-texto">Valida os dados e sincroniza com CRM e ERP</span></li>
+                <li class="wo-demonstracoes__passo wo-demonstracoes__passo--saida"><span class="wo-rotulo-mono wo-rotulo-mono--acento">3 · Saída</span><span class="wo-demonstracoes__passo-texto">O mesmo registro em todos os sistemas, com log de cada envio</span></li>
+              </ol>
+            </article>
+            <article class="wo-demonstracoes__fluxo" data-categorias="sistemas" aria-labelledby="demonstracao-sistemas-titulo">
+              <div class="wo-demonstracoes__texto">
+                <div class="wo-demonstracoes__rotulos">
+                  <span class="wo-demonstracoes__categoria">Sistemas e painéis sob medida</span>
+                  <span class="wo-demonstracoes__selo">Demonstração · cenário simulado</span>
+                </div>
+                <h2 class="wo-demonstracoes__h2" id="demonstracao-sistemas-titulo">Da planilha ao painel com acesso por perfil.</h2>
+                <p class="wo-demonstracoes__partida"><span class="wo-rotulo-mono">Situação de partida</span>A planilha virou o sistema da empresa e parou de dar conta.</p>
+              </div>
+              <ol class="wo-demonstracoes__passos" aria-label="Fluxo da demonstração">
+                <li class="wo-demonstracoes__passo"><span class="wo-rotulo-mono">1 · Entrada</span><span class="wo-demonstracoes__passo-texto">Dados lançados em formulário, não em célula</span></li>
+                <li class="wo-demonstracoes__passo"><span class="wo-rotulo-mono">2 · Regra</span><span class="wo-demonstracoes__passo-texto">Valida, guarda o histórico e aplica a permissão de cada perfil</span></li>
+                <li class="wo-demonstracoes__passo wo-demonstracoes__passo--saida"><span class="wo-rotulo-mono wo-rotulo-mono--acento">3 · Saída</span><span class="wo-demonstracoes__passo-texto">Painel com indicadores e trilha de alterações</span></li>
+              </ol>
+            </article>
+            <article class="wo-demonstracoes__fluxo" data-categorias="agentes" aria-labelledby="demonstracao-agentes-titulo">
+              <div class="wo-demonstracoes__texto">
+                <div class="wo-demonstracoes__rotulos">
+                  <span class="wo-demonstracoes__categoria">Agentes de IA com supervisão</span>
+                  <span class="wo-demonstracoes__selo">Demonstração · cenário simulado</span>
+                </div>
+                <h2 class="wo-demonstracoes__h2" id="demonstracao-agentes-titulo">Triagem com IA e revisão humana.</h2>
+                <p class="wo-demonstracoes__partida"><span class="wo-rotulo-mono">Situação de partida</span>Atender, fazer triagem e ler documento o dia todo trava o time.</p>
+              </div>
+              <ol class="wo-demonstracoes__passos" aria-label="Fluxo da demonstração">
+                <li class="wo-demonstracoes__passo"><span class="wo-rotulo-mono">1 · Entrada</span><span class="wo-demonstracoes__passo-texto">Mensagem ou documento recebido</span></li>
+                <li class="wo-demonstracoes__passo"><span class="wo-rotulo-mono">2 · Regra</span><span class="wo-demonstracoes__passo-texto">O agente classifica, consulta a base e propõe uma resposta</span></li>
+                <li class="wo-demonstracoes__passo wo-demonstracoes__passo--saida"><span class="wo-rotulo-mono wo-rotulo-mono--acento">3 · Saída</span><span class="wo-demonstracoes__passo-texto">Uma pessoa revisa e aprova antes do envio</span></li>
+              </ol>
+            </article>
+            <article class="wo-demonstracoes__fluxo" data-categorias="ecommerce" aria-labelledby="demonstracao-ecommerce-titulo">
+              <div class="wo-demonstracoes__texto">
+                <div class="wo-demonstracoes__rotulos">
+                  <span class="wo-demonstracoes__categoria">E-commerce e pagamentos</span>
+                  <span class="wo-demonstracoes__selo">Demonstração · cenário simulado</span>
+                </div>
+                <h2 class="wo-demonstracoes__h2" id="demonstracao-ecommerce-titulo">Pedido, pagamento e estoque no mesmo fluxo.</h2>
+                <p class="wo-demonstracoes__partida"><span class="wo-rotulo-mono">Situação de partida</span>A loja vende, mas o financeiro e o estoque só ficam sabendo depois.</p>
+              </div>
+              <ol class="wo-demonstracoes__passos" aria-label="Fluxo da demonstração">
+                <li class="wo-demonstracoes__passo"><span class="wo-rotulo-mono">1 · Entrada</span><span class="wo-demonstracoes__passo-texto">Pagamento confirmado na loja</span></li>
+                <li class="wo-demonstracoes__passo"><span class="wo-rotulo-mono">2 · Regra</span><span class="wo-demonstracoes__passo-texto">Emite a nota, baixa o estoque e concilia o recebimento</span></li>
+                <li class="wo-demonstracoes__passo wo-demonstracoes__passo--saida"><span class="wo-rotulo-mono wo-rotulo-mono--acento">3 · Saída</span><span class="wo-demonstracoes__passo-texto">Pedido, nota e financeiro com o mesmo status</span></li>
+              </ol>
+            </article>
+            <article class="wo-demonstracoes__fluxo" data-categorias="consultoria" aria-labelledby="demonstracao-consultoria-titulo">
+              <div class="wo-demonstracoes__texto">
+                <div class="wo-demonstracoes__rotulos">
+                  <span class="wo-demonstracoes__categoria">Consultoria de TI</span>
+                  <span class="wo-demonstracoes__selo">Demonstração · cenário simulado</span>
+                </div>
+                <h2 class="wo-demonstracoes__h2" id="demonstracao-consultoria-titulo">Mapa de processos com ordem de prioridade.</h2>
+                <p class="wo-demonstracoes__partida"><span class="wo-rotulo-mono">Situação de partida</span>Muita ferramenta contratada, pouca coisa conectada e nenhuma prioridade clara.</p>
+              </div>
+              <ol class="wo-demonstracoes__passos" aria-label="Fluxo da demonstração">
+                <li class="wo-demonstracoes__passo"><span class="wo-rotulo-mono">1 · Entrada</span><span class="wo-demonstracoes__passo-texto">Entrevistas e levantamento dos sistemas atuais</span></li>
+                <li class="wo-demonstracoes__passo"><span class="wo-rotulo-mono">2 · Regra</span><span class="wo-demonstracoes__passo-texto">Mapa de processos, gargalos e dependências</span></li>
+                <li class="wo-demonstracoes__passo wo-demonstracoes__passo--saida"><span class="wo-rotulo-mono wo-rotulo-mono--acento">3 · Saída</span><span class="wo-demonstracoes__passo-texto">Plano com escopo, ordem e estimativa de cada etapa</span></li>
+              </ol>
+            </article>
+          </div>
+          <p class="wo-demonstracoes__fecho">Quer ver um destes fluxos com os sistemas da sua empresa? <a href="/contato/">Peça uma demonstração guiada.</a></p>
+        </div>
+      </section>
+
+      <!-- parcial:cta-final -->
+      <section class="wo-cta" aria-labelledby="cta-final-titulo">
+        <div class="wo-conteiner">
+          <div class="wo-cta__caixa">
+            <div class="wo-cta__texto">
+              <span class="wo-sobretitulo">Vamos começar</span>
+              <h2 class="wo-cta__titulo" id="cta-final-titulo">Vamos falar sobre a sua operação?</h2>
+              <p class="wo-cta__lead">Você conta como a empresa trabalha hoje. A gente devolve os pontos de maior impacto e um caminho possível, sem custo e sem compromisso.</p>
+            </div>
+            <div class="wo-cta__lado">
+              <ul class="wo-cta__lista">
+                <li><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5" /></svg>Resposta em até 1 dia útil</li>
+                <li><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5" /></svg>Proposta clara, sem letra miúda</li>
+                <li><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5" /></svg>Conversa no seu idioma, sem jargão</li>
+              </ul>
+              <div class="wo-acoes">
+                <a class="wo-btn wo-btn--primario" href="/contato/">Falar com especialista<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+                <a class="wo-btn wo-btn--secundario" href="https://wa.me/5534991775784?text=Ol%C3%A1%2C%20WaveOps.%20Quero%20conversar%20sobre%20a%20minha%20opera%C3%A7%C3%A3o." data-whatsapp="cta-final"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 0 0-8.7 15L2 22l5.2-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.2 14.8l-.4-.2-2.6.7.7-2.5-.2-.4A8 8 0 0 1 12 4zm-2.7 4c-.2 0-.5 0-.7.4-.2.4-.8.8-.8 2s.8 2.3 1 2.5c.1.2 1.6 2.6 4 3.5 2 .8 2.4.6 2.8.6.5 0 1.4-.6 1.6-1.1.2-.6.2-1 .1-1.1l-.6-.3c-.3-.2-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1-.3-.1-1-.4-2-1.2-.7-.6-1.2-1.4-1.3-1.6-.1-.2 0-.4.1-.5l.4-.4.2-.4v-.4c0-.1-.5-1.3-.7-1.7-.2-.5-.4-.4-.5-.4z" /></svg>Falar no WhatsApp</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- /parcial:cta-final -->
+    </main>
+    <!-- parcial:rodape -->
+    <footer class="wo-rodape">
+      <div class="wo-conteiner">
+        <div class="wo-rodape__grade">
+          <div class="wo-rodape__marca">
+            <a class="wo-marca wo-marca--rodape" href="/" aria-label="WaveOps, início">
+              <span class="wo-marca__selo">
+                <img src="/assets/brand/waveops-badge-3d-128.webp" alt="" width="38" height="38" loading="lazy" />
+                <svg width="1em" height="1em" viewBox="0 0 100 100" fill="none" aria-hidden="true" focusable="false"><g stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 50 Q 30 33 41 50" /><path d="M59 50 Q 70 67 82 50" /></g><circle cx="50" cy="50" r="9" fill="none" stroke="#fff" stroke-width="5" /><circle cx="18" cy="50" r="7.5" fill="#fff" /><circle cx="82" cy="50" r="7.5" fill="#fff" /></svg>
+              </span>
+              <span>Wave<span class="wo-marca__ops">Ops</span></span>
+            </a>
+            <p class="wo-rodape__descricao">Consultoria, engenharia de software, automação e inteligência artificial para empresas que querem operar melhor.</p>
+            <a href="https://www.linkedin.com/company/waveops" rel="noopener">LinkedIn</a>
+          </div>
+          <nav class="wo-rodape__coluna wo-rodape__coluna--solucoes" aria-labelledby="rodape-solucoes">
+            <h2 class="wo-rodape__titulo" id="rodape-solucoes">Soluções</h2>
+            <a href="/solucoes/#vender">Vender mais</a>
+            <a href="/solucoes/#atender">Atender melhor</a>
+            <a href="/solucoes/#operar">Operar com menos retrabalho</a>
+            <a href="/solucoes/#decidir">Decidir com dados</a>
+            <a href="/solucoes/#crescer">Crescer com segurança</a>
+          </nav>
+          <nav class="wo-rodape__coluna wo-rodape__coluna--plataforma" aria-labelledby="rodape-plataforma">
+            <h2 class="wo-rodape__titulo" id="rodape-plataforma">Plataforma</h2>
+            <a href="/plataforma/">Visão geral</a>
+            <a href="/plataforma/#modulos">Núcleo e módulos</a>
+            <a href="/plataforma/#lista">Lista de interesse</a>
+          </nav>
+          <nav class="wo-rodape__coluna wo-rodape__coluna--sobmedida" aria-labelledby="rodape-sobmedida">
+            <h2 class="wo-rodape__titulo" id="rodape-sobmedida">Projetos sob medida</h2>
+            <div class="wo-rodape__duas">
+              <a href="/projetos-sob-medida/#web">Desenvolvimento web</a>
+              <a href="/projetos-sob-medida/#sistemas">Sistemas empresariais</a>
+              <a href="/projetos-sob-medida/#ecommerce">E-commerce</a>
+              <a href="/projetos-sob-medida/#automacoes">Automações</a>
+              <a href="/projetos-sob-medida/#agentes">Agentes de IA</a>
+              <a href="/projetos-sob-medida/#integracoes">Integrações</a>
+              <a href="/projetos-sob-medida/#dados">Engenharia de dados</a>
+              <a href="/projetos-sob-medida/#consultoria">Consultoria de TI</a>
+            </div>
+          </nav>
+          <nav class="wo-rodape__coluna wo-rodape__coluna--empresa" aria-labelledby="rodape-empresa">
+            <h2 class="wo-rodape__titulo" id="rodape-empresa">Empresa</h2>
+            <a href="/demonstracoes-tecnicas/">Demonstrações técnicas</a>
+            <a href="/contato/">Falar com especialista</a>
+            <a href="https://wa.me/5534991775784?text=Ol%C3%A1%2C%20WaveOps.%20Vim%20pelo%20site." data-whatsapp="rodape">WhatsApp</a>
+            <a href="mailto:contato@waveops.com.br">contato@waveops.com.br</a>
+            <a href="https://portal.waveops.com.br/cliente/login">Área do cliente</a>
+          </nav>
+        </div>
+        <div class="wo-rodape__base">
+          <span>© 2026 WaveOps. Todos os direitos reservados.</span>
+          <div class="wo-rodape__legal">
+            <a href="https://portal.waveops.com.br/termos">Termos de Uso</a>
+            <a href="https://portal.waveops.com.br/privacidade">Política de Privacidade</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+    <!-- /parcial:rodape -->
+  </body>
+</html>

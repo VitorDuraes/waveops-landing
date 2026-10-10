@@ -1,0 +1,61 @@
+/* Só para gerar a imagem de compartilhamento (dev/site/og.html). Não é publicado. */
+html,
+body {
+  width: 1200px;
+  height: 630px;
+  overflow: hidden;
+}
+
+.og {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 1200px;
+  height: 630px;
+  padding: 64px 76px;
+  overflow: hidden;
+  background: var(--wo-fundo);
+}
+
+.og__brilho {
+  position: absolute;
+  top: -520px;
+  right: -300px;
+  width: 1100px;
+  height: 1100px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(162, 139, 249, 0.3), transparent 62%);
+  pointer-events: none;
+}
+
+.og__marca {
+  position: relative;
+  font-size: 34px;
+}
+
+.og__marca .wo-marca__selo {
+  width: 64px;
+  height: 64px;
+}
+
+.og__etiqueta {
+  position: relative;
+  font-size: 15px;
+}
+
+.og__titulo {
+  position: relative;
+  margin-top: 26px;
+  font-size: 76px;
+  font-weight: 500;
+  line-height: 1.04;
+  letter-spacing: -0.05em;
+}
+
+.og__url {
+  position: relative;
+  color: var(--wo-acento-texto);
+  font-family: var(--wo-mono);
+  font-size: 22px;
+}

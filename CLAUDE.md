@@ -2,283 +2,127 @@
 
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guia do Claude Code para este repositório.
 
-> **Desvio de stack (registrado):** este projeto é uma landing page estática (HTML/CSS/JS), não a stack default Next.js/Drizzle da WaveOps. A rule `.claude/rules/nextjs-drizzle.md` e os comandos baseados em `npm run lint/build/test` são referência, não se aplicam aqui. Valem integralmente: o hook `secret-scan`, a rule de segurança/LGPD e a rule de copy PT-BR (esta é crítica para a copy da landing).
+> **Desvio de stack (registrado):** o site institucional é estático (HTML, CSS e JavaScript puro, sem framework), não a stack default Next.js/Drizzle da WaveOps. Decisão do Vitor em 09/10/2026 (D1 do plano `docs/plans/2026-10-09-site-institucional-v2.plan.md`): componentes compartilhados montados no build, sem injeção por JavaScript, e Astro só quando houver blog com cadência (SPEC-13). A rule `.claude/rules/nextjs-drizzle.md` e os comandos `npm run lint/build/test` valem para o `portal/`, não para o site. Valem integralmente: o hook `secret-scan`, a rule de segurança/LGPD e a rule de copy PT-BR.
 
-## What this is
+## O que é
 
-WaveOps is a single institutional landing page (cinematic aesthetic, dark theme by default with a light toggle, PT-BR) for an automation/dev/AI consultancy. All copy is Brazilian Portuguese. (The repo and GitHub Pages path are still named `flowops-landing` from the old name; the live brand is WaveOps.)
+Dois produtos no mesmo repo:
 
-There is **no build step and no package manager**. The production page is plain HTML + CSS + JS.
-De 09/09/2026 a 11/09/2026 a página carregou React 19 como ESM pré-compilado, vendorizado em
-`assets/vendor/`, só para desenhar o campo de partículas do hero. Em **11/09/2026 o starfield foi
-portado para JavaScript puro** e o React saiu do caminho crítico. **Não há React em produção.**
-
-O único `<script type="module">` do `index.html` é `assets/starfield.mjs`, e o grafo de import dele
-tem dois arquivos. Medido em 11/09/2026 com `gzip -9` sobre cada arquivo:
-
-| Módulo | gzip | Quando carrega |
+| Produto | Onde | Publicação |
 |---|---|---|
-| `assets/starfield.mjs` | 8,5 KB | sempre (é o próprio `<script type="module">`) |
-| `assets/scroll-signal.mjs` | 0,6 KB | sempre |
-| **Total do island do hero** | **9,1 KB** | |
+| Site institucional WaveOps (PT-BR, só tema escuro, 6 páginas) | Raiz do repo | Netlify, `https://waveops.com.br` |
+| WaveOps Portal (checkout, área do cliente, admin, funil) | `portal/` (Next 16) | Railway, `https://portal.waveops.com.br` |
 
-Somando os scripts clássicos (`funil.js`, `meta-pixel.js`, `theme-store.js`, `motion.js`,
-`main.js`, `cinema.js`, `operacao.js`), a página baixa **28,9 KB gzip de JavaScript próprio,
-em 9 arquivos**, e **55,3 KB gzip de CSS em 6 arquivos**. JavaScript medido em 16/09/2026, CSS
-em 12/09/2026. Em 16/09/2026 `analytics.js` (0,3 KB, bootstrap do Plausible) saiu e
-`assets/funil.js` (1,1 KB, medição própria, SPEC-18) entrou. O CSS é hoje
-o dobro do JavaScript, e metade dele é `assets/cinema.css` (22,8 KB gzip), que desenha as
-cinco maquetes de produto de "O que fazemos".
-Antes do porte eram **84,2 KB em 13 arquivos**. A queda foi de **61,4 KB gzip**, e 61,2 KB disso
-era React.
+O repo e o caminho antigo do GitHub Pages se chamam `flowops-landing` por motivo histórico: a marca no ar é WaveOps.
 
-Ficaram vendorizados e **sem consumidor em produção**: `assets/vendor/react-dom-client.mjs`
-(56,6 KB gzip), `assets/vendor/react.mjs` (3,8 KB), `assets/vendor/jsx-runtime.mjs` (0,8 KB),
-`assets/vendor/framer-shim.mjs` (0,9 KB), `assets/vendor/framer-motion.mjs` (48,7 KB),
-`assets/vendor/emotion-is-prop-valid.mjs` (2,2 KB) e o antigo `assets/starfield-mount.mjs`
-(1,1 KB). Quem ainda importa esses arquivos é código fora da página: `assets/sequence-mount.mjs` e
-`assets/image-sequence.mjs` (o island da sequência de "Como funciona", que o `index.html` não
-carrega hoje) e `dev/smoke-react.html`. Eles ficam no repo porque regenerar depois custa mais caro
-que manter parado. Não cite o peso deles como custo de página, e apagar é decisão do dono.
+Páginas do site (`dev/site/paginas.json` é a fonte):
 
-**A sequência de quadros em si** (`assets/sequence/`, 48 WebP) pesa **309,1 KB** em bytes brutos,
-medido em 10/09/2026, abaixo do teto de 400 KB do plano da fase 2. Gzip não ajuda nesses arquivos
-porque WebP já é um formato comprimido (um quadro amostrado caiu de 10864 para 10762 bytes com
-`gzip -9`, menos de 1%), então o peso relevante é o tamanho em disco. Esses 309,1 KB nunca entram
-no cálculo de JS acima porque não são módulo: são o `src` de `<img>` que o `ImageSequence` seta
-depois de montado, carga preguiçosa de verdade, via `IntersectionObserver` com `rootMargin: '600px
-0px'` observando a seção, e **nunca no mobile**: o mount confere `window.matchMedia('(min-width:
-768px)')` antes de montar, então abaixo de 768px nenhum quadro é baixado, ponto.
+| Página | URL | Arquivo |
+|---|---|---|
+| Início | `/` | `index.html` |
+| Soluções | `/solucoes/` | `solucoes/index.html` |
+| Plataforma | `/plataforma/` | `plataforma/index.html` |
+| Projetos sob medida | `/projetos-sob-medida/` | `projetos-sob-medida/index.html` |
+| Contato | `/contato/` | `contato/index.html` |
+| Demonstrações técnicas (fora do menu) | `/demonstracoes-tecnicas/` | `demonstracoes-tecnicas/index.html` |
+| Não encontrado | qualquer outra | `404.html` (`noindex`) |
 
-There is still no npm, no `node_modules`, no bundler and no Babel. Regenerate the vendored modules
-with `python _fetch_vendor.py`; see `assets/vendor/README.md`.
+## Rodar e verificar
 
-## Running it
+```bash
+node dev/site/serve.mjs                    # http://127.0.0.1:4321/, com endpoints simulados
+node dev/site/build.mjs                    # carimba parciais e atualiza ?v= (rode depois de editar)
+node dev/site/build.mjs --check            # o que o CI roda
+node dev/site/lint.mjs
+npm ci --prefix tests/site && npm --prefix tests/site run typecheck && npm --prefix tests/site run test:unit
+cd tests/site && PW_CHANNEL=chrome npx playwright test
+DESIGN_CAPTURAS=<pasta> PW_CHANNEL=chrome node qa/visual.mjs   # comparação com as capturas do design
+SITE_URL=<deploy preview> PW_CHANNEL=chrome node qa/preview.mjs  # conferência do Deploy Preview (recusa produção)
+```
 
-The entry file is `index.html` (renamed from `FlowOps Landing.html` so GitHub Pages serves it at the site root). Serve it from a static server (the project README recommends the VS Code **Live Server** extension). `file://` mostly works now that there are no CDN scripts, but a static server is still preferred since the relative `assets/` paths and the lead-form `fetch` expect an HTTP origin. Nothing to compile or install.
+`PW_CHANNEL=chrome` usa o Chrome instalado. No Git Bash, argumento que começa com `/` precisa de `MSYS_NO_PATHCONV=1`. As dependências de `tests/site/` (Playwright, axe, TypeScript, `@types/node`) são só de teste e nunca vão para o ar.
 
-## Architecture
+O servidor local roda na raiz do repo, onde também estão `.git` e `portal/`: por isso só responde com Host local (fecha DNS rebinding), nega qualquer caminho com segmento que começa com ponto e, com `netlify.toml` na raiz, só serve o que o Netlify publica, mais `dev/site/`. `node dev/site/build.mjs --dist` só aceita uma pasta `.tmp-*` na raiz do repo, porque apaga o destino antes de copiar.
 
-### Script load order (intentional, do not reorder)
-In `<head>`, in order: the CSP `<meta>` (must come first, before any resource), then
-`assets/fonts.css` + `assets/styles.css` + `assets/cinematic.css` + `assets/cinema.css` +
-`assets/motion-system.css` + `assets/operacao.css`, then `assets/funil.js` (medição própria de
-funil, SPEC-18), then `assets/meta-pixel.js`, then `assets/theme-store.js`.
-At the end of `<body>`: `assets/motion.js`, `assets/main.js`, `assets/operacao.js`,
-`assets/cinema.js` (defer), `assets/starfield.mjs` (module).
+Orçamento de peso por página (`tests/site/unit/peso.test.mjs`): JavaScript próprio até 15 KB gzip (20 KB nas páginas com formulário) e CSS até 25 KB gzip.
 
-**A ordem das duas folhas novas importa.** `motion-system.css` declara o vocabulário de
-movimento em `:root` (quatro curvas, quatro durações, o passo do escalonamento e os
-deslocamentos). `assets/styles.css` consome esse vocabulário nas regras de `.reveal` e
-`.stagger`, mas as custom properties são resolvidas no valor computado, então a ordem de
-carga não quebra: o que não pode acontecer é `motion-system.css` sair da página, porque aí
-os `var(--t-calmo, 550ms)` caem nos fallbacks e a página perde o ritmo comum.
-`operacao.css` carrega por último de propósito: ele sobrescreve `styles.css`, `cinematic.css`
-e `cinema.css` sem precisar de `!important`.
-1. `assets/theme-store.js` in `<head>` applies the theme attributes before paint (prevents a flash of the wrong theme).
-2. `assets/funil.js` expõe `window.WaveFunil.enviar(nome, props)` e dispara `visita` sozinho. Ele
-   manda o evento para `POST /api/e` no portal (`portal.waveops.com.br`), que é onde estão o banco e
-   as faturas: é isso que permite ligar a visita anônima à fatura paga, coisa que nenhuma ferramenta
-   hospedada faz. Duas coisas que parecem detalhe e não são: **o corpo vai como `text/plain`** (com
-   `application/json` o navegador dispara preflight entre origens, e preflight morre quando a página
-   está sendo descarregada), e **o nome do evento precisa existir na lista fechada de
-   `portal/src/lib/funil.ts`**, senão o servidor descarta em silêncio. Substituiu o Plausible, que
-   deixou de ser pago (SPEC-18, 16/09/2026). Não re-inline o arquivo.
-3. `assets/main.js` at the end of `<body>` wires all DOM interactions.
-4. `assets/operacao.js` carrega depois do `main.js` e antes do `cinema.js`. Ele depende de
-   `data-motion` já estar escrito no `<html>` (quem escreve é o `motion.js`) e escuta
-   `waveops:motion`. Ele não depende do `main.js`, mas convive com ele: quem liga
-   `.is-visible` continua sendo o observador do `main.js`.
+## Arquitetura do site
 
-After `assets/main.js`, `assets/starfield.mjs` loads as `<script type="module">`. It is plain
-JavaScript, no React and no framework: it creates the `<canvas>` inside `#hero-starfield`, runs the
-particle loop, reads colors from the CSS tokens through `FlowTheme` and pauses on the
-`waveops:motion` event. The module exports `criarStarfield(container, opcoes)`, which returns
-`{ definirPausa, definirCores, destruir }`, and mounts itself at the bottom of the same file. It
-has no import map on purpose: every specifier is relative, so the CSP stays at `script-src 'self'`.
-If the module fails, the CSS `.dots-bg` fallback stays visible.
+### Parciais carimbados no build
+Topo, rodapé, chamada final, `<head>` comum e os dois formulários vivem em `dev/site/parciais/` e entram no HTML entre marcadores `<!-- parcial:nome ativo="..." -->` e `<!-- /parcial:nome -->`. `dev/site/build.mjs` carimba e grava; as páginas carimbadas são commitadas. Nada é injetado por JavaScript no navegador (decisão de SEO, leitor de tela e navegação sem JS). Guia completo: `dev/site/README.md`.
 
-Four rules that the island depends on and that are easy to break:
-1. **Cache-busting reaches the sub-imports.** The `<script>` tag carries `?v=20260911a` like its
-   neighbours, but a query string on the tag does not reach relative sub-imports. The only
-   sub-import left is `./scroll-signal.mjs?v=`, which carries the version in the specifier itself.
-   Bump both together. The `assets/vendor/` modules are no longer in the graph.
-2. **Paused must still paint.** `construirGrade()` sets `canvas.width`, which wipes the canvas. So
-   `definirPausa(true)` repaints through `desenharQuadroEstatico()`, and the debounced
-   `ResizeObserver` callback repaints whenever no animation loop is running (`pausado || !visivel`).
-   Without that, a visitor with `prefers-reduced-motion: reduce`, or anyone pressing
-   `#motion-toggle`, gets an empty hero: the `:has()` rule in `styles.css` keeps `.dots-bg` at
-   `opacity: 0` as long as the canvas element exists, so the CSS fallback does not come back.
-3. **Cursor events are listened for on `window`, not on the island.** `#hero-starfield` keeps
-   `pointer-events: none` so it never steals clicks from the nodes and the wires, and
-   `svg.flow-wires` covers it anyway. `pointerToLocal()` converts page coordinates to container
-   coordinates through `container.getBoundingClientRect()`.
-4. **The loop stops off screen.** An `IntersectionObserver` flips `visivel`; `animate()` returns
-   early when it is false and the observer restarts the loop when the hero comes back. Every
-   listener and both observers are removed in `destruir()`.
+O build também põe `?v=<hash>` em todo CSS e JS de `/assets/`. O hash de um módulo cobre os módulos que ele importa. Os imports entre módulos não levam query: o Netlify serve tudo com `Cache-Control: public,max-age=0,must-revalidate` e ETag (conferido em 09/10/2026), então não sobra versão velha, e o TypeScript resolve os imports. O build normaliza CRLF para LF antes de carimbar e de calcular hash, porque `core.autocrlf=true` no Windows mudaria o resultado entre máquinas.
 
-Uma diferença de comportamento em relação à versão React, medida e aceita: no React, mudar a prop
-`paused` derrubava o efeito inteiro e reconstruía a grade, o que ressorteava as estrelas e zerava a
-rotação delas. Agora pausar só congela o quadro. A diferença de tinta no canvas foi de 0,19%.
+### Design system
+- `assets/site/tokens.css`: cores, tipografia, raios, sombras e contêiner copiados do design aprovado. Valor novo entra aqui antes de ser usado.
+- `assets/site/base.css`: fontes, reset, foco, contêiner, seção e títulos.
+- `assets/site/components.css`: peças compartilhadas. Componente de uma página só vai em `assets/site/paginas/<id>.css`. O teste `tests/site/unit/css.test.mjs` barra seletor base repetido e página redefinindo componente (já houve colisão de `.wo-entrada` entre cartão e campo).
+- Selo de situação muda de forma junto com a cor (círculo cheio, quadrado, círculo vazado), para não depender só de cor.
+- Fontes auto-hospedadas: `assets/fonts/hanken-variavel-*.woff2` é Hanken Grotesk VARIÁVEL (um arquivo cobre 400 a 700; os `hankengrotesk-500/600/700-*` antigos são cópias idênticas do 400) e Space Mono 400. Não volte ao Google Fonts.
+- Só tema escuro. Sem animação contínua: só transição curta de estado, desligada por `prefers-reduced-motion`.
 
-No Babel, no build step, **no React in production**. The only remaining third-party network request
-is the Meta Pixel; everything else (fonts, CSS, JS) is self-hosted, e a medição de funil bate no
-nosso próprio portal.
-The Tweaks panel and its React/Babel CDN scripts were removed from the page; the sources now live in
-`dev/`.
+### Ordem do `<head>` (parcial `head`)
+CSP `<meta>` logo depois de charset e viewport, antes de qualquer recurso; ícones; preload da Hanken; `tokens.css`, `base.css`, `components.css`; `funil.js` com `defer`; `site.js` como módulo; `<noscript>` que mostra o menu e todos os painéis e esconde o que depende de JS. Depois do parcial, cada página põe o próprio CSS, scripts de página (`contato.js`, `interesse.js`, `paginas/demonstracoes.js`), title, description, canonical, Open Graph e JSON-LD.
 
-### Security hardening (HTTP/CSP, fonts, anti-bot)
-- **CSP** is a `<meta http-equiv="Content-Security-Policy">` at the very top of `<head>`. If you add a third-party origin (script, font, image, or a `fetch`/`connect` target), you must add it to the matching directive or the browser blocks it. `connect-src` currently allows the n8n webhook host, `portal.waveops.com.br` (medição de funil) e `www.facebook.com`; `script-src` allows `connect.facebook.net`. `style-src` keeps `'unsafe-inline'` because the HTML uses inline `style=` attributes (low risk; not worth a full refactor). `frame-ancestors`/`X-Frame-Options` only work as HTTP headers, and a `<meta>` CSP cannot carry them. This was blocked while the site was on GitHub Pages. **It is no longer blocked**: the site is on Netlify, which sets headers from a `[[headers]]` block in `netlify.toml`. As of 13/09/2026 that block does not exist and the live response carries only `Strict-Transport-Security`, so clickjacking protection is still open, but now for want of the work, not for want of a host.
-- **Fonts are self-hosted** in `assets/fonts/` (woff2) with `@font-face` in `assets/fonts.css`. Regenerate with `python _fetch_fonts.py` (downloads only the weights used; Sora was dropped as unused). Do not re-add the Google Fonts `<link>`.
-- **Anti-bot** on both lead forms: a hidden honeypot field (`website`/`#f-website`/`#cl-website`) plus a minimum fill-time gate (`MIN_FILL_MS` in `main.js`). Both only stop bots that render the page; bots posting straight to the webhook need server-side defense. See `docs/specs/SECURITY-n8n-hardening.md`.
+### JavaScript
+- `assets/site/site.js`: menu do topo (Esc fecha e devolve o foco), seletores `[data-seletor]` com `aria-pressed`, clique de WhatsApp (`data-whatsapp`) como evento de funil e, só na Home, o redirecionamento das âncoras da página única antiga (`assets/site/lib/legado.js`).
+- `assets/site/contato.js` e `assets/site/interesse.js`: estados do design, foco no primeiro erro e no título da confirmação, tempo limite de 12 s, reenvio com o mesmo `idEnvio` enquanto os dados não mudam, honeypot e trava de 1,2 s (robô vê confirmação sem envio), recusa 422 marcada no campo. O botão de envio nasce `disabled` e só o módulo libera; com `method="post"` e a CSP em `form-action 'none'`, nenhum envio nativo acontece se o JavaScript falhar (nada de dado pessoal na URL). A mensagem de erro entra no `aria-describedby` só enquanto está visível.
+- `assets/site/lib/`: funções puras testadas em Node (`validacao.js`, `payload.js`, `atribuicao.js`, `enviar.js`, `formulario.js`).
+- Tudo é melhoria progressiva: sem JS, o conteúdo aparece inteiro e os formulários dão lugar a um aviso com saída pelo WhatsApp (nenhum dado vai para a URL).
 
-### Brand / logo (single canonical mark)
-The official WaveOps mark is "Sine Nodes": a symmetric sine wave (two humps) crossing a central hollow hub (a stroked ring), with two solid round nodes at the ends. The wave is the flow, the hub is the operation, the end nodes are the connected points. The full kit lives in `assets/brand/`: `waveops-icon.svg` (squircle app icon/favicon, gradient `#8b5cf6`→`#6d28d9`), `waveops-symbol.svg` (violet on transparent), `waveops-symbol-mono.svg` (`currentColor`), `waveops-lockup.svg` (mark + "WaveOps"), plus `png/` exports (icon-512, icon, symbol, symbol-white) and its own `README.md`. Canonical geometry, `viewBox="0 0 100 100"`, `stroke-width="5"`, round caps:
+### Medição de funil (`assets/funil.js`)
+Manda evento para `POST /api/e` no portal, como `text/plain` (com JSON o navegador faria preflight, que morre no descarregamento da página). O nome do evento precisa existir na lista fechada de `portal/src/lib/funil.ts`, senão o servidor descarta em silêncio. Desde o site de várias páginas, o primeiro toque fica em `sessionStorage["waveops:origem:v1"]` e vale para todos os eventos da sessão, e `visita` sai uma vez por sessão (de novo só se chegar outra campanha). O próprio site e `*.waveops.com.br` (o portal) são internos: aba nova aberta de outra página herda a UTM da URL de origem sem contar outra visita, e voltar do portal não reescreve o primeiro toque. Os formulários leem o mesmo registro para mandar UTM com o lead. Com `sessionStorage` bloqueado, volta à fonte por carregamento. Só mede em `waveops.com.br`, no próprio portal e no dev local: no Deploy Preview, na cópia do GitHub Pages ou em qualquer outro host, nada sai (`tests/site/unit/funil.test.mjs`). `interesse_plataforma` depende do PR do portal `feat/portal-funil-interesse`, que entra no ar antes do site.
+
+### Meta Pixel
+Desligado nas páginas novas até existir mecanismo de consentimento e revisão de privacidade (decisão do Vitor em 09/10/2026). `assets/meta-pixel.js` fica no repo sem ser carregado, e a CSP das páginas novas não libera mais as origens do Facebook.
+
+## Formulários e integrações
+
+| Fluxo | Destino | Estado |
+|---|---|---|
+| Contato | n8n Cloud, `waveops-lead-v2` | O webhook ainda não existe. O site NÃO aponta para o `flowops-lead` que roda hoje (não versionado; o JSON de `n8n/` é esqueleto) porque ele só lê as 15 chaves antigas: um lead pelo canal E-mail chegaria sem o e-mail. Até o v2 existir, o envio falha de forma visível, com os dados preservados e saída pelo WhatsApp |
+| Lista de interesse | n8n Cloud, `waveops-interesse` | O webhook ainda não existe. Até ser criado, o envio cai no estado de falha sem perder o e-mail |
+
+Endpoints por ambiente em `assets/site/config.js`: produção só em `waveops.com.br`; `localhost` usa `/__dev/lead` e `/__dev/interesse` do servidor local; Deploy Preview do Netlify fica desligado. Rascunho dos workflows, colunas da planilha, roteiro de publicação e exclusão de dado: `docs/integrations/n8n-site-v2.md`. O roteiro de homologação e os parâmetros de operação do n8n ficam fora do git, em `docs/specs/2026-10-10-n8n-site-v2-operacao-restrita.md`, porque o repo é público; os workflows publicados trazem `__DEFINIR__` no lugar dos valores do limite de volume. Nada no n8n de produção muda sem aprovação do Vitor.
+
+Privacidade: ciência da Política de Privacidade (obrigatória) separada do consentimento de marketing (opcional). O contrato grava a versão da política (`POLITICA_VERSAO`), a versão do texto de ciência (`TEXTO_CIENCIA`) e a do texto de marketing (`TEXTO_MARKETING`), todas em `assets/site/config.js`: mudou o texto, mude a versão. Os textos de aceite são rascunho até a revisão jurídica. Termos e Política vivem no portal (`/termos`, `/privacidade`).
+
+## Segurança
+- CSP `<meta>` em toda página, vinda do parcial `head`. Origem nova de script, fonte, imagem ou `fetch` entra na diretiva certa, senão o navegador bloqueia. Hoje `connect-src` libera o portal (funil) e o n8n (formulários). `style-src` mantém `'unsafe-inline'` por causa do `<noscript><style>` e de atributos `style`.
+- `[[headers]]` no `netlify.toml` (desde o commit `3f66779`): `frame-ancestors 'none'`, `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy` e `Permissions-Policy`. Clickjacking está fechado.
+- Anti-robô nos formulários: honeypot e trava de tempo no navegador. O workflow n8n em rascunho (`docs/integrations/`) repete as duas travas e vai validar e deduplicar no servidor quando for publicado.
+
+## Marca (Sine Nodes)
+Onda senoidal simétrica cruzando um núcleo vazado, com dois nós sólidos nas pontas. Kit completo em `assets/brand/` (`waveops-icon.svg`, `waveops-symbol.svg`, `waveops-symbol-mono.svg`, `waveops-lockup.svg`, `png/`, `README.md`). Geometria canônica, `viewBox="0 0 100 100"`, `stroke-width="5"`:
 ```
 <g stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M18 50 Q 30 33 41 50"/><path d="M59 50 Q 70 67 82 50"/>   <!-- the two wave humps -->
+  <path d="M18 50 Q 30 33 41 50"/><path d="M59 50 Q 70 67 82 50"/>
 </g>
-<circle cx="50" cy="50" r="9" fill="none" stroke="#fff" stroke-width="5"/>  <!-- central hollow hub -->
-<circle cx="18" cy="50" r="7.5" fill="#fff"/><circle cx="82" cy="50" r="7.5" fill="#fff"/>  <!-- solid end nodes -->
+<circle cx="50" cy="50" r="9" fill="none" stroke="#fff" stroke-width="5"/>
+<circle cx="18" cy="50" r="7.5" fill="#fff"/><circle cx="82" cy="50" r="7.5" fill="#fff"/>
 ```
-Stroke is `#fff` on a violet chip / dark / violet bg (shown above), `#7c3aed` on a light bg. The hub is `fill="none"`, so the background shows through its centre. The white variant is inlined in the nav and footer of `index.html` (inside `.brand .mark`, over the 3D badge), and is the source for `assets/favicon.svg` (= the kit `waveops-icon.svg`), `assets/apple-touch-icon.png` (full-bleed gradient, regenerated via `assets/_appicon.html`), `assets/favicon-32.png`, the `assets/og-image.*` card, and the `assets/checklist.*` PDF. If you change the canonical mark geometry, update every one of those in lockstep and regenerate the PNG/PDF (Chrome headless `--screenshot` / `--print-to-pdf`). Do NOT regress to either retired mark: the earlier "onda + nó" single-hollow-ring (path `Q 31 30 34 18.6`, `viewBox 0 0 48 48`) or the green FlowOps node-graph (`#03140d`, `viewBox 0 0 24 24`, path `M7 7l9 4`).
+O topo e o rodapé usam o selo 3D em 128 px (`assets/brand/waveops-badge-3d-128.webp`, 6 KB, gerado do `waveops-badge-3d.webp` de 512 px) com o símbolo SVG por cima. Mudou a geometria, atualize no mesmo passo o kit, `assets/favicon.svg`, `assets/apple-touch-icon.png`, `assets/favicon-32.png` e a imagem de compartilhamento (`assets/og-waveops.png`, gerada de `dev/site/og.html` com `tests/site/qa/og.mjs`). Não volte às marcas aposentadas (anel único `Q 31 30 34 18.6` de `viewBox 0 0 48 48`, ou o grafo verde da FlowOps).
 
-The header and footer marks use `assets/brand/waveops-badge-3d.webp`: a transparent rendered purple badge, shot straight on, with smooth edges and no metallic side pins or sockets. It is 512 x 512, lossless WebP, centred with an even margin, so the canonical Sine Nodes SVG overlays it at `left: 50%; top: 50%` with no rotation (see `.brand .mark` in `assets/cinematic.css`). `dev/workflow-core-v1.prompt.md` records the generation prompt and the post-processing (pin removal by row interpolation, frontal view by homography). This is a rendered presentation variant; it does not change the mark geometry or replace the canonical vector brand kit. It is the only 3D element in the page.
+## Publicação (`netlify.toml`)
+O base directory do Netlify está travado em `portal/` no painel, então o build roda um nível abaixo e copia de `../`. O `[build] command` copia uma lista explícita: `index.html`, `404.html`, `robots.txt`, `sitemap.xml`, `llms.txt`, `assets/` e as cinco pastas de página. **Arquivo ou pasta fora dessa lista não vai ao ar.** O mesmo base directory decide se há build: o `ignore` é um `git diff --quiet` sobre os caminhos publicados (contrato invertido: exit 0 pula o build). Página nova entra no `cp` e no `ignore` no mesmo commit; `tests/site/unit/netlify.test.mjs` confere as duas listas contra `dev/site/paginas.json`. Pastas proibidas, por causa dos 301 com `force` para o portal: `api`, `admin`, `cliente`, `checkout`, `termos`, `privacidade`. Não existe `CNAME`: o domínio é configurado no painel do Netlify mais DNS.
 
-### Theme system : single source of truth
-`assets/theme-store.js` owns all theme state and exposes `window.FlowTheme`:
-- `FlowTheme.get(key?)`, `FlowTheme.set(patch|key, val)`, `FlowTheme.toggleTheme()`, `FlowTheme.subscribe(fn)`.
-- State shape: `{ theme, accent, font, density }`. Persisted to `localStorage` key `flowops:tweaks:v1`.
-- `set()` writes four attributes on `<html>`: `data-theme`, `data-accent`, `data-font`, `data-density`, then persists and emits to subscribers.
-- **All visual variation lives in CSS, not JS.** `assets/styles.css` defines design tokens (CSS custom properties like `--bg`, `--accent`, `--glow`, `--dscale`) keyed off those four attribute selectors. To add a theme/accent/font/density option you add a CSS rule for the attribute value AND register it in the relevant Tweak control. Never hardcode colors in JS or markup; reference the tokens.
+Deploy Preview e branch deploy usam o comando de produção, letra por letra, mais um `_headers` com `X-Robots-Tag: noindex, nofollow` (`[context.deploy-preview]` e `[context.branch-deploy]`; o teste confere que os comandos só diferem nisso). Fora de `waveops.com.br`, os formulários ficam desligados (`config.js`) e o funil não manda evento (`funil.js`): preview nunca escreve em serviço de produção.
 
-The nav sun/moon button (`main.js`) toggles `theme` through this store and persists it. Since the Tweaks panel is no longer shipped, `accent`, `font`, and `density` are effectively fixed at the `DEFAULTS` (currently `dark / violet / a / regular`), which must stay in sync with the `data-*` attributes hardcoded on `<html>`. Keep all theme state in this one store; do not introduce a second source.
+## SEO e arquivos de crawler
+- Por página: title até 60 caracteres, description até 155, canonical, Open Graph com `og:image:alt`, Twitter Card e JSON-LD (`Organization` com `contactPoint` e `WebSite` na Home, sem `ProfessionalService`, que pede endereço público; `BreadcrumbList` nas internas, `FAQPage` em Projetos sob medida). O lint confere title, description, canonical e JSON-LD.
+- `sitemap.xml`: as 6 URLs indexáveis. `robots.txt`: `Allow: /` e a linha do sitemap. `llms.txt`: resumo para LLM com links das páginas, só com o que as páginas afirmam (o teste barra "3 a 7 dias úteis", "preço fechado" e "sem fidelidade", que o refino retirou).
+- Âncoras da página única antiga (`/#contato`, `/#pacotes`, `/#servicos`, `/#casos`, `/#como`, `/#faq`, `/#publicos`, `/#operacao`) são redirecionadas no navegador pela Home: servidor não vê o `#`. Renomear um `id` de destino quebra esse mapa (`assets/site/lib/legado.js`) e o `llms.txt`.
 
-To actually change a default appearance you must edit it in lockstep in three places: `DEFAULTS` in `theme-store.js`, the `<html data-theme/data-accent/data-font/data-density>` attributes, and (if you re-enable it) `TWEAK_DEFAULTS` in the panel. A persisted value in `localStorage` (`flowops:tweaks:v1`) overrides all of them, so clear that key (or use a private window) when testing a default change.
+## Legado (no repo, fora das páginas novas)
+Ficam no repo, sem carregar em nenhuma página nova, até o Vitor decidir apagar depois da homologação (alguns podem ter link externo): `assets/styles.css`, `cinematic.css`, `cinema.css`, `operacao.css`, `motion-system.css`, `fonts.css`, `workflow.css`, `main.js`, `operacao.js`, `cinema.js`, `starfield.mjs`, `scroll-signal.mjs`, `motion.js`, `theme-store.js`, `scene.js`, `meta-pixel.js`, `assets/vendor/`, `assets/sequence/`, `image-sequence.mjs`, `sequence-mount.mjs`, `starfield-mount.mjs`, `motion-lite.mjs`, `og-image.png` e `og-image.html`, e o painel de Tweaks em `dev/`. `assets/checklist.html` e `assets/waveops-checklist.pdf` seguem publicados para não quebrar links antigos. A documentação detalhada da página única (starfield, cinema, "uma operação viva", Tweaks) está no histórico do git deste arquivo, antes de 10/2026. A chave `flowops:tweaks:v1` do localStorage passa a ser ignorada.
 
-### Tweaks panel (React, development only, in `dev/`)
-The Tweaks panel is a prototyping aid for experimenting with theme/accent/font/density. It is **not part of the production page** and lives in `dev/`. To re-enable it temporarily, add the CDN scripts plus the two sources back before `</body>`, pointing the sources at `dev/`:
-```html
-<script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
-<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
-<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
-<script type="text/babel" src="dev/tweaks-panel.jsx"></script>
-<script type="text/babel" src="dev/tweaks-app.jsx"></script>
-```
-- `dev/tweaks-panel.jsx` is a reusable control library scaffold (`useTweaks`, `TweaksPanel`, `TweakRadio`, `TweakColor`, etc.) exported onto `window`, plus a host edit-mode `postMessage` protocol (`@ds-adherence-ignore`). Vendored infrastructure: avoid editing.
-- `dev/tweaks-app.jsx` is the FlowOps panel. It mirrors `FlowTheme` in via `subscribe` and writes back through `FlowTheme.set`; the one-way wiring avoids an update loop. Its `TWEAK_DEFAULTS` is wrapped in `/*EDITMODE-BEGIN*/ ... /*EDITMODE-END*/` markers (a host rewrites that block on disk, so keep them). Editing `TWEAK_DEFAULTS` does NOT change the live default. See the lockstep rule above.
+## Pendências conhecidas
+- Workflow n8n de leads ao vivo não verificado; webhook da lista de interesse a criar (gate H2).
+- `contato@waveops.com.br` sem MX nem SPF (conferido em 09/10/2026): não recebe e-mail, e o site o publica no rodapé e na página de contato.
+- Política de Privacidade e Termos em rascunho; textos de aceite e compromissos ("sem custo e sem compromisso", "Resposta em até 1 dia útil") dependem de revisão (gate H4).
+- O webhook n8n `flowops-lead` e a chave `flowops:tweaks:v1` mantêm o nome antigo de propósito: renomear quebra a integração e o tema salvo.
 
-### main.js conventions
-Single IIFE, no modules. Reveals and carousel visibility use `IntersectionObserver`, with content visible if the API is unavailable or motion is paused. Scrollspy uses manual `getBoundingClientRect` checks. FAQ accordion, pricing tabs, and mobile menu are class-toggle driven against IDs in the HTML.
-
-### Uma operação viva (`assets/motion-system.css` + `assets/operacao.css` + `assets/operacao.js`)
-
-A linguagem visual da página é **interface**: nó, fio, evento, registro. Nunca circuito,
-cérebro brilhando, holograma ou esfera 3D. Software é o visual.
-
-`assets/motion-system.css` é o único lugar onde curva, duração e passo são escolhidos.
-Quatro curvas (`--ease-entrada`, `--ease-saida`, `--ease-padrao`, `--ease-firme`), quatro
-durações (`--t-toque` 160ms, `--t-base` 320ms, `--t-calmo` 560ms, `--t-cena` 900ms), o passo
-do escalonamento (`--passo` 70ms) e os deslocamentos. Mais a primitiva `.mv-revela`, que é a
-revelação por máscara das nove manchetes de seção, e o bloco que desliga tudo sob
-`prefers-reduced-motion` e sob `[data-motion="paused"]`. **A regra desse bloco é mostrar
-sempre o ESTADO FINAL**, nunca o inicial: esconder conteúdo de quem pediu menos movimento já
-aconteceu neste projeto e é o pior desfecho possível.
-
-`assets/operacao.js` é uma IIFE com quatro responsabilidades e três travas:
-
-- **Laço de eventos do hero.** Sete eventos em rodízio lento. Cada um acende UM nó
-  (`[data-no]`), dispara no máximo UM pulso de fio (`[data-fio]`) e escreve UMA linha no
-  registro. Nunca dois ao mesmo tempo: com dois acesos o olho perde a ordem da leitura.
-  O registro é um anel de quatro linhas movidas por `transform`, e a linha mais velha volta
-  ao topo sem transição, invisível, antes de receber o texto novo.
-- **Entrega do hero.** Um `--saida` e um `--saida2` escritos por quadro de scroll. O segundo
-  existe porque a copy carrega o CTA e não pode desbotar junto com a janela.
-- **Percurso de "Como funciona".** Um `--percurso` entre 0 e 1, ancorado na fileira de
-  etapas e não na seção, e a classe `.ativo` em cada etapa que a linha já alcançou.
-- **Rede de integrações.** Um sinal por vez, com a ferramenta da vez acesa e o anel do
-  centro confirmando a chegada.
-
-As travas: **um `requestAnimationFrame` para a página inteira**, com o listener de scroll só
-agendando; **movimento é melhoria, nunca requisito** (sem este arquivo a página continua
-completa); e **pausar é de verdade**, tanto pela preferência do sistema quanto pelo botão.
-
-Dois detalhes que são fáceis de quebrar:
-
-1. **Os dois conjuntos de fios do hero.** Existe um SVG de tela larga e um de celular, com as
-   mesmas chaves `data-fio`. O JavaScript guarda uma LISTA por chave e pulsa as duas: a que
-   está com `display: none` não anima, então não custa nada. Trocar a lista por um elemento
-   só faz o pulso sumir num dos dois layouts.
-2. **`preserveAspectRatio="none"` nos SVGs de fio.** É isso que faz as coordenadas do viewBox
-   virarem percentagem da caixa, e é por isso que os nós, posicionados em `%` pelo CSS, ficam
-   colados nas pontas dos fios em qualquer proporção. As posições dos nós vivem no CSS e não
-   num atributo `style`, porque estilo inline vence media query e o celular não conseguiria
-   reposicionar.
-
-### Cinematic visual layer
-
-`assets/cinematic.css` loads after the base stylesheet and owns the visual tokens, responsive layouts and CSS motion diagrams. Display typography uses the local Hanken Grotesk font.
-
-The hero panel is the flat `.flow-canvas` from `assets/styles.css`: five `.fnode` cards positioned in percentages over a dotted grid, with `IA qualifica` as the hub card and SVG wires carrying animated beads. `assets/workflow.css` and `assets/scene.js` implement an alternative 3D panel with floating cards and a rendered badge at the centre. They are kept in the repo but the page does not load them. To bring that panel back you restore the `.hero-visual` block from the `workflow.css` era and re-add both files to `index.html`.
-
-The integrations strip (`section.logos`) scrolls as a continuous marquee. Four identical `.marquee-group` copies sit in one `.marquee-track`; the animation translates the track by 25%, which is exactly one group width, so the end frame matches the start and the loop closes with no jump. Two groups are not enough because one group is narrower than the visible window. It pauses on hover, freezes in place (not back to the start) under the global `data-motion="paused"`, and stops under reduced motion.
-
-At the end of the body, scripts load in this order: `motion.js`, `main.js`. `motion.js` owns the `data-motion` attribute and emits `waveops:motion` with `{ paused }`; it respects live reduced-motion preferences, and the nav pause button toggles it. No canvas and no WebGL renderer anywhere. Theme defaults and HTML attributes are `dark / violet / a / regular`; saved theme preferences still take precedence.
-
-`dev/verify-workflow.cjs` checks the `scene.js` motion controller with a mocked DOM built from the `data-edge` paths in `index.html`; since the 3D panel is not in the page it exits early with a SKIP line, and starts asserting again if that panel returns. `dev/verify-design.js` provides UI checks to run in a local browser. Neither file is loaded in production.
-
-## Backend integration points
-
-The page is frontend-only today. Three places connect to a backend:
-1. **Lead form (primary).** `assets/main.js` → function `submitLead(data)`, marked with the comment `PONTO DE INTEGRAÇÃO COM O BACK-END`. It currently fakes success after 600ms. Replace its body with the real `fetch` (suggested `POST /api/leads`). The `data` object is already assembled: `{ nome, empresa, whatsapp, dor, mensagem, origem: 'landing', enviadoEm }`. The UI (sending state, disabled button, success/error screens) is already handled : only make the request work.
-2. **WhatsApp buttons** point at `https://wa.me/5534991775784` with a prefilled message (hero button, contact section `#wa-btn`, and footer link), opening in a new tab. To change the number, search the HTML for `wa.me/5534991775784`.
-3. Pricing/plan text is hardcoded in the HTML (`#pacotes`); optional future CMS.
-
-## Known pending items (from README)
-
-- The brand is **WaveOps**, domain **waveops.com.br** (decided after FlowOps / Nodo / Operon / Trama were all taken). Two internal identifiers were intentionally NOT renamed: the `localStorage` key `flowops:tweaks:v1` (renaming resets visitors' saved theme) and the n8n webhook path `flowops-lead` (renaming breaks the live lead integration).
-- The footer email is `mailto:contato@waveops.com.br` (set up this mailbox; it is the intended address).
-- **The custom domain is live, and the host is Netlify, not GitHub Pages.** `https://waveops.com.br/` serves the page (checked 13/09/2026: `200`, `Server: Netlify`), and the canonical, the OG URLs, `robots.txt` and `sitemap.xml` all point at it. The custom domain is configured in the Netlify panel plus DNS; **there is no `CNAME` file and adding one does nothing here**, because that file is a GitHub Pages mechanism. Anything in this file that still says "GitHub Pages" is talking about the old host: the repo and the Pages path are named `flowops-landing` for historical reasons only.
-
-### How the site is actually published (`netlify.toml`)
-Netlify's base directory is locked to `portal/` in the panel, so the build runs one level below the
-landing. The `[build] command` in `netlify.toml` therefore builds `_site` by copying **an explicit
-list of files** up from `../`. That list is the whole deploy: **a file at the repo root that is not
-named in that `cp` never reaches the live site**, no matter how correct it is locally. The list is
-currently `index.html`, `robots.txt`, `sitemap.xml`, `llms.txt` and `assets/`. Add a root file, add
-it there in the same commit.
-
-That same locked base directory also decides **whether a build runs at all**. Netlify skips the build
-when nothing changed inside the base directory, and the landing lives one level above it, so until
-14/09/2026 a commit touching only `index.html` or `assets/` deployed nothing: it reached the live
-site by accident, whenever some later commit happened to touch `portal/` or `netlify.toml`. The
-`[build] ignore` line now states the rule instead. Its contract is inverted (**exit 0 skips the
-build, a non-zero exit builds**), so it is a `git diff --quiet` over the published paths: no
-difference, no deploy. Adding a published file means adding it to that list too, next to the `cp`.
-A broken ignore command exits non-zero and therefore builds, which is the safe direction.
-
-`netlify.toml` also holds six `301` redirects that bounce every portal route (`/cliente/*`,
-`/admin/*`, `/checkout`, `/api/*`, `/termos`, `/privacidade`) to `portal.waveops.com.br` on Railway.
-The comment at the top of the file explains why, and it is worth reading before touching it: one
-portal, one database.
-
-### SEO and crawler files (repo root)
-Three files serve crawlers, and all three must be updated in lockstep when the site's structure or
-its offering changes:
-- `robots.txt`: `Allow: /` plus the `Sitemap:` line. It carries a comment pointing at `llms.txt`;
-  there is no standard directive for that, so the comment is the pointer.
-- `sitemap.xml`: one `<url>`, the root. The page is a single page, so there is nothing else to list.
-  Bump `<lastmod>` when the page content changes in a way worth recrawling.
-- `llms.txt` (added 13/09/2026): a plain-text summary of the offering for LLMs, in PT-BR, following
-  the `llms.txt` convention (H1, blockquote summary, H2 sections of Markdown links). Its links are
-  anchors of the single page (`#servicos`, `#casos`, `#como`, `#pacotes`, `#faq`, `#contato`), so
-  **renaming a section id breaks `llms.txt`**. It is deliberately NOT listed in `sitemap.xml`: a
-  sitemap is for indexable pages, and search engines do nothing useful with a `.txt` entry there.
-  Every claim in it (3 to 7 business days, human review over AI agents, diagnosis at no cost) is
-  copied from the page's FAQ. Do not add a claim to `llms.txt` that the page itself does not make.
-
-## Writing rules for this repo
-
-All user-facing copy is PT-BR with correct accentuation. In any text you produce (copy, comments, this file), do not use em dashes or en dashes; use periods, commas, or colons.
+## Regras de escrita deste repo
+Toda copy de usuário em PT-BR com acento. Em qualquer texto produzido (copy, comentário, este arquivo), nunca travessão nem meia-risca: use ponto, vírgula ou dois-pontos. O lint do site barra os dois caracteres no HTML.

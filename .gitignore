@@ -15,6 +15,23 @@ docs/specs/
 # Workflows n8n (locais, nao publicar)
 n8n/
 
+# Pesquisa interna da refatoração do site. Este repo é público, então fica local,
+# como docs/specs/.
+docs/research/
+
+# Segredos locais. O repo é público: nada disso entra, nem por engano num git add -A.
+.env
+.env.*
+!.env.example
+.mcp.json
+*.pem
+
+# Saidas locais do ferramental do site (build simulado, QA visual, Playwright)
+.tmp-site/
+.tmp-qa/
+tests/site/test-results/
+tests/site/playwright-report/
+
 # Dependencias e config local de ferramentas (nao publicar)
 node_modules/
 .claude/

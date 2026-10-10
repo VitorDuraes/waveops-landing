@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { rateLimit, clientIp } from "@/server/ratelimit";
 import { idDoVisitante, registrarEvento } from "@/server/evento";
 import { env } from "@/server/env";
-import { normalizarEvento, origemDoEvento, ORIGENS_DA_LANDING, LIMITES } from "@/lib/funil";
+import { log } from "@/server/log";
+import { normalizarEvento, origemDaRequisicao, ORIGENS_DA_LANDING, LIMITES } from "@/lib/funil";
 import { ehRobo } from "@/lib/robo";
 
 // Coleta de evento de funil (SPEC-18). Rota PUBLICA, chamada pela landing estatica
@@ -31,12 +32,26 @@ function vazio(origin: string | null): NextResponse {
   return res;
 }
 
+// O descarte por origem é calado para quem chama (204), mas não para a gente: foi um
+// descarte calado que escondeu o checkout_aberto por semanas. No máximo um aviso por
+// minuto, para robô nenhum encher o log.
+let ultimoAvisoDeOrigem = 0;
+function avisarOrigemDescartada(origin: string | null): void {
+  const agora = Date.now();
+  if (agora - ultimoAvisoDeOrigem < 60_000) return;
+  ultimoAvisoDeOrigem = agora;
+  log.warn("evento.origem_descartada", { origin: (origin ?? "").slice(0, 80) });
+}
+
 export async function POST(req: NextRequest) {
   const origin = req.headers.get("origin");
   // Landing, telas do portal (que mandam Origin mesmo na mesma origem) ou descarte.
-  // A regra vive em lib/funil (origemDoEvento), com teste.
-  const origem = origemDoEvento(origin, req.headers.get("sec-fetch-site"), env.appUrl);
-  if (!origem) return vazio(null);
+  // A regra vive em lib/funil (origemDaRequisicao), com teste.
+  const origem = origemDaRequisicao(req.headers, env.appUrl);
+  if (!origem) {
+    avisarOrigemDescartada(origin);
+    return vazio(null);
+  }
 
   // Robo fora, antes de qualquer trabalho. Googlebot executa JavaScript, entao sem
   // isso ele entra no topo do funil como pessoa. Ver src/lib/robo.ts.

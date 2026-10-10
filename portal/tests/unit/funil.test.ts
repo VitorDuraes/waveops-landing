@@ -2,7 +2,7 @@ import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import { calcularId, diaUtc } from "../../src/lib/funil";
 import { normalizarEvento, normalizarFonte, ETAPAS, EVENTOS, EVENTOS_DA_LANDING, ROTULO_ETAPA } from "../../src/lib/funil";
-import { origemDoEvento } from "../../src/lib/funil";
+import { origemDoEvento, origemDaRequisicao } from "../../src/lib/funil";
 import { ehRobo } from "../../src/lib/robo";
 
 // Testes das funcoes puras da medicao de funil (SPEC-18). Rodam sem banco e sem
@@ -260,11 +260,24 @@ describe("origemDoEvento: quem mandou o evento", () => {
     assert.equal(origemDoEvento(null, null, PORTAL), "portal");
   });
 
+  test("Origin null com same-origin é o portal (página com Referrer-Policy no-referrer)", () => {
+    assert.equal(origemDoEvento("null", "same-origin", PORTAL), "portal");
+  });
+
   test("outra origem é descartada", () => {
     assert.equal(origemDoEvento("https://golpe.com", "cross-site", PORTAL), null);
     assert.equal(origemDoEvento("https://golpe.com", null, PORTAL), null);
     assert.equal(origemDoEvento("null", null, PORTAL), null);
     assert.equal(origemDoEvento(PORTAL, null, "lixo"), null, "APP_URL inválido sem Sec-Fetch-Site não vira aceite");
     assert.equal(origemDoEvento("https://portal.waveops.com.br.golpe.com", "cross-site", PORTAL), null);
+    assert.equal(origemDoEvento("https://x.waveops.com.br", "same-site", PORTAL), null, "subdomínio irmão não é o portal");
+    assert.equal(origemDoEvento("null", null, "file:///x"), null, "APP_URL opaco não aceita Origin null");
+  });
+
+  test("lê Origin e Sec-Fetch-Site dos cabeçalhos da requisição", () => {
+    assert.equal(origemDaRequisicao(new Headers({ origin: PORTAL, "sec-fetch-site": "same-origin" }), "lixo"), "portal");
+    assert.equal(origemDaRequisicao(new Headers({ origin: "https://waveops.com.br" }), PORTAL), "landing");
+    assert.equal(origemDaRequisicao(new Headers({ origin: "https://golpe.com", "sec-fetch-site": "cross-site" }), PORTAL), null);
+    assert.equal(origemDaRequisicao(new Headers(), PORTAL), "portal");
   });
 });

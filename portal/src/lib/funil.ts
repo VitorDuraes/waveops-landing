@@ -82,6 +82,11 @@ export function origemDoEvento(
   return null;
 }
 
+// A mesma regra, lida dos cabeçalhos da requisição: o nome dos cabeçalhos também fica testado.
+export function origemDaRequisicao(headers: Headers, appUrl: string): "landing" | "portal" | null {
+  return origemDoEvento(headers.get("origin"), headers.get("sec-fetch-site"), appUrl);
+}
+
 // Origem de uma URL, ou null quando ela não tem origem utilizável (inválida ou opaca).
 function origemDaUrl(url: string): string | null {
   try {

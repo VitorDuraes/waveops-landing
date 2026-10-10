@@ -101,6 +101,13 @@ test('campo dentro do próprio label conta como rotulado', () => {
   assert.ok(regras(solto).includes('rotulo'));
 });
 
+test('svg inline sem width e height acusa (sem CSS ele ocupa a largura toda)', () => {
+  const sem = trocar('</main>', '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M0 0"/></svg></main>');
+  assert.ok(regras(sem).includes('svg-tamanho'));
+  const com = trocar('</main>', '<svg width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true"><path d="M0 0"/></svg></main>');
+  assert.ok(!regras(com).includes('svg-tamanho'));
+});
+
 test('script inline, evento inline e javascript: são proibidos', () => {
   assert.ok(regras(trocar('</main>', '<script>alert(1)</script></main>')).includes('script-inline'));
   assert.ok(regras(trocar('<div id="painel">', '<div id="painel" onclick="x()">')).includes('evento-inline'));

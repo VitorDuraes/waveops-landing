@@ -167,6 +167,9 @@ export function lintarHtml(html, ctx) {
     if (/\s(href|src)="http:\/\//i.test(tag)) acusar('http', indice, 'use https://');
     if (nome === 'img' && atributo(tag, 'alt') === undefined) acusar('img-alt', indice, '<img> sem alt (use alt="" se for decorativa)');
     if (nome === 'button' && atributo(tag, 'type') === undefined) acusar('botao-type', indice, '<button> sem type');
+    if (nome === 'svg' && (atributo(tag, 'width') === undefined || atributo(tag, 'height') === undefined)) {
+      acusar('svg-tamanho', indice, '<svg> sem width e height: se o CSS não carregar, ele ocupa a largura toda (use width="1em" height="1em")');
+    }
     if (atributo(tag, 'target') === '_blank' && !/\bnoopener\b/.test(atributo(tag, 'rel') ?? '')) {
       acusar('blank-rel', indice, 'target="_blank" exige rel="noopener"');
     }

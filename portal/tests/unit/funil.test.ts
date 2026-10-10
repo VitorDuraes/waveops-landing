@@ -147,6 +147,15 @@ describe("visita vinda de dentro: não é entrada nova", () => {
     assert.notEqual(normalizarEvento({ n: "visita", u: "/" }), null, "visita direta, sem referrer, conta");
   });
 
+  test("referrer de dentro sem fonte também é descartado", () => {
+    assert.equal(normalizarEvento({ n: "visita", u: "/", r: "https://portal.waveops.com.br/" }), null);
+  });
+
+  test("campanha na URL vence o referrer de dentro, como no funil novo", () => {
+    const ev = normalizarEvento({ n: "visita", u: "/", r: "https://portal.waveops.com.br/", f: "meta/cpc" });
+    assert.equal(ev?.fonte, "meta/cpc");
+  });
+
   test("outros eventos vindos do portal continuam", () => {
     const ev = normalizarEvento({ n: "whatsapp_click", u: "/", r: "https://portal.waveops.com.br/checkout" });
     assert.equal(ev?.nome, "whatsapp_click");

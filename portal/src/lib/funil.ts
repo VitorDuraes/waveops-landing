@@ -139,16 +139,19 @@ export function normalizarEvento(bruto: unknown): EventoNormalizado | null {
   const b = bruto as Record<string, unknown>;
   if (!ehNomeValido(b.n)) return null;
   const referrerHost = apenasHost(b.r);
+  const fonte = normalizarFonte(b.f);
   // Visita que chega de dentro (o próprio site ou o portal) não é entrada nova: a
   // pessoa já foi contada quando chegou de fora. O funil do site novo nem manda esse
   // evento (assets/funil.js, interno()); o do site antigo manda, com o portal como
-  // origem, quando alguém clica num link do portal para o site.
-  if (b.n === "visita" && referrerHost && ehDominioProprio(referrerHost)) return null;
+  // origem, quando alguém clica num link do portal para o site. Campanha na URL
+  // vence o referrer interno, como no funil novo: com fonte de fora, a visita conta.
+  const fonteDeDentro = !fonte || ehDominioProprio(fonte.split("/")[0]);
+  if (b.n === "visita" && referrerHost && ehDominioProprio(referrerHost) && fonteDeDentro) return null;
   return {
     nome: b.n,
     path: apenasPath(b.u),
     referrerHost,
-    fonte: normalizarFonte(b.f),
+    fonte,
     props: normalizarProps(b.p),
   };
 }

@@ -189,7 +189,7 @@ Uma tarefa por página, cada uma dona só dos próprios arquivos: `<slug>/index.
 - **Dependência de entrada:** JSON exportado do `flowops-lead` atual ou um envio real conferido pelo Vitor.
 - **Estimativa:** 2 a 3 h.
 
-**F2. PR do portal (branch própria; em 10/10/2026 separado em `feat/portal-funil-interesse`, que entra antes do site, e `feat/portal-links-site-novo`, que entra depois)**
+**F2. PR do portal (branch própria; em 10/10/2026 separado em `feat/portal-funil-interesse`, que entra antes do site, e `feat/portal-links-site-novo`, que entra depois. O #75 acabou mergeado antes do site, e `fix/portal-links-ancoras` trocou os links pelas âncoras antigas, que funcionam nos dois sites)**
 
 - **Arquivos:** modificar `portal/src/lib/funil.ts` (`EVENTOS`, `ROTULO_ETAPA`, `EVENTOS_DA_LANDING`), `portal/tests/unit/` (teste do evento novo), `portal/src/components/PublicNav.tsx:18`, `portal/src/app/checkout/page.tsx:81,112`, `portal/src/app/cliente/login/page.tsx:178,206`.
 - **Aceite:** `interesse_plataforma` aceito pela rota `/api/e`; links absolutos para `https://waveops.com.br/contato/` e `https://waveops.com.br/projetos-sob-medida/#modelos`.

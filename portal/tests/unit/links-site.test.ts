@@ -30,6 +30,8 @@ const FONTES = arquivos(join(PORTAL, "src")).map((caminho) => ({
 const ANCORAS = [...readFileSync(LEGADO, "utf8").matchAll(/'(#[a-z-]+)':/g)].map((m) => m[1]);
 const RAIZES = ["https://waveops.com.br", "https://waveops.com.br/", "https://www.waveops.com.br", "https://www.waveops.com.br/"];
 const PERMITIDOS = new Set([...RAIZES, ...ANCORAS.map((ancora) => `https://waveops.com.br/${ancora}`)]);
+const TROCA_PREVISTA =
+  "Se o site novo já está no ar e os links viraram URLs diretas, é a troca prevista: relaxe este teste (CLAUDE.md, Pendências conhecidas).";
 
 function ocorrencias(padrao: RegExp) {
   return FONTES.flatMap(({ arquivo, texto }) => [...texto.matchAll(padrao)].map((m) => ({ arquivo, valor: m[1] })));
@@ -43,9 +45,9 @@ describe("links do portal para o site", () => {
   test("todo link absoluto para o site é a raiz ou uma âncora antiga", () => {
     // Maiúscula e URL sem esquema ("//waveops.com.br") também entram, para cair na regra.
     const urls = ocorrencias(/((?:https?:)?\/\/(?:www\.)?waveops\.com\.br[^\s"'`)}<>,]*)/gi);
-    assert.ok(urls.some(({ valor }) => valor.includes("#")), "nenhum link com âncora encontrado: o teste perdeu o alvo");
+    assert.ok(urls.some(({ valor }) => valor.includes("#")), `nenhum link com âncora encontrado: o teste perdeu o alvo. ${TROCA_PREVISTA}`);
     const fora = urls.filter(({ valor }) => !PERMITIDOS.has(valor));
-    assert.deepEqual(fora, [], `use a raiz ou uma destas âncoras, que funcionam no site atual e no novo: ${[...PERMITIDOS].join(", ")}`);
+    assert.deepEqual(fora, [], `use a raiz ou uma destas âncoras, que funcionam no site atual e no novo: ${[...PERMITIDOS].join(", ")}. ${TROCA_PREVISTA}`);
   });
 
   test("nenhum link relativo para a raiz do portal", () => {

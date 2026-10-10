@@ -30,8 +30,8 @@ export const TEXTO_MARKETING = Object.freeze({
 });
 
 const PRODUCAO = Object.freeze({
-  lead: 'https://cowboyhouse.app.n8n.cloud/webhook/waveops-lead-v2',
-  interesse: 'https://cowboyhouse.app.n8n.cloud/webhook/waveops-interesse',
+  lead: 'https://n8n.waveops.com.br/webhook/waveops-lead-v2',
+  interesse: 'https://n8n.waveops.com.br/webhook/waveops-interesse',
 });
 
 /** Preencha quando existir webhook de homologação (planilha separada). */

@@ -11,7 +11,7 @@
 | Teste | `node --test tests/site/unit/n8n-site-v2.test.mjs` |
 | Operação restrita | `docs/specs/2026-10-10-n8n-site-v2-operacao-restrita.md`, arquivo local fora do git: roteiro de homologação e parâmetros de operação |
 
-O workflow que roda hoje (`flowops-lead`, host `cowboyhouse.app.n8n.cloud`) não está versionado. O JSON `n8n/flowops-lead-capture.json` é só um esqueleto e fica fora do git (a pasta `n8n/` é ignorada). Por isso os dois arquivos desta pasta são rascunho. Confira cada ponto da seção 17 contra o export real antes de publicar.
+O workflow que roda hoje (`flowops-lead`, host `cowboyhouse.app.n8n.cloud`, que não é a instância da WaveOps) não está versionado. Os dois workflows novos vão para o n8n da WaveOps, `n8n.waveops.com.br` (confirmado pelo Vitor em 10/10/2026). O JSON `n8n/flowops-lead-capture.json` é só um esqueleto e fica fora do git (a pasta `n8n/` é ignorada). Por isso os dois arquivos desta pasta são rascunho. Confira cada ponto da seção 17 contra o export real antes de publicar.
 
 ## 1. Resumo
 
@@ -70,7 +70,7 @@ Cada fluxo tem 27 nós, dois deles são notas. O nome de cada nó diz o que ele 
 |---|---|---|
 | Método | `POST` | `POST` |
 | Path | `waveops-lead-v2` | `waveops-interesse` |
-| URL de produção | `https://cowboyhouse.app.n8n.cloud/webhook/waveops-lead-v2` | `https://cowboyhouse.app.n8n.cloud/webhook/waveops-interesse` |
+| URL de produção | `https://n8n.waveops.com.br/webhook/waveops-lead-v2` | `https://n8n.waveops.com.br/webhook/waveops-interesse` |
 | Corpo | JSON, `Content-Type: application/json` | idem |
 | Origens aceitas | `https://waveops.com.br` e `https://www.waveops.com.br` | idem |
 | Página | `/contato/` | `/plataforma/` |
@@ -464,7 +464,7 @@ Consentimento, sem misturar:
 - `politicaVersao`, `cienciaTextoVersao` e `marketingTextoVersao` provam qual texto a pessoa viu. `politicaCienteEm` é a hora que o navegador informou. A hora oficial é `recebidoEm`.
 - O e-mail da lista de interesse serve só para avisar a abertura da plataforma, a menos que a linha mais recente tenha `marketingAceito` TRUE.
 
-A política precisa listar n8n Cloud e Google (Sheets e Gmail) como operadores. Hoje ela não lista (spec, seção 12, item 1).
+A política precisa listar o n8n da WaveOps (`n8n.waveops.com.br`, incluindo quem hospeda o servidor) e Google (Sheets e Gmail) como operadores. Hoje ela não lista (spec, seção 12, item 1).
 
 ## 12. Roteiro de publicação
 
@@ -509,7 +509,7 @@ Nada abaixo foi feito. Cada passo é uma ação do dono ou autorizada por ele.
 
 **Fase G. Ligar no site**
 
-15. Confira se os paths do `PRODUCAO` em `assets/site/config.js` são os mesmos dos nós Webhook: `https://cowboyhouse.app.n8n.cloud/webhook/waveops-lead-v2` e `https://cowboyhouse.app.n8n.cloud/webhook/waveops-interesse`. Hoje já são. Não precisa mexer na CSP: o `connect-src` já libera `https://cowboyhouse.app.n8n.cloud`.
+15. Confira se os paths do `PRODUCAO` em `assets/site/config.js` são os mesmos dos nós Webhook: `https://n8n.waveops.com.br/webhook/waveops-lead-v2` e `https://n8n.waveops.com.br/webhook/waveops-interesse`. Hoje já são. Não precisa mexer na CSP: o `connect-src` já libera `https://n8n.waveops.com.br`, e `tests/site/unit/envio.test.mjs` falha se o host do `config.js` e o da CSP divergirem.
 16. Faça o merge do site (gates H4 e H5). Rode o teste pelo site publicado, do roteiro.
 17. Registre a data do corte. Duas semanas depois, desative o `flowops-lead`.
 
@@ -581,7 +581,7 @@ Outros pedidos:
 | 6 | Webhook de homologação com planilha separada | `HOMOLOGACAO` em `assets/site/config.js` | Vitor | O Deploy Preview do Netlify fica com o envio desligado |
 | 7 | Canal de saída da lista de interesse | Texto do cartão de confirmação do site | Vitor | O texto promete um e-mail que não existe |
 | 8 | Decisão D2: lista no n8n | Spec, seção 5.8 | Vitor | O JSON da lista só vale se a resposta for n8n |
-| 9 | Host do webhook | `cowboyhouse.app.n8n.cloud` | Vitor | Mantido igual ao atual. Trocar exige mudar a CSP em todas as páginas e o `config.js`. Confirme de quem é essa conta do n8n antes de guardar lead da WaveOps nela |
+| 9 | Host do webhook | `n8n.waveops.com.br` | Vitor | Resolvido em 10/10/2026: o `cowboyhouse.app.n8n.cloud` não é da WaveOps, e o lead da WaveOps vai para a instância dela. `config.js`, CSP das páginas e teste trocados juntos |
 | 10 | Segundo canal do aviso de falha (Slack ou Discord) | Ramo do Error Trigger | Vitor | O aviso de falha depende só da credencial Gmail |
 | 11 | Confirmação do e-mail na lista (double opt-in) | Fora destes workflows | Vitor | Marketing da lista não deve sair |
 | 12 | Proteção adicional antes do webhook | Fora destes workflows | Vitor | Opções no documento de operação restrita |

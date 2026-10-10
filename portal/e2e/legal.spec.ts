@@ -33,12 +33,14 @@ test.describe("documentos legais", () => {
   test("rodape da landing tem os links legais", async ({ page }) => {
     // A landing e o portal vivem em origens diferentes (waveops.com.br vs
     // portal.waveops.com.br), entao os links legais do rodape sao ABSOLUTOS.
+    // O escopo é o elemento footer, não uma classe: a landing antiga marca o bloco com
+    // .foot-legal e o site novo com .wo-rodape__legal, mas as duas têm um único footer.
     await page.goto("/");
     await expect(
-      page.locator('.foot-legal a[href="https://portal.waveops.com.br/termos"]')
+      page.locator('footer a[href="https://portal.waveops.com.br/termos"]')
     ).toHaveText(/Termos de Uso/);
     await expect(
-      page.locator('.foot-legal a[href="https://portal.waveops.com.br/privacidade"]')
+      page.locator('footer a[href="https://portal.waveops.com.br/privacidade"]')
     ).toHaveText(/Política de Privacidade/);
   });
 });

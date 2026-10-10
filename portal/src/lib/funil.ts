@@ -13,6 +13,7 @@ export const EVENTOS = [
   "seccao_precos",
   "lead_enviado",
   "whatsapp_click",
+  "interesse_plataforma",
   "checkout_aberto",
   "checkout_enviado",
   "pagamento_confirmado",
@@ -21,9 +22,10 @@ export const EVENTOS = [
 
 export type NomeEvento = (typeof EVENTOS)[number];
 
-// As etapas do funil principal, em ordem. whatsapp_click e seccao_precos ficam de
-// fora porque sao sinais laterais, nao degraus: quem clica no WhatsApp nao "avancou"
-// para o checkout, pegou outro caminho.
+// As etapas do funil principal, em ordem. whatsapp_click, seccao_precos e
+// interesse_plataforma ficam de fora porque são sinais laterais, não degraus: quem
+// clica no WhatsApp ou entra na lista de interesse não "avançou" para o checkout,
+// pegou outro caminho.
 export const ETAPAS: NomeEvento[] = [
   "visita",
   "lead_enviado",
@@ -38,6 +40,7 @@ export const ROTULO_ETAPA: Record<NomeEvento, string> = {
   seccao_precos: "Viu os preços",
   lead_enviado: "Lead enviado",
   whatsapp_click: "Clique no WhatsApp",
+  interesse_plataforma: "Lista de interesse da Plataforma",
   checkout_aberto: "Checkout aberto",
   checkout_enviado: "Checkout enviado",
   pagamento_confirmado: "Pagamento confirmado",
@@ -50,7 +53,13 @@ export const ROTULO_ETAPA: Record<NomeEvento, string> = {
 // portal/scripts/sync-landing.mjs), entao abrir portal.waveops.com.br para conferir
 // qualquer coisa dispara uma "visita" identica a de um visitante real. Sem esta
 // regra, o topo do funil mistura trafego de verdade com a gente navegando no painel.
-export const EVENTOS_DA_LANDING: NomeEvento[] = ["visita", "seccao_precos", "lead_enviado", "whatsapp_click"];
+export const EVENTOS_DA_LANDING: NomeEvento[] = [
+  "visita",
+  "seccao_precos",
+  "lead_enviado",
+  "whatsapp_click",
+  "interesse_plataforma",
+];
 
 export const LIMITES = {
   corpoBytes: 2048,

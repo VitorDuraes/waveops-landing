@@ -151,6 +151,11 @@ export function lintarHtml(html, ctx) {
     ids.add(m[1]);
   }
 
+  // Trechos <label>...</label>: campo dentro de um deles tem rótulo implícito.
+  const trechosLabel = [...limpo.matchAll(/<label\b[^>]*>[\s\S]*?<\/label>/gi)].map((m) => [m.index ?? 0, (m.index ?? 0) + m[0].length]);
+  /** @param {number} indice */
+  const dentroDeLabel = (indice) => trechosLabel.some(([inicio, fim]) => indice > inicio && indice < fim);
+
   for (const m of limpo.matchAll(/<[a-z][a-z0-9-]*\b[^>]*>/gi)) {
     const tag = m[0];
     const indice = m.index ?? 0;
@@ -170,7 +175,9 @@ export function lintarHtml(html, ctx) {
       const tipo = (atributo(tag, 'type') ?? '').toLowerCase();
       const rotulado = atributo(tag, 'aria-label') || atributo(tag, 'aria-labelledby');
       const id = atributo(tag, 'id');
-      const temLabel = id !== undefined && new RegExp(`<label\\b[^>]*\\sfor="${id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"`, 'i').test(limpo);
+      const temLabel =
+        dentroDeLabel(indice) ||
+        (id !== undefined && new RegExp(`<label\\b[^>]*\\sfor="${id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"`, 'i').test(limpo));
       if (!(nome === 'input' && TIPOS_SEM_ROTULO.has(tipo)) && !rotulado && !temLabel) {
         acusar('rotulo', indice, `<${nome}${id ? ` id="${id}"` : ''}> sem <label for> nem aria-label`);
       }

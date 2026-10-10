@@ -94,6 +94,13 @@ test('id duplicado, img sem alt, botão sem type, campo sem rótulo', () => {
   assert.ok(regras(trocar('<label for="f-nome">Nome</label>', '')).includes('rotulo'));
 });
 
+test('campo dentro do próprio label conta como rotulado', () => {
+  const html = trocar('<label for="f-nome">Nome</label><input id="f-nome" type="text">', '<label><input type="radio" name="canal" value="whatsapp">WhatsApp</label>');
+  assert.ok(!regras(html).includes('rotulo'));
+  const solto = trocar('<label for="f-nome">Nome</label><input id="f-nome" type="text">', '<label>WhatsApp</label><input type="radio" name="canal">');
+  assert.ok(regras(solto).includes('rotulo'));
+});
+
 test('script inline, evento inline e javascript: são proibidos', () => {
   assert.ok(regras(trocar('</main>', '<script>alert(1)</script></main>')).includes('script-inline'));
   assert.ok(regras(trocar('<div id="painel">', '<div id="painel" onclick="x()">')).includes('evento-inline'));

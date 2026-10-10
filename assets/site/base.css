@@ -122,6 +122,12 @@ main:focus {
   outline: none;
 }
 
+/* hidden vence qualquer display de componente (.wo-btn, svg e grade têm display
+   próprio e, sem isto, reapareciam no estado em branco do formulário). */
+[hidden] {
+  display: none !important;
+}
+
 /* Pular para o conteúdo: invisível até receber foco pelo teclado. */
 .wo-pular {
   position: absolute;

@@ -1221,6 +1221,7 @@
   color: var(--wo-texto);
   font-family: var(--wo-fonte);
   font-size: 16px;
+  line-height: normal;
   transition: border-color var(--wo-transicao);
 }
 
@@ -1273,7 +1274,7 @@ textarea.wo-controle {
 
 /* Canal de retorno: rádio nativo com aparência de botão. */
 .wo-opcoes-canal {
-  margin: 0;
+  margin: 0 0 18px;
   padding: 0;
   border: 0;
   min-width: 0;
@@ -1309,8 +1310,8 @@ textarea.wo-controle {
 
 .wo-opcao-canal input {
   appearance: none;
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   margin: 0;
   flex-shrink: 0;
   border: 2px solid currentColor;
@@ -1555,6 +1556,22 @@ textarea.wo-controle {
   font-weight: 600;
   overflow-wrap: anywhere;
   text-align: right;
+}
+
+.wo-confirmacao__dados .wo-confirmacao__contato {
+  font-family: var(--wo-mono);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+/* Abaixo de 380 px os três canais mal cabem lado a lado: o texto encolhe um pouco
+   em vez de vazar da caixa. */
+@media (max-width: 380px) {
+  .wo-opcao-canal {
+    gap: 6px;
+    padding: 0 4px;
+    font-size: 13.5px;
+  }
 }
 
 /* ---------- Lista de interesse (formulário curto da Plataforma) ---------- */

@@ -25,6 +25,12 @@ describe("ipDoCliente", () => {
     assert.equal(ipDoCliente(h, false), "203.0.113.9");
   });
 
+  test("valor que não é IP não vira chave: lixo e texto gigante caem no balde comum", () => {
+    assert.equal(ipDoCliente(new Headers({ "x-real-ip": "x".repeat(15000) }), false), "desconhecido");
+    assert.equal(ipDoCliente(new Headers({ "x-real-ip": "não é ip", "x-forwarded-for": "203.0.113.9" }), false), "203.0.113.9");
+    assert.equal(ipDoCliente(new Headers({ "x-real-ip": "2001:db8::1" }), false), "2001:db8::1");
+  });
+
   test("sem nenhum cabeçalho", () => {
     assert.equal(ipDoCliente(new Headers(), false), "desconhecido");
     assert.equal(ipDoCliente(new Headers({ "x-forwarded-for": " , " }), false), "desconhecido");

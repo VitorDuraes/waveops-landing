@@ -70,14 +70,18 @@ const AVISOS_POR_HORA = 10;
 
 // Aviso no Discord sem dado pessoal: nem nome, nem contato, nem texto livre (nada que a
 // pessoa digitou entra, então também não há menção forjada). O dado fica no admin.
-// No máximo 10 por hora: acima disso, só o admin, para um ataque de volume não virar
-// spam no canal do time.
+// No máximo 10 avisos por hora, para um ataque de volume não virar spam no canal do
+// time. Quando o teto estoura, sai UM aviso de pausa por hora: sem ele, o time não
+// saberia que leads reais seguem chegando sem aviso.
 export async function avisarTime(lead: LeadValidado): Promise<void> {
+  const admin = `${env.appUrl.replace(/\/+$/, "")}/admin/leads`;
   if (!rateLimit("aviso:leads", AVISOS_POR_HORA, 3_600_000)) {
-    log.info("lead.aviso_suprimido", { tipo: lead.tipo });
+    log.warn("lead.aviso_suprimido", { tipo: lead.tipo });
+    if (rateLimit("aviso:leads:pausa", 1, 3_600_000)) {
+      await notifyDiscord(`Muitos leads em pouco tempo: os avisos individuais pararam por até 1 hora. Veja todos no admin: ${admin}`);
+    }
     return;
   }
-  const admin = `${env.appUrl.replace(/\/+$/, "")}/admin/leads`;
   const texto =
     lead.tipo === "contato"
       ? `Novo lead pelo site (contato, retorno por ${ROTULO_CANAL[lead.canalRetorno ?? ""] ?? "canal não informado"}). Veja no admin: ${admin}`

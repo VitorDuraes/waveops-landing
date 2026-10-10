@@ -11,11 +11,14 @@ export async function notifyDiscord(content: string): Promise<void> {
     return;
   }
   try {
-    await fetch(env.discordWebhook, {
+    const res = await fetch(env.discordWebhook, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content }),
     });
+    // Webhook revogado ou apagado responde 401 ou 404 sem lançar erro: sem este log, o
+    // aviso ao time sumia calado.
+    if (!res.ok) log.warn("discord.falhou", { status: res.status });
   } catch (e) {
     console.error("[discord] erro", e);
   }

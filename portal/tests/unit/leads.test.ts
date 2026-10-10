@@ -182,6 +182,7 @@ describe("robô: isca e tempo, antes da validação", () => {
     assert.equal(TEMPO_MINIMO_MS, 1200);
     assert.equal(ehRoboDeFormulario({ ...base, website: "https://spam.example" }), true);
     assert.equal(ehRoboDeFormulario({ ...base, website: 0 }), true, "qualquer valor não vazio conta");
+    assert.equal(ehRoboDeFormulario({ ...base, website: { toString: 1 } }), true, "objeto que quebra String() não derruba a rota");
     assert.equal(ehRoboDeFormulario({ ...base, preenchidoEmMs: 1199 }), true);
     assert.equal(ehRoboDeFormulario({ ...base, preenchidoEmMs: 0 }), true);
   });
@@ -247,6 +248,43 @@ describe("corte e limpeza: nunca 422", () => {
     assert.ok(r.ok);
     assert.equal(r.dados.preenchidoEmMs, 2_147_483_647);
     assert.equal(r.dados.enviadoEm, null);
+  });
+
+  test("substituto solto vira caractere de substituição em vez de derrubar a gravação", async () => {
+    // O próprio site gera isso: atribuicao.js corta a UTM no meio de um emoji. O Postgres
+    // recusa texto que não é UTF-8 válido, e a rota respondia 503 a todo envio da sessão.
+    const r = validarContato(
+      await leadDoSite({ nome: "Ana \ud800 Souza", mensagem: "oi \udc00" }, { atribuicao: { ...ATRIBUICAO, utm: { ...ATRIBUICAO.utm, source: "insta\ud83d" } } })
+    );
+    assert.ok(r.ok, `recusou: ${camposDe(r).join(", ")}`);
+    assert.equal(r.dados.nome, "Ana � Souza");
+    assert.equal(r.dados.mensagem, "oi �");
+    assert.equal(r.dados.utmSource, "insta�");
+    for (const valor of Object.values(r.dados)) {
+      if (typeof valor === "string") assert.doesNotMatch(valor, /[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]/, valor);
+    }
+  });
+
+  test("data de envio fora de 2000 a 2100 vira nula", async () => {
+    const base = await leadDoSite();
+    for (const enviadoEm of ["9999-12-31T23:59:59-05:00", "1999-12-31T23:59:59Z"]) {
+      const r = validarContato({ ...base, enviadoEm });
+      assert.ok(r.ok);
+      assert.equal(r.dados.enviadoEm, null, enviadoEm);
+    }
+  });
+
+  test("URL de entrada e referrer ficam só com origem e caminho: query pode trazer dado pessoal", async () => {
+    const r = validarContato(
+      await leadDoSite({}, { atribuicao: { ...ATRIBUICAO, landingUrl: "https://waveops.com.br/contato/?utm_source=x&email=ana@x.com#topo", referrer: "https://www.google.com/search?q=ana+souza" } })
+    );
+    assert.ok(r.ok);
+    assert.equal(r.dados.landingUrl, "https://waveops.com.br/contato/");
+    assert.equal(r.dados.referrer, "https://www.google.com/search");
+    const lixo = validarContato({ ...(await leadDoSite()), landingUrl: "não é url", referrer: "javascript:alert(1)" });
+    assert.ok(lixo.ok);
+    assert.equal(lixo.ok && lixo.dados.landingUrl, null);
+    assert.equal(lixo.ok && lixo.dados.referrer, null);
   });
 
   test("o campo whatsapp do corpo é ignorado: o telefone vale", async () => {

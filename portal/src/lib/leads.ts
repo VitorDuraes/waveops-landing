@@ -99,8 +99,15 @@ export function validarEmail(valor: unknown): boolean {
 
 // --- Limpeza -------------------------------------------------------------------------
 
-// Corta sem deixar metade de um par substituto (emoji) no fim: o Postgres aceitaria, mas
-// a tela mostraria lixo.
+// Substituto solto (metade de um emoji) não é UTF-8 válido, e o Postgres recusa: a rota
+// respondia 503 a todo envio da sessão. O próprio site gera isso, porque atribuicao.js
+// corta a UTM com slice. Vira U+FFFD, como faria String.prototype.toWellFormed.
+const SUBSTITUTO_SOLTO = /[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]/g;
+function bemFormado(texto: string): string {
+  return texto.replace(SUBSTITUTO_SOLTO, "�");
+}
+
+// Corta sem deixar metade de um par substituto (emoji) no fim.
 function cortar(texto: string, limite: number): string {
   if (texto.length <= limite) return texto;
   const corte = texto.slice(0, limite);
@@ -112,7 +119,7 @@ function cortar(texto: string, limite: number): string {
 // quebra e tabulação viram espaço, espaços repetidos viram um. Vazio vira nulo.
 function umaLinha(valor: unknown, limite: number): string | null {
   if (typeof valor !== "string") return null;
-  const limpo = valor
+  const limpo = bemFormado(valor)
     .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, "")
     .replace(/\s+/g, " ")
     .trim();
@@ -124,7 +131,7 @@ function umaLinha(valor: unknown, limite: number): string | null {
 // resto do controle, inclusive o NUL que o Postgres recusa em coluna de texto.
 function textoLivre(valor: unknown, limite: number): string | null {
   if (typeof valor !== "string") return null;
-  const limpo = valor
+  const limpo = bemFormado(valor)
     .replace(/\r\n?/g, "\n")
     .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, "")
     .trim();
@@ -138,8 +145,32 @@ function dataIso(valor: unknown): Date | null {
   return Number.isFinite(data.getTime()) ? data : null;
 }
 
+// Relógio do navegador, só referência: fora de 2000 a 2100 é lixo, e um ano com 5 dígitos
+// derrubava a gravação.
+function dataDeEnvio(valor: unknown): Date | null {
+  const data = dataIso(valor);
+  if (!data) return null;
+  const ano = data.getUTCFullYear();
+  return ano >= 2000 && ano <= 2100 ? data : null;
+}
+
+// URL de entrada e referrer ficam só com origem e caminho. A query pode trazer e-mail,
+// telefone ou token (o funil guarda só host e caminho pelo mesmo motivo), e a UTM já vem
+// separada nos campos utm_*. Só http e https.
+function urlSemConsulta(valor: unknown): string | null {
+  const texto = umaLinha(valor, LIMITE.url);
+  if (!texto) return null;
+  try {
+    const url = new URL(texto);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+    return cortar(`${url.origin}${url.pathname}`, LIMITE.url);
+  } catch {
+    return null;
+  }
+}
+
 function emailComRegrasDoServidor(valor: unknown): { email: string; valido: boolean } {
-  const email = normalizarEmail(valor);
+  const email = bemFormado(normalizarEmail(valor));
   const valido = validarEmail(email) && email.length <= LIMITE.email && !/[\u0000-\u001f\u007f]/.test(email);
   return { email, valido };
 }
@@ -152,8 +183,10 @@ function emailComRegrasDoServidor(valor: unknown): { email: string; valido: bool
 // validação e volta 422.
 export function ehRoboDeFormulario(corpo: unknown): boolean {
   if (!ehCorpo(corpo)) return false;
+  // Sem String(isca): um objeto com toString inválido lançava erro e a rota caía com 500
+  // sem CORS. Texto conta se não for só espaço; qualquer outro valor presente conta.
   const isca = corpo.website;
-  if (isca !== undefined && isca !== null && String(isca).trim() !== "") return true;
+  if (typeof isca === "string" ? isca.trim() !== "" : isca !== undefined && isca !== null) return true;
   const tempo = corpo.preenchidoEmMs;
   return typeof tempo === "number" && Number.isFinite(tempo) && tempo < TEMPO_MINIMO_MS;
 }
@@ -219,11 +252,11 @@ function comum(corpo: Corpo, versaoContrato: number, origem: string, contrato: s
     utmCampaign: umaLinha(corpo.utm_campaign, LIMITE.utm),
     utmContent: umaLinha(corpo.utm_content, LIMITE.utm),
     utmTerm: umaLinha(corpo.utm_term, LIMITE.utm),
-    referrer: umaLinha(corpo.referrer, LIMITE.url),
-    landingUrl: umaLinha(corpo.landingUrl, LIMITE.url),
+    referrer: urlSemConsulta(corpo.referrer),
+    landingUrl: urlSemConsulta(corpo.landingUrl),
     primeiraFonte: umaLinha(corpo.primeiraFonte, LIMITE.curto),
     pagina: umaLinha(corpo.pagina, LIMITE.curto),
-    enviadoEm: dataIso(corpo.enviadoEm),
+    enviadoEm: dataDeEnvio(corpo.enviadoEm),
     preenchidoEmMs: tempoValido ? Math.min(Math.max(Math.round(tempo), 0), MAIOR_INT32) : null,
   };
 }

@@ -1,3 +1,5 @@
+import { isIP } from "node:net";
+
 // IP do cliente, para o limite de volume por IP e para o hash diário do visitante.
 // Função pura (testada em tests/unit/ip-do-cliente.test.ts); quem lê o env é
 // src/server/ratelimit.ts.
@@ -9,16 +11,23 @@
 // 2. x-real-ip, posto pelo proxy do Railway.
 // 3. O ÚLTIMO valor de x-forwarded-for, posto pelo proxy mais próximo. Nunca o primeiro,
 //    que o cliente forja à vontade. [M5 do audit 2026-06-28; CF corrigido em 2026-10-10]
+//
+// Valor que não é IP é descartado: lixo ou texto gigante não vira chave no limitador.
+function ip(valor: string | null | undefined): string | null {
+  const texto = valor?.trim().slice(0, 64);
+  return texto && isIP(texto) ? texto : null;
+}
+
 export function ipDoCliente(headers: Headers, confiarCloudflare: boolean): string {
   if (confiarCloudflare) {
-    const cf = headers.get("cf-connecting-ip")?.trim();
+    const cf = ip(headers.get("cf-connecting-ip"));
     if (cf) return cf;
   }
-  const real = headers.get("x-real-ip")?.trim();
+  const real = ip(headers.get("x-real-ip"));
   if (real) return real;
   const partes = (headers.get("x-forwarded-for") ?? "")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
-  return partes.length ? partes[partes.length - 1] : "desconhecido";
+  return ip(partes[partes.length - 1]) ?? "desconhecido";
 }

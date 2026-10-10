@@ -46,4 +46,10 @@ describe("links do portal para o site", () => {
     const fora = urls.filter(({ valor }) => !PERMITIDOS.has(valor));
     assert.deepEqual(fora, [], `use a raiz ou uma destas âncoras, que funcionam no site atual e no novo: ${[...PERMITIDOS].join(", ")}`);
   });
+
+  test("nenhum link relativo para a raiz do portal", () => {
+    // A raiz do portal redireciona para /cliente/login: "/" e "/#contato" nunca chegam ao site.
+    const relativos = ocorrencias(/href=["'](\/(?:#[^"']*)?)["']/g);
+    assert.deepEqual(relativos, [], "para ir ao site, use a URL absoluta (https://waveops.com.br/)");
+  });
 });

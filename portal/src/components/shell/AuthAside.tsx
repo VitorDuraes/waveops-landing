@@ -14,7 +14,7 @@ export function AuthAside({
   return (
     <div className="auth-aside">
       <div className="glow" />
-      <Link className="brand" href="/">
+      <Link className="brand" href="https://waveops.com.br/">
         <BrandMark size={34} /> Wave<span className="v">Ops</span>
       </Link>
       <div className="auth-pitch">

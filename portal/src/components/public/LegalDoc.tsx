@@ -17,7 +17,7 @@ export function LegalDoc({
     <>
       <PublicNav />
       <div className="pub-wrap" style={{ maxWidth: 760 }}>
-        <Link className="btn btn-quiet btn-sm" href="/" style={{ marginBottom: 18 }}>
+        <Link className="btn btn-quiet btn-sm" href="https://waveops.com.br/" style={{ marginBottom: 18 }}>
           <Icon name="chevronLeft" /> Voltar ao site
         </Link>
         <h1 style={{ fontSize: 30, marginBottom: 6 }}>{title}</h1>

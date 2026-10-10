@@ -116,38 +116,35 @@ export async function listarLeads(): Promise<LeadDto[]> {
   return linhas.map(paraDto);
 }
 
-// "atendido" grava a hora em atendidoEm, "novo" zera. Pedir o status que o lead já tem
-// não muda nada e não gera linha de auditoria (mudou: false).
+// "atendido" grava a hora em atendidoEm, "novo" zera. O updateMany só casa com o lead que
+// ainda não está no status pedido, e a auditoria só entra quando ele mudou uma linha
+// (count 1): de dois pedidos iguais ao mesmo tempo, só um muda o lead e só um audita. O
+// segundo espera o primeiro terminar, não casa mais e cai em mudou: false, igual a pedir
+// o status que o lead já tinha. Tudo na mesma transação: a mudança e a auditoria entram
+// juntas ou nenhuma entra.
 export async function mudarStatusLead(id: string, status: LeadStatus, por: string): Promise<ResultadoStatus> {
   if (!env.hasDb()) return { ok: false, motivo: "indisponivel" };
-  const db = getPrisma();
 
-  const atual = await db.lead.findUnique({ where: { id }, select: CAMPOS });
-  if (!atual) return { ok: false, motivo: "nao_encontrado" };
-  if (atual.status === status) return { ok: true, lead: paraDto(atual), mudou: false };
-
-  try {
-    // A mudança e a linha de auditoria andam juntas: as duas entram ou nenhuma.
-    const [atualizado] = await db.$transaction([
-      db.lead.update({
-        where: { id },
-        data: { status, atendidoEm: status === "atendido" ? new Date() : null },
-        select: CAMPOS,
-      }),
-      db.auditoria.create({
+  return getPrisma().$transaction(async (tx): Promise<ResultadoStatus> => {
+    const { count } = await tx.lead.updateMany({
+      where: { id, status: { not: status } },
+      data: { status, atendidoEm: status === "atendido" ? new Date() : null },
+    });
+    // count 0 é lead inexistente ou lead que já estava nesse status: a leitura separa os dois.
+    const lead = await tx.lead.findUnique({ where: { id }, select: CAMPOS });
+    if (!lead) return { ok: false, motivo: "nao_encontrado" };
+    if (count === 1) {
+      await tx.auditoria.create({
         data: {
           acao: status === "atendido" ? "lead.atendido" : "lead.reaberto",
           alvoId: id,
           por,
-          detalhe: detalheDe(atual),
+          detalhe: detalheDe(lead),
         },
-      }),
-    ]);
-    return { ok: true, lead: paraDto(atualizado), mudou: true };
-  } catch (e) {
-    if (registroNaoExiste(e)) return { ok: false, motivo: "nao_encontrado" };
-    throw e;
-  }
+      });
+    }
+    return { ok: true, lead: paraDto(lead), mudou: count === 1 };
+  });
 }
 
 // Apagar a pedido do titular. Some o lead inteiro; a auditoria fica com o id, o tipo e a

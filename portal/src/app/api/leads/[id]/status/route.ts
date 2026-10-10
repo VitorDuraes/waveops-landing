@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { guard, ok, err } from "@/server/http";
 import { log } from "@/server/log";
 import { ERRO_SEM_BANCO, descreverErro, mudarStatusLead } from "@/server/leads-admin";
-import { statusDoCorpo } from "@/lib/leads-admin";
+import { ERRO_SEM_JSON, ehJson, statusDoCorpo } from "@/lib/leads-admin";
 
-// Marca o lead como atendido ou reabre. Cada mudança grava uma linha em Auditoria.
+// Marca o lead como atendido ou reabre. Cada mudança grava uma linha em Auditoria. Só
+// aceita JSON: sem isso, um formulário de outra origem alcançaria a rota com o cookie.
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const u = await guard(["admin"]);
   if (u instanceof NextResponse) return u;
+  if (!ehJson(req.headers.get("content-type"))) return err(ERRO_SEM_JSON, 415);
   const { id } = await params;
   const corpo: unknown = await req.json().catch(() => null);
   const status = statusDoCorpo(corpo);

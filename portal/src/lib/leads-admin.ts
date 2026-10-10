@@ -1,6 +1,9 @@
 // Tipos e funções puras da tela de leads do admin (/admin/leads). Sem banco e sem
 // framework: roda na rota, no navegador e nos testes (tests/unit/leads-admin.test.ts).
 
+// A regra do telefone (só dígitos, sem o 55) é a de quem grava o lead, em lib/leads.ts.
+import { normalizarTelefone, soDigitos } from "./leads";
+
 export type LeadTipo = "contato" | "interesse";
 export type LeadStatus = "novo" | "atendido";
 
@@ -62,17 +65,11 @@ export function statusDoCorpo(corpo: unknown): LeadStatus | null {
 
 /* ---------------- telefone ---------------- */
 
-function soDigitos(valor: string | null | undefined): string {
-  return (valor ?? "").replace(/\D/g, "");
-}
-
-// Número nacional: DDD mais 8 ou 9 dígitos. O site já tira o 55, mas quem chama a API
-// direto pode mandar com ele, então 12 ou 13 dígitos começando em 55 também valem.
-// Qualquer outro tamanho devolve vazio.
+// Número nacional: DDD mais 8 ou 9 dígitos, já sem o 55. Qualquer outro tamanho devolve
+// vazio, e a tela mostra o que foi gravado sem máscara e sem link.
 function telefoneNacional(valor: string | null | undefined): string {
-  const d = soDigitos(valor);
-  if ((d.length === 12 || d.length === 13) && d.startsWith("55")) return d.slice(2);
-  return d.length === 10 || d.length === 11 ? d : "";
+  const n = normalizarTelefone(valor);
+  return n.length === 10 || n.length === 11 ? n : "";
 }
 
 // "11912345678" vira "(11) 91234-5678". Tamanho fora do padrão volta como veio, só

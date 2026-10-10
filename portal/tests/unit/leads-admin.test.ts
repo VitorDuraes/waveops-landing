@@ -69,8 +69,17 @@ describe("formatarTelefone: máscara brasileira", () => {
     assert.equal(formatarTelefone("5511912345678"), "(11) 91234-5678");
   });
 
+  test("deve tirar o 55 de um fixo quando o número chega com 12 dígitos", () => {
+    assert.equal(formatarTelefone("551123456789"), "(11) 2345-6789");
+  });
+
   test("deve manter o DDD 55 quando o número tem 11 dígitos", () => {
     assert.equal(formatarTelefone("55991234567"), "(55) 99123-4567");
+  });
+
+  test("deve devolver só os dígitos quando o número de 12 dígitos não começa com 55", () => {
+    assert.equal(formatarTelefone("111234567890"), "111234567890");
+    assert.equal(linkWhatsapp("111234567890"), null);
   });
 
   test("deve ignorar a máscara quando o número já vem formatado", () => {

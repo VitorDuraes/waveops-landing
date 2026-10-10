@@ -1173,6 +1173,20 @@ test('fluxo do lead: erro no nó Code também responde 503 e falha a execução'
   assert.match(r.mensagemDeErro, /^Falha na validação\. O site recebeu 503\. falha simulada no Code$/);
 });
 
+test('fluxo: o workflow publicado, sem os valores do limite, responde 503 em todo envio e nunca grava', () => {
+  const casos = [[leadPublicado, corpoLead(), COLUNAS_LEAD], [interessePublicado, corpoInteresse(), COLUNAS_INTERESSE]];
+  for (const [wf, corpo, colunas] of casos) {
+    const planilha = planilhaVazia(colunas);
+    for (const origin of ['https://waveops.com.br', 'https://exemplo.com']) {
+      const r = simular(wf, { corpo, planilha, headers: { origin } });
+      assert.deepEqual(respostaDe(r), [503], `${wf.name}, Origin ${origin}`);
+      assert.equal(r.execucaoFalhou, true, 'a execução falha para acionar o aviso ao time');
+      assert.match(r.mensagemDeErro, /^Falha na validação\. O site recebeu 503\. Defina LIMITE_POR_MINUTO/);
+    }
+    assert.equal(planilha.linhas.length, 0);
+  }
+});
+
 test('fluxo da lista: inscrição nova grava; e-mail repetido recebe a mesma resposta sem nova linha', () => {
   const planilha = planilhaVazia(COLUNAS_INTERESSE);
   const primeira = simular(interesse, { corpo: corpoInteresse(), planilha });

@@ -54,6 +54,13 @@ const REDIRECTS = [
   ['/solucoes', '/solucoes/'],
 ];
 
+/* O Netlify injeta uma barra de colaboração (Netlify Drawer) só em Deploy Preview. Ela tenta
+   abrir um iframe de app.netlify.com e a CSP do site (frame-src 'none') bloqueia: é o
+   comportamento certo, não um defeito do site. Vira aviso, não falha. */
+const BARRA_NETLIFY = /app\.netlify\.com|netlify-cdp|\/\.netlify\/scripts\//;
+/** @type {Set<string>} */
+const avisos = new Set();
+
 /** @type {string[]} */
 const falhas = [];
 /** @param {boolean} ok @param {string} texto */
@@ -85,7 +92,10 @@ async function abrir(/** @type {typeof LARGURAS[number]} */ largura) {
   });
   const aba = await contexto.newPage();
   aba.on('console', (m) => {
-    if (m.type() === 'error') erros.push(m.text().slice(0, 160));
+    if (m.type() !== 'error') return;
+    const texto = m.text().slice(0, 160);
+    if (BARRA_NETLIFY.test(texto)) avisos.add(texto);
+    else erros.push(texto);
   });
   aba.on('pageerror', (e) => erros.push(e.message.slice(0, 160)));
   return { contexto, aba, erros, fora };
@@ -258,6 +268,7 @@ try {
 }
 
 resultado.falhas = falhas;
+resultado.avisos = [...avisos];
 const saida = path.join(raizRepo, '.tmp-qa', 'preview');
 fs.mkdirSync(saida, { recursive: true });
 fs.writeFileSync(path.join(saida, 'resultado.json'), JSON.stringify(resultado, null, 2));
@@ -265,5 +276,6 @@ console.log(`preview: ${base}`);
 console.log(`páginas x larguras: ${/** @type {unknown[]} */ (resultado.paginas).length}; links internos conferidos: ${/** @type {{ internos: number }} */ (resultado.links).internos}`);
 console.log(`falhas: ${falhas.length}`);
 for (const f of falhas) console.log(`  ${f}`);
+if (avisos.size) console.log(`avisos: barra de colaboração do Netlify bloqueada pela CSP (só em Deploy Preview): ${avisos.size} mensagem(ns) distinta(s)`);
 console.log(`detalhe em ${path.relative(raizRepo, path.join(saida, 'resultado.json'))}`);
 process.exit(falhas.length ? 1 : 0);

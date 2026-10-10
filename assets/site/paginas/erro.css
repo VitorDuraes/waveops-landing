@@ -1,0 +1,14 @@
+/* WaveOps · página 404. */
+.wo-erro {
+  min-height: 56vh;
+  display: flex;
+  align-items: center;
+}
+
+.wo-erro__titulo {
+  margin-top: 16px;
+}
+
+.wo-erro__acoes {
+  margin-top: 32px;
+}

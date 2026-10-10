@@ -12,7 +12,15 @@
   # entao o build roda dentro de portal/. A landing (index.html, assets/, robots,
   # sitemap) fica na RAIZ do repo, um nivel acima: por isso copiamos de "../".
   # Monta um site estatico so com a landing (nao serve o codigo-fonte do repo).
-  command = "rm -rf _site && mkdir -p _site && cp ../index.html ../robots.txt ../sitemap.xml ../llms.txt _site/ && cp -r ../assets _site/"
+  #
+  # Site de varias paginas (10/2026): cada pagina e uma pasta com index.html e o
+  # 404.html fica na raiz (o Netlify serve ele sozinho para rota inexistente).
+  # Pagina nova entra AQUI e no ignore abaixo, no mesmo commit, senao nao vai ao
+  # ar. O teste tests/site/unit/netlify.test.mjs confere as duas listas contra
+  # dev/site/paginas.json, e o CI monta este mesmo cp com node dev/site/build.mjs
+  # --dist. Nao use como pasta de pagina: api, admin, cliente, checkout, termos,
+  # privacidade (os 301 com force abaixo sequestram essas rotas).
+  command = "rm -rf _site && mkdir -p _site && cp ../index.html ../404.html ../robots.txt ../sitemap.xml ../llms.txt _site/ && cp -r ../assets ../solucoes ../plataforma ../projetos-sob-medida ../contato ../demonstracoes-tecnicas _site/"
   publish = "_site"
 
   # O Netlify ignora o build quando nada muda dentro do base directory, que aqui
@@ -30,7 +38,7 @@
   # ACRESCENTA a landing. Nada passa a deployar menos do que ja deploya. E se o
   # comando quebrar, o exit vira diferente de 0 e o Netlify builda: a falha erra
   # para o lado de publicar demais, nunca para o lado de congelar a landing.
-  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ../index.html ../assets ../robots.txt ../sitemap.xml ../llms.txt ../netlify.toml ."
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ../index.html ../404.html ../assets ../solucoes ../plataforma ../projetos-sob-medida ../contato ../demonstracoes-tecnicas ../robots.txt ../sitemap.xml ../llms.txt ../netlify.toml ."
 
 # Rede de seguranca: qualquer rota de portal que caia aqui (bookmark antigo, link
 # indexado, URL digitada) salta pro Railway, pra nunca existir um 2o portal/banco

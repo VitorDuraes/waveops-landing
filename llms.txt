@@ -1,47 +1,31 @@
 # WaveOps
 
-> A WaveOps entrega automação, integração de sistemas, dashboards sob medida e agentes de IA
-> supervisionados para a operação de quem vende. O modelo é assinatura mensal e inclui hospedagem,
-> monitoramento, correção de falha e evolução contínua do que está no ar.
+> Consultoria, engenharia de software, automação e inteligência artificial para empresas que querem
+> operar melhor. A WaveOps desenvolve sistemas, integra ferramentas e automatiza operações. Projetos
+> sob medida estão disponíveis. A Plataforma WaveOps está em desenvolvimento e ainda não está
+> disponível para contratação.
 
-O site é uma página única em português do Brasil. Todas as seções abaixo são âncoras da mesma URL.
+O site tem seis páginas em português do Brasil. Contato: WhatsApp +55 34 99177 5784.
 
-Contato: WhatsApp +55 34 99177 5784. E-mail contato@waveops.com.br.
+## Páginas
 
-## O que a WaveOps faz
+- [Início](https://waveops.com.br/): três entradas (soluções, plataforma e projetos sob medida),
+  frentes de engenharia e modelos de contratação.
+- [Soluções](https://waveops.com.br/solucoes/): cinco resultados de negócio. Vender mais, atender
+  melhor, operar com menos retrabalho, decidir com dados e crescer com segurança, cada um com os
+  sinais de que é o seu caso, o que a WaveOps constrói e como contratar.
+- [Plataforma](https://waveops.com.br/plataforma/): camada de gestão sobre os sistemas que a empresa
+  já usa. Está em desenvolvimento, nenhum módulo está aberto para contratação, e a página tem uma
+  lista de interesse.
+- [Projetos sob medida](https://waveops.com.br/projetos-sob-medida/): oito frentes de projeto, como
+  a WaveOps trabalha, modelos de contratação e perguntas frequentes.
+- [Contato](https://waveops.com.br/contato/): formulário com retorno por WhatsApp, e-mail ou ligação.
+- [Demonstrações técnicas](https://waveops.com.br/demonstracoes-tecnicas/): cenários simulados de
+  automação, sem dados de clientes.
 
-- [Automação de processos](https://waveops.com.br/#servicos): tarefa repetitiva passa a acontecer
-  sozinha. Gestão de lead, follow-up e cobrança saem das costas do time.
-- [Integração de sistemas](https://waveops.com.br/#servicos): WhatsApp, CRM, checkout, planilha e
-  APIs conectados em tempo real, em vez de trabalharem cada um por conta.
-- [Sistemas e dashboards sob medida](https://waveops.com.br/#servicos): substitui a planilha que
-  virou o sistema da empresa por uma plataforma web.
-- [Agentes de IA supervisionados](https://waveops.com.br/#servicos): tarefa específica, fonte de
-  dados definida, limite de atuação, registro de uso e revisão humana.
-- [Site que opera](https://waveops.com.br/#servicos): o site deixa de ser cartão de visita e passa a
-  alimentar a operação.
+## Como contratar
 
-## Como contratar e o que esperar
-
-- [Casos de uso](https://waveops.com.br/#casos): lead que chega e não recebe follow-up, ferramentas
-  desconectadas, planilha que virou sistema, time preso em atendimento e leitura de documento.
-- [Como funciona](https://waveops.com.br/#como): conversa, mapeamento, proposta, implantação,
-  validação e evolução.
-- [Planos](https://waveops.com.br/#pacotes): construir o projeto e manter o que está no ar. A
-  assinatura mensal cobre infra rodando, monitoramento, conserto das integrações, evolução contínua
-  e relatório mensal de valor.
-- [Perguntas frequentes](https://waveops.com.br/#faq): pré-requisito técnico, troca de ferramenta,
-  prazo, controle sobre a IA, suporte depois da entrega e como começar.
-- [Contato](https://waveops.com.br/#contato): formulário de diagnóstico e WhatsApp direto.
-
-## Fatos
-
-- Prazo: automação simples fica pronta em 3 a 7 dias úteis. Projeto maior depende do escopo e o
-  prazo fica definido na proposta.
-- Ferramentas: a WaveOps integra o que o cliente já usa. Só sugere trocar quando a ferramenta atual
-  é o gargalo.
-- IA: nenhum agente responde cliente sem supervisão. Todo agente tem função clara, fonte de dados
-  definida, limite de atuação, registro de uso e revisão humana.
-- Suporte: todo projeto entra com assinatura que mantém, monitora e evolui o que foi construído. O
-  tamanho da assinatura vem do que ficou no ar.
-- Diagnóstico inicial sem custo e sem compromisso.
+- Projeto, implementação e serviços gerenciados estão disponíveis. As condições de cada contrato são
+  definidas na proposta, depois do diagnóstico.
+- A assinatura da plataforma está em desenvolvimento, com planos em definição.
+- Agentes de IA trabalham com revisão humana.

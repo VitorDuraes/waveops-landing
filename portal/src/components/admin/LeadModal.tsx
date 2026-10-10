@@ -1,9 +1,12 @@
 "use client";
-import type { CSSProperties, ReactNode } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import { Icon } from "@/components/icons";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { useModal } from "@/components/providers";
+import { useModal, useToast } from "@/components/providers";
+import { CABECALHO_JSON, chamar } from "@/lib/leads-client";
 import {
+  avisoTitularApagado,
+  confirmacaoDoTitular,
   formatarDataHora,
   formatarTelefone,
   linkWhatsappDoLead,
@@ -11,7 +14,9 @@ import {
   rotuloCanal,
   rotuloFinalidade,
   rotuloTipo,
+  type CampoDoTitular,
   type LeadDto,
+  type ListaLeads,
 } from "@/lib/leads-admin";
 
 interface Item {
@@ -51,13 +56,54 @@ function Secao({ titulo, itens }: { titulo: string; itens: Item[] }) {
   );
 }
 
-// Modal com o registro completo do lead. Só leitura: marcar atendido, reabrir e apagar
-// ficam nas ações da tabela.
-export function LeadModalContent({ lead }: { lead: LeadDto }) {
+// Botão travado enquanto uma ação roda. O design system não tem estilo para :disabled.
+const TRAVADO: CSSProperties = { opacity: 0.55, cursor: "not-allowed" };
+
+// Modal com o registro completo do lead. Marcar atendido, reabrir e apagar um lead ficam
+// nas ações da tabela. Aqui só se apaga o titular inteiro: todos os leads com o mesmo
+// e-mail ou telefone, que é o que um pedido de exclusão (LGPD) pede. `onTitularApagado`
+// recarrega a lista de quem abriu o modal.
+export function LeadModalContent({ lead, onTitularApagado }: { lead: LeadDto; onTitularApagado?: () => void }) {
   const { closeModal } = useModal();
+  const toast = useToast();
+  // Campo cuja exclusão está em andamento. Trava os dois botões.
+  const [ocupado, setOcupado] = useState<CampoDoTitular | null>(null);
   const wa = linkWhatsappDoLead(lead);
   const contato = lead.tipo === "contato";
   const utm = resumoUtm(lead);
+
+  async function apagarTodos(campo: CampoDoTitular) {
+    const valor = campo === "email" ? lead.email : lead.telefone;
+    if (!valor || ocupado) return;
+    setOcupado(campo);
+    try {
+      // A contagem do confirm vem da própria consulta: e-mail e telefone são buscas exatas, o
+      // total dela é o número de linhas que a exclusão vai pegar. Vai no corpo de um POST: o
+      // e-mail e o telefone do titular não podem ficar numa URL.
+      const { total } = await chamar<ListaLeads>("/api/leads/consulta", {
+        method: "POST",
+        headers: CABECALHO_JSON,
+        body: JSON.stringify({ busca: valor }),
+      });
+      if (total === 0) {
+        toast("Nenhum lead encontrado com esse dado", "info");
+        return;
+      }
+      if (!window.confirm(confirmacaoDoTitular(campo, valor, total))) return;
+      const r = await chamar<{ quantidade: number }>("/api/leads/apagar-titular", {
+        method: "POST",
+        headers: CABECALHO_JSON,
+        body: JSON.stringify({ [campo]: valor }),
+      });
+      closeModal();
+      toast(avisoTitularApagado(r.quantidade));
+      onTitularApagado?.();
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Não foi possível apagar os leads.", "info");
+    } finally {
+      setOcupado(null);
+    }
+  }
 
   const pessoa: Item[] = contato
     ? [
@@ -136,6 +182,40 @@ export function LeadModalContent({ lead }: { lead: LeadDto }) {
             { rotulo: "Atendido em", valor: lead.atendidoEm ? formatarDataHora(lead.atendidoEm) : "Ainda não" },
           ]}
         />
+
+        {(lead.email || lead.telefone) && (
+          <section style={{ marginTop: 22 }}>
+            <h4 className="section-title">Apagar a pedido do titular</h4>
+            <p className="hint" style={{ marginTop: 0, marginBottom: 12 }}>
+              Cada botão apaga todos os leads com o mesmo e-mail ou telefone, não só este. Você vê quantos são antes
+              de confirmar. Não dá para desfazer.
+            </p>
+            <div className="flex gap8 wrap">
+              {lead.email && (
+                <button
+                  type="button"
+                  className="btn btn-danger btn-sm"
+                  disabled={ocupado !== null}
+                  style={ocupado !== null ? TRAVADO : undefined}
+                  onClick={() => void apagarTodos("email")}
+                >
+                  <Icon name="trash" /> {ocupado === "email" ? "Contando..." : "Apagar todos deste e-mail"}
+                </button>
+              )}
+              {lead.telefone && (
+                <button
+                  type="button"
+                  className="btn btn-danger btn-sm"
+                  disabled={ocupado !== null}
+                  style={ocupado !== null ? TRAVADO : undefined}
+                  onClick={() => void apagarTodos("telefone")}
+                >
+                  <Icon name="trash" /> {ocupado === "telefone" ? "Contando..." : "Apagar todos deste telefone"}
+                </button>
+              )}
+            </div>
+          </section>
+        )}
       </div>
       <div className="modal-foot">
         <button type="button" className="btn btn-ghost" onClick={closeModal}>

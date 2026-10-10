@@ -6,6 +6,7 @@ import {
   LIMITE_LEADS,
   escaparCuringasLike,
   interpretarBusca,
+  type AlvoDoTitular,
   type FiltroLeads,
   type LeadDto,
   type LeadStatus,
@@ -195,6 +196,40 @@ export async function mudarStatusLead(id: string, status: LeadStatus, por: strin
       });
     }
     return { ok: true, lead: paraDto(lead), mudou: count === 1 };
+  });
+}
+
+export type ResultadoTitular = { ok: true; quantidade: number } | { ok: false; motivo: FalhaLead };
+
+// Apaga todos os leads de um titular, pelo e-mail ou pelo telefone (com os dois, apaga o
+// que casar com qualquer um). Numa transação só: lê os ids, apaga esses ids e grava UMA
+// linha de auditoria, sem dado pessoal: a quantidade apagada e os tipos que havia. O
+// alvoId é o do primeiro lead apagado: um id sintético feito do e-mail ou do telefone
+// seria dado pessoal com outra roupa. Sem nenhum lead que case, não apaga nem audita.
+export async function apagarTitular(alvo: AlvoDoTitular, por: string): Promise<ResultadoTitular> {
+  if (!env.hasDb()) return { ok: false, motivo: "indisponivel" };
+  const criterios: Prisma.LeadWhereInput[] = [];
+  if (alvo.email) criterios.push({ email: alvo.email });
+  if (alvo.telefone) criterios.push({ telefone: alvo.telefone });
+  // A rota já exige um dos dois. Sem critério, um OR vazio não casaria nada de qualquer jeito.
+  if (criterios.length === 0) return { ok: false, motivo: "nao_encontrado" };
+
+  return getPrisma().$transaction(async (tx): Promise<ResultadoTitular> => {
+    const linhas = await tx.lead.findMany({ where: { OR: criterios }, select: { id: true, tipo: true } });
+    if (linhas.length === 0) return { ok: false, motivo: "nao_encontrado" };
+    // Apaga por id, não pela condição: o que chegar depois da leitura fica de fora, e a
+    // auditoria conta só o que esta transação apagou.
+    const { count } = await tx.lead.deleteMany({ where: { id: { in: linhas.map((l) => l.id) } } });
+    if (count === 0) return { ok: false, motivo: "nao_encontrado" };
+    await tx.auditoria.create({
+      data: {
+        acao: "lead.titular_apagado",
+        alvoId: linhas[0].id,
+        por,
+        detalhe: { quantidade: count, tipos: [...new Set(linhas.map((l) => l.tipo))].sort() },
+      },
+    });
+    return { ok: true, quantidade: count };
   });
 }
 

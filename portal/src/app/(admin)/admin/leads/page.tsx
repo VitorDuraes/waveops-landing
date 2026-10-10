@@ -376,7 +376,7 @@ export default function LeadsPage() {
                         key={l.id}
                         lead={l}
                         travado={travado}
-                        onAbrir={(lead) => openModal(<LeadModalContent lead={lead} />)}
+                        onAbrir={(lead) => openModal(<LeadModalContent lead={lead} onTitularApagado={req.reload} />)}
                         onStatus={mudarStatus}
                         onApagar={apagar}
                       />

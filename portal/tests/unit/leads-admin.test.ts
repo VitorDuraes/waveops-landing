@@ -1,18 +1,28 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import {
+  TAMANHO_MAXIMO_BUSCA,
   assuntosDoLead,
+  avisoTitularApagado,
+  confirmacaoDoTitular,
+  ehJson,
   ehStatusLead,
   filtrarLeads,
   formatarDataHora,
   formatarTelefone,
+  interpretarBusca,
+  lerAlvoDoTitular,
+  lerFiltroDaBusca,
   linkWhatsapp,
+  linkWhatsappDoLead,
+  montarUrlDeLeads,
   resumoDaLista,
   resumoUtm,
   rotuloCanal,
   rotuloFinalidade,
   rotuloTipo,
   statusDoCorpo,
+  type FiltroLeads,
   type LeadDto,
 } from "../../src/lib/leads-admin";
 import { statusMeta } from "../../src/lib/format";
@@ -344,6 +354,241 @@ describe("filtrarLeads: tipo, status e busca", () => {
     const r = filtrarLeads(original, { ...sem, tipo: "contato" });
     assert.notEqual(r, original);
     assert.equal(original.length, 3);
+  });
+});
+
+describe("linkWhatsappDoLead: só no canal que a pessoa escolheu", () => {
+  test("deve montar o link quando o canal é WhatsApp e o telefone é válido", () => {
+    assert.equal(linkWhatsappDoLead(lead()), "https://wa.me/5511912345678");
+  });
+
+  test("deve devolver null quando o canal é ligação, mesmo com telefone válido", () => {
+    assert.equal(linkWhatsappDoLead(lead({ canalRetorno: "ligacao" })), null);
+  });
+
+  test("deve devolver null quando o canal é e-mail", () => {
+    assert.equal(linkWhatsappDoLead(lead({ canalRetorno: "email" })), null);
+  });
+
+  test("deve devolver null quando não há canal, como na lista de interesse", () => {
+    assert.equal(linkWhatsappDoLead(lead({ canalRetorno: null, telefone: null })), null);
+  });
+
+  test("deve devolver null quando o canal é WhatsApp mas o telefone não serve", () => {
+    assert.equal(linkWhatsappDoLead(lead({ telefone: null })), null);
+    assert.equal(linkWhatsappDoLead(lead({ telefone: "123" })), null);
+  });
+});
+
+describe("ehJson: Content-Type das rotas de escrita", () => {
+  test("deve aceitar application/json com ou sem charset e em qualquer caixa", () => {
+    assert.equal(ehJson("application/json"), true);
+    assert.equal(ehJson("application/json; charset=utf-8"), true);
+    assert.equal(ehJson("Application/JSON"), true);
+    assert.equal(ehJson("  application/json ;charset=UTF-8"), true);
+  });
+
+  test("deve recusar os tipos que uma página de outra origem manda sem preflight", () => {
+    assert.equal(ehJson("text/plain"), false);
+    assert.equal(ehJson("text/plain;charset=UTF-8"), false);
+    assert.equal(ehJson("application/x-www-form-urlencoded"), false);
+    assert.equal(ehJson("multipart/form-data; boundary=----x"), false);
+  });
+
+  test("deve recusar quando falta o cabeçalho", () => {
+    assert.equal(ehJson(null), false);
+    assert.equal(ehJson(undefined), false);
+    assert.equal(ehJson(""), false);
+  });
+
+  test("deve recusar tipos parecidos que não são application/json", () => {
+    assert.equal(ehJson("application/jsonp"), false);
+    assert.equal(ehJson("application/json5"), false);
+    assert.equal(ehJson("application/vnd.api+json"), false);
+    assert.equal(ehJson("text/json"), false);
+  });
+});
+
+describe("interpretarBusca: o que o servidor procura", () => {
+  test("deve tratar como e-mail exato, em minúsculas, o que tem arroba", () => {
+    assert.deepEqual(interpretarBusca("JOAO@Silva.com.br"), { tipo: "email", valor: "joao@silva.com.br" });
+    assert.deepEqual(interpretarBusca("  joao@silva.com.br  "), { tipo: "email", valor: "joao@silva.com.br" });
+  });
+
+  test("deve tratar como e-mail mesmo o que ainda está incompleto, sem virar busca por nome", () => {
+    assert.deepEqual(interpretarBusca("joao@"), { tipo: "email", valor: "joao@" });
+  });
+
+  test("deve normalizar o telefone quando a busca tem máscara, espaço ou o 55", () => {
+    assert.deepEqual(interpretarBusca("(11) 91234-5678"), { tipo: "telefone", valor: "11912345678" });
+    assert.deepEqual(interpretarBusca("+55 11 91234-5678"), { tipo: "telefone", valor: "11912345678" });
+    assert.deepEqual(interpretarBusca("11912345678"), { tipo: "telefone", valor: "11912345678" });
+    assert.deepEqual(interpretarBusca("5511912345678"), { tipo: "telefone", valor: "11912345678" });
+    assert.deepEqual(interpretarBusca("(21) 3333-4444"), { tipo: "telefone", valor: "2133334444" });
+  });
+
+  test("deve tratar como texto o número que não tem o tamanho de um telefone", () => {
+    assert.deepEqual(interpretarBusca("1234"), { tipo: "texto", valor: "1234" });
+    assert.deepEqual(interpretarBusca("123456789"), { tipo: "texto", valor: "123456789" });
+    assert.deepEqual(interpretarBusca("12345678901234"), { tipo: "texto", valor: "12345678901234" });
+  });
+
+  test("deve tratar como texto o que mistura letra e número", () => {
+    assert.deepEqual(interpretarBusca("joao2"), { tipo: "texto", valor: "joao2" });
+    assert.deepEqual(interpretarBusca("Loja 24h"), { tipo: "texto", valor: "Loja 24h" });
+  });
+
+  test("deve manter a caixa do texto, porque quem ignora a caixa é o banco", () => {
+    assert.deepEqual(interpretarBusca("  Silva & Filhos "), { tipo: "texto", valor: "Silva & Filhos" });
+  });
+
+  test("deve devolver null quando a busca está vazia", () => {
+    assert.equal(interpretarBusca(""), null);
+    assert.equal(interpretarBusca("   "), null);
+  });
+
+  test("deve cortar a busca no tamanho máximo", () => {
+    const r = interpretarBusca("a".repeat(TAMANHO_MAXIMO_BUSCA + 50));
+    assert.equal(r?.tipo, "texto");
+    assert.equal(r?.valor.length, TAMANHO_MAXIMO_BUSCA);
+  });
+});
+
+describe("lerFiltroDaBusca: parâmetros de GET /api/leads", () => {
+  const ler = (consulta: string) => lerFiltroDaBusca(new URLSearchParams(consulta));
+
+  test("deve devolver tudo como todos quando não há parâmetro", () => {
+    assert.deepEqual(ler(""), { ok: true, filtro: { tipo: "todos", status: "todos", busca: "" } });
+  });
+
+  test("deve ler tipo, status e busca quando os valores são válidos", () => {
+    assert.deepEqual(ler("tipo=contato&status=novo&busca=maria"), {
+      ok: true,
+      filtro: { tipo: "contato", status: "novo", busca: "maria" },
+    });
+    assert.deepEqual(ler("tipo=interesse&status=atendido"), {
+      ok: true,
+      filtro: { tipo: "interesse", status: "atendido", busca: "" },
+    });
+  });
+
+  test("deve tratar vazio e todos como sem filtro", () => {
+    assert.deepEqual(ler("tipo=&status=todos"), { ok: true, filtro: { tipo: "todos", status: "todos", busca: "" } });
+  });
+
+  test("deve recusar tipo e status fora da lista, para um typo não virar sem filtro", () => {
+    assert.deepEqual(ler("tipo=lista"), { ok: false, erro: "Tipo inválido. Use: contato ou interesse." });
+    assert.deepEqual(ler("status=NOVO"), { ok: false, erro: "Status inválido. Use: novo ou atendido." });
+  });
+
+  test("deve tirar os espaços da busca e cortar no tamanho máximo", () => {
+    assert.deepEqual(ler("busca=%20%20joao%20%20"), { ok: true, filtro: { tipo: "todos", status: "todos", busca: "joao" } });
+    const longa = ler("busca=" + "a".repeat(TAMANHO_MAXIMO_BUSCA + 10));
+    assert.ok(longa.ok && longa.filtro.busca.length === TAMANHO_MAXIMO_BUSCA);
+  });
+});
+
+describe("montarUrlDeLeads: URL que a tela chama", () => {
+  const sem: FiltroLeads = { tipo: "todos", status: "todos", busca: "" };
+
+  test("deve devolver a rota pura quando nada filtra", () => {
+    assert.equal(montarUrlDeLeads(sem), "/api/leads");
+    assert.equal(montarUrlDeLeads({ ...sem, busca: "   " }), "/api/leads");
+  });
+
+  test("deve incluir só o que filtra", () => {
+    assert.equal(montarUrlDeLeads({ ...sem, tipo: "contato" }), "/api/leads?tipo=contato");
+    assert.equal(montarUrlDeLeads({ ...sem, status: "novo", busca: "maria" }), "/api/leads?status=novo&busca=maria");
+  });
+
+  test("deve codificar a busca quando tem arroba, espaço, e comercial ou acento", () => {
+    assert.equal(montarUrlDeLeads({ ...sem, busca: "joao@silva.com.br" }), "/api/leads?busca=joao%40silva.com.br");
+    assert.equal(montarUrlDeLeads({ ...sem, busca: "Silva & Filhos" }), "/api/leads?busca=Silva+%26+Filhos");
+  });
+
+  test("deve voltar igual depois de lida pela rota", () => {
+    const filtros: FiltroLeads[] = [
+      sem,
+      { tipo: "contato", status: "atendido", busca: "João D'Ávila & Cia" },
+      { tipo: "interesse", status: "todos", busca: "joao@silva.com.br" },
+      { tipo: "todos", status: "novo", busca: "+55 (11) 91234-5678" },
+      { tipo: "todos", status: "todos", busca: "100% 50_50 a+b=c?" },
+    ];
+    for (const filtro of filtros) {
+      const url = new URL(montarUrlDeLeads(filtro), "http://localhost");
+      assert.deepEqual(lerFiltroDaBusca(url.searchParams), { ok: true, filtro });
+    }
+  });
+});
+
+describe("lerAlvoDoTitular: corpo de POST /api/leads/apagar-titular", () => {
+  test("deve normalizar o e-mail quando só ele vem", () => {
+    assert.deepEqual(lerAlvoDoTitular({ email: "  JOAO@Silva.com.br " }), { ok: true, alvo: { email: "joao@silva.com.br" } });
+  });
+
+  test("deve normalizar o telefone, sem máscara e sem o 55, quando só ele vem", () => {
+    assert.deepEqual(lerAlvoDoTitular({ telefone: "(11) 91234-5678" }), { ok: true, alvo: { telefone: "11912345678" } });
+    assert.deepEqual(lerAlvoDoTitular({ telefone: "+55 11 91234-5678" }), { ok: true, alvo: { telefone: "11912345678" } });
+  });
+
+  test("deve aceitar os dois campos juntos", () => {
+    assert.deepEqual(lerAlvoDoTitular({ email: "a@b.com", telefone: "11912345678" }), {
+      ok: true,
+      alvo: { email: "a@b.com", telefone: "11912345678" },
+    });
+  });
+
+  test("deve tratar nulo, vazio e só espaço como campo ausente", () => {
+    assert.deepEqual(lerAlvoDoTitular({ email: null, telefone: "11912345678" }), { ok: true, alvo: { telefone: "11912345678" } });
+    assert.deepEqual(lerAlvoDoTitular({ email: "a@b.com", telefone: "  " }), { ok: true, alvo: { email: "a@b.com" } });
+  });
+
+  test("deve exigir pelo menos um dos dois campos", () => {
+    const erro = { ok: false, erro: "Informe o e-mail ou o telefone do titular." };
+    assert.deepEqual(lerAlvoDoTitular({}), erro);
+    assert.deepEqual(lerAlvoDoTitular({ email: "", telefone: "  " }), erro);
+    assert.deepEqual(lerAlvoDoTitular({ email: null, telefone: null }), erro);
+    assert.deepEqual(lerAlvoDoTitular({ nome: "João" }), erro);
+  });
+
+  test("deve recusar corpo que não é objeto", () => {
+    for (const corpo of [null, undefined, "a@b.com", 42, ["a@b.com"], true]) {
+      const r = lerAlvoDoTitular(corpo);
+      assert.equal(r.ok, false, JSON.stringify(corpo));
+    }
+  });
+
+  test("deve recusar e-mail inválido, ou que não é texto, mesmo com telefone válido", () => {
+    assert.deepEqual(lerAlvoDoTitular({ email: "sem-arroba" }), { ok: false, erro: "E-mail inválido." });
+    assert.deepEqual(lerAlvoDoTitular({ email: 123 }), { ok: false, erro: "E-mail inválido." });
+    assert.deepEqual(lerAlvoDoTitular({ email: "a b@c.com", telefone: "11912345678" }), { ok: false, erro: "E-mail inválido." });
+  });
+
+  test("deve recusar telefone inválido, ou que não é texto, mesmo com e-mail válido", () => {
+    assert.deepEqual(lerAlvoDoTitular({ telefone: "123" }), { ok: false, erro: "Telefone inválido." });
+    assert.deepEqual(lerAlvoDoTitular({ telefone: 11912345678 }), { ok: false, erro: "Telefone inválido." });
+    assert.deepEqual(lerAlvoDoTitular({ email: "a@b.com", telefone: "abc" }), { ok: false, erro: "Telefone inválido." });
+  });
+});
+
+describe("textos de apagar o titular", () => {
+  test("deve dizer quantos leads saem e de qual e-mail", () => {
+    assert.equal(
+      confirmacaoDoTitular("email", "joao@silva.com.br", 3),
+      "Apagar 3 leads do e-mail joao@silva.com.br a pedido do titular? Não dá para desfazer."
+    );
+  });
+
+  test("deve usar o singular e formatar o telefone quando é um lead de um telefone", () => {
+    assert.equal(
+      confirmacaoDoTitular("telefone", "11912345678", 1),
+      "Apagar 1 lead do telefone (11) 91234-5678 a pedido do titular? Não dá para desfazer."
+    );
+  });
+
+  test("deve avisar com o número apagado, no singular e no plural", () => {
+    assert.equal(avisoTitularApagado(1), "1 lead apagado");
+    assert.equal(avisoTitularApagado(4), "4 leads apagados");
   });
 });
 

@@ -1,8 +1,9 @@
 // Tipos e funções puras da tela de leads do admin (/admin/leads). Sem banco e sem
 // framework: roda na rota, no navegador e nos testes (tests/unit/leads-admin.test.ts).
 
-// A regra do telefone (só dígitos, sem o 55) é a de quem grava o lead, em lib/leads.ts.
-import { normalizarTelefone, soDigitos } from "./leads";
+// As regras de telefone e de e-mail (normalização e validade) são as de quem grava o
+// lead, em lib/leads.ts: o que a busca e a exclusão procuram é o que foi gravado.
+import { normalizarEmail, normalizarTelefone, soDigitos, validarEmail, validarTelefone } from "./leads";
 
 export type LeadTipo = "contato" | "interesse";
 export type LeadStatus = "novo" | "atendido";
@@ -47,6 +48,14 @@ export interface LeadDto {
   atendidoEm: string | null;
 }
 
+// Resposta de GET /api/leads. `leads` vem limitado a LIMITE_LEADS; `total` e `novos`
+// contam tudo o que combina com os filtros, inclusive o que passou do teto.
+export interface ListaLeads {
+  leads: LeadDto[];
+  total: number;
+  novos: number;
+}
+
 /* ---------------- status ---------------- */
 
 const STATUS_VALIDOS: readonly string[] = ["novo", "atendido"];
@@ -61,6 +70,17 @@ export function statusDoCorpo(corpo: unknown): LeadStatus | null {
   if (typeof corpo !== "object" || corpo === null) return null;
   const status = (corpo as { status?: unknown }).status;
   return ehStatusLead(status) ? status : null;
+}
+
+export const ERRO_SEM_JSON = "Envie o corpo como application/json.";
+
+// As rotas de escrita do admin só aceitam application/json (com ou sem charset). O cookie
+// de sessão é SameSite=Lax e o site e o portal são o mesmo site para o navegador, então
+// um formulário de fora poderia mandar um POST com o cookie. Formulário HTML e text/plain
+// são os únicos tipos que uma página de outra origem manda sem preflight; JSON obrigatório
+// força o preflight, que essas rotas não respondem.
+export function ehJson(contentType: string | null | undefined): boolean {
+  return (contentType ?? "").split(";")[0].trim().toLowerCase() === "application/json";
 }
 
 /* ---------------- telefone ---------------- */
@@ -86,6 +106,13 @@ export function formatarTelefone(valor: string | null | undefined): string {
 export function linkWhatsapp(valor: string | null | undefined): string | null {
   const n = telefoneNacional(valor);
   return n ? `https://wa.me/55${n}` : null;
+}
+
+// O botão de WhatsApp respeita o canal que a pessoa escolheu: quem pediu retorno por
+// ligação ou por e-mail não é chamada no WhatsApp. O telefone segue visível nos outros
+// canais, só o link some.
+export function linkWhatsappDoLead(lead: Pick<LeadDto, "canalRetorno" | "telefone">): string | null {
+  return lead.canalRetorno === "whatsapp" ? linkWhatsapp(lead.telefone) : null;
 }
 
 /* ---------------- rótulos e datas ---------------- */
@@ -212,4 +239,108 @@ export function filtrarLeads(leads: readonly LeadDto[], filtro: FiltroLeads): Le
     if ([lead.nome, lead.empresa, lead.email].some((v) => normalizar(v).includes(termo))) return true;
     return numero !== "" && soDigitos(lead.telefone).includes(numero);
   });
+}
+
+/* ---------------- busca no servidor ---------------- */
+
+// Teto do texto da busca. O maior campo pesquisável é o e-mail, de até 160 caracteres.
+export const TAMANHO_MAXIMO_BUSCA = 200;
+
+export type BuscaInterpretada =
+  | { tipo: "email"; valor: string }
+  | { tipo: "telefone"; valor: string }
+  | { tipo: "texto"; valor: string };
+
+// O que o servidor procura, conforme o formato do que foi digitado:
+// - com @: e-mail inteiro, em minúsculas, como é gravado;
+// - só dígitos e pontuação de telefone, com 10 a 13 dígitos: telefone normalizado, sem
+//   máscara e sem o 55;
+// - qualquer outra coisa: parte do nome ou da empresa. Número curto cai aqui, porque
+//   pode ser parte do nome de uma empresa.
+// E-mail e telefone são buscas exatas: usam os índices dessas colunas e acham todas as
+// linhas de um titular, por mais antigas que sejam.
+export function interpretarBusca(bruta: string): BuscaInterpretada | null {
+  const termo = bruta.trim().slice(0, TAMANHO_MAXIMO_BUSCA).trim();
+  if (!termo) return null;
+  if (termo.includes("@")) return { tipo: "email", valor: normalizarEmail(termo) };
+  if (PARECE_TELEFONE.test(termo) && validarTelefone(termo)) {
+    return { tipo: "telefone", valor: normalizarTelefone(termo) };
+  }
+  return { tipo: "texto", valor: termo };
+}
+
+export type LeituraDoFiltro = { ok: true; filtro: FiltroLeads } | { ok: false; erro: string };
+
+// Lê tipo, status e busca da URL de GET /api/leads. Ausente ou "todos" não filtra. Valor
+// fora da lista é erro (400), para um typo não passar por "sem filtro".
+export function lerFiltroDaBusca(params: Pick<URLSearchParams, "get">): LeituraDoFiltro {
+  const tipo = (params.get("tipo") ?? "").trim() || "todos";
+  const status = (params.get("status") ?? "").trim() || "todos";
+  if (tipo !== "todos" && tipo !== "contato" && tipo !== "interesse") {
+    return { ok: false, erro: "Tipo inválido. Use: contato ou interesse." };
+  }
+  if (status !== "todos" && !ehStatusLead(status)) {
+    return { ok: false, erro: "Status inválido. Use: novo ou atendido." };
+  }
+  const busca = (params.get("busca") ?? "").trim().slice(0, TAMANHO_MAXIMO_BUSCA).trim();
+  return { ok: true, filtro: { tipo, status, busca } };
+}
+
+// URL de GET /api/leads para os filtros da tela. O que não filtra fica fora da URL.
+export function montarUrlDeLeads(filtro: FiltroLeads): string {
+  const params = new URLSearchParams();
+  if (filtro.tipo !== "todos") params.set("tipo", filtro.tipo);
+  if (filtro.status !== "todos") params.set("status", filtro.status);
+  const busca = filtro.busca.trim();
+  if (busca) params.set("busca", busca);
+  const consulta = params.toString();
+  return consulta ? `/api/leads?${consulta}` : "/api/leads";
+}
+
+/* ---------------- apagar tudo de um titular ---------------- */
+
+export interface AlvoDoTitular {
+  email?: string;
+  telefone?: string;
+}
+
+export type LeituraDoAlvo = { ok: true; alvo: AlvoDoTitular } | { ok: false; erro: string };
+
+function ausente(valor: unknown): boolean {
+  return valor === undefined || valor === null || (typeof valor === "string" && valor.trim() === "");
+}
+
+// Lê o corpo de POST /api/leads/apagar-titular. Pede pelo menos um dos dois campos. O
+// e-mail sai em minúsculas e o telefone sem máscara e sem o 55, como foram gravados.
+// Campo enviado e inválido é erro: não vale apagar só pelo outro e calar sobre este.
+export function lerAlvoDoTitular(corpo: unknown): LeituraDoAlvo {
+  if (typeof corpo !== "object" || corpo === null || Array.isArray(corpo)) {
+    return { ok: false, erro: "Corpo inválido. Envie o e-mail ou o telefone do titular." };
+  }
+  const { email, telefone } = corpo as { email?: unknown; telefone?: unknown };
+  const alvo: AlvoDoTitular = {};
+  if (!ausente(email)) {
+    if (typeof email !== "string" || !validarEmail(email)) return { ok: false, erro: "E-mail inválido." };
+    alvo.email = normalizarEmail(email);
+  }
+  if (!ausente(telefone)) {
+    if (typeof telefone !== "string" || !validarTelefone(telefone)) return { ok: false, erro: "Telefone inválido." };
+    alvo.telefone = normalizarTelefone(telefone);
+  }
+  if (!alvo.email && !alvo.telefone) return { ok: false, erro: "Informe o e-mail ou o telefone do titular." };
+  return { ok: true, alvo };
+}
+
+export type CampoDoTitular = "email" | "telefone";
+
+// Texto do confirm antes de apagar. Diz quantos leads saem e de qual dado.
+export function confirmacaoDoTitular(campo: CampoDoTitular, valor: string, quantidade: number): string {
+  const leads = quantidade === 1 ? "1 lead" : `${quantidade} leads`;
+  const dado = campo === "email" ? `do e-mail ${valor}` : `do telefone ${formatarTelefone(valor)}`;
+  return `Apagar ${leads} ${dado} a pedido do titular? Não dá para desfazer.`;
+}
+
+// Aviso depois de apagar, com o número que o servidor realmente apagou.
+export function avisoTitularApagado(quantidade: number): string {
+  return quantidade === 1 ? "1 lead apagado" : `${quantidade} leads apagados`;
 }

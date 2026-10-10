@@ -50,6 +50,10 @@
   // em "direto" e sujaria a atribuição.
   var FONTE = fonte();
 
+  /**
+   * @param {string} nome evento da lista fechada de portal/src/lib/funil.ts
+   * @param {Record<string, string | number | boolean>} [props] até 5 rótulos curtos, nunca dado pessoal
+   */
   function enviar(nome, props) {
     try {
       var corpo = JSON.stringify({ n: nome, p: props || undefined, u: location.pathname, r: refHost(), f: FONTE });

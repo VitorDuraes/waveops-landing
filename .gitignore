@@ -15,6 +15,16 @@ docs/specs/
 # Workflows n8n (locais, nao publicar)
 n8n/
 
+# Pesquisa interna da refatoracao do site. Este repo e publico, entao fica local,
+# como docs/specs/.
+docs/research/
+
+# Saidas locais do ferramental do site (build simulado, QA visual, Playwright)
+.tmp-site/
+.tmp-qa/
+tests/site/test-results/
+tests/site/playwright-report/
+
 # Dependencias e config local de ferramentas (nao publicar)
 node_modules/
 .claude/

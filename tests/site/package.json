@@ -1,0 +1,21 @@
+{
+  "name": "waveops-site-testes",
+  "private": true,
+  "description": "Testes do site institucional. Dependências só de desenvolvimento: nada daqui vai para o ar.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.browser.json",
+    "test:unit": "node --test \"unit/**/*.test.mjs\"",
+    "test:e2e": "playwright test",
+    "qa:visual": "node qa/visual.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^24.0.0",
+    "typescript": "^6.0.3"
+  }
+}

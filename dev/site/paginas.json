@@ -1,0 +1,12 @@
+{
+  "dominio": "https://waveops.com.br",
+  "paginas": [
+    { "id": "home", "arquivo": "index.html", "url": "/" },
+    { "id": "solucoes", "arquivo": "solucoes/index.html", "url": "/solucoes/" },
+    { "id": "plataforma", "arquivo": "plataforma/index.html", "url": "/plataforma/" },
+    { "id": "sobmedida", "arquivo": "projetos-sob-medida/index.html", "url": "/projetos-sob-medida/" },
+    { "id": "contato", "arquivo": "contato/index.html", "url": "/contato/" },
+    { "id": "demonstracoes", "arquivo": "demonstracoes-tecnicas/index.html", "url": "/demonstracoes-tecnicas/" },
+    { "id": "404", "arquivo": "404.html", "url": "/404.html", "indexavel": false }
+  ]
+}

@@ -50,6 +50,47 @@ jobs:
       - name: Audit de dependencias (falha em high/critical)
         run: npm audit --audit-level=high
 
+  # Site institucional estatico (raiz do repo). As dependencias ficam so em
+  # tests/site/ e nunca vao para o ar: o Netlify publica apenas o que o cp do
+  # netlify.toml copia. Os testes de navegador rodam sobre o build simulado.
+  site:
+    name: Site (parciais, lint, tipos, testes, navegador)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: tests/site/package-lock.json
+      - name: Parciais e versoes de cache em dia
+        run: node dev/site/build.mjs --check
+      - name: Lint do HTML
+        run: node dev/site/lint.mjs
+      - name: Instalar ferramentas de teste
+        run: npm ci --prefix tests/site
+      - name: Typecheck
+        run: npm --prefix tests/site run typecheck
+      - name: Testes unitarios
+        run: npm --prefix tests/site run test:unit
+      - name: Build simulado do Netlify
+        run: node dev/site/build.mjs --dist .tmp-site
+      - name: Navegador do Playwright
+        working-directory: tests/site
+        run: npx playwright install --with-deps chromium
+      - name: Testes de navegador
+        working-directory: tests/site
+        run: npx playwright test
+        env:
+          SITE_RAIZ: .tmp-site
+      - name: Relatorio do Playwright
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: tests/site/playwright-report
+          retention-days: 7
+
   secrets:
     name: Secret scan (gitleaks)
     runs-on: ubuntu-latest

@@ -1,0 +1,127 @@
+<div class="wo-form-contato" data-form-contato>
+  <form class="wo-form" id="form-contato" novalidate aria-labelledby="form-contato-titulo" aria-describedby="form-contato-intro" data-sem-js-oculto>
+    <h2 class="wo-form__titulo" id="form-contato-titulo">Conte sobre a sua operação</h2>
+    <p class="wo-form__intro" id="form-contato-intro">Leva cerca de um minuto. Só nome, um contato e o aceite são obrigatórios.</p>
+    <div class="wo-alerta" id="contato-resumo" role="alert" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" /><path d="M12 8v5M12 16.5v.5" /></svg>
+      <p><strong data-resumo-texto>Falta 1 campo para enviar.</strong> <span class="wo-alerta__secundario">Revise os campos marcados em vermelho.</span></p>
+    </div>
+    <div class="wo-form__grade">
+      <div class="wo-campo">
+        <label class="wo-rotulo" for="f-nome">Seu nome</label>
+        <input class="wo-controle" id="f-nome" name="nome" type="text" autocomplete="name" placeholder="Como te chamamos?" maxlength="120" required aria-describedby="e-nome" />
+        <span class="wo-erro-campo" id="e-nome" hidden>Informe o seu nome.</span>
+      </div>
+      <div class="wo-campo">
+        <label class="wo-rotulo" for="f-empresa">Empresa <span class="wo-opcional">(opcional)</span></label>
+        <input class="wo-controle" id="f-empresa" name="empresa" type="text" autocomplete="organization" placeholder="Nome da empresa" maxlength="120" />
+      </div>
+    </div>
+    <fieldset class="wo-opcoes-canal wo-form__bloco" aria-describedby="f-canal-dica">
+      <legend class="wo-rotulo">Como prefere receber o retorno?</legend>
+      <div class="wo-opcoes-canal__grade">
+        <label class="wo-opcao-canal"><input type="radio" name="canalRetorno" value="whatsapp" checked />WhatsApp</label>
+        <label class="wo-opcao-canal"><input type="radio" name="canalRetorno" value="email" />E-mail</label>
+        <label class="wo-opcao-canal"><input type="radio" name="canalRetorno" value="ligacao" />Ligação</label>
+      </div>
+      <p class="wo-dica" id="f-canal-dica" data-canal-dica>A gente responde pelo WhatsApp, em horário comercial.</p>
+    </fieldset>
+    <div class="wo-form__grade">
+      <div class="wo-campo">
+        <label class="wo-rotulo" for="f-tel"><span data-rotulo-tel>WhatsApp</span> <span class="wo-opcional" data-tel-opcional hidden>(opcional)</span></label>
+        <input class="wo-controle" id="f-tel" name="telefone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(00) 00000-0000" maxlength="25" aria-describedby="e-tel" />
+        <span class="wo-erro-campo" id="e-tel" hidden>Informe um número com DDD.</span>
+      </div>
+      <div class="wo-campo">
+        <label class="wo-rotulo" for="f-email">E-mail de trabalho <span class="wo-opcional" data-email-opcional>(opcional)</span></label>
+        <input class="wo-controle" id="f-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="voce@empresa.com.br" maxlength="160" aria-describedby="e-email" />
+        <span class="wo-erro-campo" id="e-email" hidden>Informe um e-mail válido.</span>
+      </div>
+    </div>
+    <div class="wo-campo wo-form__bloco" data-campo-horario hidden>
+      <label class="wo-rotulo" for="f-horario">Melhor horário para ligar <span class="wo-opcional">(opcional)</span></label>
+      <select class="wo-controle" id="f-horario" name="melhorHorario">
+        <option value="">Qualquer horário comercial</option>
+        <option value="manha">Manhã</option>
+        <option value="tarde">Tarde</option>
+        <option value="fim">Fim do dia</option>
+      </select>
+    </div>
+    <div class="wo-form__grade">
+      <div class="wo-campo">
+        <label class="wo-rotulo" for="f-procura">O que você procura <span class="wo-opcional">(opcional)</span></label>
+        <select class="wo-controle" id="f-procura" name="procura">
+          <option value="">Selecione</option>
+          <option value="projeto">Projeto sob medida</option>
+          <option value="implementacao">Implementação de ferramenta ou automação</option>
+          <option value="gerenciado">Serviço gerenciado do que já está no ar</option>
+          <option value="plataforma">Plataforma WaveOps, lista de interesse</option>
+          <option value="diagnostico">Ainda não sei, quero um diagnóstico</option>
+        </select>
+      </div>
+      <div class="wo-campo">
+        <label class="wo-rotulo" for="f-dor">O que mais pesa hoje <span class="wo-opcional">(opcional)</span></label>
+        <select class="wo-controle" id="f-dor" name="dor">
+          <option value="">Selecione</option>
+          <option value="retrabalho">Time copiando e colando dados</option>
+          <option value="integracao">Ferramentas que não conversam</option>
+          <option value="dados">Falta de relatório e de controle</option>
+          <option value="sistema">Preciso de um sistema sob medida</option>
+          <option value="vendas">Quero vender mais pelo digital</option>
+          <option value="ia">Quero usar IA na operação</option>
+          <option value="outro">Outra coisa</option>
+        </select>
+      </div>
+    </div>
+    <div class="wo-campo wo-form__bloco">
+      <label class="wo-rotulo" for="f-msg">Conte um pouco <span class="wo-opcional">(opcional)</span></label>
+      <textarea class="wo-controle" id="f-msg" name="mensagem" placeholder="Quais ferramentas você usa? O que mais incomoda?" maxlength="2000"></textarea>
+    </div>
+    <div class="wo-isca" aria-hidden="true">
+      <label for="f-website">Não preencha este campo</label>
+      <input id="f-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+    </div>
+    <div class="wo-form__aceites">
+      <div class="wo-campo">
+        <label class="wo-marcar" for="f-politica">
+          <input id="f-politica" name="politicaCiente" type="checkbox" required aria-describedby="e-politica" />
+          <span>Li a <a href="https://portal.waveops.com.br/privacidade">Política de Privacidade</a> e sei como a WaveOps usa estes dados para responder ao meu pedido.</span>
+        </label>
+        <span class="wo-erro-campo" id="e-politica" hidden>Para enviar, confirme que leu a Política de Privacidade.</span>
+      </div>
+      <label class="wo-marcar" for="f-marketing">
+        <input id="f-marketing" name="marketingAceito" type="checkbox" />
+        <span>Quero receber conteúdos e novidades da WaveOps. Posso cancelar quando quiser.</span>
+      </label>
+    </div>
+    <div class="wo-alerta wo-alerta--falha" id="contato-falha" role="alert" hidden>
+      <p>Não foi possível enviar agora.</p>
+      <p>Seus dados continuam preenchidos. Tente de novo em instantes ou fale direto pelo WhatsApp.</p>
+    </div>
+    <div class="wo-form__envio">
+      <button class="wo-btn wo-btn--primario wo-btn--grande" type="submit" data-botao-enviar>
+        <svg class="wo-girar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" focusable="false" data-icone-enviando hidden><path d="M12 3a9 9 0 1 1-9 9" /></svg>
+        <span data-botao-texto>Enviar pedido</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" data-icone-seta><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+      </button>
+      <a class="wo-btn wo-btn--secundario wo-btn--grande" href="https://wa.me/5534991775784?text=Ol%C3%A1%2C%20WaveOps.%20Tentei%20enviar%20o%20formul%C3%A1rio%20do%20site%20e%20n%C3%A3o%20consegui." data-whatsapp="contato-falha" data-falha-whatsapp hidden>Falar no WhatsApp</a>
+      <p class="wo-form__privacidade" data-nota-privacidade>Sem spam. Seus dados são usados só para responder a este pedido.</p>
+    </div>
+  </form>
+  <noscript>
+    <p class="wo-form__semjs">Para enviar pelo site, ative o JavaScript. Ou fale direto pelo <a href="https://wa.me/5534991775784?text=Ol%C3%A1%2C%20WaveOps.%20Vim%20pelo%20site.">WhatsApp</a>.</p>
+  </noscript>
+  <div class="wo-confirmacao" id="contato-confirmacao" role="status" hidden>
+    <span class="wo-confirmacao__icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M20 6 9 17l-5-5" /></svg></span>
+    <h2 class="wo-confirmacao__titulo" tabindex="-1" data-confirmacao-titulo>Recebido.</h2>
+    <p class="wo-confirmacao__texto"><span data-confirmacao-retorno>A gente responde pelo WhatsApp que você informou.</span> O prazo de resposta é de até 1 dia útil.</p>
+    <dl class="wo-confirmacao__dados">
+      <div><dt>Retorno por</dt><dd data-confirmacao-canal>WhatsApp</dd></div>
+      <div><dt>Contato informado</dt><dd class="wo-confirmacao__contato" data-confirmacao-contato></dd></div>
+    </dl>
+    <div class="wo-acoes">
+      <button class="wo-btn wo-btn--secundario" type="button" data-novo-pedido>Enviar outro pedido</button>
+      <a class="wo-link-seta" href="https://wa.me/5534991775784?text=Ol%C3%A1%2C%20WaveOps.%20Acabei%20de%20enviar%20um%20pedido%20pelo%20site." data-whatsapp="contato-confirmacao">Adiantar pelo WhatsApp</a>
+    </div>
+  </div>
+</div>

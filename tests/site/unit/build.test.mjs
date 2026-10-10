@@ -157,6 +157,14 @@ test('construir: mudar a lib muda o ?v= da página que carrega o módulo de entr
   assert.notEqual(versaoDepois, versaoAntes);
 });
 
+test('construir com paginas limita o carimbo às páginas pedidas', async () => {
+  const repo = criarRepoTemporario();
+  const { alterados } = await construir({ raiz: repo.raiz, modo: 'escrever', paginas: ['contato/index.html'] });
+  assert.deepEqual(alterados, ['contato/index.html']);
+  assert.doesNotMatch(repo.ler('index.html'), /aria-current/);
+  assert.doesNotMatch(repo.ler('index.html'), /\?v=/);
+});
+
 test('CRLF do Windows não muda hash nem resultado do carimbo', async () => {
   const lf = criarRepoTemporario();
   await construir({ raiz: lf.raiz, modo: 'escrever' });

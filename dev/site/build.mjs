@@ -10,6 +10,7 @@
      node dev/site/build.mjs              carimba e versiona, gravando os arquivos
      node dev/site/build.mjs --check      sai com 1 se alguma página ou módulo estiver desatualizado
      node dev/site/build.mjs --dist DIR   monta em DIR o que o cp do netlify.toml publica
+     node dev/site/build.mjs --pagina contato/index.html   só a página indicada (repetível)
 
    Marcador:  <!-- parcial:topo ativo="solucoes" --> ... <!-- /parcial:topo -->
    No parcial: {{atual:solucoes}} vira aria-current="page" quando ativo="solucoes";
@@ -181,11 +182,11 @@ export function lerPaginas(raiz) {
 }
 
 /**
- * Carimba parciais e versiona assets de todas as páginas e módulos.
- * @param {{ raiz: string, modo?: 'escrever' | 'checar' }} opcoes
+ * Carimba parciais e versiona assets das páginas (todas, ou só as de `paginas`).
+ * @param {{ raiz: string, modo?: 'escrever' | 'checar', paginas?: string[] }} opcoes
  * @returns {Promise<{ alterados: string[], avisos: string[] }>}
  */
-export async function construir({ raiz, modo = 'escrever' }) {
+export async function construir({ raiz, modo = 'escrever', paginas }) {
   const config = lerPaginas(raiz);
   /** @type {Map<string, string>} */
   const novos = new Map();
@@ -234,6 +235,7 @@ export async function construir({ raiz, modo = 'escrever' }) {
   };
 
   for (const pagina of config.paginas) {
+    if (paginas && !paginas.includes(pagina.arquivo)) continue;
     const abs = path.join(raiz, pagina.arquivo);
     if (!fs.existsSync(abs)) {
       avisos.push(`página ainda não existe: ${pagina.arquivo}`);
@@ -298,8 +300,13 @@ if (executadoDireto(import.meta.url)) {
   const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
   const checar = args.includes('--check');
   const iDist = args.indexOf('--dist');
+  const paginas = args.flatMap((a, i) => (args[i - 1] === '--pagina' ? [a.split(path.sep).join('/')] : []));
   try {
-    const { alterados, avisos } = await construir({ raiz, modo: checar ? 'checar' : 'escrever' });
+    const { alterados, avisos } = await construir({
+      raiz,
+      modo: checar ? 'checar' : 'escrever',
+      paginas: paginas.length ? paginas : undefined,
+    });
     for (const aviso of avisos) console.warn(`aviso: ${aviso}`);
     if (checar && alterados.length) {
       console.error('Desatualizado. Rode: node dev/site/build.mjs');

@@ -14,7 +14,7 @@ import {
   filtrarLeads,
   formatarDataHora,
   formatarTelefone,
-  linkWhatsapp,
+  linkWhatsappDoLead,
   resumoDaLista,
   rotuloCanal,
   rotuloTipo,
@@ -84,7 +84,8 @@ function LinhaLead({ lead: l, travado, onAbrir, onStatus, onApagar }: LinhaProps
   const contato = l.tipo === "contato";
   const pessoa = (contato ? l.nome || l.email : l.email || l.nome) || "Sem identificação";
   const assuntos = assuntosDoLead(l);
-  const wa = linkWhatsapp(l.telefone);
+  // O link respeita o canal escolhido: com retorno por ligação ou e-mail o telefone só aparece.
+  const wa = linkWhatsappDoLead(l);
   const atendido = l.status === "atendido";
   const rotuloStatus = atendido ? "Reabrir" : "Marcar atendido";
   const [dia = "", hora = ""] = formatarDataHora(l.createdAt).split(" ");

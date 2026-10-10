@@ -6,7 +6,7 @@ import { useModal } from "@/components/providers";
 import {
   formatarDataHora,
   formatarTelefone,
-  linkWhatsapp,
+  linkWhatsappDoLead,
   resumoUtm,
   rotuloCanal,
   rotuloFinalidade,
@@ -55,7 +55,7 @@ function Secao({ titulo, itens }: { titulo: string; itens: Item[] }) {
 // ficam nas ações da tabela.
 export function LeadModalContent({ lead }: { lead: LeadDto }) {
   const { closeModal } = useModal();
-  const wa = linkWhatsapp(lead.telefone);
+  const wa = linkWhatsappDoLead(lead);
   const contato = lead.tipo === "contato";
   const utm = resumoUtm(lead);
 

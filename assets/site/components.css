@@ -1615,7 +1615,8 @@ textarea.wo-controle {
   margin: 16px 0 0;
 }
 
-.wo-form-interesse__nota {
+/* 0,2,0 para vencer .wo-hero .wo-nota-mono quando o formulário fica dentro de um hero. */
+.wo-form-interesse .wo-form-interesse__nota {
   margin-top: 12px;
 }
 

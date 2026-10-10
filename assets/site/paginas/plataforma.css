@@ -1,0 +1,950 @@
+/* WaveOps · peças que só a página Plataforma usa: hero com o workspace de exemplo, diagrama
+   "Como se encaixa", responsabilidades do núcleo, telas de exemplo, módulos por situação,
+   tabela comparativa, princípios da assinatura e o aviso final. Tudo com o prefixo
+   wo-plataforma-. Depende de tokens.css, base.css e components.css. */
+
+/* Valor do design que ainda não tem token: o tracejado de "Sistemas do cliente" e da caixa
+   vazia de módulos. Candidato a --wo-borda-tracejada em tokens.css. */
+body[data-pagina='plataforma'] {
+  --wo-plataforma-tracejado: rgba(208, 200, 237, 0.32);
+}
+
+/* ---------- Colunas texto + painel (Como se encaixa, Núcleo, Assinatura) ----------
+   O design usa base de 400 px para o texto e 1,25 x 500 px para o painel. As folgas
+   verticais mudam de uma seção para outra (48, 40 e 36 px). */
+.wo-plataforma-colunas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 40px 72px;
+}
+
+.wo-plataforma-colunas--centro {
+  align-items: center;
+  row-gap: 48px;
+}
+
+.wo-plataforma-colunas--assinatura {
+  row-gap: 36px;
+}
+
+.wo-plataforma-colunas__texto {
+  flex: 1 1 400px;
+  min-width: 0;
+}
+
+.wo-plataforma-colunas__lado {
+  flex: 1.25 1 500px;
+  min-width: 0;
+}
+
+/* Largura máxima do parágrafo de abertura em cada seção (o padrão do .wo-lead é 640 px). */
+.wo-plataforma-lead-520 {
+  max-width: 520px;
+}
+
+.wo-plataforma-lead-660 {
+  max-width: 660px;
+}
+
+.wo-plataforma-lead-700 {
+  max-width: 700px;
+}
+
+.wo-plataforma-checks {
+  margin-top: 26px;
+}
+
+/* ---------- Hero ----------
+   A Plataforma tem escala própria de título e pequenas diferenças de ritmo em relação ao
+   .wo-hero compartilhado (a Home usa 66 px no título, aqui são 58 px). */
+.wo-plataforma-hero {
+  padding-top: clamp(44px, 5.4vw, 84px);
+}
+
+.wo-plataforma-hero .wo-hero__brilho {
+  top: -620px;
+  opacity: 0.4;
+}
+
+.wo-plataforma-hero__grade {
+  gap: 44px 64px;
+}
+
+.wo-plataforma-hero__texto {
+  flex: 1.05 1 480px;
+}
+
+.wo-plataforma-hero__visual {
+  flex: 1.1 1 480px;
+}
+
+.wo-plataforma-hero .wo-h1 {
+  margin-top: 18px;
+  font-size: clamp(34px, 4vw, 58px);
+  line-height: 1.07;
+}
+
+.wo-plataforma-hero .wo-hero__lead {
+  margin-top: 22px;
+}
+
+/* ---------- Workspace de exemplo (hero) ---------- */
+.wo-plataforma-workspace {
+  gap: 12px;
+}
+
+.wo-plataforma-workspace .wo-maquete__cabeca {
+  margin-bottom: 0;
+}
+
+.wo-plataforma-workspace__corpo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.wo-plataforma-workspace__menu {
+  display: flex;
+  flex: 1 1 150px;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px;
+  border: 1px solid var(--wo-borda);
+  border-radius: var(--wo-raio-sm);
+  background: var(--wo-faixa);
+  color: var(--wo-texto-2);
+  font-size: 13px;
+}
+
+.wo-plataforma-workspace__grupo {
+  padding: 6px 10px 4px;
+  color: var(--wo-texto-4);
+  font-family: var(--wo-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.wo-plataforma-workspace__grupo--seguinte {
+  padding-top: 10px;
+}
+
+.wo-plataforma-workspace__item {
+  padding: 8px 10px;
+}
+
+.wo-plataforma-workspace__item--ativo {
+  border-radius: var(--wo-raio-campo);
+  background: var(--wo-acento-fundo);
+  color: var(--wo-acento-texto);
+  font-weight: 600;
+}
+
+.wo-plataforma-workspace__item--planejado {
+  color: var(--wo-texto-4);
+}
+
+.wo-plataforma-workspace__principal {
+  display: flex;
+  flex: 3 1 300px;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* Números de destaque: 24 px no hero, 26 px nas telas de exemplo. */
+.wo-plataforma-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(110px, 100%), 1fr));
+  gap: 8px;
+}
+
+.wo-plataforma-kpis > div {
+  padding: 12px 14px;
+  border: 1px solid var(--wo-borda);
+  border-radius: var(--wo-raio-sm);
+  background: var(--wo-superficie);
+}
+
+.wo-plataforma-kpis span {
+  display: block;
+  color: var(--wo-texto-3);
+  font-size: 12px;
+}
+
+.wo-plataforma-kpis strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.wo-plataforma-kpis--tela {
+  grid-template-columns: repeat(auto-fit, minmax(min(130px, 100%), 1fr));
+}
+
+.wo-plataforma-kpis--tela > div {
+  padding: 14px 16px;
+}
+
+.wo-plataforma-kpis--tela span {
+  font-size: 12.5px;
+}
+
+.wo-plataforma-kpis--tela strong {
+  font-size: 26px;
+}
+
+.wo-plataforma-execucoes {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 9px;
+  padding: 14px;
+  border: 1px solid var(--wo-borda);
+  border-radius: var(--wo-raio-sm);
+  background: var(--wo-superficie);
+}
+
+.wo-plataforma-execucoes__titulo {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.wo-plataforma-execucoes__linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.wo-plataforma-execucoes__nome {
+  color: var(--wo-texto-2);
+}
+
+/* Estado de uma execução ou conexão. O marcador é redondo, menos em "alerta". */
+.wo-plataforma-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: var(--wo-raio-pilula);
+  background: var(--wo-neutro-fundo);
+  color: var(--wo-texto-2);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.wo-plataforma-estado::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.wo-plataforma-estado--ok {
+  background: var(--wo-sucesso-fundo);
+  color: var(--wo-sucesso);
+}
+
+.wo-plataforma-estado--andamento {
+  background: var(--wo-info-fundo);
+  color: var(--wo-info);
+}
+
+.wo-plataforma-estado--falha {
+  background: var(--wo-erro-fundo-forte);
+  color: var(--wo-erro);
+}
+
+.wo-plataforma-estado--alerta {
+  background: var(--wo-alerta-fundo);
+  color: var(--wo-alerta);
+}
+
+.wo-plataforma-estado--alerta::before {
+  border-radius: 2px;
+}
+
+/* ---------- Diagrama "Como se encaixa" ---------- */
+.wo-plataforma-diagrama__usa {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--wo-borda);
+  border-radius: 14px;
+  background: var(--wo-superficie);
+}
+
+.wo-plataforma-pilulas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.wo-plataforma-pilulas li {
+  padding: 6px 12px;
+  border: 1px solid var(--wo-borda-forte);
+  border-radius: var(--wo-raio-pilula);
+  color: var(--wo-texto-2);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.wo-plataforma-diagrama__fio {
+  width: 1px;
+  height: 20px;
+  margin: 0 auto;
+  background: var(--wo-borda-forte);
+}
+
+.wo-plataforma-diagrama__caixa {
+  padding: clamp(14px, 1.5vw, 20px);
+  border: 1px solid var(--wo-acento-borda);
+  border-radius: var(--wo-raio-painel);
+  background: rgba(162, 139, 249, 0.07);
+}
+
+.wo-plataforma-diagrama__cabeca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.wo-plataforma-diagrama__titulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.wo-plataforma-diagrama__marca {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: var(--wo-raio-btn);
+  background: var(--wo-acento-marca);
+}
+
+.wo-plataforma-diagrama__marca svg {
+  width: 23px;
+  height: 23px;
+}
+
+.wo-plataforma-diagrama__camadas {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wo-plataforma-diagrama__camada {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--wo-borda);
+  border-radius: var(--wo-raio-sm);
+  background: var(--wo-superficie);
+}
+
+.wo-plataforma-diagrama__nome {
+  flex: 0 0 118px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.wo-plataforma-diagrama__descricao {
+  flex: 1 1 220px;
+  min-width: 0;
+  color: var(--wo-texto-3);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.wo-plataforma-diagrama__camada--nucleo {
+  border-color: var(--wo-borda-forte);
+  background: var(--wo-superficie-3);
+}
+
+.wo-plataforma-diagrama__camada--nucleo .wo-plataforma-diagrama__nome {
+  color: var(--wo-acento-texto);
+}
+
+.wo-plataforma-diagrama__camada--nucleo .wo-plataforma-diagrama__descricao {
+  color: var(--wo-texto-2);
+}
+
+.wo-plataforma-diagrama__conector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.wo-plataforma-diagrama__conector::before,
+.wo-plataforma-diagrama__conector::after {
+  content: '';
+  width: 1px;
+  height: 12px;
+  background: var(--wo-borda-forte);
+}
+
+.wo-plataforma-diagrama__conector span {
+  padding: 3px 10px;
+  border: 1px solid var(--wo-borda-forte);
+  border-radius: var(--wo-raio-pilula);
+  color: var(--wo-texto-3);
+  font-family: var(--wo-mono);
+  font-size: 10.5px;
+}
+
+.wo-plataforma-diagrama__sistemas {
+  padding: 16px;
+  border: 1px dashed var(--wo-plataforma-tracejado);
+  border-radius: 16px;
+}
+
+.wo-plataforma-diagrama__sistemas-cabeca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+  margin-bottom: 12px;
+}
+
+.wo-plataforma-diagrama__sistemas-titulo {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.wo-plataforma-diagrama__sistemas-nota {
+  color: var(--wo-texto-3);
+  font-family: var(--wo-mono);
+  font-size: 11px;
+}
+
+/* ---------- Responsabilidades do núcleo ---------- */
+.wo-plataforma-responsabilidades {
+  margin-top: 14px;
+  border-bottom: 1px solid var(--wo-borda);
+}
+
+.wo-plataforma-responsabilidades > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 28px;
+  padding: 18px 0;
+  border-top: 1px solid var(--wo-borda);
+}
+
+.wo-plataforma-responsabilidades dt {
+  flex: 1 1 230px;
+  min-width: 0;
+  font-size: 16.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.wo-plataforma-responsabilidades dd {
+  flex: 1.5 1 280px;
+  min-width: 0;
+  color: var(--wo-texto-3);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.wo-plataforma-governanca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 18px;
+  color: var(--wo-texto-3);
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+.wo-plataforma-governanca__texto {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+/* ---------- Telas de exemplo (seletor "Como vai ser usar no dia a dia") ----------
+   Os botões e o painel reaproveitam .wo-seletor. Aqui só mudam as medidas do design:
+   botão em duas linhas e painel com o mesmo degradê dos outros mocks. */
+.wo-plataforma-tela__opcoes {
+  flex-basis: 300px;
+}
+
+.wo-plataforma-tela__opcao {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 4px;
+  min-height: 0;
+  padding: 16px 18px;
+  color: var(--wo-texto);
+}
+
+/* O botão do design não herda a altura de linha do corpo (line-height: normal), o que dá
+   80 px por botão em vez de 85. */
+.wo-plataforma-tela__titulo {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: normal;
+}
+
+.wo-plataforma-tela__descricao {
+  color: var(--wo-texto-3);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.55;
+}
+
+.wo-plataforma-tela {
+  display: flex;
+  flex: 2.4 1 520px;
+  flex-direction: column;
+  gap: 12px;
+  padding: clamp(16px, 1.6vw, 22px);
+  border-radius: var(--wo-raio-lg);
+  background: linear-gradient(180deg, var(--wo-superficie-2), var(--wo-superficie));
+}
+
+.wo-plataforma-tela .wo-maquete__cabeca {
+  margin-bottom: 0;
+}
+
+.wo-plataforma-tela__corpo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.wo-plataforma-tela__corpo--lista {
+  gap: 8px;
+}
+
+.wo-plataforma-tela__corpo--grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  gap: 8px;
+}
+
+.wo-plataforma-pendencias {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--wo-borda);
+  border-radius: var(--wo-raio-sm);
+  background: var(--wo-superficie);
+}
+
+.wo-plataforma-pendencias__titulo {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.wo-plataforma-pendencia {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--wo-borda);
+  font-size: 13.5px;
+}
+
+.wo-plataforma-pendencia:last-child {
+  padding-bottom: 2px;
+}
+
+.wo-plataforma-linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--wo-borda);
+  border-radius: var(--wo-raio-sm);
+  background: var(--wo-superficie);
+}
+
+.wo-plataforma-linha--modelo {
+  border-style: dashed;
+  border-color: var(--wo-borda-forte);
+  background: none;
+}
+
+.wo-plataforma-linha--falha {
+  border-color: var(--wo-erro-borda);
+}
+
+.wo-plataforma-linha__texto {
+  min-width: 0;
+}
+
+.wo-plataforma-linha__nome {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.wo-plataforma-linha__detalhe {
+  display: block;
+  color: var(--wo-texto-3);
+  font-size: 12.5px;
+}
+
+/* Botão desenhado do mock: é só um span, nada nele recebe clique ou foco. */
+.wo-plataforma-acao {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border: 1px solid var(--wo-borda-forte);
+  border-radius: var(--wo-raio-campo);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.wo-plataforma-acao--cartao {
+  align-self: flex-start;
+  margin-top: auto;
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.wo-plataforma-cartao {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--wo-borda);
+  border-radius: var(--wo-raio-sm);
+  background: var(--wo-superficie);
+}
+
+.wo-plataforma-cartao--planejado {
+  border-style: dashed;
+  border-color: var(--wo-borda-forte);
+  background: none;
+}
+
+.wo-plataforma-cartao__nome {
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.wo-plataforma-cartao__texto {
+  color: var(--wo-texto-3);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.wo-plataforma-etiqueta {
+  align-self: flex-start;
+  margin-top: auto;
+  padding: 3px 9px;
+  border-radius: var(--wo-raio-pilula);
+  background: var(--wo-acento-fundo);
+  color: var(--wo-acento-texto);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.wo-plataforma-etiqueta--planejado {
+  background: var(--wo-neutro-fundo);
+  color: var(--wo-texto-2);
+}
+
+/* ---------- Módulos por situação ---------- */
+.wo-plataforma-situacoes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: 36px 44px;
+  align-items: start;
+  margin-top: 44px;
+}
+
+.wo-plataforma-situacao {
+  min-width: 0;
+}
+
+.wo-plataforma-situacao__cabeca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  padding-bottom: 14px;
+}
+
+.wo-plataforma-situacao__legenda {
+  color: var(--wo-texto-3);
+  font-size: 13.5px;
+}
+
+.wo-plataforma-vazio {
+  padding: 20px;
+  border: 1px dashed var(--wo-plataforma-tracejado);
+  border-radius: 14px;
+}
+
+.wo-plataforma-vazio__titulo {
+  font-size: 16.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.wo-plataforma-vazio__texto {
+  margin-top: 8px;
+  color: var(--wo-texto-3);
+  font-size: 14.5px;
+  line-height: 1.65;
+}
+
+.wo-plataforma-vazio .wo-link-seta {
+  margin-top: 8px;
+}
+
+.wo-plataforma-modulos {
+  border-bottom: 1px solid var(--wo-borda);
+}
+
+.wo-plataforma-modulos li {
+  padding: 16px 0;
+  border-top: 1px solid var(--wo-borda);
+}
+
+.wo-plataforma-modulo__cabeca {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.wo-plataforma-modulo__nome {
+  font-size: 16.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.wo-plataforma-modulo__area {
+  color: var(--wo-texto-3);
+  font-family: var(--wo-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.wo-plataforma-modulo__texto {
+  margin-top: 4px;
+  color: var(--wo-texto-3);
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+/* ---------- Tabela comparativa ----------
+   Sem min-width: no design a tabela rolava na horizontal entre 641 e 688 px. Aqui as
+   colunas encolhem, e abaixo de 640 px cada linha vira um bloco (regra .wo-cmp do design). */
+.wo-plataforma-tabela {
+  margin-top: 40px;
+  border: 1px solid var(--wo-borda);
+  border-radius: var(--wo-raio-md);
+  background: var(--wo-superficie);
+  overflow-x: auto;
+}
+
+.wo-plataforma-cmp {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.wo-plataforma-cmp thead th {
+  padding: 18px 22px;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.wo-plataforma-cmp thead th:first-child {
+  width: 20%;
+  color: var(--wo-texto-3);
+  font-family: var(--wo-mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.wo-plataforma-cmp thead th:not(:first-child) {
+  width: 40%;
+}
+
+.wo-plataforma-cmp tbody th {
+  padding: 16px 22px;
+  border-top: 1px solid var(--wo-borda);
+  color: var(--wo-texto-3);
+  font-weight: 400;
+  text-align: left;
+}
+
+.wo-plataforma-cmp tbody td {
+  padding: 16px 22px;
+  border-top: 1px solid var(--wo-borda);
+  color: var(--wo-texto-2);
+}
+
+/* ---------- Princípios da assinatura ---------- */
+.wo-plataforma-principios {
+  border-bottom: 1px solid var(--wo-borda);
+}
+
+.wo-plataforma-principios li {
+  display: flex;
+  gap: 18px;
+  padding: 20px 0;
+  border-top: 1px solid var(--wo-borda);
+}
+
+.wo-plataforma-principios__numero {
+  padding-top: 4px;
+  color: var(--wo-acento-texto);
+  font-family: var(--wo-mono);
+  font-size: 12px;
+}
+
+.wo-plataforma-principios__corpo {
+  min-width: 0;
+}
+
+.wo-plataforma-principios__titulo {
+  font-size: 17.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+
+.wo-plataforma-principios__texto {
+  margin-top: 6px;
+  color: var(--wo-texto-3);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+/* ---------- Aviso final: lista de interesse ---------- */
+.wo-plataforma-aviso {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px 48px;
+  margin-top: clamp(48px, 5.6vw, 80px);
+  padding: clamp(28px, 4vw, 52px);
+  border: 1px solid rgba(162, 139, 249, 0.3);
+  border-radius: var(--wo-raio-lg);
+  background: radial-gradient(ellipse at 0 100%, rgba(162, 139, 249, 0.1), var(--wo-superficie) 65%);
+}
+
+.wo-plataforma-aviso__texto {
+  flex: 1 1 440px;
+  min-width: 0;
+}
+
+.wo-plataforma-aviso__titulo {
+  font-size: clamp(26px, 3vw, 42px);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+
+.wo-plataforma-aviso__lead {
+  max-width: 520px;
+  margin-top: 14px;
+  color: var(--wo-texto-3);
+  font-size: 15.5px;
+  line-height: 1.75;
+}
+
+/* ---------- Telas pequenas ---------- */
+@media (max-width: 640px) {
+  .wo-plataforma-cmp {
+    display: block;
+  }
+
+  .wo-plataforma-cmp thead {
+    display: none;
+  }
+
+  .wo-plataforma-cmp tbody,
+  .wo-plataforma-cmp tr,
+  .wo-plataforma-cmp tbody th,
+  .wo-plataforma-cmp tbody td {
+    display: block;
+    width: auto;
+    border: 0;
+  }
+
+  .wo-plataforma-cmp tr {
+    padding: 12px 0;
+    border-top: 1px solid var(--wo-borda);
+  }
+
+  .wo-plataforma-cmp tr:first-child {
+    border-top: 0;
+  }
+
+  .wo-plataforma-cmp tbody th {
+    padding: 6px 18px 2px;
+    color: var(--wo-texto);
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .wo-plataforma-cmp tbody td {
+    padding: 6px 18px;
+  }
+
+  .wo-plataforma-cmp tbody td::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 2px;
+    color: var(--wo-texto-3);
+    font-family: var(--wo-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+}
+
+@media (max-width: 560px) {
+  .wo-plataforma-workspace__menu {
+    display: none;
+  }
+}

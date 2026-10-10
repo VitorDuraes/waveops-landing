@@ -47,8 +47,10 @@ const HOMOLOGACAO = Object.freeze({ lead: '', interesse: '' });
  * @returns {Endpoints}
  */
 export function endpoints(host, simular = '') {
-  if (host === 'waveops.com.br' || host === 'www.waveops.com.br') return { ambiente: 'producao', ...PRODUCAO };
-  if (host === 'localhost' || host === '127.0.0.1') {
+  // Minúsculas e sem o ponto final de FQDN: "waveops.com.br." é o mesmo site.
+  const h = host.toLowerCase().replace(/\.$/, '');
+  if (h === 'waveops.com.br' || h === 'www.waveops.com.br') return { ambiente: 'producao', ...PRODUCAO };
+  if (h === 'localhost' || h === '127.0.0.1' || h === '[::1]') {
     const consulta = /^(falha|lento|validacao)$/.test(simular) ? `?simular=${simular}` : '';
     return { ambiente: 'local', lead: `/__dev/lead${consulta}`, interesse: `/__dev/interesse${consulta}` };
   }

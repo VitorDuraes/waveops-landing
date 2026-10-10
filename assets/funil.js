@@ -12,7 +12,10 @@
       e vale para todos os eventos da sessão, e "visita" sai uma vez por sessão (de
       novo só se chegar outra campanha). Os formulários leem o mesmo registro para
       mandar UTM junto com o lead (assets/site/lib/atribuicao.js). Se o
-      sessionStorage falhar, volta ao comportamento antigo: fonte por carregamento. */
+      sessionStorage falhar, volta ao comportamento antigo: fonte por carregamento.
+   5. Só mede onde é de verdade: waveops.com.br, o próprio portal e o dev local. No
+      Deploy Preview do Netlify, na cópia do GitHub Pages ou em qualquer outro host,
+      nada sai, para teste não cair no funil de produção. */
 (function () {
   'use strict';
 
@@ -21,21 +24,27 @@
 
   // No portal (e no dev local) a landing é servida na mesma origem do endpoint,
   // então a chamada é relativa e nem passa por CORS.
-  var h = location.hostname;
-  var mesma = h === 'localhost' || h === '127.0.0.1' || /(^|\.)portal\.waveops\.com\.br$/.test(h);
-  var URL_EVENTO = mesma ? '/api/e' : 'https://portal.waveops.com.br/api/e';
+  /** Host em minúsculas e sem o ponto final de FQDN ("waveops.com.br." é o mesmo site). @param {string} host */
+  function normalizar(host) {
+    return String(host).toLowerCase().replace(/\.$/, '');
+  }
+  var h = normalizar(location.hostname);
+  var mesma = h === 'localhost' || h === '127.0.0.1' || h === '[::1]' || /(^|\.)portal\.waveops\.com\.br$/.test(h);
+  var producao = h === 'waveops.com.br' || h === 'www.waveops.com.br';
+  var URL_EVENTO = mesma ? '/api/e' : producao ? 'https://portal.waveops.com.br/api/e' : '';
 
   /* Interno: o próprio site e qualquer *.waveops.com.br (o portal). Quem volta do
      checkout não é chegada nova e não pode reescrever o primeiro toque. */
   /** @param {string} host */
   function interno(host) {
+    host = normalizar(host);
     return host === h || host === 'waveops.com.br' || /\.waveops\.com\.br$/.test(host);
   }
 
   /** Host do referrer, interno ou não; vazio se não houver ou for ilegível. */
   function hostDoReferrer() {
     try {
-      return document.referrer ? new URL(document.referrer).hostname : '';
+      return document.referrer ? normalizar(new URL(document.referrer).hostname) : '';
     } catch (e) {
       return '';
     }
@@ -145,6 +154,7 @@
    * @param {Record<string, string | number | boolean>} [props] até 5 rótulos curtos, nunca dado pessoal
    */
   function enviar(nome, props) {
+    if (!URL_EVENTO) return;
     try {
       var corpo = JSON.stringify({ n: nome, p: props || undefined, u: location.pathname, r: refHost(), f: FONTE });
       if (navigator.sendBeacon) {

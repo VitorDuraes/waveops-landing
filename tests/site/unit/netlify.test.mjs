@@ -88,3 +88,35 @@ test('os headers de segurança continuam no netlify.toml', () => {
   assert.match(toml, /Referrer-Policy = "strict-origin-when-cross-origin"/);
   assert.match(toml, /Permissions-Policy = "camera=\(\), microphone=\(\)/);
 });
+
+/** O `command` de uma seção do netlify.toml (`build` ou `context.deploy-preview`), ou null. */
+function comandoDaSecao(toml, secao) {
+  const linhas = toml.replace(/\r\n/g, '\n').split('\n');
+  const inicio = linhas.findIndex((l) => l.trim() === `[${secao}]`);
+  if (inicio === -1) return null;
+  for (const linha of linhas.slice(inicio + 1)) {
+    if (/^\s*\[/.test(linha)) return null;
+    const achado = /^\s*command\s*=\s*"([^"]*)"/.exec(linha);
+    if (achado) return achado[1];
+  }
+  return null;
+}
+
+const NOINDEX = " && echo '/*' > _site/_headers && echo '  X-Robots-Tag: noindex, nofollow' >> _site/_headers";
+
+test('Deploy Preview e branch deploy publicam o mesmo site, com noindex em toda resposta', () => {
+  const toml = ler('netlify.toml');
+  const producao = comandoDaSecao(toml, 'build');
+  assert.ok(producao, 'sem command em [build]');
+  for (const contexto of ['context.deploy-preview', 'context.branch-deploy']) {
+    assert.equal(comandoDaSecao(toml, contexto), producao + NOINDEX, `${contexto} precisa ser o build de produção mais o _headers com noindex`);
+  }
+});
+
+test('produção nunca leva noindex', () => {
+  const toml = ler('netlify.toml');
+  assert.doesNotMatch(comandoDaSecao(toml, 'build') ?? '', /noindex/);
+  assert.equal(comandoDaSecao(toml, 'context.production'), null, 'produção usa o [build], sem override');
+  assert.doesNotMatch(ler('robots.txt'), /Disallow:\s*\/\s*$/m);
+  assert.ok(!fs.existsSync(path.join(raiz, '_headers')), 'um _headers na raiz iria para produção');
+});

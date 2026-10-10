@@ -155,3 +155,51 @@ test('sessionStorage bloqueado: volta ao comportamento antigo sem quebrar', asyn
   assert.equal(eventos[0].f, 'x');
   assert.equal(typeof funil.enviar, 'function');
 });
+
+/** Carrega o funil.js, manda um evento e devolve o destino de cada chamada, por sendBeacon ou por fetch. */
+function destinos(href, { semBeacon = false } = {}) {
+  const url = new URL(href);
+  const chamadas = [];
+  const contexto = {
+    location: { href: url.href, search: url.search, hostname: url.hostname, pathname: url.pathname },
+    document: { referrer: '' },
+    navigator: semBeacon ? {} : { sendBeacon: (destino) => { chamadas.push(destino); return true; } },
+    sessionStorage: armazenamentoFalso(), URL, URLSearchParams, Blob, JSON,
+    fetch: (destino) => { chamadas.push(destino); return Promise.resolve(); },
+  };
+  contexto.window = contexto;
+  vm.createContext(contexto);
+  vm.runInContext(codigo, contexto);
+  contexto.window.WaveFunil.enviar('whatsapp_click', { local: 'teste' });
+  return chamadas;
+}
+
+test('produção manda para o portal de produção, com URL absoluta', () => {
+  const portal = 'https://portal.waveops.com.br/api/e';
+  assert.deepEqual(destinos('https://waveops.com.br/contato/'), [portal, portal]);
+  assert.deepEqual(destinos('https://www.waveops.com.br/'), [portal, portal]);
+});
+
+test('dev local e o próprio portal mandam para /api/e da mesma origem', () => {
+  assert.deepEqual(destinos('http://127.0.0.1:4321/'), ['/api/e', '/api/e']);
+  assert.deepEqual(destinos('http://localhost:4321/'), ['/api/e', '/api/e']);
+  assert.deepEqual(destinos('http://[::1]:4321/'), ['/api/e', '/api/e']);
+  assert.deepEqual(destinos('https://portal.waveops.com.br/'), ['/api/e', '/api/e']);
+});
+
+test('host de produção com ponto final (FQDN) continua sendo produção', () => {
+  const portal = 'https://portal.waveops.com.br/api/e';
+  assert.deepEqual(destinos('https://waveops.com.br./'), [portal, portal]);
+  assert.deepEqual(destinos('https://www.waveops.com.br./contato/'), [portal, portal]);
+});
+
+test('Deploy Preview do Netlify não manda nada para o funil de produção', () => {
+  assert.deepEqual(destinos('https://deploy-preview-73--waveops.netlify.app/contato/'), []);
+  assert.deepEqual(destinos('https://deploy-preview-73--waveops.netlify.app/', { semBeacon: true }), []);
+});
+
+test('qualquer outro host (cópia no GitHub Pages, domínio parecido) também não manda nada', () => {
+  assert.deepEqual(destinos('https://vitorduraes.github.io/waveops-landing/'), []);
+  assert.deepEqual(destinos('https://waveops.com.br.exemplo.com/'), []);
+  assert.deepEqual(destinos('https://xwaveops.com.br/'), []);
+});

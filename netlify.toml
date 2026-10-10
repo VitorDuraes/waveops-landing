@@ -40,6 +40,18 @@
   # para o lado de publicar demais, nunca para o lado de congelar a landing.
   ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ../index.html ../404.html ../assets ../solucoes ../plataforma ../projetos-sob-medida ../contato ../demonstracoes-tecnicas ../robots.txt ../sitemap.xml ../llms.txt ../netlify.toml ."
 
+# Deploy Preview e branch deploy: o mesmo site, mas nenhuma resposta pode ser indexada.
+# O comando é o de produção, letra por letra, mais um _headers com X-Robots-Tag: noindex
+# em toda rota (o teste tests/site/unit/netlify.test.mjs trava as duas coisas). O robots.txt
+# fica igual de propósito: com Disallow o buscador não chega a ler o noindex. O resto da
+# proteção do preview mora no código: fora de waveops.com.br os formulários ficam
+# desligados (assets/site/config.js) e o funil não manda evento (assets/funil.js).
+[context.deploy-preview]
+  command = "rm -rf _site && mkdir -p _site && cp ../index.html ../404.html ../robots.txt ../sitemap.xml ../llms.txt _site/ && cp -r ../assets ../solucoes ../plataforma ../projetos-sob-medida ../contato ../demonstracoes-tecnicas _site/ && echo '/*' > _site/_headers && echo '  X-Robots-Tag: noindex, nofollow' >> _site/_headers"
+
+[context.branch-deploy]
+  command = "rm -rf _site && mkdir -p _site && cp ../index.html ../404.html ../robots.txt ../sitemap.xml ../llms.txt _site/ && cp -r ../assets ../solucoes ../plataforma ../projetos-sob-medida ../contato ../demonstracoes-tecnicas _site/ && echo '/*' > _site/_headers && echo '  X-Robots-Tag: noindex, nofollow' >> _site/_headers"
+
 # Rede de seguranca: qualquer rota de portal que caia aqui (bookmark antigo, link
 # indexado, URL digitada) salta pro Railway, pra nunca existir um 2o portal/banco
 # em waveops.com.br. Os botoes da landing ja apontam direto pro portal (absolutos).

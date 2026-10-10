@@ -158,6 +158,14 @@ test('endpoints: produção só em waveops.com.br; localhost simulado; preview d
   assert.match(POLITICA_VERSAO, /\S/);
 });
 
+test('endpoints: host com ponto final ou em maiúsculas é o mesmo site; [::1] é dev local', () => {
+  assert.equal(endpoints('waveops.com.br.').ambiente, 'producao');
+  assert.equal(endpoints('WWW.WAVEOPS.COM.BR').ambiente, 'producao');
+  assert.equal(endpoints('[::1]').ambiente, 'local');
+  assert.equal(endpoints('waveops.com.br.exemplo.com').ambiente, 'desligado');
+  assert.equal(endpoints('xwaveops.com.br').ambiente, 'desligado');
+});
+
 test('contrato do lead: exatamente estas chaves, nesta grafia', () => {
   const lead = montarLead(
     { nome: 'Ana', empresa: '', canalRetorno: 'email', telefone: '', email: 'a@x.com', mensagem: '', politicaCiente: true, marketingAceito: false, website: '' },

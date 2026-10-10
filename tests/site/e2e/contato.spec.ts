@@ -166,6 +166,10 @@ test('"Enviar outro pedido" volta ao formulário vazio com foco no nome', async 
   await expect(page.locator('#form-contato')).toBeVisible();
   await expect(page.getByLabel('Seu nome')).toHaveValue('');
   await expect(page.getByLabel('Seu nome')).toBeFocused();
+  await expect(page.getByLabel('Seu nome')).toHaveAttribute('aria-invalid', 'false');
+  await expect(page.locator('#e-nome')).toBeHidden();
+  await expect(page.locator('#e-tel')).toBeHidden();
+  await expect(page.locator('#contato-resumo')).toBeHidden();
 });
 
 test('teclado: dá para preencher e enviar só com Tab, Espaço e Enter', async ({ page }) => {
@@ -183,4 +187,63 @@ test('teclado: dá para preencher e enviar só com Tab, Espaço e Enter', async 
   await page.keyboard.press('Enter');
   await expect(page.getByRole('heading', { name: 'Recebido, Ana.' })).toBeVisible();
   expect(pedidos).toHaveLength(1);
+});
+
+test('falha do servidor não dispara lead_enviado', async ({ page }) => {
+  await abrir(page);
+  await interceptar(page, (route) => route.fulfill({ status: 503, body: '' }));
+  const eventos: string[] = [];
+  page.on('request', (r) => {
+    if (r.url().endsWith('/api/e')) eventos.push(r.postData() ?? '');
+  });
+  await preencherMinimo(page);
+  await page.clock.fastForward(2000);
+  await page.getByRole('button', { name: 'Enviar pedido' }).click();
+  await expect(page.locator('#contato-falha')).toBeVisible();
+  expect(eventos.some((e) => e.includes('lead_enviado'))).toBe(false);
+});
+
+test('envio antes de 1,2 s é tratado como robô e não sai', async ({ page }) => {
+  await abrir(page);
+  const pedidos = await interceptar(page, ok);
+  await preencherMinimo(page);
+  await page.getByRole('button', { name: 'Enviar pedido' }).click();
+  await expect(page.getByRole('heading', { name: 'Recebido, Ana.' })).toBeVisible();
+  expect(pedidos).toHaveLength(0);
+});
+
+test('recusa 422 do servidor marca o campo, sem cair no estado de falha', async ({ page }) => {
+  await abrir(page);
+  await interceptar(page, (route) =>
+    route.fulfill({ status: 422, contentType: 'application/json', body: JSON.stringify({ ok: false, erro: 'validacao', campos: ['telefone'] }) }),
+  );
+  await preencherMinimo(page);
+  await page.clock.fastForward(2000);
+  await page.getByRole('button', { name: 'Enviar pedido' }).click();
+  await expect(page.locator('#e-tel')).toBeVisible();
+  await expect(page.locator('#f-tel')).toBeFocused();
+  await expect(page.locator('#contato-falha')).toBeHidden();
+});
+
+test('a mensagem de erro só descreve o campo enquanto aparece', async ({ page }) => {
+  await abrir(page);
+  await expect(page.locator('#f-nome')).not.toHaveAttribute('aria-describedby', /e-nome/);
+  await page.getByRole('button', { name: 'Enviar pedido' }).click();
+  await expect(page.locator('#f-nome')).toHaveAttribute('aria-describedby', /e-nome/);
+  await page.getByLabel('Seu nome').fill('Ana');
+  await expect(page.locator('#f-nome')).not.toHaveAttribute('aria-describedby', /e-nome/);
+});
+
+test('se o módulo de envio não carregar, nada é enviado e nenhum dado vai para a URL', async ({ page }) => {
+  await page.route('**/assets/site/lib/enviar.js*', (rota) => rota.abort());
+  const resposta = await page.goto('/contato/');
+  expect(resposta?.status()).toBe(200);
+  await page.getByLabel('Seu nome').fill('Maria Teste');
+  await page.locator('#f-tel').fill('34991234567');
+  await page.locator('#f-politica').check();
+  await expect(page.locator('[data-botao-enviar]')).toBeDisabled();
+  await page.locator('#f-tel').press('Enter');
+  await page.waitForTimeout(300);
+  expect(page.url()).not.toContain('?');
+  expect(page.url()).not.toContain('Maria');
 });

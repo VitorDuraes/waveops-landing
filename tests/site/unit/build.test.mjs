@@ -1,9 +1,11 @@
 // Testes do carimbo de parciais, do versionamento de assets e da simulação do build do Netlify.
-import { test } from 'node:test';
+import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import {
   carimbarParciais,
   versionarAssets,
@@ -97,8 +99,14 @@ test('lê do netlify.toml os arquivos e pastas do cp e os caminhos do ignore', (
   });
 });
 
+const temporarios = [];
+after(() => {
+  for (const pasta of temporarios) fs.rmSync(pasta, { recursive: true, force: true });
+});
+
 function criarRepoTemporario() {
   const raiz = fs.mkdtempSync(path.join(os.tmpdir(), 'wo-build-'));
+  temporarios.push(raiz);
   const escrever = (rel, conteudo) => {
     const destino = path.join(raiz, rel);
     fs.mkdirSync(path.dirname(destino), { recursive: true });
@@ -189,4 +197,36 @@ test('montarDist copia exatamente o que o cp do netlify.toml copia', async () =>
   assert.ok(existe('assets/site/site.js'));
   assert.ok(!existe('dev/site/paginas.json'));
   assert.ok(!existe('netlify.toml'));
+});
+
+test('página listada em paginas.json e sem arquivo é erro, não aviso', async () => {
+  const repo = criarRepoTemporario();
+  fs.rmSync(path.join(repo.raiz, 'contato', 'index.html'));
+  await assert.rejects(construir({ raiz: repo.raiz, modo: 'checar' }), /contato\/index\.html/);
+});
+
+test('montarDist só aceita pasta .tmp-* logo abaixo da raiz (o destino é apagado antes)', async () => {
+  const repo = criarRepoTemporario();
+  await assert.rejects(montarDist({ raiz: repo.raiz, destino: os.tmpdir() }), /destino recusado/);
+  await assert.rejects(montarDist({ raiz: repo.raiz, destino: path.join(repo.raiz, '..', '.tmp-site') }), /destino recusado/);
+  await assert.rejects(montarDist({ raiz: repo.raiz, destino: path.join(repo.raiz, '.tmpsite') }), /destino recusado/);
+  await assert.rejects(montarDist({ raiz: repo.raiz, destino: path.join(repo.raiz, 'assets') }), /destino recusado/);
+});
+
+const cli = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../dev/site/build.mjs');
+const rodar = (...args) => spawnSync(process.execPath, [cli, ...args], { encoding: 'utf8' });
+
+test('CLI: --check sai com 1 quando há página desatualizada e com 0 depois de carimbar', () => {
+  const repo = criarRepoTemporario();
+  assert.equal(rodar('--check', '--raiz', repo.raiz).status, 1);
+  assert.equal(rodar('--raiz', repo.raiz).status, 0);
+  assert.equal(rodar('--check', '--raiz', repo.raiz).status, 0);
+});
+
+test('CLI: página ausente faz o build sair com 1', () => {
+  const repo = criarRepoTemporario();
+  fs.rmSync(path.join(repo.raiz, 'index.html'));
+  const r = rodar('--check', '--raiz', repo.raiz);
+  assert.equal(r.status, 1);
+  assert.match(r.stderr, /index\.html/);
 });

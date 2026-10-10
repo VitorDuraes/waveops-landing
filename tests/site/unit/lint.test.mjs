@@ -126,20 +126,41 @@ test('link interno para página, âncora ou asset que não existe', () => {
   assert.ok(regras(trocar('/assets/brand/selo.webp', '/assets/brand/sumiu.webp')).includes('link-interno'));
 });
 
-test('link para página prevista em paginas.json e ainda não escrita não é erro', () => {
-  const ctx = { ...contexto, pendentes: new Set(['/plataforma/']) };
-  assert.deepEqual(regras(trocar('/solucoes/#vender', '/plataforma/#lista'), ctx), []);
-  assert.ok(regras(trocar('/solucoes/#vender', '/outra/'), ctx).includes('link-interno'));
-});
-
 test('travessão e meia-risca são proibidos', () => {
-  assert.ok(regras(trocar('Seção', 'Seção — nova')).includes('travessao'));
-  assert.ok(regras(trocar('Seção', '1–2')).includes('travessao'));
+  assert.ok(regras(trocar('Seção', 'Seção \u2014 nova')).includes('travessao'));
+  assert.ok(regras(trocar('Seção', '1\u20132')).includes('travessao'));
 });
 
 test('JSON-LD inválido e referência ARIA quebrada', () => {
   assert.ok(regras(trocar('"WebPage"}', '"WebPage",}')).includes('json-ld'));
   assert.ok(regras(trocar('aria-controls="painel"', 'aria-controls="sumiu"')).includes('referencia-aria'));
+});
+
+test('limites da spec: title até 60 e description até 155 caracteres', () => {
+  assert.ok(regras(trocar('Contato · WaveOps', 'x'.repeat(61))).includes('titulo'));
+  assert.ok(!regras(trocar('Contato · WaveOps', 'x'.repeat(60))).includes('titulo'));
+  assert.ok(regras(trocar('content="Fale com a WaveOps."', `content="${'y'.repeat(156)}"`)).includes('descricao'));
+});
+
+test('travessão escrito como entidade também acusa', () => {
+  assert.ok(regras(trocar('Seção', 'Seção &mdash; nova')).includes('travessao'));
+  assert.ok(regras(trocar('Seção', 'Seção &#8211; nova')).includes('travessao'));
+});
+
+test('evento inline colado no atributo anterior também acusa', () => {
+  assert.ok(regras(trocar('<div id="painel">', '<div id="painel"onclick="x()">')).includes('evento-inline'));
+});
+
+test('link relativo (sem barra inicial) acusa', () => {
+  assert.ok(regras(trocar('href="/solucoes/#vender"', 'href="solucoes/"')).includes('link-relativo'));
+  assert.ok(!regras(trocar('href="/solucoes/#vender"', 'href="mailto:contato@waveops.com.br"')).includes('link-relativo'));
+});
+
+test('imagem de compartilhamento que não existe no site acusa', () => {
+  const comImagem = (url) => trocar('</title>', `</title>\n<meta property="og:image" content="${url}">`);
+  assert.ok(regras(comImagem('https://waveops.com.br/assets/sumiu.png')).includes('og-imagem'));
+  assert.ok(regras(comImagem('https://outro.site/x.png')).includes('og-imagem'));
+  assert.ok(!regras(comImagem('https://waveops.com.br/assets/brand/selo.webp')).includes('og-imagem'));
 });
 
 test('o erro aponta a linha certa', () => {

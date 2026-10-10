@@ -1,10 +1,10 @@
 <div class="wo-form-interesse" data-form-interesse>
-  <form class="wo-form" id="form-interesse" novalidate aria-label="Lista de interesse da Plataforma WaveOps" data-sem-js-oculto>
+  <form class="wo-form" id="form-interesse" method="post" novalidate aria-label="Lista de interesse da Plataforma WaveOps" data-sem-js-oculto>
     <div class="wo-campo">
       <label class="wo-rotulo" for="pl-email">Seu e-mail de trabalho</label>
       <div class="wo-form-interesse__linha">
-        <input class="wo-controle wo-controle--grande" id="pl-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="voce@empresa.com.br" maxlength="160" required aria-describedby="e-pl-email" />
-        <button class="wo-btn wo-btn--primario wo-btn--grande" type="submit" data-botao-enviar>
+        <input class="wo-controle wo-controle--grande" id="pl-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="voce@empresa.com.br" maxlength="160" required />
+        <button class="wo-btn wo-btn--primario wo-btn--grande" type="submit" data-botao-enviar disabled>
           <svg width="1em" height="1em" class="wo-girar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" focusable="false" data-icone-enviando hidden><path d="M12 3a9 9 0 1 1-9 9" /></svg>
           <span data-botao-texto>Entrar na lista de interesse</span>
         </button>
@@ -18,8 +18,8 @@
     <div class="wo-form__aceites wo-form-interesse__aceites">
       <div class="wo-campo">
         <label class="wo-marcar" for="pl-politica">
-          <input id="pl-politica" name="politicaCiente" type="checkbox" required aria-describedby="e-pl-politica" />
-          <span>Li a <a href="https://portal.waveops.com.br/privacidade">Política de Privacidade</a> e sei que o e-mail será usado só para avisar da abertura da plataforma.</span>
+          <input id="pl-politica" name="politicaCiente" type="checkbox" required />
+          <span>Li a <a href="https://portal.waveops.com.br/privacidade">Política de Privacidade</a> e sei como a WaveOps usa meu e-mail para avisar da abertura da plataforma.</span>
         </label>
         <span class="wo-erro-campo" id="e-pl-politica" hidden>Para entrar na lista, confirme que leu a Política de Privacidade.</span>
       </div>

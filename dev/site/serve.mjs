@@ -14,12 +14,17 @@
      POST /api/e             204, como o endpoint de funil do portal (o funil.js usa
                              caminho relativo em localhost)
 
+   Proteções (o servidor roda na raiz do repo, onde também estão .git e portal/):
+   só responde com Host local (127.0.0.1, localhost), o que fecha DNS rebinding; nega
+   qualquer segmento que comece com ponto; e, se a raiz tiver netlify.toml, só serve o
+   que o cp do Netlify publica, mais dev/site/ para as ferramentas de QA.
+
    Uso: node dev/site/serve.mjs [--port 4321] [--root .tmp-site] */
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { executadoDireto } from './build.mjs';
+import { executadoDireto, lerNetlify } from './build.mjs';
 
 /** @type {Record<string, string>} */
 const TIPOS = {
@@ -109,6 +114,22 @@ function estado(abs) {
  */
 export function criarServidor({ raiz, atrasoLentoMs = 15000 }) {
   const raizAbs = path.resolve(raiz);
+  const toml = path.join(raizAbs, 'netlify.toml');
+  /** @type {Set<string> | null} primeiro segmento permitido, ou null para servir tudo */
+  let permitidos = null;
+  if (fs.existsSync(toml)) {
+    const { arquivos, pastas } = lerNetlify(fs.readFileSync(toml, 'utf8'));
+    permitidos = new Set([...arquivos, ...pastas, 'dev']);
+  }
+
+  /** @param {string} caminho caminho decodificado da URL */
+  const liberado = (caminho) => {
+    const segmentos = caminho.split('/').filter(Boolean);
+    if (segmentos.some((s) => s.startsWith('.'))) return false;
+    if (!permitidos || !segmentos.length) return true;
+    if (segmentos[0] === 'dev') return segmentos[1] === 'site';
+    return permitidos.has(segmentos[0]);
+  };
 
   /** @param {http.ServerResponse} res @param {string} abs @param {number} status @param {boolean} cabeca */
   const enviarArquivo = (res, abs, status, cabeca) => {
@@ -117,7 +138,9 @@ export function criarServidor({ raiz, atrasoLentoMs = 15000 }) {
       'Cache-Control': 'no-store',
     });
     if (cabeca) return res.end();
-    fs.createReadStream(abs).pipe(res);
+    fs.createReadStream(abs)
+      .on('error', () => res.destroy())
+      .pipe(res);
   };
 
   /** @param {http.ServerResponse} res @param {boolean} cabeca */
@@ -130,6 +153,11 @@ export function criarServidor({ raiz, atrasoLentoMs = 15000 }) {
 
   return http.createServer(async (req, res) => {
     try {
+      const host = (req.headers.host ?? '').replace(/:\d+$/, '');
+      if (!['127.0.0.1', 'localhost', '[::1]'].includes(host)) {
+        res.writeHead(421, { 'Content-Type': 'text/plain; charset=utf-8' });
+        return res.end('host não permitido');
+      }
       const url = new URL(req.url ?? '/', 'http://local');
       if (url.pathname.startsWith('/__dev/')) return await endpointSimulado(req, res, url, atrasoLentoMs);
       if (url.pathname === '/api/e' && req.method === 'POST') {
@@ -150,6 +178,7 @@ export function criarServidor({ raiz, atrasoLentoMs = 15000 }) {
       }
       const alvo = path.resolve(raizAbs, '.' + caminho);
       if (alvo !== raizAbs && !alvo.startsWith(raizAbs + path.sep)) return naoEncontrado(res, cabeca);
+      if (!liberado(caminho)) return naoEncontrado(res, cabeca);
       const info = estado(alvo);
       if (info?.isDirectory()) {
         if (!caminho.endsWith('/')) {

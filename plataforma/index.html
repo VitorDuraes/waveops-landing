@@ -4,7 +4,7 @@
     <!-- parcial:head -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self' https://portal.waveops.com.br https://cowboyhouse.app.n8n.cloud; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self' https://portal.waveops.com.br https://cowboyhouse.app.n8n.cloud; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests" />
     <meta name="theme-color" content="#0a0b0e" />
     <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png" />
@@ -13,12 +13,12 @@
     <link rel="stylesheet" href="/assets/site/tokens.css?v=dc02737f" />
     <link rel="stylesheet" href="/assets/site/base.css?v=77810b0f" />
     <link rel="stylesheet" href="/assets/site/components.css?v=75406572" />
-    <script defer src="/assets/funil.js?v=a7d946b7"></script>
+    <script defer src="/assets/funil.js?v=089e5ffb"></script>
     <script type="module" src="/assets/site/site.js?v=00ed62c5"></script>
     <noscript><style>[data-seletor] [data-painel]{display:block!important}[data-seletor] [data-opcoes],[data-sem-js-oculto]{display:none!important}@media (max-width:1180px){.wo-topo__painel[hidden]{display:flex!important}.wo-topo__menu{display:none!important}}</style></noscript>
     <!-- /parcial:head -->
     <link rel="stylesheet" href="/assets/site/paginas/plataforma.css?v=5def78ae" />
-    <script type="module" src="/assets/site/interesse.js?v=7f0a792c"></script>
+    <script type="module" src="/assets/site/interesse.js?v=6d17fdc6"></script>
     <title>Plataforma em desenvolvimento · WaveOps</title>
     <meta name="description" content="Plataforma WaveOps: camada de integração, automação e gestão sobre os sistemas que a empresa já usa. Em desenvolvimento, sem contratação aberta." />
     <link rel="canonical" href="https://waveops.com.br/plataforma/" />
@@ -29,14 +29,14 @@
     <meta property="og:url" content="https://waveops.com.br/plataforma/" />
     <meta property="og:title" content="Plataforma em desenvolvimento · WaveOps" />
     <meta property="og:description" content="Plataforma WaveOps: camada de integração, automação e gestão sobre os sistemas que a empresa já usa. Em desenvolvimento, sem contratação aberta." />
-    <meta property="og:image" content="https://waveops.com.br/assets/og-image.png" />
+    <meta property="og:image" content="https://waveops.com.br/assets/og-waveops.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="WaveOps: engenharia de software, automação e IA" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Plataforma em desenvolvimento · WaveOps" />
     <meta name="twitter:description" content="Plataforma WaveOps: camada de integração, automação e gestão sobre os sistemas que a empresa já usa. Em desenvolvimento, sem contratação aberta." />
-    <meta name="twitter:image" content="https://waveops.com.br/assets/og-image.png" />
+    <meta name="twitter:image" content="https://waveops.com.br/assets/og-waveops.png" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -98,12 +98,12 @@
             <p class="wo-hero__lead">Uma camada de inteligência, integração, automação e gestão que funciona sobre o que a sua empresa já tem. Cada organização recebe um workspace, com seus usuários e os módulos que contratar.</p>
             <!-- parcial:form-interesse -->
             <div class="wo-form-interesse" data-form-interesse>
-              <form class="wo-form" id="form-interesse" novalidate aria-label="Lista de interesse da Plataforma WaveOps" data-sem-js-oculto>
+              <form class="wo-form" id="form-interesse" method="post" novalidate aria-label="Lista de interesse da Plataforma WaveOps" data-sem-js-oculto>
                 <div class="wo-campo">
                   <label class="wo-rotulo" for="pl-email">Seu e-mail de trabalho</label>
                   <div class="wo-form-interesse__linha">
-                    <input class="wo-controle wo-controle--grande" id="pl-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="voce@empresa.com.br" maxlength="160" required aria-describedby="e-pl-email" />
-                    <button class="wo-btn wo-btn--primario wo-btn--grande" type="submit" data-botao-enviar>
+                    <input class="wo-controle wo-controle--grande" id="pl-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="voce@empresa.com.br" maxlength="160" required />
+                    <button class="wo-btn wo-btn--primario wo-btn--grande" type="submit" data-botao-enviar disabled>
                       <svg width="1em" height="1em" class="wo-girar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" focusable="false" data-icone-enviando hidden><path d="M12 3a9 9 0 1 1-9 9" /></svg>
                       <span data-botao-texto>Entrar na lista de interesse</span>
                     </button>
@@ -117,8 +117,8 @@
                 <div class="wo-form__aceites wo-form-interesse__aceites">
                   <div class="wo-campo">
                     <label class="wo-marcar" for="pl-politica">
-                      <input id="pl-politica" name="politicaCiente" type="checkbox" required aria-describedby="e-pl-politica" />
-                      <span>Li a <a href="https://portal.waveops.com.br/privacidade">Política de Privacidade</a> e sei que o e-mail será usado só para avisar da abertura da plataforma.</span>
+                      <input id="pl-politica" name="politicaCiente" type="checkbox" required />
+                      <span>Li a <a href="https://portal.waveops.com.br/privacidade">Política de Privacidade</a> e sei como a WaveOps usa meu e-mail para avisar da abertura da plataforma.</span>
                     </label>
                     <span class="wo-erro-campo" id="e-pl-politica" hidden>Para entrar na lista, confirme que leu a Política de Privacidade.</span>
                   </div>

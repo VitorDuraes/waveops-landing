@@ -112,6 +112,43 @@ test('entrada direta: visita com fonte direto e registro gravado', async () => {
   assert.equal(JSON.parse(s.getItem('waveops:origem:v1')).fonte, 'direto');
 });
 
+test('aba nova aberta de uma página com UTM: sem nova visita e com a UTM do referrer', async () => {
+  const novaAba = armazenamentoFalso();
+  const { eventos } = await carregar('https://waveops.com.br/contato/', 'https://waveops.com.br/?utm_source=google&utm_medium=cpc&utm_campaign=out', novaAba);
+  assert.equal(eventos.length, 0, 'a aba de origem já contou a visita');
+  const registro = JSON.parse(novaAba.getItem('waveops:origem:v1'));
+  assert.equal(registro.fonte, 'google/cpc');
+  assert.equal(registro.utm.campaign, 'out');
+});
+
+test('voltar do portal não reescreve o primeiro toque nem conta outra visita', async () => {
+  const s = armazenamentoFalso();
+  await carregar('https://waveops.com.br/?utm_source=google&utm_medium=cpc', 'https://www.google.com/', s);
+  const { eventos } = await carregar('https://waveops.com.br/', 'https://portal.waveops.com.br/checkout', s);
+  assert.equal(eventos.length, 0);
+  assert.equal(JSON.parse(s.getItem('waveops:origem:v1')).fonte, 'google/cpc');
+});
+
+test('vindo do portal numa sessão nova: sem visita e fonte direto', async () => {
+  const { eventos } = await carregar('https://waveops.com.br/', 'https://portal.waveops.com.br/cliente/login', armazenamentoFalso());
+  assert.equal(eventos.length, 0);
+});
+
+test('o evento vai como text/plain (com JSON o navegador faria preflight)', async () => {
+  const url = new URL('https://waveops.com.br/');
+  const blobs = [];
+  const contexto = {
+    location: { href: url.href, search: url.search, hostname: url.hostname, pathname: url.pathname },
+    document: { referrer: '' },
+    navigator: { sendBeacon: (_d, blob) => { blobs.push(blob); return true; } },
+    sessionStorage: armazenamentoFalso(), URL, URLSearchParams, Blob, JSON, fetch: () => Promise.resolve(),
+  };
+  contexto.window = contexto;
+  vm.createContext(contexto);
+  vm.runInContext(codigo, contexto);
+  assert.match(blobs[0].type, /^text\/plain/);
+});
+
 test('sessionStorage bloqueado: volta ao comportamento antigo sem quebrar', async () => {
   const { eventos, funil } = await carregar('https://waveops.com.br/?utm_source=x', '', armazenamentoQuebrado);
   assert.equal(eventos.length, 1);

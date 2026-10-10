@@ -21,16 +21,13 @@ import { lerPaginas, executadoDireto } from './build.mjs';
  *   dominio: string,
  *   paginas: Map<string, Set<string>>,
  *   arquivos: Set<string>,
- *   pendentes?: Set<string>,
  * }} ContextoLint
- *
- * pendentes: URLs que estão em dev/site/paginas.json mas cujo arquivo ainda não existe.
- * Link para elas não é erro enquanto o site está sendo montado; a fumaça do Playwright
- * e o build simulado acusam se alguma continuar faltando no fim.
  */
 
-const TITULO_MAX = 70;
-const DESCRICAO_MAX = 160;
+const TITULO_MAX = 60;
+const DESCRICAO_MAX = 155;
+const TRAVESSAO = /[\u2013\u2014]|&(?:mdash|ndash);|&#(?:8211|8212);|&#x201[34];/gi;
+const ESQUEMA_PERMITIDO = /^(?:\/|#|https?:|mailto:|tel:|data:)/i;
 const TIPOS_SEM_ROTULO = new Set(['hidden', 'submit', 'button', 'reset', 'image']);
 
 /** @param {string} texto */
@@ -162,7 +159,7 @@ export function lintarHtml(html, ctx) {
     const nome = /^<([a-z0-9-]+)/i.exec(tag)?.[1].toLowerCase() ?? '';
     const semValores = tag.replace(/"[^"]*"/g, '""');
 
-    if (/\son[a-z]+\s*=/i.test(semValores)) acusar('evento-inline', indice, `evento inline em <${nome}>: use addEventListener`);
+    if (/(?:\s|")on[a-z]+\s*=/i.test(semValores)) acusar('evento-inline', indice, `evento inline em <${nome}>: use addEventListener`);
     if (/\s(href|src|action)="\s*javascript:/i.test(tag)) acusar('javascript-url', indice, 'URL javascript: é proibida');
     if (/\s(href|src)="http:\/\//i.test(tag)) acusar('http', indice, 'use https://');
     if (nome === 'img' && atributo(tag, 'alt') === undefined) acusar('img-alt', indice, '<img> sem alt (use alt="" se for decorativa)');
@@ -197,8 +194,18 @@ export function lintarHtml(html, ctx) {
     for (const attr of ['href', 'src']) {
       const valor = atributo(tag, attr);
       if (valor === undefined) continue;
+      if (!ESQUEMA_PERMITIDO.test(valor) && !/^javascript:/i.test(valor)) {
+        acusar('link-relativo', indice, `${attr}="${valor}": use caminho a partir da raiz (/...) ou URL completa`);
+        continue;
+      }
       const problema = verificarLinkInterno(valor, ctx, ids);
       if (problema) acusar('link-interno', indice, problema);
+    }
+
+    if (nome === 'meta' && /^(og:image|twitter:image)$/.test(atributo(tag, 'property') ?? atributo(tag, 'name') ?? '')) {
+      const imagem = atributo(tag, 'content') ?? '';
+      const caminho = imagem.startsWith(ctx.dominio + '/') ? imagem.slice(ctx.dominio.length) : '';
+      if (!caminho || !ctx.arquivos.has(caminho)) acusar('og-imagem', indice, `imagem de compartilhamento não existe no site: ${imagem}`);
     }
   }
 
@@ -216,7 +223,7 @@ export function lintarHtml(html, ctx) {
     }
   }
 
-  for (const m of html.matchAll(/[–—]/g)) {
+  for (const m of html.matchAll(TRAVESSAO)) {
     acusar('travessao', m.index ?? 0, 'travessão ou meia-risca: troque por ponto, vírgula ou dois-pontos');
   }
 
@@ -244,7 +251,6 @@ function verificarLinkInterno(valor, ctx, idsPagina) {
   if (!valor.startsWith('/') || valor.startsWith('//')) return undefined;
   const [semHash, ancora] = valor.split('#');
   const caminho = semHash.split('?')[0];
-  if (ctx.pendentes?.has(caminho)) return undefined;
   const ehPagina = ctx.paginas.has(caminho) || caminho === ctx.url;
   if (ehPagina) {
     if (!ancora) return undefined;
@@ -277,34 +283,63 @@ function listarArquivosPublicos(raiz) {
   return arquivos;
 }
 
+/**
+ * Travessão em arquivo que não é HTML: JavaScript e CSS do site e textos publicados.
+ * @param {string} raiz
+ * @returns {ErroLint[]}
+ */
+export function lintarTextos(raiz) {
+  /** @type {string[]} */
+  const alvos = ['llms.txt', 'robots.txt', 'assets/funil.js'];
+  /** @param {string} dir */
+  const andar = (dir) => {
+    if (!fs.existsSync(path.join(raiz, dir))) return;
+    for (const item of fs.readdirSync(path.join(raiz, dir), { withFileTypes: true })) {
+      const rel = `${dir}/${item.name}`;
+      if (item.isDirectory()) andar(rel);
+      else if (/\.(m?js|css)$/.test(item.name)) alvos.push(rel);
+    }
+  };
+  andar('assets/site');
+  /** @type {ErroLint[]} */
+  const erros = [];
+  for (const rel of alvos) {
+    const abs = path.join(raiz, rel);
+    if (!fs.existsSync(abs)) continue;
+    const texto = fs.readFileSync(abs, 'utf8');
+    const linhaDe = criarLocalizador(texto);
+    for (const m of texto.matchAll(TRAVESSAO)) {
+      erros.push({ arquivo: rel, linha: linhaDe(m.index ?? 0), regra: 'travessao', mensagem: 'travessão ou meia-risca: troque por ponto, vírgula ou dois-pontos' });
+    }
+  }
+  return erros;
+}
+
 if (executadoDireto(import.meta.url)) {
-  const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
+  const argumentos = process.argv.slice(2);
+  const iRaiz = argumentos.indexOf('--raiz');
+  const raiz = iRaiz !== -1 && argumentos[iRaiz + 1] ? path.resolve(argumentos[iRaiz + 1]) : path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
   const config = lerPaginas(raiz);
-  const pedidos = process.argv.slice(2).map((a) => a.split(path.sep).join('/'));
+  const pedidos = argumentos.filter((a, i) => a !== '--raiz' && argumentos[i - 1] !== '--raiz').map((a) => a.split(path.sep).join('/'));
   const arquivos = listarArquivosPublicos(raiz);
   /** @type {Map<string, Set<string>>} */
   const paginas = new Map();
-  /** @type {Set<string>} */
-  const pendentes = new Set();
+  /** @type {ErroLint[]} */
+  const erros = [];
   for (const p of config.paginas) {
     const abs = path.join(raiz, p.arquivo);
     if (fs.existsSync(abs)) paginas.set(p.url, coletarIds(fs.readFileSync(abs, 'utf8')));
-    else pendentes.add(p.url);
+    else erros.push({ arquivo: p.arquivo, linha: 0, regra: 'pagina-ausente', mensagem: 'listada em dev/site/paginas.json e sem arquivo' });
   }
-  if (pendentes.size) console.warn(`aviso: links para páginas ainda não escritas não contam como erro: ${[...pendentes].join(', ')}`);
-  /** @type {ErroLint[]} */
-  const erros = [];
+  if (!pedidos.length) erros.push(...lintarTextos(raiz));
   let lidas = 0;
   for (const p of config.paginas) {
     if (pedidos.length && !pedidos.includes(p.arquivo)) continue;
     const abs = path.join(raiz, p.arquivo);
-    if (!fs.existsSync(abs)) {
-      console.warn(`aviso: página ainda não existe: ${p.arquivo}`);
-      continue;
-    }
+    if (!fs.existsSync(abs)) continue;
     lidas += 1;
     erros.push(...lintarHtml(fs.readFileSync(abs, 'utf8'), {
-      arquivo: p.arquivo, url: p.url, indexavel: p.indexavel, dominio: config.dominio, paginas, arquivos, pendentes,
+      arquivo: p.arquivo, url: p.url, indexavel: p.indexavel, dominio: config.dominio, paginas, arquivos,
     }));
   }
   for (const e of erros) console.log(`${e.arquivo}:${e.linha}: ${e.regra}: ${e.mensagem}`);

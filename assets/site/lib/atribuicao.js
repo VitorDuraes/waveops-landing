@@ -34,7 +34,9 @@ export function calcularAtribuicao(local, referrer) {
   let hostReferrer = '';
   try {
     hostReferrer = referrer ? new URL(referrer).hostname : '';
-    if (hostReferrer && hostReferrer !== local.hostname) referrerExterno = referrer.slice(0, 500);
+    // O próprio site e o portal (*.waveops.com.br) não são origem, como no funil.js.
+    const interno = hostReferrer === local.hostname || hostReferrer === 'waveops.com.br' || /\.waveops\.com\.br$/.test(hostReferrer);
+    if (hostReferrer && !interno) referrerExterno = referrer.slice(0, 500);
   } catch {
     referrerExterno = '';
   }

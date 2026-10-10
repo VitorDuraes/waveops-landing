@@ -4,12 +4,12 @@
    Só confirma depois que o servidor responde que gravou. E-mail repetido recebe a
    mesma confirmação (o servidor deduplica e não revela que já estava na lista).
    Robô (honeypot ou envio antes de 1,2 s) vê a confirmação e nada é enviado. */
-import { validarInteresse, normalizarEmail } from './lib/validacao.js';
+import { validarInteresse, normalizarEmail, MENSAGENS_INTERESSE } from './lib/validacao.js';
 import { lerAtribuicao } from './lib/atribuicao.js';
 import { montarInteresse } from './lib/payload.js';
 import { enviarJson } from './lib/enviar.js';
-import { TEMPO_MINIMO_MS, armazenamentoDaSessao, criarControleDeEnvio, definirBotao, marcarErro, medir } from './lib/formulario.js';
-import { endpoints, POLITICA_VERSAO, TEXTO_MARKETING } from './config.js';
+import { TEMPO_MINIMO_MS, armazenamentoDaSessao, criarControleDeEnvio, definirBotao, liberarEnvio, marcarErro, medir } from './lib/formulario.js';
+import { endpoints, POLITICA_VERSAO, TEXTO_CIENCIA, TEXTO_MARKETING } from './config.js';
 
 const TEXTO_BOTAO = 'Entrar na lista de interesse';
 
@@ -104,6 +104,7 @@ export function iniciarInteresse(raiz = document) {
       atribuicao: lerAtribuicao(location, document.referrer, armazenamentoDaSessao()),
       pagina: location.pathname,
       politicaVersao: POLITICA_VERSAO,
+      cienciaTextoVersao: TEXTO_CIENCIA.interesse,
       marketingTextoVersao: TEXTO_MARKETING.interesse,
     });
     const resultado = await enviarJson(destino.interesse, corpo);
@@ -114,8 +115,20 @@ export function iniciarInteresse(raiz = document) {
       mostrarConfirmacao(dados);
       return;
     }
+    // 422 com campos: o servidor recusou o e-mail ou a ciência. Mostra no campo.
+    const campos = resultado.campos ?? [];
+    if (resultado.motivo === 'validacao' && (campos.includes('email') || campos.includes('politicaCiente'))) {
+      if (campos.includes('email')) marcarErro(email, doc.getElementById('e-pl-email'), MENSAGENS_INTERESSE.email);
+      if (campos.includes('politicaCiente')) marcarErro(politica, doc.getElementById('e-pl-politica'), MENSAGENS_INTERESSE.politicaCiente);
+      enviando = false;
+      definirBotao(form, botao, { enviando: false, texto: TEXTO_BOTAO });
+      (campos.includes('email') ? email : politica)?.focus();
+      return;
+    }
     mostrarFalha();
   });
+
+  liberarEnvio(botao);
 }
 
 iniciarInteresse();

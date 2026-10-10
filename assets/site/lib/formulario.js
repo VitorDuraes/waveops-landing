@@ -69,6 +69,23 @@ export function marcarErro(campo, mensagem, erro) {
     mensagem.hidden = !erro;
     if (erro) mensagem.textContent = erro;
   }
+  // A mensagem só descreve o campo enquanto está visível: referência a texto escondido
+  // também é lida pelo leitor de tela, e o campo pareceria errado antes de qualquer erro.
+  if (campo && mensagem?.id) {
+    const ids = (campo.getAttribute('aria-describedby') ?? '').split(/\s+/).filter((id) => id && id !== mensagem.id);
+    if (erro) ids.push(mensagem.id);
+    if (ids.length) campo.setAttribute('aria-describedby', ids.join(' '));
+    else campo.removeAttribute('aria-describedby');
+  }
+}
+
+/**
+ * Libera o botão de envio. Ele nasce desabilitado no HTML: se este módulo não carregar,
+ * nenhum envio nativo acontece (e nenhum dado vai parar na URL).
+ * @param {HTMLButtonElement} botao
+ */
+export function liberarEnvio(botao) {
+  botao.disabled = false;
 }
 
 /** Evento de funil sem dado pessoal. Nunca atrapalha o formulário. @param {string} nome @param {Record<string, string>} [props] */

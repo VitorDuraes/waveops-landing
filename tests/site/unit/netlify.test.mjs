@@ -62,3 +62,29 @@ test('llms.txt só linka páginas que existem e não repete afirmação retirada
     assert.doesNotMatch(llms, retirada);
   }
 });
+
+test('os 301 para o portal continuam, todos com force', () => {
+  const toml = ler('netlify.toml');
+  const regras = [...toml.matchAll(/\[\[redirects\]\]\s*from = "([^"]+)"\s*to = "([^"]+)"\s*status = (\d+)\s*force = (true|false)/g)].map((m) => ({
+    de: m[1],
+    para: m[2],
+    status: Number(m[3]),
+    force: m[4] === 'true',
+  }));
+  for (const de of ['/cliente/*', '/admin/*', '/checkout', '/api/*', '/termos', '/privacidade']) {
+    const regra = regras.find((r) => r.de === de);
+    assert.ok(regra, `falta o redirect de ${de}`);
+    assert.equal(regra.status, 301);
+    assert.equal(regra.force, true);
+    assert.match(regra.para, /^https:\/\/portal\.waveops\.com\.br\//);
+  }
+});
+
+test('os headers de segurança continuam no netlify.toml', () => {
+  const toml = ler('netlify.toml');
+  assert.match(toml, /Content-Security-Policy = "frame-ancestors 'none'"/);
+  assert.match(toml, /X-Frame-Options = "DENY"/);
+  assert.match(toml, /X-Content-Type-Options = "nosniff"/);
+  assert.match(toml, /Referrer-Policy = "strict-origin-when-cross-origin"/);
+  assert.match(toml, /Permissions-Policy = "camera=\(\), microphone=\(\)/);
+});

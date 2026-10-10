@@ -2,7 +2,7 @@
 /* Corpo enviado ao n8n. O lead mantém as 15 chaves que o site antigo mandava, com os
    mesmos nomes, para nada se perder se o workflow atual ainda estiver recebendo, e
    acrescenta as chaves novas do contrato v2 (spec do site v2, seção 5.7). */
-import { soDigitos, normalizarEmail } from './validacao.js';
+import { normalizarTelefone, normalizarEmail } from './validacao.js';
 
 /**
  * @typedef {import('./validacao.js').DadosContato} DadosContato
@@ -15,6 +15,7 @@ import { soDigitos, normalizarEmail } from './validacao.js';
  *   atribuicao: Atribuicao,
  *   pagina: string,
  *   politicaVersao: string,
+ *   cienciaTextoVersao: string,
  *   marketingTextoVersao: string,
  * }} ContextoEnvio
  * @typedef {{ dor: string, procura: string, melhorHorario: string }} RotulosContato
@@ -39,7 +40,7 @@ function camposUtm(a) {
  * @param {ContextoEnvio} ctx
  */
 export function montarLead(dados, rotulos, ctx) {
-  const telefone = soDigitos(dados.telefone);
+  const telefone = normalizarTelefone(dados.telefone);
   const agora = ctx.agora.toISOString();
   return {
     nome: dados.nome.trim(),
@@ -61,6 +62,7 @@ export function montarLead(dados, rotulos, ctx) {
     politicaCiente: dados.politicaCiente === true,
     politicaVersao: ctx.politicaVersao,
     politicaCienteEm: agora,
+    cienciaTextoVersao: ctx.cienciaTextoVersao,
     marketingAceito: dados.marketingAceito === true,
     marketingTextoVersao: ctx.marketingTextoVersao,
     primeiraFonte: ctx.atribuicao.fonte,
@@ -82,6 +84,7 @@ export function montarInteresse(dados, ctx) {
     politicaCiente: dados.politicaCiente === true,
     politicaVersao: ctx.politicaVersao,
     politicaCienteEm: agora,
+    cienciaTextoVersao: ctx.cienciaTextoVersao,
     marketingAceito: dados.marketingAceito === true,
     marketingTextoVersao: ctx.marketingTextoVersao,
     finalidade: 'aviso_abertura_plataforma',

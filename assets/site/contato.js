@@ -6,12 +6,12 @@
    antes de 1,2 s) vê a confirmação e nada é enviado, como no site antigo. A falha
    preserva tudo o que foi digitado e oferece WhatsApp; "Tentar de novo" reenvia o
    mesmo idEnvio enquanto os dados não mudarem. */
-import { validarContato, resumoErros } from './lib/validacao.js';
+import { validarContato, resumoErros, MENSAGENS_CONTATO } from './lib/validacao.js';
 import { lerAtribuicao } from './lib/atribuicao.js';
 import { montarLead } from './lib/payload.js';
 import { enviarJson } from './lib/enviar.js';
-import { TEMPO_MINIMO_MS, armazenamentoDaSessao, criarControleDeEnvio, definirBotao, marcarErro, medir } from './lib/formulario.js';
-import { endpoints, POLITICA_VERSAO, TEXTO_MARKETING } from './config.js';
+import { TEMPO_MINIMO_MS, armazenamentoDaSessao, criarControleDeEnvio, definirBotao, liberarEnvio, marcarErro, medir } from './lib/formulario.js';
+import { endpoints, POLITICA_VERSAO, TEXTO_CIENCIA, TEXTO_MARKETING } from './config.js';
 
 /** @typedef {import('./lib/validacao.js').CanalRetorno} CanalRetorno */
 
@@ -203,6 +203,7 @@ export function iniciarContato(raiz = document) {
       atribuicao: lerAtribuicao(location, document.referrer, armazenamentoDaSessao()),
       pagina: location.pathname,
       politicaVersao: POLITICA_VERSAO,
+      cienciaTextoVersao: TEXTO_CIENCIA.contato,
       marketingTextoVersao: TEXTO_MARKETING.contato,
     });
     const resultado = await enviarJson(destino.lead, corpo);
@@ -212,6 +213,23 @@ export function iniciarContato(raiz = document) {
       mostrarConfirmacao(dados);
       return;
     }
+    // 422 com campos: o servidor recusou um dado. Mostra no campo, em vez de pedir para
+    // tentar de novo um envio que vai ser recusado outra vez.
+    const recusados = (resultado.campos ?? []).filter((c) => c in CAMPOS);
+    if (resultado.motivo === 'validacao' && recusados.length) {
+      for (const campo of recusados) {
+        const [idCampo, idErro] = CAMPOS[/** @type {keyof typeof CAMPOS} */ (campo)];
+        marcarErro(porId(idCampo), porId(idErro), MENSAGENS_CONTATO[/** @type {keyof typeof MENSAGENS_CONTATO} */ (campo)]);
+      }
+      if (resumo) {
+        const texto = resumo.querySelector('[data-resumo-texto]');
+        if (texto) texto.textContent = resumoErros(recusados.length);
+        resumo.hidden = false;
+      }
+      pronto('enviar');
+      porId(CAMPOS[/** @type {keyof typeof CAMPOS} */ (recusados[0])][0])?.focus();
+      return;
+    }
     mostrarFalha();
   });
 
@@ -219,7 +237,7 @@ export function iniciarContato(raiz = document) {
     form.reset();
     envio.reiniciar();
     tentou = false;
-    validar(false);
+    for (const [idCampo, idErro] of Object.values(CAMPOS)) marcarErro(porId(idCampo), porId(idErro), undefined);
     if (resumo) resumo.hidden = true;
     if (falha) falha.hidden = true;
     achar('[data-falha-whatsapp]')?.setAttribute('hidden', '');
@@ -232,6 +250,7 @@ export function iniciarContato(raiz = document) {
   });
 
   atualizarCanal();
+  liberarEnvio(botao);
 }
 
 iniciarContato();

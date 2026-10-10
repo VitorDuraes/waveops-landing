@@ -25,15 +25,42 @@
   var mesma = h === 'localhost' || h === '127.0.0.1' || /(^|\.)portal\.waveops\.com\.br$/.test(h);
   var URL_EVENTO = mesma ? '/api/e' : 'https://portal.waveops.com.br/api/e';
 
-  // Só o host, e nunca o próprio site. Tem try/catch próprio para um referrer
-  // estranho não cancelar o evento inteiro.
-  function refHost() {
+  /* Interno: o próprio site e qualquer *.waveops.com.br (o portal). Quem volta do
+     checkout não é chegada nova e não pode reescrever o primeiro toque. */
+  /** @param {string} host */
+  function interno(host) {
+    return host === h || host === 'waveops.com.br' || /\.waveops\.com\.br$/.test(host);
+  }
+
+  /** Host do referrer, interno ou não; vazio se não houver ou for ilegível. */
+  function hostDoReferrer() {
     try {
-      var r = document.referrer ? new URL(document.referrer).hostname : '';
-      return r && r !== h ? r : undefined;
+      return document.referrer ? new URL(document.referrer).hostname : '';
     } catch (e) {
-      return undefined;
+      return '';
     }
+  }
+
+  // Só o host, e nunca o próprio site nem o portal. Tem try/catch próprio para um
+  // referrer estranho não cancelar o evento inteiro.
+  function refHost() {
+    var r = hostDoReferrer();
+    return r && !interno(r) ? r : undefined;
+  }
+
+  /** @param {string} busca location.search ou a query de outra URL */
+  function lerUtm(busca) {
+    var p = new URLSearchParams(busca);
+    /** @param {string} k */
+    var g = function (k) {
+      return (p.get(k) || '').trim().slice(0, 120);
+    };
+    return { source: g('utm_source'), medium: g('utm_medium'), campaign: g('utm_campaign'), term: g('utm_term'), content: g('utm_content') };
+  }
+
+  /** @param {{ source: string, medium: string }} utm */
+  function fonteDaUtm(utm) {
+    return (utm.medium ? utm.source + '/' + utm.medium : utm.source).slice(0, 64);
   }
 
   /* De onde a pessoa veio NESTE carregamento. Precedência: UTM vence referrer, porque
@@ -42,15 +69,10 @@
      decide é o registro da sessão. */
   function chegada() {
     try {
-      var p = new URLSearchParams(location.search);
-      /** @param {string} k */
-      var g = function (k) {
-        return (p.get(k) || '').trim().slice(0, 120);
-      };
-      var utm = { source: g('utm_source'), medium: g('utm_medium'), campaign: g('utm_campaign'), term: g('utm_term'), content: g('utm_content') };
+      var utm = lerUtm(location.search);
       var r = refHost();
       if (!utm.source && !r) return null;
-      var fonte = utm.source ? (utm.medium ? utm.source + '/' + utm.medium : utm.source) : String(r);
+      var fonte = utm.source ? fonteDaUtm(utm) : String(r);
       return {
         fonte: fonte.slice(0, 64),
         landingUrl: String(location.href).slice(0, 500),
@@ -71,20 +93,46 @@
     };
   }
 
+  /* Sem registro na aba e com referrer interno: é aba nova aberta de outra página do
+     site (o sessionStorage é por aba) ou volta do portal. Não é chegada nova, então não
+     conta visita; a UTM, se houver, vem da URL de onde a pessoa saiu. */
+  function herdadaDoReferrer() {
+    var utm = { source: '', medium: '', campaign: '', term: '', content: '' };
+    try {
+      if (hostDoReferrer() === h) utm = lerUtm(new URL(document.referrer).search);
+    } catch (e) {
+      /* referrer ilegível: fica sem UTM */
+    }
+    return {
+      fonte: utm.source ? fonteDaUtm(utm) : 'direto',
+      landingUrl: hostDoReferrer() === h ? String(document.referrer).slice(0, 500) : String(location.href).slice(0, 500),
+      referrer: '',
+      utm: utm,
+    };
+  }
+
   var FONTE = 'direto';
   var mandarVisita = true;
   try {
     var atual = chegada();
     var bruto = sessionStorage.getItem(CHAVE_ORIGEM);
     var gravado = bruto ? JSON.parse(bruto) : null;
-    var registro = atual || (gravado && typeof gravado.fonte === 'string' ? gravado : direta());
+    if (gravado && typeof gravado.fonte !== 'string') gravado = null;
+    var refInterno = !atual && !gravado && hostDoReferrer() !== '' && interno(hostDoReferrer());
+    var registro = atual || gravado || (refInterno ? herdadaDoReferrer() : direta());
     if (atual || !gravado) {
       registro.em = new Date().toISOString();
       sessionStorage.setItem(CHAVE_ORIGEM, JSON.stringify(registro));
     }
     FONTE = String(registro.fonte).slice(0, 64);
-    mandarVisita = sessionStorage.getItem(CHAVE_VISITA) !== FONTE;
-    if (mandarVisita) sessionStorage.setItem(CHAVE_VISITA, FONTE);
+    if (refInterno) {
+      // A aba de origem já contou a visita: marca como enviada e não manda de novo.
+      sessionStorage.setItem(CHAVE_VISITA, FONTE);
+      mandarVisita = false;
+    } else {
+      mandarVisita = sessionStorage.getItem(CHAVE_VISITA) !== FONTE;
+      if (mandarVisita) sessionStorage.setItem(CHAVE_VISITA, FONTE);
+    }
   } catch (e) {
     // sessionStorage bloqueado (Safari privado, política do navegador): fonte por carregamento.
     var porCarga = chegada();

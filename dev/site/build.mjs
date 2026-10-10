@@ -237,10 +237,8 @@ export async function construir({ raiz, modo = 'escrever', paginas }) {
   for (const pagina of config.paginas) {
     if (paginas && !paginas.includes(pagina.arquivo)) continue;
     const abs = path.join(raiz, pagina.arquivo);
-    if (!fs.existsSync(abs)) {
-      avisos.push(`página ainda não existe: ${pagina.arquivo}`);
-      continue;
-    }
+    // Página listada e sem arquivo é erro: no ar seria 404 no menu.
+    if (!fs.existsSync(abs)) throw new Error(`página listada em dev/site/paginas.json e sem arquivo: ${pagina.arquivo}`);
     const atual = lerTexto(abs);
     let novo;
     try {
@@ -264,12 +262,12 @@ export async function construir({ raiz, modo = 'escrever', paginas }) {
 export async function montarDist({ raiz, destino }) {
   const raizAbs = path.resolve(raiz);
   const destinoAbs = path.resolve(destino);
-  const dentroDoTmp = destinoAbs.startsWith(path.resolve(process.env.TEMP || process.env.TMPDIR || '/tmp'));
-  if (destinoAbs === raizAbs || raizAbs.startsWith(destinoAbs + path.sep)) {
-    throw new Error(`destino recusado, apagaria o repo: ${destinoAbs}`);
-  }
-  if (!path.basename(destinoAbs).startsWith('.tmp') && !dentroDoTmp) {
-    throw new Error(`destino recusado: use uma pasta .tmp-* ou temporária, não ${destinoAbs}`);
+  // O destino é apagado antes da cópia, então só vale uma pasta .tmp-* logo abaixo da
+  // raiz do repo. Nada de pasta temporária do sistema, irmã com prefixo parecido ou
+  // caminho com "..": um engano aqui apagaria coisa que não é do site.
+  const relativoAoRepo = path.relative(raizAbs, destinoAbs);
+  if (!/^\.tmp-[a-z0-9-]+$/i.test(relativoAoRepo)) {
+    throw new Error(`destino recusado: use uma pasta .tmp-* na raiz do repo, não ${destinoAbs}`);
   }
   const { arquivos, pastas } = lerNetlify(fs.readFileSync(path.join(raizAbs, 'netlify.toml'), 'utf8'));
   fs.rmSync(destinoAbs, { recursive: true, force: true });
@@ -297,7 +295,8 @@ export function executadoDireto(urlModulo) {
 
 if (executadoDireto(import.meta.url)) {
   const args = process.argv.slice(2);
-  const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
+  const iRaiz = args.indexOf('--raiz');
+  const raiz = iRaiz !== -1 && args[iRaiz + 1] ? path.resolve(args[iRaiz + 1]) : path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
   const checar = args.includes('--check');
   const iDist = args.indexOf('--dist');
   const paginas = args.flatMap((a, i) => (args[i - 1] === '--pagina' ? [a.split(path.sep).join('/')] : []));

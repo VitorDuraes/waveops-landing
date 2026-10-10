@@ -45,6 +45,17 @@ export function validarTelefone(valor) {
   return digitos.length >= 10 && digitos.length <= 13;
 }
 
+/**
+ * Telefone num formato só: dígitos com DDD, sem o +55. "+55 (34) 99177-5784" e
+ * "(34) 99177-5784" viram os dois "34991775784", para a mesma pessoa não aparecer
+ * com dois valores na planilha.
+ * @param {unknown} valor
+ */
+export function normalizarTelefone(valor) {
+  const digitos = soDigitos(valor);
+  return (digitos.length === 12 || digitos.length === 13) && digitos.startsWith('55') ? digitos.slice(2) : digitos;
+}
+
 /** @param {unknown} valor */
 export function normalizarEmail(valor) {
   return String(valor ?? '').trim().toLowerCase();

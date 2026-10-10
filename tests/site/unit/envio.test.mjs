@@ -4,9 +4,10 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { calcularAtribuicao, lerAtribuicao, CHAVE_ORIGEM } from '../../../assets/site/lib/atribuicao.js';
 import { montarLead, montarInteresse } from '../../../assets/site/lib/payload.js';
-import { enviarJson, novoIdEnvio } from '../../../assets/site/lib/enviar.js';
+import { enviarJson, novoIdEnvio, TEMPO_LIMITE_MS } from '../../../assets/site/lib/enviar.js';
+import { normalizarTelefone } from '../../../assets/site/lib/validacao.js';
 import { endpoints, POLITICA_VERSAO } from '../../../assets/site/config.js';
-import { criarControleDeEnvio } from '../../../assets/site/lib/formulario.js';
+import { criarControleDeEnvio, TEMPO_MINIMO_MS } from '../../../assets/site/lib/formulario.js';
 
 const local = (href) => {
   const u = new URL(href);
@@ -23,6 +24,8 @@ test('atribuição: UTM vence referrer; referrer interno vira direto', () => {
   const interno = calcularAtribuicao(local('https://waveops.com.br/contato/'), 'https://waveops.com.br/solucoes/');
   assert.equal(interno.fonte, 'direto');
   assert.equal(interno.referrer, '');
+  const portal = calcularAtribuicao(local('https://waveops.com.br/'), 'https://portal.waveops.com.br/checkout');
+  assert.equal(portal.fonte, 'direto', 'o portal é interno, não é origem');
 });
 
 test('atribuição: o primeiro toque gravado pelo funil.js vence a página atual', () => {
@@ -48,6 +51,7 @@ const ctx = {
   atribuicao: { fonte: 'google/cpc', landingUrl: 'https://waveops.com.br/?utm_source=google', referrer: 'https://www.google.com/', utm: { source: 'google', medium: 'cpc', campaign: 'out', term: 't', content: 'c' } },
   pagina: '/contato/',
   politicaVersao: 'v-teste',
+  cienciaTextoVersao: 'c-teste',
   marketingTextoVersao: 'm-teste',
 };
 
@@ -152,4 +156,47 @@ test('endpoints: produção só em waveops.com.br; localhost simulado; preview d
   assert.equal(endpoints('127.0.0.1', '<script>').lead, '/__dev/lead');
   assert.deepEqual(endpoints('deploy-preview-70--waveops.netlify.app'), { ambiente: 'desligado', lead: '', interesse: '' });
   assert.match(POLITICA_VERSAO, /\S/);
+});
+
+test('contrato do lead: exatamente estas chaves, nesta grafia', () => {
+  const lead = montarLead(
+    { nome: 'Ana', empresa: '', canalRetorno: 'email', telefone: '', email: 'a@x.com', mensagem: '', politicaCiente: true, marketingAceito: false, website: '' },
+    { dor: '', procura: '', melhorHorario: '' },
+    ctx,
+  );
+  assert.deepEqual(Object.keys(lead).sort(), [
+    'canalRetorno', 'cienciaTextoVersao', 'dor', 'email', 'empresa', 'enviadoEm', 'idEnvio', 'landingUrl', 'marketingAceito',
+    'marketingTextoVersao', 'melhorHorario', 'mensagem', 'nome', 'origem', 'pagina', 'politicaCiente', 'politicaCienteEm',
+    'politicaVersao', 'preenchidoEmMs', 'primeiraFonte', 'procura', 'referrer', 'telefone', 'utm_campaign', 'utm_content',
+    'utm_medium', 'utm_source', 'utm_term', 'versaoContrato', 'website', 'whatsapp',
+  ]);
+  assert.equal(lead.cienciaTextoVersao, 'c-teste');
+});
+
+test('contrato da lista de interesse: exatamente estas chaves', () => {
+  const corpo = montarInteresse({ email: 'a@x.com', politicaCiente: true, marketingAceito: true, website: '' }, ctx);
+  assert.deepEqual(Object.keys(corpo).sort(), [
+    'cienciaTextoVersao', 'email', 'enviadoEm', 'finalidade', 'idEnvio', 'landingUrl', 'marketingAceito', 'marketingTextoVersao',
+    'origem', 'pagina', 'politicaCiente', 'politicaCienteEm', 'politicaVersao', 'preenchidoEmMs', 'primeiraFonte', 'referrer',
+    'utm_campaign', 'utm_content', 'utm_medium', 'utm_source', 'utm_term', 'versaoContrato', 'website',
+  ]);
+});
+
+test('limites do envio: 12 s de tempo limite e 1,2 s de trava anti-robô', () => {
+  assert.equal(TEMPO_LIMITE_MS, 12000);
+  assert.equal(TEMPO_MINIMO_MS, 1200);
+});
+
+test('produção não manda o contrato v2 ao workflow antigo, que descartaria e-mail e consentimento', () => {
+  const { lead, interesse } = endpoints('waveops.com.br');
+  assert.doesNotMatch(lead, /flowops-lead/);
+  assert.match(lead, /^https:\/\/cowboyhouse\.app\.n8n\.cloud\/webhook\/waveops-lead-v2$/);
+  assert.match(interesse, /^https:\/\/cowboyhouse\.app\.n8n\.cloud\/webhook\/waveops-interesse$/);
+});
+
+test('telefone sai num formato só, sem o +55', () => {
+  assert.equal(normalizarTelefone('+55 (34) 99177-5784'), '34991775784');
+  assert.equal(normalizarTelefone('(34) 99177-5784'), '34991775784');
+  assert.equal(normalizarTelefone('55 99999-9999'), '55999999999', 'DDD 55 sem DDI fica como está');
+  assert.equal(normalizarTelefone('+55 34 3333-4444'), '3433334444');
 });

@@ -41,15 +41,16 @@ describe("links do portal para o site", () => {
   });
 
   test("todo link absoluto para o site é a raiz ou uma âncora antiga", () => {
-    const urls = ocorrencias(/(https?:\/\/(?:www\.)?waveops\.com\.br[^\s"'`)}<>]*)/g);
-    assert.ok(urls.length > 0, "nenhum link para o site encontrado: o teste perdeu o alvo");
+    // Maiúscula e URL sem esquema ("//waveops.com.br") também entram, para cair na regra.
+    const urls = ocorrencias(/((?:https?:)?\/\/(?:www\.)?waveops\.com\.br[^\s"'`)}<>,]*)/gi);
+    assert.ok(urls.some(({ valor }) => valor.includes("#")), "nenhum link com âncora encontrado: o teste perdeu o alvo");
     const fora = urls.filter(({ valor }) => !PERMITIDOS.has(valor));
     assert.deepEqual(fora, [], `use a raiz ou uma destas âncoras, que funcionam no site atual e no novo: ${[...PERMITIDOS].join(", ")}`);
   });
 
   test("nenhum link relativo para a raiz do portal", () => {
     // A raiz do portal redireciona para /cliente/login: "/" e "/#contato" nunca chegam ao site.
-    const relativos = ocorrencias(/href=["'](\/(?:#[^"']*)?)["']/g);
+    const relativos = ocorrencias(/href\s*=\s*\{?\s*["'`](\/(?:[?#][^"'`]*)?)["'`]/g);
     assert.deepEqual(relativos, [], "para ir ao site, use a URL absoluta (https://waveops.com.br/)");
   });
 });

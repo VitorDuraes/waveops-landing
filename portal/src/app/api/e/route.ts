@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit, clientIp } from "@/server/ratelimit";
 import { idDoVisitante, registrarEvento } from "@/server/evento";
-import { normalizarEvento, LIMITES } from "@/lib/funil";
+import { env } from "@/server/env";
+import { normalizarEvento, origemDoEvento, ORIGENS_DA_LANDING, LIMITES } from "@/lib/funil";
 import { ehRobo } from "@/lib/robo";
 
 // Coleta de evento de funil (SPEC-18). Rota PUBLICA, chamada pela landing estatica
@@ -21,11 +22,9 @@ import { ehRobo } from "@/lib/robo";
 // 3. NENHUM DADO PESSOAL ENTRA. O IP e usado para o hash do visitante e para o rate
 //    limit, e nao e gravado. A sanitizacao de path, referrer e props vive em lib/funil.
 
-const ORIGENS = ["https://waveops.com.br", "https://www.waveops.com.br"];
-
 function vazio(origin: string | null): NextResponse {
   const res = new NextResponse(null, { status: 204 });
-  if (origin && ORIGENS.includes(origin)) {
+  if (origin && ORIGENS_DA_LANDING.includes(origin)) {
     res.headers.set("Access-Control-Allow-Origin", origin);
     res.headers.set("Vary", "Origin");
   }
@@ -34,8 +33,10 @@ function vazio(origin: string | null): NextResponse {
 
 export async function POST(req: NextRequest) {
   const origin = req.headers.get("origin");
-  // Sem Origin = mesma origem (as telas do portal). Com Origin, tem que ser a landing.
-  if (origin && !ORIGENS.includes(origin)) return vazio(null);
+  // Landing, telas do portal (que mandam Origin mesmo na mesma origem) ou descarte.
+  // A regra vive em lib/funil (origemDoEvento), com teste.
+  const origem = origemDoEvento(origin, req.headers.get("sec-fetch-site"), env.appUrl);
+  if (!origem) return vazio(null);
 
   // Robo fora, antes de qualquer trabalho. Googlebot executa JavaScript, entao sem
   // isso ele entra no topo do funil como pessoa. Ver src/lib/robo.ts.
@@ -60,7 +61,7 @@ export async function POST(req: NextRequest) {
   const ev = normalizarEvento(bruto);
   if (!ev) return vazio(origin);
 
-  await registrarEvento(ev, idDoVisitante(req.headers), origin ? "landing" : "portal");
+  await registrarEvento(ev, idDoVisitante(req.headers), origem);
   return vazio(origin);
 }
 
@@ -69,7 +70,7 @@ export async function POST(req: NextRequest) {
 export async function OPTIONS(req: NextRequest) {
   const origin = req.headers.get("origin");
   const res = vazio(origin);
-  if (origin && ORIGENS.includes(origin)) {
+  if (origin && ORIGENS_DA_LANDING.includes(origin)) {
     res.headers.set("Access-Control-Allow-Methods", "POST, OPTIONS");
     res.headers.set("Access-Control-Allow-Headers", "content-type");
     res.headers.set("Access-Control-Max-Age", "86400");

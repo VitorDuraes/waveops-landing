@@ -121,6 +121,39 @@ describe("normalizarEvento: o que entra na tabela", () => {
   });
 });
 
+describe("visita vinda de dentro: não é entrada nova", () => {
+  // O funil do site antigo, ainda no ar, manda visita quando alguém clica num link do
+  // portal para o site, com o portal como origem. A pessoa já foi contada quando chegou
+  // de fora: contar de novo cria uma linha "portal.waveops.com.br" nas origens, e o
+  // pagamento dela casa com as duas linhas.
+  test("visita com o portal ou o próprio site como referrer é descartada", () => {
+    for (const r of [
+      "https://portal.waveops.com.br/checkout?plano=pro",
+      "portal.waveops.com.br",
+      "https://waveops.com.br/",
+      "https://www.waveops.com.br/contato/",
+      "https://PORTAL.WaveOps.com.br/",
+      "https://portal.waveops.com.br:443/",
+      "https://portal.waveops.com.br./",
+    ]) {
+      assert.equal(normalizarEvento({ n: "visita", u: "/", r, f: "portal.waveops.com.br" }), null, `"${r}" deveria ser descartado`);
+    }
+  });
+
+  test("visita de fora continua contando, mesmo com host parecido", () => {
+    for (const r of ["https://www.google.com/", "https://waveops.com.br.golpe.com/", "https://naowaveops.com.br/"]) {
+      assert.notEqual(normalizarEvento({ n: "visita", u: "/", r }), null, `"${r}" deveria contar`);
+    }
+    assert.notEqual(normalizarEvento({ n: "visita", u: "/" }), null, "visita direta, sem referrer, conta");
+  });
+
+  test("outros eventos vindos do portal continuam", () => {
+    const ev = normalizarEvento({ n: "whatsapp_click", u: "/", r: "https://portal.waveops.com.br/checkout" });
+    assert.equal(ev?.nome, "whatsapp_click");
+    assert.equal(ev?.referrerHost, "portal.waveops.com.br");
+  });
+});
+
 describe("etapas do funil", () => {
   test("toda etapa e um evento conhecido", () => {
     for (const etapa of ETAPAS) assert.ok(EVENTOS.includes(etapa), `${etapa} fora da lista`);

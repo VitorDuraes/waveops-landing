@@ -1,14 +1,23 @@
 /* WaveOps: medição própria de funil (SPEC-18). Manda evento para POST /api/e, no
    portal, que é onde estão o banco e as faturas. Substituiu o Plausible.
 
-   Três regras que este arquivo não pode quebrar:
+   Quatro regras que este arquivo não pode quebrar:
    1. Medição nunca derruba a página: tudo em try/catch, nada bloqueia.
    2. O corpo vai como text/plain de propósito. Com application/json o navegador
       dispara preflight entre origens, e preflight morre quando a página está sendo
       descarregada. O conteúdo continua sendo JSON.
-   3. Não sai dado pessoal daqui. Só rótulo curto de opção fixa. */
+   3. Não sai dado pessoal daqui. Só rótulo curto de opção fixa.
+   4. Atribuição por sessão (site de várias páginas, 10/2026). A UTM só existe na URL
+      da primeira página: o primeiro toque fica em sessionStorage["waveops:origem:v1"]
+      e vale para todos os eventos da sessão, e "visita" sai uma vez por sessão (de
+      novo só se chegar outra campanha). Os formulários leem o mesmo registro para
+      mandar UTM junto com o lead (assets/site/lib/atribuicao.js). Se o
+      sessionStorage falhar, volta ao comportamento antigo: fonte por carregamento. */
 (function () {
   'use strict';
+
+  var CHAVE_ORIGEM = 'waveops:origem:v1';
+  var CHAVE_VISITA = 'waveops:visita:v1';
 
   // No portal (e no dev local) a landing é servida na mesma origem do endpoint,
   // então a chamada é relativa e nem passa por CORS.
@@ -27,28 +36,61 @@
     }
   }
 
-  /* De onde a pessoa veio. Precedência: UTM vence referrer, porque UTM é o que nós
-     carimbamos no link e é o único que separa campanha de campanha. Sem os dois é
-     "direto", que mistura URL digitada, favorito, app e e-mail: não dá para separar,
-     e fingir que dá seria pior. */
-  function fonte() {
+  /* De onde a pessoa veio NESTE carregamento. Precedência: UTM vence referrer, porque
+     UTM é o que nós carimbamos no link e é o único que separa campanha de campanha.
+     Sem os dois, null: pode ser navegação interna, recarga ou entrada direta, e quem
+     decide é o registro da sessão. */
+  function chegada() {
     try {
       var p = new URLSearchParams(location.search);
-      var src = (p.get('utm_source') || '').trim();
-      if (src) {
-        var med = (p.get('utm_medium') || '').trim();
-        return (med ? src + '/' + med : src).slice(0, 64);
-      }
+      /** @param {string} k */
+      var g = function (k) {
+        return (p.get(k) || '').trim().slice(0, 120);
+      };
+      var utm = { source: g('utm_source'), medium: g('utm_medium'), campaign: g('utm_campaign'), term: g('utm_term'), content: g('utm_content') };
       var r = refHost();
-      return r ? r.slice(0, 64) : 'direto';
+      if (!utm.source && !r) return null;
+      var fonte = utm.source ? (utm.medium ? utm.source + '/' + utm.medium : utm.source) : String(r);
+      return {
+        fonte: fonte.slice(0, 64),
+        landingUrl: String(location.href).slice(0, 500),
+        referrer: r ? String(document.referrer).slice(0, 500) : '',
+        utm: utm,
+      };
     } catch (e) {
-      return 'direto';
+      return null;
     }
   }
 
-  // Uma vez por carregamento: por evento, um clique depois de trocar de aba cairia
-  // em "direto" e sujaria a atribuição.
-  var FONTE = fonte();
+  function direta() {
+    return {
+      fonte: 'direto',
+      landingUrl: String(location.href).slice(0, 500),
+      referrer: '',
+      utm: { source: '', medium: '', campaign: '', term: '', content: '' },
+    };
+  }
+
+  var FONTE = 'direto';
+  var mandarVisita = true;
+  try {
+    var atual = chegada();
+    var bruto = sessionStorage.getItem(CHAVE_ORIGEM);
+    var gravado = bruto ? JSON.parse(bruto) : null;
+    var registro = atual || (gravado && typeof gravado.fonte === 'string' ? gravado : direta());
+    if (atual || !gravado) {
+      registro.em = new Date().toISOString();
+      sessionStorage.setItem(CHAVE_ORIGEM, JSON.stringify(registro));
+    }
+    FONTE = String(registro.fonte).slice(0, 64);
+    mandarVisita = sessionStorage.getItem(CHAVE_VISITA) !== FONTE;
+    if (mandarVisita) sessionStorage.setItem(CHAVE_VISITA, FONTE);
+  } catch (e) {
+    // sessionStorage bloqueado (Safari privado, política do navegador): fonte por carregamento.
+    var porCarga = chegada();
+    FONTE = porCarga ? porCarga.fonte : 'direto';
+    mandarVisita = true;
+  }
 
   /**
    * @param {string} nome evento da lista fechada de portal/src/lib/funil.ts
@@ -75,5 +117,5 @@
   }
 
   window.WaveFunil = { enviar: enviar };
-  enviar('visita');
+  if (mandarVisita) enviar('visita');
 })();

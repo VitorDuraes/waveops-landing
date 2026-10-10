@@ -140,6 +140,14 @@ export function lerNetlify(toml) {
   return { arquivos, pastas, ignorados };
 }
 
+/* Texto sempre com LF. Com core.autocrlf=true o Windows tira o arquivo com CRLF e a
+   esteira do Linux com LF: sem normalizar, o hash e o --check mudariam de máquina
+   para máquina. */
+/** @param {string} abs */
+function lerTexto(abs) {
+  return fs.readFileSync(abs, 'utf8').replace(/\r\n/g, '\n');
+}
+
 /** @param {string | Buffer} conteudo */
 function hash8(conteudo) {
   return crypto.createHash('sha256').update(conteudo).digest('hex').slice(0, 8);
@@ -190,7 +198,7 @@ export async function construir({ raiz, modo = 'escrever' }) {
   const lerParcial = (nome) => {
     const arquivo = path.join(raiz, 'dev/site/parciais', `${nome}.html`);
     if (!fs.existsSync(arquivo)) throw new Error(`parcial inexistente: dev/site/parciais/${nome}.html`);
-    return fs.readFileSync(arquivo, 'utf8');
+    return lerTexto(arquivo);
   };
 
   const emProcesso = new Set();
@@ -201,7 +209,7 @@ export async function construir({ raiz, modo = 'escrever' }) {
     if (pronto) return pronto;
     if (emProcesso.has(url)) throw new Error(`import circular envolvendo ${url}`);
     emProcesso.add(url);
-    const conteudo = fs.readFileSync(abs, 'utf8');
+    const conteudo = lerTexto(abs);
     const dependencias = importsRelativos(conteudo).map((especificador) => {
       const alvo = path.resolve(path.dirname(abs), especificador);
       if (!fs.existsSync(alvo)) throw new Error(`${url} importa ${especificador}, que não existe`);
@@ -220,7 +228,7 @@ export async function construir({ raiz, modo = 'escrever' }) {
     if (pronto) return pronto;
     const abs = path.join(raiz, caminho);
     if (!fs.existsSync(abs)) return undefined;
-    const versao = hash8(fs.readFileSync(abs));
+    const versao = hash8(lerTexto(abs));
     hashes.set(caminho, versao);
     return versao;
   };
@@ -231,7 +239,7 @@ export async function construir({ raiz, modo = 'escrever' }) {
       avisos.push(`página ainda não existe: ${pagina.arquivo}`);
       continue;
     }
-    const atual = fs.readFileSync(abs, 'utf8');
+    const atual = lerTexto(abs);
     let novo;
     try {
       novo = versionarAssets(carimbarParciais(atual, lerParcial), hashDe);

@@ -157,6 +157,18 @@ test('construir: mudar a lib muda o ?v= da página que carrega o módulo de entr
   assert.notEqual(versaoDepois, versaoAntes);
 });
 
+test('CRLF do Windows não muda hash nem resultado do carimbo', async () => {
+  const lf = criarRepoTemporario();
+  await construir({ raiz: lf.raiz, modo: 'escrever' });
+  const crlf = criarRepoTemporario();
+  for (const rel of ['index.html', 'assets/site/site.js', 'assets/site/base.css', 'dev/site/parciais/topo.html']) {
+    crlf.escrever(rel, crlf.ler(rel).replace(/\n/g, '\r\n'));
+  }
+  await construir({ raiz: crlf.raiz, modo: 'escrever' });
+  assert.equal(crlf.ler('index.html').replace(/\r\n/g, '\n'), lf.ler('index.html'));
+  assert.deepEqual((await construir({ raiz: crlf.raiz, modo: 'checar' })).alterados, []);
+});
+
 test('montarDist copia exatamente o que o cp do netlify.toml copia', async () => {
   const repo = criarRepoTemporario();
   await construir({ raiz: repo.raiz, modo: 'escrever' });

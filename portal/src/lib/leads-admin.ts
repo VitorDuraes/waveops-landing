@@ -8,9 +8,9 @@ import { normalizarEmail, normalizarTelefone, soDigitos, validarEmail, validarTe
 export type LeadTipo = "contato" | "interesse";
 export type LeadStatus = "novo" | "atendido";
 
-// Teto de leads por resposta de POST /api/leads/consulta, do mais recente para o mais antigo. O
-// servidor aplica os filtros e a busca antes do corte, e o total do que combina volta
-// junto: um lead antigo se acha pela busca, e a tela avisa quando algo ficou de fora.
+// Teto de leads por resposta de POST /api/leads/consulta, do mais recente para o mais
+// antigo. O servidor aplica os filtros e a busca antes do corte, e o total do que combina
+// volta junto: um lead antigo se acha pela busca, e a tela avisa quando algo ficou de fora.
 export const LIMITE_LEADS = 500;
 
 // Lead como a tela do admin enxerga: plano e serializável (datas em ISO). Não leva
@@ -49,8 +49,8 @@ export interface LeadDto {
   atendidoEm: string | null;
 }
 
-// Resposta de POST /api/leads/consulta. `leads` vem limitado a LIMITE_LEADS; `total` e `novos`
-// contam tudo o que combina com os filtros, inclusive o que passou do teto.
+// Resposta de POST /api/leads/consulta. `leads` vem limitado a LIMITE_LEADS; `total` e
+// `novos` contam tudo o que combina com os filtros, inclusive o que passou do teto.
 export interface ListaLeads {
   leads: LeadDto[];
   total: number;
@@ -75,11 +75,12 @@ export function statusDoCorpo(corpo: unknown): LeadStatus | null {
 
 export const ERRO_SEM_JSON = "Envie o corpo como application/json.";
 
-// As rotas de escrita do admin só aceitam application/json (com ou sem charset). O cookie
-// de sessão é SameSite=Lax e o site e o portal são o mesmo site para o navegador, então
-// um formulário de fora poderia mandar um POST com o cookie. Formulário HTML e text/plain
-// são os únicos tipos que uma página de outra origem manda sem preflight; JSON obrigatório
-// força o preflight, que essas rotas não respondem.
+// As rotas do admin que recebem corpo só aceitam application/json (com ou sem charset). O
+// cookie de sessão é SameSite=Lax, e waveops.com.br e portal.waveops.com.br são o mesmo
+// site para o navegador: um formulário numa página de waveops.com.br mandaria um POST
+// para o portal com o cookie. Formulário HTML e text/plain são os únicos tipos que uma
+// página de outra origem manda sem preflight; JSON obrigatório força o preflight, que
+// essas rotas não respondem.
 export function ehJson(contentType: string | null | undefined): boolean {
   return (contentType ?? "").split(";")[0].trim().toLowerCase() === "application/json";
 }
@@ -143,8 +144,8 @@ export function rotuloFinalidade(finalidade: string | null | undefined): string 
   return ROTULO_FINALIDADE.get(finalidade) ?? finalidade;
 }
 
-// Criado na primeira chamada, e não ao importar o módulo: a rota de leads importa este
-// arquivo só pelo limite da lista e não pode depender do Intl para subir.
+// Criado na primeira chamada, e não ao importar o módulo: as rotas de leads importam este
+// arquivo e não podem depender do Intl para subir.
 let formatoDataHora: Intl.DateTimeFormat | null = null;
 
 // O portal atende o Brasil, então a hora sai sempre em Brasília, de onde quer que o

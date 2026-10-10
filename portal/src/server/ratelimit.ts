@@ -1,4 +1,5 @@
 import "server-only";
+import { ipDoCliente } from "@/lib/ip-do-cliente";
 
 // Rate limiter leve em memoria (janela deslizante). Suficiente para 1 instancia
 // (caso do Railway no MVP). Para multi-instancia, trocar por Redis/Upstash.
@@ -33,22 +34,9 @@ export function rateLimit(key: string, max: number, windowMs: number): boolean {
   return true; // dentro do limite
 }
 
-// IP do cliente. Ordem de confianca: header dedicado da borda (Cloudflare CF-Connecting-IP
-// quando estiver na frente, Railway x-real-ip) e, por ultimo, o ULTIMO valor de
-// x-forwarded-for (adicionado pelo proxy mais proximo). NAO o primeiro valor de XFF, que
-// o cliente forja a vontade para furar o rate limit por IP. [M5 do audit 2026-06-28]
+// IP do cliente. A ordem de confiança e o porquê estão em src/lib/ip-do-cliente.ts:
+// CF-Connecting-IP só vale com o Cloudflare declarado na frente, senão o cliente forja o
+// cabeçalho e fura o limite por IP. [M5 do audit 2026-06-28; CF corrigido em 2026-10-10]
 export function clientIp(headers: Headers): string {
-  const cf = headers.get("cf-connecting-ip");
-  if (cf) return cf.trim();
-  const real = headers.get("x-real-ip");
-  if (real) return real.trim();
-  const fwd = headers.get("x-forwarded-for");
-  if (fwd) {
-    const parts = fwd
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-    if (parts.length) return parts[parts.length - 1];
-  }
-  return "desconhecido";
+  return ipDoCliente(headers, process.env.CONFIAR_CF_CONNECTING_IP === "true");
 }

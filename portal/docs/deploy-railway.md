@@ -78,6 +78,11 @@ EMAIL_FROM=WaveOps <nao-responder@waveops.com.br>
 
 # Job de cobranca
 CRON_SECRET=<string aleatoria>
+
+# Só "true" se o Cloudflare estiver na frente do portal. Sem Cloudflare, deixe sem
+# definir: o cabeçalho CF-Connecting-IP chega como o cliente mandou e furaria o limite
+# por IP (src/lib/ip-do-cliente.ts).
+# CONFIAR_CF_CONNECTING_IP=true
 ```
 Importante: com `APP_URL` em `https`, o checkout passa a mandar `notification_url`
 para o MP (o webhook so e enviado quando publico). Em localhost isso fica

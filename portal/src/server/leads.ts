@@ -45,30 +45,22 @@ function paraLinha(lead: LeadValidado, visitorId: string): Prisma.LeadCreateMany
   };
 }
 
-// Na lista de interesse, a linha mais recente do e-mail vale. Mesmo estado de marketing
-// (e, se aceito, o mesmo texto) não grava de novo; estado diferente grava linha nova,
-// que passa a valer. A resposta é a mesma nos dois casos: a rota nunca revela que o
-// e-mail já estava na lista.
-async function mesmaInscricao(lead: LeadValidado): Promise<boolean> {
-  if (!lead.email) return false;
-  const ultima = await getPrisma().lead.findFirst({
-    where: { tipo: "interesse", email: lead.email },
-    orderBy: { createdAt: "desc" },
-    select: { marketingAceito: true, marketingTextoVersao: true },
-  });
-  if (!ultima || ultima.marketingAceito !== lead.marketingAceito) return false;
-  return !lead.marketingAceito || ultima.marketingTextoVersao === lead.marketingTextoVersao;
-}
-
-// A primeira gravação de um idEnvio vence. O reenvio do site repete o id, às vezes com a
-// primeira tentativa ainda em voo (o navegador desiste aos 12 s, o servidor não): o
+// Todo envio válido vira linha; a única repetição descartada é a do mesmo idEnvio. A
+// primeira gravação de um id vence: o reenvio do site repete o id, às vezes com a
+// primeira tentativa ainda em voo (o navegador desiste aos 12 s, o servidor não), e o
 // ON CONFLICT DO NOTHING do createMany resolve sem exceção e sem linha nova.
+//
+// Não há deduplicação por conteúdo, nem na lista de interesse. A regra antiga do n8n
+// ("mesmo e-mail com o mesmo estado de marketing não grava") deixava um terceiro, que
+// não prova ser dono do e-mail, suprimir a inscrição real cadastrando o e-mail antes.
+// Aqui cada inscrição fica com a própria hora, versões e visitorId, e o histórico
+// completo de um e-mail aparece no admin. Consentimento vindo do formulário não prova o
+// dono do e-mail: marketing só depois de double opt-in.
 export async function gravarLead(lead: LeadValidado, visitorId: string): Promise<ResultadoDaGravacao> {
   if (!env.hasDb()) {
     log.info("lead.mock", { tipo: lead.tipo });
     return "sem-banco";
   }
-  if (lead.tipo === "interesse" && (await mesmaInscricao(lead))) return "repetido";
   const { count } = await getPrisma().lead.createMany({ data: [paraLinha(lead, visitorId)], skipDuplicates: true });
   return count === 1 ? "gravado" : "repetido";
 }

@@ -1,11 +1,14 @@
 // @ts-check
-/* Para onde os formulários enviam, por ambiente. Fora de waveops.com.br nada vai para
-   o n8n de produção: localhost usa os endpoints simulados do dev/site/serve.mjs e o
-   Deploy Preview do Netlify fica desligado até existir um webhook de homologação.
+/* Para onde os formulários enviam, por ambiente. Em produção, os dois formulários gravam
+   no portal (portal.waveops.com.br): POST /api/site/contato e POST /api/site/interesse,
+   com o contrato descrito em docs/integrations/n8n-site-v2.md (corpo, respostas e CORS).
+   Fora de waveops.com.br os formulários não enviam para o portal de produção: localhost
+   usa os endpoints simulados do dev/site/serve.mjs e o Deploy Preview do Netlify fica
+   desligado até existir um endpoint de homologação.
 
-   PENDENTE antes de publicar (gate H2, ver docs/integrations/n8n-site-v2.md): os dois
-   webhooks abaixo ainda não existem no n8n. Até serem criados, o envio cai no estado
-   de falha, com os dados preservados e saída pelo WhatsApp.
+   PENDENTE antes de publicar: as duas rotas vivem no portal e precisam estar no ar antes
+   deste site. Sem elas, o envio cai no estado de falha, com os dados preservados e saída
+   pelo WhatsApp.
 
    O lead NÃO aponta para o flowops-lead que roda hoje de propósito: aquele workflow só
    lê as 15 chaves antigas, então um lead pelo canal E-mail chegaria sem o e-mail, e a
@@ -30,11 +33,11 @@ export const TEXTO_MARKETING = Object.freeze({
 });
 
 const PRODUCAO = Object.freeze({
-  lead: 'https://n8n.waveops.com.br/webhook/waveops-lead-v2',
-  interesse: 'https://n8n.waveops.com.br/webhook/waveops-interesse',
+  lead: 'https://portal.waveops.com.br/api/site/contato',
+  interesse: 'https://portal.waveops.com.br/api/site/interesse',
 });
 
-/** Preencha quando existir webhook de homologação (planilha separada). */
+/** Preencha quando existir endpoint de homologação do portal (com banco separado). */
 const HOMOLOGACAO = Object.freeze({ lead: '', interesse: '' });
 
 /**

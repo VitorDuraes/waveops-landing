@@ -295,3 +295,20 @@ Netlify: publicar o deploy anterior no painel e `git revert` do merge. n8n: path
 - [ ] Zero erro de console
 - [ ] Copy sem travessão, com acento; nenhum módulo como disponível; maquetes marcadas
 - [ ] Pendências de publicação da spec, seção 12, resolvidas
+
+---
+
+## Registro de execução (10/10/2026)
+
+Ondas A, B, C, D, F1, F2, I, R e E executadas no worktree `feat/site-institucional-v2`. Desvios em relação ao plano, todos registrados aqui e no `CLAUDE.md`:
+
+| Plano | Execução | Motivo |
+|---|---|---|
+| `dev/site/galeria.html` | Não criada | A Home exercita quase todo o design system e o `qa/visual.mjs` compara cada página com o PNG do design |
+| Formulários escritos nas páginas P3 e P6 | Parciais `form-contato` e `form-interesse` | O envio (C3) e a marcação ficam com um dono só, sem conflito com os agentes de página |
+| Lead em produção para `flowops-lead` até o H2 | `waveops-lead-v2` desde já | O workflow antigo só lê as 15 chaves antigas e perderia o e-mail do canal E-mail; falha visível é melhor que perda silenciosa (revisão adversarial) |
+| Redirect `/index.html` para `/` | Não incluído | Com o arquivo existindo, só funciona com `force`, e o canonical já resolve a duplicidade; risco sem ganho |
+| JSON-LD `ProfessionalService` | `Organization` com `contactPoint` | `ProfessionalService` herda de `LocalBusiness`, que pede endereço público, e não aceita `serviceType` |
+| JS até 15 KB por página | 20 KB nas páginas com formulário | Dez módulos pequenos de validação, contrato, atribuição e envio; Contato em 15,9 KB |
+| Meta Pixel mantido | Desligado | Pedido do Vitor até existir consentimento |
+| `cienciaTextoVersao` | Acrescentado ao contrato | Registrar a versão do texto de ciência, separada da de marketing |

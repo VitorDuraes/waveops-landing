@@ -43,6 +43,10 @@ PW_CHANNEL=chrome node qa/visual.mjs       # comparação com as capturas do des
 
 `PW_CHANNEL=chrome` usa o Chrome instalado. No Git Bash, argumento que começa com `/` precisa de `MSYS_NO_PATHCONV=1`. As dependências de `tests/site/` (Playwright, axe, TypeScript, `@types/node`) são só de teste e nunca vão para o ar.
 
+O servidor local roda na raiz do repo, onde também estão `.git` e `portal/`: por isso só responde com Host local (fecha DNS rebinding), nega qualquer caminho com segmento que começa com ponto e, com `netlify.toml` na raiz, só serve o que o Netlify publica, mais `dev/site/`. `node dev/site/build.mjs --dist` só aceita uma pasta `.tmp-*` na raiz do repo, porque apaga o destino antes de copiar.
+
+Orçamento de peso por página (`tests/site/unit/peso.test.mjs`): JavaScript próprio até 15 KB gzip (20 KB nas páginas com formulário) e CSS até 25 KB gzip.
+
 ## Arquitetura do site
 
 ### Parciais carimbados no build
@@ -63,12 +67,12 @@ CSP `<meta>` logo depois de charset e viewport, antes de qualquer recurso; ícon
 
 ### JavaScript
 - `assets/site/site.js`: menu do topo (Esc fecha e devolve o foco), seletores `[data-seletor]` com `aria-pressed`, clique de WhatsApp (`data-whatsapp`) como evento de funil e, só na Home, o redirecionamento das âncoras da página única antiga (`assets/site/lib/legado.js`).
-- `assets/site/contato.js` e `assets/site/interesse.js`: estados do design, foco no primeiro erro e no título da confirmação, tempo limite de 12 s, reenvio com o mesmo `idEnvio` enquanto os dados não mudam, honeypot e trava de 1,2 s (robô vê confirmação sem envio).
+- `assets/site/contato.js` e `assets/site/interesse.js`: estados do design, foco no primeiro erro e no título da confirmação, tempo limite de 12 s, reenvio com o mesmo `idEnvio` enquanto os dados não mudam, honeypot e trava de 1,2 s (robô vê confirmação sem envio), recusa 422 marcada no campo. O botão de envio nasce `disabled` e só o módulo libera; com `method="post"` e a CSP em `form-action 'none'`, nenhum envio nativo acontece se o JavaScript falhar (nada de dado pessoal na URL). A mensagem de erro entra no `aria-describedby` só enquanto está visível.
 - `assets/site/lib/`: funções puras testadas em Node (`validacao.js`, `payload.js`, `atribuicao.js`, `enviar.js`, `formulario.js`).
 - Tudo é melhoria progressiva: sem JS, o conteúdo aparece inteiro e os formulários dão lugar a um aviso com saída pelo WhatsApp (nenhum dado vai para a URL).
 
 ### Medição de funil (`assets/funil.js`)
-Manda evento para `POST /api/e` no portal, como `text/plain` (com JSON o navegador faria preflight, que morre no descarregamento da página). O nome do evento precisa existir na lista fechada de `portal/src/lib/funil.ts`, senão o servidor descarta em silêncio. Desde o site de várias páginas, o primeiro toque fica em `sessionStorage["waveops:origem:v1"]` e vale para todos os eventos da sessão, e `visita` sai uma vez por sessão (de novo só se chegar outra campanha). Os formulários leem o mesmo registro para mandar UTM com o lead. Com `sessionStorage` bloqueado, volta à fonte por carregamento. `interesse_plataforma` depende do PR do portal `feat/funil-interesse-e-links-do-site`.
+Manda evento para `POST /api/e` no portal, como `text/plain` (com JSON o navegador faria preflight, que morre no descarregamento da página). O nome do evento precisa existir na lista fechada de `portal/src/lib/funil.ts`, senão o servidor descarta em silêncio. Desde o site de várias páginas, o primeiro toque fica em `sessionStorage["waveops:origem:v1"]` e vale para todos os eventos da sessão, e `visita` sai uma vez por sessão (de novo só se chegar outra campanha). O próprio site e `*.waveops.com.br` (o portal) são internos: aba nova aberta de outra página herda a UTM da URL de origem sem contar outra visita, e voltar do portal não reescreve o primeiro toque. Os formulários leem o mesmo registro para mandar UTM com o lead. Com `sessionStorage` bloqueado, volta à fonte por carregamento. `interesse_plataforma` depende do PR do portal `feat/funil-interesse-e-links-do-site`.
 
 ### Meta Pixel
 Desligado nas páginas novas até existir mecanismo de consentimento e revisão de privacidade (decisão do Vitor em 09/10/2026). `assets/meta-pixel.js` fica no repo sem ser carregado, e a CSP das páginas novas não libera mais as origens do Facebook.
@@ -77,12 +81,12 @@ Desligado nas páginas novas até existir mecanismo de consentimento e revisão 
 
 | Fluxo | Destino | Estado |
 |---|---|---|
-| Contato | n8n Cloud, `flowops-lead` | Real. O workflow que roda hoje NÃO está versionado (o JSON de `n8n/` é esqueleto). O site manda o contrato v2, superconjunto das 15 chaves antigas |
+| Contato | n8n Cloud, `waveops-lead-v2` | O webhook ainda não existe. O site NÃO aponta para o `flowops-lead` que roda hoje (não versionado; o JSON de `n8n/` é esqueleto) porque ele só lê as 15 chaves antigas: um lead pelo canal E-mail chegaria sem o e-mail. Até o v2 existir, o envio falha de forma visível, com os dados preservados e saída pelo WhatsApp |
 | Lista de interesse | n8n Cloud, `waveops-interesse` | O webhook ainda não existe. Até ser criado, o envio cai no estado de falha sem perder o e-mail |
 
 Endpoints por ambiente em `assets/site/config.js`: produção só em `waveops.com.br`; `localhost` usa `/__dev/lead` e `/__dev/interesse` do servidor local; Deploy Preview do Netlify fica desligado. Rascunho dos workflows, colunas da planilha, roteiro de publicação, teste e exclusão de dado: `docs/integrations/n8n-site-v2.md`. Nada no n8n de produção muda sem aprovação do Vitor.
 
-Privacidade: ciência da Política de Privacidade (obrigatória) separada do consentimento de marketing (opcional), com a versão da política em `POLITICA_VERSAO` (`assets/site/config.js`). Os textos de aceite são rascunho até a revisão jurídica. Termos e Política vivem no portal (`/termos`, `/privacidade`).
+Privacidade: ciência da Política de Privacidade (obrigatória) separada do consentimento de marketing (opcional). O contrato grava a versão da política (`POLITICA_VERSAO`), a versão do texto de ciência (`TEXTO_CIENCIA`) e a do texto de marketing (`TEXTO_MARKETING`), todas em `assets/site/config.js`: mudou o texto, mude a versão. Os textos de aceite são rascunho até a revisão jurídica. Termos e Política vivem no portal (`/termos`, `/privacidade`).
 
 ## Segurança
 - CSP `<meta>` em toda página, vinda do parcial `head`. Origem nova de script, fonte, imagem ou `fetch` entra na diretiva certa, senão o navegador bloqueia. Hoje `connect-src` libera o portal (funil) e o n8n (formulários). `style-src` mantém `'unsafe-inline'` por causa do `<noscript><style>` e de atributos `style`.

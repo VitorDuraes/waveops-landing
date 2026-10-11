@@ -1,5 +1,7 @@
 # n8n do site v2: lead de contato e lista de interesse
 
+> **Aviso (10/10/2026):** por decisão desta data, os formulários do site passam a gravar no portal, e não mais no n8n: `POST https://portal.waveops.com.br/api/site/contato` e `POST https://portal.waveops.com.br/api/site/interesse`, com o mesmo contrato descrito neste guia (corpo, respostas e CORS). Este guia e os dois JSON desta pasta ficam como referência do contrato e da decisão anterior. Onde o guia trata de n8n, planilha ou Gmail, ou diz que o `config.js` e a CSP apontam para o n8n, é histórico e não vale para o portal. Em especial, as seções 11 e 14 (dado pessoal e exclusão de titular) descrevem planilha, n8n e Gmail e não cobrem o banco do portal: o equivalente para o portal ainda precisa ser escrito (gate H4).
+
 | Campo | Valor |
 |---|---|
 | Dono | Vitor Duraes |

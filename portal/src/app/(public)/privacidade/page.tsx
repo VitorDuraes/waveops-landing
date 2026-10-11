@@ -7,15 +7,15 @@ export const metadata: Metadata = {
   description: "Como a WaveOps coleta, usa e protege dados pessoais, conforme a LGPD.",
 };
 
-// Politica de Privacidade (LGPD). Rascunho adaptado a WaveOps com os sub-processadores
-// reais usados pelo portal. Revisar com advogado e preencher a razao social, o CNPJ e o
+// Política de Privacidade (LGPD). Rascunho adaptado à WaveOps com os operadores
+// usados pelo portal. Revisar com advogado e preencher a razão social, o CNPJ e o
 // encarregado (DPO) antes de considerar definitiva.
-// Atualizada em 10/10/2026 na parte factual: contatos do site gravados no banco do portal
-// (tabela leads), Railway no lugar do Supabase, sem Meta Pixel, e o WhatsApp como canal
-// enquanto contato@ nao recebe. Mudou o texto, mude POLITICA_VERSAO em assets/site/config.js.
+// Revisão factual de 11/10/2026: código diário relacionável aos dados de contato,
+// tratado como dado pessoal. Não encerra a revisão H4. Mudou o texto, mude
+// POLITICA_VERSAO em assets/site/config.js.
 export default function PrivacidadePage() {
   return (
-    <LegalDoc title="Política de Privacidade" updatedAt="10 de outubro de 2026">
+    <LegalDoc title="Política de Privacidade" updatedAt="11 de outubro de 2026">
       <p>
         Esta Política descreve como a <strong>{EMPRESA.razaoSocial}</strong> (CNPJ {EMPRESA.cnpj}), que opera a
         marca {EMPRESA.marca}, coleta, usa, compartilha e protege dados pessoais, em conformidade com a Lei
@@ -51,10 +51,13 @@ export default function PrivacidadePage() {
         <li>
           <strong>Dados de navegação:</strong> medição própria de funil, feita pela WaveOps no site e no
           portal, sem ferramenta de terceiro. Registramos o evento (visita, envio de formulário, clique no
-          WhatsApp, abertura de checkout, pagamento, ativação), a página e a origem da visita. Para agrupar os
-          eventos de uma mesma sessão usamos um código derivado do seu IP e do navegador, que muda todo dia e
-          não permite identificar você nem recuperar o IP. O IP em si não é armazenado. Esses registros são
-          apagados após 180 dias. No site, a origem da visita fica guardada no armazenamento da sessão do
+          WhatsApp, abertura de checkout, pagamento, ativação), a página e a origem da visita. Para agrupar
+          eventos ocorridos no mesmo dia, usamos um código derivado do seu IP e de informações do navegador.
+          Esse código muda a cada dia. Se você enviar um formulário ou contratar um serviço, ele pode ficar
+          associado aos seus dados de contato. Tratamos o código e os eventos associados como dados pessoais.
+          Nos registros de contato, clientes e navegação, guardamos o código sem gravar o IP diretamente.
+          Os registros de navegação são apagados após 180 dias. No site, a origem da visita fica guardada no
+          armazenamento da sessão do
           navegador (sessionStorage), que é apagado quando você fecha a aba, para a mesma visita não ser
           contada duas vezes e para o formulário informar a campanha de origem.
         </li>

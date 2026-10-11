@@ -3,16 +3,16 @@ import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 
-// Links do portal para o site institucional (waveops.com.br, outra origem). O portal
-// (Railway) e o site (Netlify) publicam em momentos diferentes, então todo link precisa
-// funcionar no site que está no ar E no site novo. Hoje isso vale para a raiz e para as
-// âncoras da página única antiga: existem no site atual, e a Home nova redireciona cada
-// uma (assets/site/lib/legado.js). Página nova, como /contato/, só depois que o site
-// novo estiver no ar: aí troque os links pelas URLs diretas e relaxe esta regra para
-// aceitar as páginas de dev/site/paginas.json.
+// Links do portal para o site publicado. As URLs são absolutas porque a raiz do
+// portal leva ao login. Cada destino precisa existir no manifesto do site, e cada
+// fragmento precisa identificar uma seção real da página de destino.
 
 const PORTAL = resolve(__dirname, "../..");
-const LEGADO = resolve(PORTAL, "../assets/site/lib/legado.js");
+const SITE = resolve(PORTAL, "..");
+const MANIFESTO: { paginas: { url: string; arquivo: string; indexavel?: boolean }[] } = JSON.parse(
+  readFileSync(join(SITE, "dev/site/paginas.json"), "utf8"),
+);
+const PAGINAS = new Map(MANIFESTO.paginas.filter((pagina) => pagina.indexavel !== false).map((pagina) => [pagina.url, pagina.arquivo]));
 
 function arquivos(pasta: string): string[] {
   return readdirSync(pasta, { withFileTypes: true }).flatMap((entrada) => {
@@ -27,27 +27,35 @@ const FONTES = arquivos(join(PORTAL, "src")).map((caminho) => ({
   texto: readFileSync(caminho, "utf8"),
 }));
 
-const ANCORAS = [...readFileSync(LEGADO, "utf8").matchAll(/'(#[a-z-]+)':/g)].map((m) => m[1]);
-const RAIZES = ["https://waveops.com.br", "https://waveops.com.br/", "https://www.waveops.com.br", "https://www.waveops.com.br/"];
-const PERMITIDOS = new Set([...RAIZES, ...ANCORAS.map((ancora) => `https://waveops.com.br/${ancora}`)]);
-const TROCA_PREVISTA =
-  "Se o site novo já está no ar e os links viraram URLs diretas, é a troca prevista: relaxe este teste (CLAUDE.md, Pendências conhecidas).";
-
 function ocorrencias(padrao: RegExp) {
   return FONTES.flatMap(({ arquivo, texto }) => [...texto.matchAll(padrao)].map((m) => ({ arquivo, valor: m[1] })));
 }
 
 describe("links do portal para o site", () => {
-  test("o mapa de âncoras antigas foi lido do site", () => {
-    assert.ok(ANCORAS.includes("#contato") && ANCORAS.includes("#pacotes"), `âncoras lidas de legado.js: ${ANCORAS.join(", ")}`);
+  test("o manifesto contém as páginas de contato e contratação", () => {
+    assert.ok(PAGINAS.has("/contato/") && PAGINAS.has("/projetos-sob-medida/"));
   });
 
-  test("todo link absoluto para o site é a raiz ou uma âncora antiga", () => {
+  test("todo link absoluto aponta diretamente para uma página e seção existentes", () => {
     // Maiúscula e URL sem esquema ("//waveops.com.br") também entram, para cair na regra.
     const urls = ocorrencias(/((?:https?:)?\/\/(?:www\.)?waveops\.com\.br[^\s"'`)}<>,]*)/gi);
-    assert.ok(urls.some(({ valor }) => valor.includes("#")), `nenhum link com âncora encontrado: o teste perdeu o alvo. ${TROCA_PREVISTA}`);
-    const fora = urls.filter(({ valor }) => !PERMITIDOS.has(valor));
-    assert.deepEqual(fora, [], `use a raiz ou uma destas âncoras, que funcionam no site atual e no novo: ${[...PERMITIDOS].join(", ")}. ${TROCA_PREVISTA}`);
+    assert.ok(urls.length > 0, "nenhum link encontrado: o teste perdeu o alvo");
+    for (const { arquivo, valor } of urls) {
+      const url = new URL(valor);
+      assert.equal(url.protocol, "https:", `${arquivo}: use HTTPS em ${valor}`);
+      assert.ok(
+        ["https://waveops.com.br", "https://www.waveops.com.br"].includes(url.origin),
+        `${arquivo}: origem diferente do site em ${valor}`,
+      );
+      const pagina = PAGINAS.get(url.pathname);
+      assert.ok(pagina, `${arquivo}: página não publicada em ${valor}`);
+      if (url.hash) {
+        assert.notEqual(url.pathname, "/", `${arquivo}: substitua a âncora antiga pelo destino direto em ${valor}`);
+        const html = readFileSync(join(SITE, pagina), "utf8");
+        const ids = [...html.matchAll(/\bid=["']([^"']+)["']/g)].map((m) => m[1]);
+        assert.ok(ids.includes(decodeURIComponent(url.hash.slice(1))), `${arquivo}: seção inexistente em ${valor}`);
+      }
+    }
   });
 
   test("nenhum link relativo para a raiz do portal", () => {

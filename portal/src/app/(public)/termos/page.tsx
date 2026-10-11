@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 // preencher a razao social e o CNPJ antes de considerar definitivo.
 export default function TermosPage() {
   return (
-    <LegalDoc title="Termos de Uso" updatedAt="26 de junho de 2026">
+    <LegalDoc title="Termos de Uso" updatedAt="10 de outubro de 2026">
       <p>
         Estes Termos de Uso regem a contratação e o uso dos serviços de{" "}
         <strong>{EMPRESA.razaoSocial}</strong>, inscrita no CNPJ sob o nº {EMPRESA.cnpj}, que opera a marca{" "}
@@ -63,7 +63,11 @@ export default function TermosPage() {
         Por se tratar de contratação fora do estabelecimento comercial, o cliente pode desistir em até{" "}
         <strong>7 (sete) dias corridos</strong> a contar da confirmação do primeiro pagamento, nos termos do
         art. 49 do Código de Defesa do Consumidor. Nesse caso, o valor pago é devolvido integralmente. Para
-        exercer o direito, basta solicitar por <a href="mailto:contato@waveops.com.br">contato@waveops.com.br</a>.
+        exercer o direito, basta solicitar pelo WhatsApp{" "}
+        <a href={EMPRESA.whatsappUrl} target="_blank" rel="noopener noreferrer">
+          {EMPRESA.whatsapp}
+        </a>
+        .
       </p>
 
       <h2>5. Uso justo</h2>
@@ -76,8 +80,11 @@ export default function TermosPage() {
 
       <h2>6. Cancelamento</h2>
       <p>
-        O cliente pode cancelar a assinatura a qualquer momento, sem multa, por{" "}
-        <a href="mailto:contato@waveops.com.br">contato@waveops.com.br</a> ou pela área do cliente. O
+        O cliente pode cancelar a assinatura a qualquer momento, sem multa, pelo WhatsApp{" "}
+        <a href={EMPRESA.whatsappUrl} target="_blank" rel="noopener noreferrer">
+          {EMPRESA.whatsapp}
+        </a>{" "}
+        ou pela área do cliente. O
         cancelamento encerra a renovação automática. O serviço permanece ativo até o fim do ciclo já pago, sem
         cobrança do ciclo seguinte. Fora da janela de arrependimento (item 4), não há devolução proporcional do
         ciclo em curso.

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Icon } from "@/components/icons";
 import { PublicNav } from "@/components/shell/PublicNav";
+import { EMPRESA } from "@/lib/empresa";
 
 // Casca compartilhada dos documentos legais (Termos de Uso e Politica de
 // Privacidade): nav publica, titulo, data e rodape cruzando os dois documentos.
@@ -30,7 +31,9 @@ export function LegalDoc({
           <span aria-hidden="true">·</span>
           <Link href="/privacidade">Política de Privacidade</Link>
           <span aria-hidden="true">·</span>
-          <a href="mailto:contato@waveops.com.br">contato@waveops.com.br</a>
+          <a href={EMPRESA.whatsappUrl} target="_blank" rel="noopener noreferrer">
+            WhatsApp {EMPRESA.whatsapp}
+          </a>
         </div>
       </div>
     </>

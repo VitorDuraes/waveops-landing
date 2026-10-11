@@ -10,9 +10,12 @@ export const metadata: Metadata = {
 // Politica de Privacidade (LGPD). Rascunho adaptado a WaveOps com os sub-processadores
 // reais usados pelo portal. Revisar com advogado e preencher a razao social, o CNPJ e o
 // encarregado (DPO) antes de considerar definitiva.
+// Atualizada em 10/10/2026 na parte factual: contatos do site gravados no banco do portal
+// (tabela leads), Railway no lugar do Supabase, sem Meta Pixel, e o WhatsApp como canal
+// enquanto contato@ nao recebe. Mudou o texto, mude POLITICA_VERSAO em assets/site/config.js.
 export default function PrivacidadePage() {
   return (
-    <LegalDoc title="Política de Privacidade" updatedAt="10 de agosto de 2026">
+    <LegalDoc title="Política de Privacidade" updatedAt="10 de outubro de 2026">
       <p>
         Esta Política descreve como a <strong>{EMPRESA.razaoSocial}</strong> (CNPJ {EMPRESA.cnpj}), que opera a
         marca {EMPRESA.marca}, coleta, usa, compartilha e protege dados pessoais, em conformidade com a Lei
@@ -27,6 +30,14 @@ export default function PrivacidadePage() {
           informados no checkout e na ativação da conta.
         </li>
         <li>
+          <strong>Dados de contato pelo site:</strong> no formulário de contato do site institucional
+          (waveops.com.br), nome, empresa, e-mail, telefone ou WhatsApp, canal e horário preferidos para o
+          retorno, assunto e mensagem; na lista de interesse da Plataforma, o e-mail. Junto, registramos a
+          versão desta Política e dos textos de ciência e de consentimento exibidos, se você aceitou receber
+          comunicações de marketing, a página do envio e a origem da visita (campanha e site de origem, sem
+          os demais parâmetros do endereço).
+        </li>
+        <li>
           <strong>Dados de pagamento:</strong> processados diretamente pela Mercado Pago. A WaveOps recebe
           apenas o status e os identificadores da transação, nunca os dados do cartão.
         </li>
@@ -38,19 +49,18 @@ export default function PrivacidadePage() {
           <strong>Dados de uso e suporte:</strong> registros de acesso à conta, faturas, follow-ups e chamados.
         </li>
         <li>
-          <strong>Dados de navegação:</strong> medição própria de funil, feita pela WaveOps, sem ferramenta de
-          terceiro. Registramos o evento (visita, envio de formulário, abertura de checkout, pagamento,
-          ativação), a página e o domínio de origem. Não gravamos nada no seu dispositivo: não há cookie nem
-          armazenamento local para essa medição. Para agrupar os eventos de uma mesma sessão usamos um código
-          derivado do seu IP e do navegador, que muda todo dia e não permite identificar você nem recuperar o
-          IP. O IP em si não é armazenado. Esses registros são apagados após 180 dias.
+          <strong>Dados de navegação:</strong> medição própria de funil, feita pela WaveOps no site e no
+          portal, sem ferramenta de terceiro. Registramos o evento (visita, envio de formulário, clique no
+          WhatsApp, abertura de checkout, pagamento, ativação), a página e a origem da visita. Para agrupar os
+          eventos de uma mesma sessão usamos um código derivado do seu IP e do navegador, que muda todo dia e
+          não permite identificar você nem recuperar o IP. O IP em si não é armazenado. Esses registros são
+          apagados após 180 dias. No site, a origem da visita fica guardada no armazenamento da sessão do
+          navegador (sessionStorage), que é apagado quando você fecha a aba, para a mesma visita não ser
+          contada duas vezes e para o formulário informar a campanha de origem.
         </li>
         <li>
-          <strong>Dados de publicidade:</strong> no site institucional (waveops.com.br), o Meta Pixel registra
-          páginas vistas e ações como envio do formulário e clique no WhatsApp. O Meta recebe endereço IP,
-          identificador de navegador e o evento realizado, e usa esses dados para medir e otimizar nossos
-          anúncios no Facebook e no Instagram. Não enviamos ao Meta seu nome, e-mail ou telefone. O portal do
-          cliente (portal.waveops.com.br) não carrega o Meta Pixel.
+          <strong>Publicidade:</strong> o site institucional e o portal não carregam o Meta Pixel nem outra
+          ferramenta de publicidade ou rastreamento de terceiro.
         </li>
       </ul>
 
@@ -60,16 +70,23 @@ export default function PrivacidadePage() {
         o login. Não usamos cookies de publicidade dentro do portal.
       </p>
       <p>
-        O site institucional usa o Meta Pixel, que grava cookies de terceiro do domínio facebook.com e permite
-        rastreamento entre sites para fins de publicidade. Para bloquear, ajuste as preferências de anúncio na
-        sua conta do Meta, bloqueie cookies de terceiros no navegador ou use uma extensão de bloqueio de
-        rastreadores. Bloquear não afeta o uso do site nem do portal.
+        O site institucional não grava cookies. A única informação que ele guarda no navegador é a origem da
+        visita, no armazenamento da sessão, descrita no item 1.
       </p>
 
       <h2>3. Para que usamos os dados e com qual base legal</h2>
       <ul>
         <li>
           <strong>Prestar o serviço, cobrar e dar suporte:</strong> execução do contrato (art. 7º, V, da LGPD).
+        </li>
+        <li>
+          <strong>Responder ao contato feito pelo site e avisar quando a Plataforma abrir</strong>, para quem
+          entrou na lista de interesse: procedimentos preliminares a contrato, a pedido do titular (art. 7º, V).
+        </li>
+        <li>
+          <strong>Enviar comunicações de marketing</strong>, só para quem marcou o aceite no formulário:
+          consentimento (art. 7º, I), que pode ser revogado a qualquer momento. Antes do primeiro envio,
+          confirmamos que o e-mail é de quem marcou o aceite.
         </li>
         <li>
           <strong>Enviar comunicações da conta</strong> (ativação, código de acesso, cobrança e avisos):
@@ -81,11 +98,6 @@ export default function PrivacidadePage() {
         <li>
           <strong>Prevenir fraudes e melhorar o serviço</strong> com métricas agregadas: legítimo interesse
           (art. 7º, IX).
-        </li>
-        <li>
-          <strong>Medir e otimizar nossos anúncios</strong> com o Meta Pixel: legítimo interesse (art. 7º, IX).
-          Você pode se opor a esse tratamento a qualquer momento, pelos meios descritos no item 2 ou escrevendo
-          para <a href="mailto:contato@waveops.com.br">contato@waveops.com.br</a>.
         </li>
       </ul>
 
@@ -102,28 +114,26 @@ export default function PrivacidadePage() {
           <strong>Resend</strong>: envio de e-mails transacionais (ativação, código de acesso, cobrança).
         </li>
         <li>
-          <strong>Supabase</strong>: banco de dados que armazena os dados da conta.
+          <strong>Railway</strong>: hospedagem do portal e do banco de dados, onde ficam os dados da conta e os
+          contatos recebidos pelo site.
         </li>
         <li>
-          <strong>Netlify</strong>: hospedagem da aplicação.
+          <strong>Netlify</strong>: hospedagem do site institucional. Os formulários do site não passam pelo
+          Netlify: vão direto para o portal.
         </li>
         <li>
           <strong>WaveOps CRM (Twenty)</strong>: gestão de clientes, quando ativo.
         </li>
         <li>
-          <strong>Meta Platforms</strong>: medição e otimização de anúncios, apenas com os dados de navegação
-          coletados pelo Meta Pixel no site institucional.
-        </li>
-        <li>
-          <strong>Ferramentas internas da equipe</strong> (Discord): alertas operacionais sobre novos clientes
-          e cobrança.
+          <strong>Ferramentas internas da equipe</strong> (Discord): alertas operacionais sobre novos clientes,
+          cobrança e novos contatos pelo site. O alerta de contato pelo site não leva dados pessoais.
         </li>
       </ul>
       <p>Não vendemos dados pessoais.</p>
 
       <h2>5. Transferência internacional</h2>
       <p>
-        Alguns prestadores (como Resend, Netlify e Meta) operam servidores fora do Brasil. Nesses casos, a
+        Alguns prestadores (como Railway, Resend e Netlify) operam servidores fora do Brasil. Nesses casos, a
         transferência observa o art. 33 da LGPD e adota garantias contratuais e técnicas adequadas de proteção.
       </p>
 
@@ -132,6 +142,11 @@ export default function PrivacidadePage() {
         Mantemos os dados enquanto a conta estiver ativa e pelo prazo necessário para cumprir obrigações legais
         e fiscais (em regra, até 5 anos após o encerramento, para registros financeiros). Encerrado o
         tratamento, os dados são eliminados ou anonimizados.
+      </p>
+      <p>
+        Contatos recebidos pelo site e inscrições na lista de interesse ficam guardados enquanto forem
+        necessários para atender o pedido e acompanhar a conversa. Você pode pedir a exclusão a qualquer
+        momento, pelo canal do item 8.
       </p>
 
       <h2>7. Segurança</h2>
@@ -145,14 +160,20 @@ export default function PrivacidadePage() {
       <p>
         Como titular, você pode, a qualquer momento, solicitar: confirmação de tratamento, acesso, correção,
         anonimização ou eliminação de dados desnecessários, portabilidade, informação sobre com quem
-        compartilhamos e revogação de consentimento. Para exercer, escreva para{" "}
-        <a href="mailto:contato@waveops.com.br">contato@waveops.com.br</a>.
+        compartilhamos e revogação de consentimento. Para exercer, fale com a gente pelo WhatsApp{" "}
+        <a href={EMPRESA.whatsappUrl} target="_blank" rel="noopener noreferrer">
+          {EMPRESA.whatsapp}
+        </a>
+        . Clientes também podem pedir pela área do cliente.
       </p>
 
       <h2>9. Encarregado (DPO)</h2>
       <p>
-        O contato do encarregado pelo tratamento de dados da WaveOps é{" "}
-        <a href="mailto:contato@waveops.com.br">contato@waveops.com.br</a>.
+        O encarregado pelo tratamento de dados da WaveOps atende pelo WhatsApp{" "}
+        <a href={EMPRESA.whatsappUrl} target="_blank" rel="noopener noreferrer">
+          {EMPRESA.whatsapp}
+        </a>
+        .
       </p>
 
       <h2>10. Alterações desta Política</h2>

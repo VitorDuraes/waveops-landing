@@ -43,7 +43,7 @@ Os nomes abaixo são os campos Prisma; o schema define os nomes das colunas Post
 
 `politicaCiente` e `politicaCienteEm` são validados na entrada, mas não são colunas da tabela. Não há data própria de confirmação do e-mail, revogação, último contato, aviso de abertura, expiração ou exceção de retenção. A versão enviada pelo navegador não substitui a preservação do texto correspondente nem uma confirmação de identidade.
 
-As versões atuais em [config.js](../../assets/site/config.js) são `rascunho-2026-10-10`, `contato-ciencia-v1`, `interesse-ciencia-v1`, `contato-marketing-v1` e `interesse-marketing-v1`. Esta documentação não muda esses valores nem publica uma nova política.
+As versões atuais em [config.js](../../assets/site/config.js) são `rascunho-2026-10-11`, `contato-ciencia-v1`, `interesse-ciencia-v1`, `contato-marketing-v1` e `interesse-marketing-v1`. A revisão factual de 11/10/2026 esclarece que o código diário pode ser associado aos dados de contato; não encerra H4 nem altera os textos das caixas de ciência e marketing. Registros recebidos sob versões anteriores mantêm a versão original.
 
 O servidor remove query string e fragmento de `landingUrl` e `referrer` antes de gravar. UTMs, caminhos e texto livre ainda exigem cuidado: não incluir identificadores pessoais em campanhas ou URLs e não solicitar dados sensíveis na mensagem.
 
@@ -105,7 +105,7 @@ Em 11/10/2026, os dois formulários foram enviados pela interface pública com d
 
 Esse teste comprova o caminho de criação, consulta e exclusão individual. Não comprova recebimento de alerta no Discord, exclusão em massa, expurgo de eventos, remoção de backups, confirmação de e-mail ou envio de campanhas.
 
-Divergência para H4: o rascunho da política afirma que o código de navegação não permite identificar a pessoa. `visitorId` fica associado aos dados do lead e também existe no modelo de clientes, permitindo relacionar eventos a esses registros. Tratar esse identificador como pseudônimo relacionável e revisar a afirmação pública; não confundir hash não reversível com anonimização.
+Correção factual de 11/10/2026 no código: o rascunho da política descreve o código diário como dado pessoal associável aos contatos. `visitorId` fica associado aos dados do lead e também existe no modelo de clientes, permitindo relacionar eventos a esses registros. A revisão jurídica H4 permanece pendente; não confundir hash não reversível com anonimização.
 
 Para concluir H4: aprovar a proposta da seção 7, validar bases legais e operadores, conferir backups/logs e transferências internacionais, definir o responsável pelo atendimento e implementar revogação e supressão antes de marketing. A política continua em rascunho e não passa a prometer expiração automática com a publicação deste guia.
 

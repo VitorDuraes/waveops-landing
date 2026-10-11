@@ -1,7 +1,7 @@
 // @ts-check
 /* Para onde os formulários enviam, por ambiente. Em produção, os dois formulários gravam
    no portal (portal.waveops.com.br): POST /api/site/contato e POST /api/site/interesse,
-   com o contrato descrito em docs/integrations/n8n-site-v2.md (corpo, respostas e CORS).
+   com o contrato e a operação descritos em docs/integrations/portal-site-v2.md.
    Fora de waveops.com.br os formulários não enviam para o portal de produção: localhost
    usa os endpoints simulados do dev/site/serve.mjs e o Deploy Preview do Netlify fica
    desligado até existir um endpoint de homologação.
@@ -17,8 +17,8 @@
 
 /** Versão da Política de Privacidade registrada junto com a ciência. Mudou o texto da
     política (portal/src/app/(public)/privacidade), mude a versão; a revisada pelo jurídico
-    entra no gate H4. 2026-10-10: contatos do site, Railway e sem Meta Pixel. */
-export const POLITICA_VERSAO = 'rascunho-2026-10-10';
+    entra no gate H4. 2026-10-11: código diário relacionável aos dados de contato. */
+export const POLITICA_VERSAO = 'rascunho-2026-10-11';
 
 /** Versão do texto da caixa de ciência da política, por formulário. Mudou o texto, mude a versão. */
 export const TEXTO_CIENCIA = Object.freeze({

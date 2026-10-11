@@ -51,10 +51,11 @@ A descoberta (feita) ──> B spec e plano (este arquivo)
 3. **E. Rotas públicas.** `portal/src/app/api/site/contato/route.ts`, `.../interesse/route.ts` e `portal/src/server/leads.ts` (gravação idempotente, regra de repetição da lista, aviso no Discord).
    Validação: chamadas reais contra o portal local com Postgres, cobrindo os critérios 1 a 7 da spec.
 
-4. **F. Admin.** `GET /api/leads`, `POST /api/leads/[id]/status`, `DELETE /api/leads/[id]` com `guard(["admin"])` e linha em `auditoria`; tela `/admin/leads` no padrão de Clientes; item "Leads" no menu; selos `novo` e `atendido`.
-   Validação: typecheck, build e chamadas reais (lista, atendido, reabrir, apagar; 401 sem sessão com `AUTH_ENFORCED=true`).
+4. **F. Admin.** `POST /api/leads/consulta` (busca e filtros no corpo, nunca na URL: e-mail e telefone em query string iriam para log de acesso e histórico), `POST /api/leads/[id]/status` (atômico), `DELETE /api/leads/[id]` e `POST /api/leads/apagar-titular` (todas as linhas de um e-mail ou telefone, com uma auditoria só), todas com `guard(["admin"])`, 415 sem JSON nas escritas e linha em `auditoria`; tela `/admin/leads` no padrão de Clientes; item "Leads" no menu; selos `novo` e `atendido`.
+   Validação: typecheck, build e chamadas reais (consulta, busca por e-mail e telefone, atendido, reabrir, apagar, apagar titular, 415; 401 sem sessão com `AUTH_ENFORCED=true`).
 
 5. **G a I. Integração, revisão e verificação.** Juntar F, revisão em contexto separado, `npm run typecheck`, `npm run test:unit`, `npm run build`, migration aplicada num Postgres local vazio.
+   Feito em 10/10/2026. A revisão adversarial trouxe, e o branch corrige: limite por hora que zerava em 15 min (expurgo por janela de cada chave, `src/lib/limitador.ts`); substituto solto que virava 503; isca malformada que derrubava a rota sem CORS; decisões da recepção sem teste (viraram `src/lib/receber-formulario.ts`, pura); busca do admin limitada aos 500 mais recentes (agora no servidor, com exclusão por titular); aviso calado acima do teto do Discord. Ficou de fora, por decisão: chave para ligar a rota só no go-live, e o `wa.me` supõe número brasileiro.
 
 6. **J. Site.** `assets/site/config.js` aponta para `https://portal.waveops.com.br/api/site/contato` e `.../interesse`; CSP `connect-src` fica só com `'self'` e o portal; `tests/site/unit/envio.test.mjs` atualizado; `CLAUDE.md` e o guia do n8n registram a troca.
    Validação: typecheck, testes unitários, lint, `build.mjs --check` e Playwright do site.

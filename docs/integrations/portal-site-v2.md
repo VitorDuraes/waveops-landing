@@ -5,7 +5,7 @@
 | Atualizado em | 11/10/2026 |
 | Escopo | Contato do site e lista de interesse da Plataforma |
 | Responsável pela operação | Vitor Duraes, WaveOps |
-| Estado | Fluxo em produção. Mapa conferido no código. Retenção proposta, ainda sem aprovação e sem expurgo de leads |
+| Estado | Fluxo em produção. Prazos operacionais aprovados para preparar a retenção; prévia de contagens implementada no código. H4 e expurgo de leads pendentes |
 | Revisão de privacidade | Gate H4: bases legais, prazos, operadores, transferências e atendimento ao titular |
 
 Este é o guia atual dos dois formulários. O [guia de n8n](n8n-site-v2.md) e os workflows JSON são históricos: planilha, execuções do n8n e avisos pelo Gmail não fazem parte deste fluxo. Dados que já existam nesses sistemas continuam exigindo inventário e atendimento separados.
@@ -52,7 +52,7 @@ O servidor remove query string e fragmento de `landingUrl` e `referrer` antes de
 | Local | Dados e acesso | Retenção atual | Exclusão e limite |
 |---|---|---|---|
 | Navegador, `sessionStorage` | Primeiro toque em `waveops:origem:v1`: fonte, UTMs, URL de entrada e referrer. A URL local ainda inclui parâmetros | Sessão do navegador; o aplicativo não define prazo em dias | Limpar o armazenamento do site no navegador. Apagar o lead no portal não limpa este registro local |
-| Railway, tabela `leads` | Dados da seção 2; admin autenticado e acesso técnico ao banco | Sem prazo automático implementado | Exclusão individual ou por titular no admin. Proposta: contato 180 dias, interesse 365 dias; ver seção 7 |
+| Railway, tabela `leads` | Dados da seção 2; admin autenticado e acesso técnico ao banco | Sem prazo automático implementado | Exclusão individual ou por titular no admin. Limites operacionais aprovados para preparação: contato 180 dias, interesse 365 dias; ver seção 7 |
 | Railway, tabela `auditoria` | Ação, ID do alvo, data, e-mail do administrador em `por`; detalhes com tipo/data ou quantidade/tipos | Sem expurgo implementado; prazo a definir na revisão | A exclusão do lead preserva a auditoria. Não há nome, contato nem mensagem do lead no detalhe, mas o registro não é anônimo |
 | Railway, tabela `eventos` | Eventos de navegação com `visitorId`, caminho e origem; pseudônimos relacionáveis a leads ou clientes | Código de expurgo de eventos com mais de 180 dias | `jobs.ts` contém a rotina. Execução e agendamento em produção não foram conferidos nesta revisão. Apagar um lead não apaga eventos |
 | Memória do processo do portal | IP nas chaves do limitador e horários de tentativas; IP e user-agent também entram no cálculo do pseudônimo diário | Chaves expurgadas conforme a própria janela, durante chamadas ao limitador; reinício limpa a memória | Sem tabela de IP ou user-agent criada pelo fluxo de leads. Isso não descreve logs de infraestrutura |
@@ -80,6 +80,7 @@ A revisão deve exigir confirmação do endereço, revogação, supressão e rec
 | Ação | Rota autenticada | Escopo |
 |---|---|---|
 | Consultar | `POST /api/leads/consulta`, JSON com `busca`, `tipo`, `status` | E-mail completo e telefone normalizado usam igualdade; texto comum busca nome/empresa. Retorna até 500 linhas e contagens de todo o filtro; resposta `no-store` |
+| Conferir retenção | `GET /api/leads/retencao`, sem parâmetros | Somente administrador. Conta todos os cadastros por tipo e limite, incluindo ambos os estados e além das 500 linhas; relógio do servidor, snapshot de leitura e resposta `no-store`. Sem banco, devolve 503 |
 | Atender ou reabrir | `POST /api/leads/[id]/status`, JSON com `status` | Atualiza `novo` ou `atendido` e registra auditoria quando há mudança |
 | Apagar um envio | `DELETE /api/leads/[id]` | Remove somente o lead daquele ID e registra auditoria na mesma transação |
 | Apagar por titular | `POST /api/leads/apagar-titular`, JSON com `email` ou `telefone` | Remove todas as linhas que correspondam, de ambos os tipos e estados, inclusive além das 500 exibidas |
@@ -107,18 +108,22 @@ Esse teste comprova o caminho de criação, consulta e exclusão individual. Nã
 
 Correção factual de 11/10/2026 no código: o rascunho da política descreve o código diário como dado pessoal associável aos contatos. `visitorId` fica associado aos dados do lead e também existe no modelo de clientes, permitindo relacionar eventos a esses registros. A revisão jurídica H4 permanece pendente; não confundir hash não reversível com anonimização.
 
-Para concluir H4: aprovar a proposta da seção 7, validar bases legais e operadores, conferir backups/logs e transferências internacionais, definir o responsável pelo atendimento e implementar revogação e supressão antes de marketing. A política continua em rascunho e não passa a prometer expiração automática com a publicação deste guia.
+Para concluir H4: validar bases legais, limites, exceções e operadores, conferir backups/logs e transferências internacionais, definir o responsável pelo atendimento e implementar revogação e supressão antes de marketing. A política continua em rascunho e não passa a prometer expiração automática com a publicação deste guia.
 
-## 7. Proposta de retenção
+## 7. Retenção: decisão operacional e prévia
 
-| Tipo | Limite ordinário proposto | Motivo |
+| Tipo | Limite ordinário aprovado para preparação | Motivo |
 |---|---|---|
 | Contato | 180 dias desde `createdAt` | Janela de seis meses para responder e acompanhar o pedido |
 | Interesse | 365 dias desde `createdAt` | Um ciclo anual de lançamento, sem lista permanente sem previsão de abertura |
 
+Vitor aprovou esses prazos em 11/10/2026 para preparar a implementação. A decisão operacional não encerra H4 nem autoriza exclusão em produção.
+
+A primeira entrega é a prévia em `/admin/leads`: o botão "Consultar prévia" chama o GET autenticado e mostra, por tipo, total, quantidade dentro do prazo e quantidade que atingiu o prazo, além da hora do cálculo e do limite de criação. Não usa os filtros da listagem nem seleciona colunas pessoais. Quatro contagens na mesma transação `RepeatableRead` mantêm o total e o subconjunto no mesmo snapshot. Uma nova consulta remove o resultado anterior; falha é exibida como erro, nunca como zero. Atingir o prazo é um critério para revisão, não autorização de remoção. Fontes: [regra](../../portal/src/lib/leads-retencao.ts), [consulta](../../portal/src/server/leads-retencao.ts), [rota](../../portal/src/app/api/leads/retencao/route.ts) e [painel](../../portal/src/components/admin/RetencaoLeads.tsx).
+
 Encerrar antes quando a finalidade terminar ou houver pedido aplicável do titular. Contar dias como 24 horas em UTC, usando a hora oficial do servidor. Reenvio, mudança de status e aceite de marketing não renovam registros anteriores. Um futuro job diário terá defasagem de até 24 horas; o atendimento ao titular não depende dele.
 
-Esses números são uma proposta operacional, não prazos obrigatórios da LGPD. A retenção depende da finalidade e da circunstância. [ANPD, pergunta 5.5](https://www.gov.br/anpd/pt-br/acesso-a-informacao/perguntas-frequentes). Exceções precisam de fundamento específico, escopo mínimo, responsável e data de revisão. O término e a conservação excepcional seguem avaliação dos arts. 15 e 16. [LGPD, texto oficial](https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709compilado.htm).
+Esses números são uma decisão operacional, não prazos obrigatórios da LGPD. A retenção depende da finalidade e da circunstância. [ANPD, pergunta 5.5](https://www.gov.br/anpd/pt-br/acesso-a-informacao/perguntas-frequentes). Exceções precisam de fundamento específico, escopo mínimo, responsável e data de revisão. O término e a conservação excepcional seguem avaliação dos arts. 15 e 16. [LGPD, texto oficial](https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709compilado.htm).
 
 Auditoria, logs, backups e eventual evidência de supressão exigem prazos próprios ainda não definidos. Não reutilizar o prazo financeiro da conta para o formulário. Antes de um expurgo: aprovar a regra, representar encerramento e exceções, revisar uma prévia restrita, implementar e testar o job, tratar restauração de backups e obter autorização específica para produção. Merge deste guia não autoriza exclusão em produção.
 

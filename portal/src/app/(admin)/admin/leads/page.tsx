@@ -6,6 +6,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Loading, LoadError } from "@/components/ui/Loading";
 import { LeadModalContent } from "@/components/admin/LeadModal";
+import { RetencaoLeads } from "@/components/admin/RetencaoLeads";
 import { useModal, useToast } from "@/components/providers";
 import { useConsultaLeads } from "@/lib/useConsultaLeads";
 import { CABECALHO_JSON, chamar } from "@/lib/leads-client";
@@ -275,6 +276,8 @@ export default function LeadsPage() {
           </div>
         </div>
       </div>
+
+      <RetencaoLeads />
 
       {!semLeads && (
         <div className="toolbar">

@@ -55,9 +55,9 @@ Como montar ou mudar uma página: `dev/site/README.md`.
   tabela `leads` e são atendidos em `/admin/leads`, com ciência da política e marketing separados.
 - Endpoints por ambiente em `assets/site/config.js`. Mapa de dados, limites e exclusão no
   [guia do portal](docs/integrations/portal-site-v2.md). O desenho n8n é histórico.
-- Retenção proposta: contato 180 dias, interesse 365 dias desde a criação. A
-  proposta da seção 7 do guia depende da revisão H4;
-  não há expurgo automático de leads implementado.
+- Retenção: Vitor aprovou limites operacionais de 180 dias para contato e 365 dias
+  para interesse desde a criação, para preparar a implementação. O admin oferece
+  uma prévia de contagens sob demanda. H4 e o expurgo automático continuam pendentes.
 
 ## Publicação
 

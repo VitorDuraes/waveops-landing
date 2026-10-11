@@ -6,9 +6,8 @@
    usa os endpoints simulados do dev/site/serve.mjs e o Deploy Preview do Netlify fica
    desligado até existir um endpoint de homologação.
 
-   PENDENTE antes de publicar: as duas rotas vivem no portal e precisam estar no ar antes
-   deste site. Sem elas, o envio cai no estado de falha, com os dados preservados e saída
-   pelo WhatsApp.
+   As duas rotas estão no ar desde 11/10/2026. Se o portal cair, o envio vai para o
+   estado de falha, com os dados preservados e saída pelo WhatsApp.
 
    O lead NÃO aponta para o flowops-lead que roda hoje de propósito: aquele workflow só
    lê as 15 chaves antigas, então um lead pelo canal E-mail chegaria sem o e-mail, e a
@@ -16,9 +15,10 @@
    visível é melhor que perda silenciosa. O teste tests/site/unit/envio.test.mjs trava
    isso. */
 
-/** Versão da Política de Privacidade registrada junto com a ciência. Troque pela
-    versão datada da política revisada quando ela for publicada (gate H4). */
-export const POLITICA_VERSAO = 'rascunho-2026-08-10';
+/** Versão da Política de Privacidade registrada junto com a ciência. Mudou o texto da
+    política (portal/src/app/(public)/privacidade), mude a versão; a revisada pelo jurídico
+    entra no gate H4. 2026-10-10: contatos do site, Railway e sem Meta Pixel. */
+export const POLITICA_VERSAO = 'rascunho-2026-10-10';
 
 /** Versão do texto da caixa de ciência da política, por formulário. Mudou o texto, mude a versão. */
 export const TEXTO_CIENCIA = Object.freeze({

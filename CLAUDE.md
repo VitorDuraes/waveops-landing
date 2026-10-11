@@ -124,7 +124,7 @@ Ficam no repo, sem carregar em nenhuma página nova, até o Vitor decidir apagar
 - Links do portal para o site usam as âncoras antigas (`https://waveops.com.br/#contato` e `#pacotes`) e a raiz, porque portal e site publicam em momentos diferentes e as âncoras funcionam nos dois sites. Depois que o site novo estiver no ar: trocar pelas URLs diretas e relaxar `portal/tests/unit/links-site.test.ts`.
 - Rotas `/api/site/contato` e `/api/site/interesse` do portal (tabela `leads`, tela "Leads" no admin): o site só pode ser publicado depois do deploy delas. Depois de publicar, conferir um envio real de cada formulário, de ponta a ponta.
 - LGPD dos leads no portal: o mapa de dados, a retenção e a exclusão de titular (seções 11 e 14 de `docs/integrations/n8n-site-v2.md`) descrevem planilha, n8n e Gmail. Refazer para o banco do portal e rever os operadores que a Política de Privacidade lista (gate H4).
-- `contato@waveops.com.br` sem MX nem SPF (conferido em 09/10/2026): não recebe e-mail, e o site o publica no rodapé e na página de contato.
+- `contato@waveops.com.br` sem MX nem SPF (conferido em 09/10/2026): não recebe e-mail. Desde 10/10/2026 ele saiu do rodapé, da página de contato e do JSON-LD da Home, e a Política e os Termos do portal usam o WhatsApp (`EMPRESA.whatsapp` em `portal/src/lib/empresa.ts`). Quando a caixa existir, volte o e-mail nesses lugares e mude `POLITICA_VERSAO`.
 - Política de Privacidade e Termos em rascunho; textos de aceite e compromissos ("sem custo e sem compromisso", "Resposta em até 1 dia útil") dependem de revisão (gate H4).
 - O webhook n8n `flowops-lead` e a chave `flowops:tweaks:v1` mantêm o nome antigo de propósito: renomear quebra a integração e o tema salvo.
 

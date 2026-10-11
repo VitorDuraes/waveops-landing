@@ -50,12 +50,14 @@ Como montar ou mudar uma página: `dev/site/README.md`.
 
 ## Formulários
 
-- **Contato** envia para o n8n o contrato v2: as 15 chaves que o site antigo mandava, com os
-  mesmos nomes, mais canal de retorno, e-mail, telefone, ciência da Política de Privacidade com
-  versão e hora, consentimento de marketing separado e o primeiro toque da sessão.
-- **Lista de interesse** da Plataforma só confirma depois que o servidor responde que gravou.
-- Endpoints por ambiente em `assets/site/config.js`. Workflows e roteiro de publicação em
-  `docs/integrations/n8n-site-v2.md`.
+- **Contato** envia diretamente para `POST https://portal.waveops.com.br/api/site/contato`;
+  **lista de interesse**, para `/api/site/interesse` no mesmo host. Envios válidos ficam na
+  tabela `leads` e são atendidos em `/admin/leads`, com ciência da política e marketing separados.
+- Endpoints por ambiente em `assets/site/config.js`. Mapa de dados, limites e exclusão no
+  [guia do portal](docs/integrations/portal-site-v2.md). O desenho n8n é histórico.
+- Retenção proposta: contato 180 dias, interesse 365 dias desde a criação. A
+  proposta da seção 7 do guia depende da revisão H4;
+  não há expurgo automático de leads implementado.
 
 ## Publicação
 

@@ -1,6 +1,6 @@
 # n8n do site v2: lead de contato e lista de interesse
 
-> **Aviso (10/10/2026):** por decisão desta data, os formulários do site passam a gravar no portal, e não mais no n8n: `POST https://portal.waveops.com.br/api/site/contato` e `POST https://portal.waveops.com.br/api/site/interesse`, com o mesmo contrato descrito neste guia (corpo, respostas e CORS). Este guia e os dois JSON desta pasta ficam como referência do contrato e da decisão anterior. Onde o guia trata de n8n, planilha ou Gmail, ou diz que o `config.js` e a CSP apontam para o n8n, é histórico e não vale para o portal. Em especial, as seções 11 e 14 (dado pessoal e exclusão de titular) descrevem planilha, n8n e Gmail e não cobrem o banco do portal: o equivalente para o portal ainda precisa ser escrito (gate H4).
+> **Histórico, atualizado em 11/10/2026:** por decisão do Vitor em 10/10/2026, os formulários gravam no portal, não no n8n. A operação vigente, o mapa de dados, a exclusão de titular e a proposta de retenção estão no [guia do portal](portal-site-v2.md). A proposta depende da revisão H4 e ainda não tem expurgo de leads implementado. Este guia e os dois JSON desta pasta preservam o desenho anterior. Regras de deduplicação por e-mail, planilha, Gmail, publicação no n8n e listas externas abaixo não descrevem o portal. Registros antigos nesses sistemas exigem inventário separado.
 
 | Campo | Valor |
 |---|---|
@@ -444,6 +444,8 @@ Na lista de interesse, troque o nome do nó para `Webhook: Receber interesse`.
 
 ## 11. Dados pessoais no fluxo (LGPD)
 
+**Seção histórica do desenho n8n.** Para os formulários atuais, usar o [mapa do portal](portal-site-v2.md), seção 3. Os prazos e a classificação abaixo não foram aprovados para a operação atual.
+
 | Onde o dado fica | O que guarda | Por quanto tempo | Como apagar |
 |---|---|---|---|
 | Planilha, aba de leads | Tudo do lead | `__DEFINIR__` (retenção, gate H4) | Seção 14 |
@@ -528,6 +530,8 @@ node --test tests/site/unit/n8n-site-v2.test.mjs
 ```
 
 ## 14. Roteiro de exclusão de dado de titular (LGPD)
+
+**Seção histórica do desenho n8n.** A operação atual usa o [roteiro do portal](portal-site-v2.md), seção 5. Este roteiro não apaga leads do banco e reenviar o formulário não revoga marketing no portal.
 
 Texto a validar com o encarregado e com a revisão jurídica (gate H4).
 

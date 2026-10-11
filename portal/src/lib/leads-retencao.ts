@@ -17,7 +17,9 @@ export interface LimitesRetencaoLeads {
   interesse: LimiteRetencaoLead;
 }
 
-export type ContagensRetencaoLeads = Record<LeadTipo, { total: number; prazoAtingido: number }>;
+export type ContagensRetencaoLeads = Record<LeadTipo, {
+  total: number; prazoAtingido: number; revisaoVigente: number; revisaoVencida: number;
+}>;
 
 export interface FaixaRetencaoLead {
   tipo: LeadTipo;
@@ -26,6 +28,9 @@ export interface FaixaRetencaoLead {
   total: number;
   noPrazo: number;
   prazoAtingido: number;
+  revisaoVigente: number;
+  revisaoVencida: number;
+  semExcecao: number;
 }
 
 export interface PreviaRetencaoLeads {
@@ -62,8 +67,9 @@ export function montarPreviaRetencaoLeads(
   return {
     calculadaEm: limites.calculadaEm,
     tipos: TIPOS.map((tipo) => {
-      const { total, prazoAtingido } = contagens[tipo];
-      if (!Number.isSafeInteger(total) || !Number.isSafeInteger(prazoAtingido) || total < 0 || prazoAtingido < 0 || prazoAtingido > total) {
+      const { total, prazoAtingido, revisaoVigente, revisaoVencida } = contagens[tipo];
+      if (![total, prazoAtingido, revisaoVigente, revisaoVencida].every((n) => Number.isSafeInteger(n) && n >= 0)
+        || prazoAtingido > total || revisaoVigente > prazoAtingido || revisaoVencida > prazoAtingido - revisaoVigente) {
         throw new RangeError("Contagens de retenção inconsistentes.");
       }
       return {
@@ -73,6 +79,9 @@ export function montarPreviaRetencaoLeads(
         total,
         noPrazo: total - prazoAtingido,
         prazoAtingido,
+        revisaoVigente,
+        revisaoVencida,
+        semExcecao: prazoAtingido - revisaoVigente - revisaoVencida,
       };
     }),
   };
@@ -99,7 +108,9 @@ export function lerPreviaRetencaoLeads(valor: unknown): PreviaRetencaoLeads | nu
       const faixa: unknown = valor.tipos[i];
       if (!objeto(faixa) || faixa.tipo !== tipo || faixa.dias !== limites[tipo].dias || faixa.criadosAte !== limites[tipo].where.createdAt.lte.toISOString()) return null;
       if (typeof faixa.total !== "number" || typeof faixa.prazoAtingido !== "number" || faixa.noPrazo !== faixa.total - faixa.prazoAtingido) return null;
-      contagens[tipo] = { total: faixa.total, prazoAtingido: faixa.prazoAtingido };
+      if (typeof faixa.revisaoVigente !== "number" || typeof faixa.revisaoVencida !== "number"
+        || faixa.semExcecao !== faixa.prazoAtingido - faixa.revisaoVigente - faixa.revisaoVencida) return null;
+      contagens[tipo] = { total: faixa.total, prazoAtingido: faixa.prazoAtingido, revisaoVigente: faixa.revisaoVigente, revisaoVencida: faixa.revisaoVencida };
     }
     return montarPreviaRetencaoLeads(limites, contagens);
   } catch (erro) {

@@ -57,7 +57,10 @@ Como montar ou mudar uma página: `dev/site/README.md`.
   [guia do portal](docs/integrations/portal-site-v2.md). O desenho n8n é histórico.
 - Retenção: Vitor aprovou limites operacionais de 180 dias para contato e 365 dias
   para interesse desde a criação, para preparar a implementação. O admin oferece
-  uma prévia de contagens sob demanda. H4 e o expurgo automático continuam pendentes.
+  uma prévia de contagens sob demanda. O detalhe do lead permite exceção manual com
+  justificativa e revisão em até 30 dias, regra operacional confirmada por Vitor.
+  A prévia separa revisões vigentes, vencidas e ausência de exceção entre os cadastros
+  com prazo atingido. H4 e o expurgo automático continuam pendentes.
 
 ## Publicação
 

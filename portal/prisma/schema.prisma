@@ -331,6 +331,7 @@ model Lead {
   preenchidoEmMs       Int?       @map("preenchido_em_ms")
   atendidoEm           DateTime?  @map("atendido_em")
   createdAt            DateTime   @default(now()) @map("created_at")
+  retencao             LeadRetencao?
 
   @@index([tipo, createdAt])
   @@index([email])
@@ -338,12 +339,27 @@ model Lead {
   @@map("leads")
 }
 
+// Revisão manual, separada da chegada e dos aceites originais. Ao encerrar, mantém
+// a versão para recusar pedidos antigos. A exclusão do lead remove esta linha.
+model LeadRetencao {
+  leadId        String    @id @map("lead_id")
+  versao        Int       @default(0)
+  justificativa String?
+  registradaEm  DateTime? @map("registrada_em")
+  revisarEm     DateTime? @map("revisar_em")
+  por           String?
+  lead          Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([revisarEm])
+  @@map("leads_retencao")
+}
+
 // Registro append-only de ação do admin (regra WaveOps: ação comercial relevante
-// grava auditoria). Sem dado pessoal: guarda o que aconteceu, com quem e quando, e o
-// id do alvo. Nunca é editado nem apagado pelo app.
+// grava auditoria). O responsável e o id do alvo são dados pessoais relacionáveis.
+// Não copiar contatos nem justificativa. Nunca é editado nem apagado pelo app.
 model Auditoria {
   id        String   @id @default(cuid())
-  // "lead.atendido" | "lead.reaberto" | "lead.apagado"
+  // "lead.atendido" | "lead.reaberto" | "lead.apagado" | "lead.excecao_registrada" | "lead.excecao_encerrada"
   acao      String
   alvoId    String   @map("alvo_id")
   por       String

@@ -91,6 +91,24 @@ export function RetencaoLeads() {
                 </tbody>
               </table>
             </div>
+            <h4 style={{ fontSize: 14 }}>Revisões dos cadastros com prazo atingido</h4>
+            <div className="table-wrap">
+              <table className="tbl" aria-label="Revisões da prévia de retenção">
+                <thead><tr><th scope="col">Tipo</th><th scope="col">Prazo atingido</th><th scope="col">Revisão vigente</th><th scope="col">Revisão vencida</th><th scope="col">Sem exceção</th></tr></thead>
+                <tbody>
+                  {previa.tipos.map((faixa) => (
+                    <tr key={faixa.tipo}>
+                      <th scope="row">{faixa.tipo === "contato" ? "Contatos" : "Lista de interesse"}</th>
+                      <td>{NUMERO.format(faixa.prazoAtingido)}</td>
+                      <td>{NUMERO.format(faixa.revisaoVigente)}</td>
+                      <td>{NUMERO.format(faixa.revisaoVencida)}</td>
+                      <td>{NUMERO.format(faixa.semExcecao)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="muted" style={{ fontSize: 12.5 }}>Nenhuma dessas faixas autoriza exclusão automática. Atualize a prévia após registrar, revisar ou encerrar uma exceção.</p>
           </>
         )}
       </div>

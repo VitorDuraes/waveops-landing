@@ -54,6 +54,19 @@ Ha migrations versionadas em `prisma/migrations/`. No Railway:
   migrations e depois quebra o `migrate deploy`.
 - Seed (opcional, so 1a vez): rode `npm run db:seed` via Railway shell.
 
+### Exceções de retenção dos leads
+
+A migration `20261011060000_leads_retencao` cria a tabela opcional `leads_retencao`,
+com versão, justificativa, responsável e revisão, sem alterar as colunas originais do
+lead. O código novo de exceções e a prévia ampliada consultam essa tabela. Aplicar
+`npm run db:deploy` antes de disponibilizar esse código, com `DIRECT_URL` configurada.
+A configuração atual do pre-deploy no painel Railway ainda não foi conferida nesta
+etapa. Conferência e migração em produção dependem da autorização do Vitor.
+
+O banco recusa revisão incompleta, versão negativa e janela acima de 30 dias.
+Apagar um lead remove sua exceção em cascata; a auditoria permanece. Essa migration
+não agenda nem executa expurgo. H4 permanece pendente.
+
 ## 4. Variaveis de ambiente do app
 No servico do app, em Variables:
 ```

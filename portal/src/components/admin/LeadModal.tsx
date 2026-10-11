@@ -2,6 +2,7 @@
 import { useState, type CSSProperties, type ReactNode } from "react";
 import { Icon } from "@/components/icons";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { ExcecaoRetencaoLead } from "./ExcecaoRetencaoLead";
 import { useModal, useToast } from "@/components/providers";
 import { CABECALHO_JSON, chamar } from "@/lib/leads-client";
 import {
@@ -182,6 +183,8 @@ export function LeadModalContent({ lead, onTitularApagado }: { lead: LeadDto; on
             { rotulo: "Atendido em", valor: lead.atendidoEm ? formatarDataHora(lead.atendidoEm) : "Ainda não" },
           ]}
         />
+
+        <ExcecaoRetencaoLead key={lead.id} leadId={lead.id} />
 
         {(lead.email || lead.telefone) && (
           <section style={{ marginTop: 22 }}>

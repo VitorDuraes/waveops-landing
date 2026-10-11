@@ -12,15 +12,20 @@ export async function consultarPreviaRetencaoLeads(usuario: SessionUser | null):
     agora: () => new Date(),
     contar: env.hasDb() ? async (limites) => {
       const db = getPrisma();
-      const [contatoTotal, contatoPrazo, interesseTotal, interessePrazo] = await db.$transaction([
+      const agora = new Date(limites.calculadaEm);
+      const [contatoTotal, contatoPrazo, contatoVigente, contatoVencida, interesseTotal, interessePrazo, interesseVigente, interesseVencida] = await db.$transaction([
         db.lead.count({ where: { tipo: "contato" } }),
         db.lead.count({ where: limites.contato.where }),
+        db.lead.count({ where: { ...limites.contato.where, retencao: { is: { revisarEm: { gt: agora } } } } }),
+        db.lead.count({ where: { ...limites.contato.where, retencao: { is: { revisarEm: { lte: agora } } } } }),
         db.lead.count({ where: { tipo: "interesse" } }),
         db.lead.count({ where: limites.interesse.where }),
+        db.lead.count({ where: { ...limites.interesse.where, retencao: { is: { revisarEm: { gt: agora } } } } }),
+        db.lead.count({ where: { ...limites.interesse.where, retencao: { is: { revisarEm: { lte: agora } } } } }),
       ], { isolationLevel: "RepeatableRead" });
       return {
-        contato: { total: contatoTotal, prazoAtingido: contatoPrazo },
-        interesse: { total: interesseTotal, prazoAtingido: interessePrazo },
+        contato: { total: contatoTotal, prazoAtingido: contatoPrazo, revisaoVigente: contatoVigente, revisaoVencida: contatoVencida },
+        interesse: { total: interesseTotal, prazoAtingido: interessePrazo, revisaoVigente: interesseVigente, revisaoVencida: interesseVencida },
       };
     } : null,
   });

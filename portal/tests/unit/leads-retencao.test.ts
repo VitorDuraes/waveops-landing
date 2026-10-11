@@ -11,16 +11,16 @@ import {
 
 const AGORA = "2026-10-11T04:17:52.123Z";
 const CONTAGENS: ContagensRetencaoLeads = {
-  contato: { total: 1200, prazoAtingido: 700 },
-  interesse: { total: 850, prazoAtingido: 700 },
+  contato: { total: 1200, prazoAtingido: 700, revisaoVigente: 200, revisaoVencida: 100 },
+  interesse: { total: 850, prazoAtingido: 700, revisaoVigente: 300, revisaoVencida: 200 },
 };
 
 function previa(): PreviaRetencaoLeads {
   return {
     calculadaEm: AGORA,
     tipos: [
-      { tipo: "contato", dias: 180, criadosAte: "2026-04-14T04:17:52.123Z", total: 1200, noPrazo: 500, prazoAtingido: 700 },
-      { tipo: "interesse", dias: 365, criadosAte: "2025-10-11T04:17:52.123Z", total: 850, noPrazo: 150, prazoAtingido: 700 },
+      { tipo: "contato", dias: 180, criadosAte: "2026-04-14T04:17:52.123Z", total: 1200, noPrazo: 500, prazoAtingido: 700, revisaoVigente: 200, revisaoVencida: 100, semExcecao: 400 },
+      { tipo: "interesse", dias: 365, criadosAte: "2025-10-11T04:17:52.123Z", total: 850, noPrazo: 150, prazoAtingido: 700, revisaoVigente: 300, revisaoVencida: 200, semExcecao: 200 },
     ],
   };
 }
@@ -81,8 +81,8 @@ describe("montagem da prévia: agregado de toda a tabela", () => {
 
   test("zero só aparece quando a consulta devolve zero", () => {
     const res = montarPreviaRetencaoLeads(limitesRetencaoLeads(new Date(AGORA)), {
-      contato: { total: 0, prazoAtingido: 0 },
-      interesse: { total: 0, prazoAtingido: 0 },
+      contato: { total: 0, prazoAtingido: 0, revisaoVigente: 0, revisaoVencida: 0 },
+      interesse: { total: 0, prazoAtingido: 0, revisaoVigente: 0, revisaoVencida: 0 },
     });
     assert.deepEqual(res.tipos.map((t) => [t.total, t.noPrazo, t.prazoAtingido]), [[0, 0, 0], [0, 0, 0]]);
   });
@@ -109,7 +109,7 @@ describe("montagem da prévia: agregado de toda a tabela", () => {
     test(`recusa ${nome} para não apresentar uma prévia falsa`, () => {
       assert.throws(() => montarPreviaRetencaoLeads(limitesRetencaoLeads(new Date(AGORA)), {
         ...CONTAGENS,
-        contato: { total, prazoAtingido },
+        contato: { total, prazoAtingido, revisaoVigente: 0, revisaoVencida: 0 },
       }), RangeError);
     });
   }
@@ -158,6 +158,37 @@ describe("leitura da resposta pelo painel", () => {
 
   test("recusa contagem inconsistente ou de tipo incorreto", () => {
     for (const mudanca of [{ noPrazo: 499 }, { total: "1200" }, { prazoAtingido: -1 }, { prazoAtingido: 1201 }]) {
+      const valor = previa();
+      assert.equal(lerPreviaRetencaoLeads({ ...valor, tipos: [{ ...valor.tipos[0], ...mudanca }, valor.tipos[1]] }), null);
+    }
+  });
+});
+
+describe("revisões entre os cadastros com prazo atingido", () => {
+  test("vigentes, vencidas e sem exceção somam o prazo atingido, não o total", () => {
+    const resultado = montarPreviaRetencaoLeads(limitesRetencaoLeads(new Date(AGORA)), CONTAGENS);
+    assert.deepEqual(resultado.tipos.map((t) => [t.revisaoVigente, t.revisaoVencida, t.semExcecao]), [[200, 100, 400], [300, 200, 200]]);
+  });
+  for (const [nome, revisaoVigente, revisaoVencida] of [
+    ["vigente negativa", -1, 0], ["vencida negativa", 0, -1],
+    ["vigente fracionada", 0.5, 0], ["vencida fracionada", 0, 0.5],
+    ["soma acima do prazo", 400, 301], ["vigente infinita", Infinity, 0],
+    ["vencida NaN", 0, NaN], ["vigente ausente", undefined, 0],
+  ] as const) {
+    test(`recusa ${nome} em vez de apresentar um subconjunto falso`, () => {
+      assert.throws(() => montarPreviaRetencaoLeads(limitesRetencaoLeads(new Date(AGORA)), {
+        ...CONTAGENS, contato: { total: 1200, prazoAtingido: 700, revisaoVigente, revisaoVencida } as ContagensRetencaoLeads["contato"],
+      }), RangeError);
+    });
+  }
+  test("resposta antiga sem as revisões não equivale a revisões zero", () => {
+    const valor = previa();
+    const { revisaoVigente, revisaoVencida, semExcecao, ...antiga } = valor.tipos[0];
+    void revisaoVigente; void revisaoVencida; void semExcecao;
+    assert.equal(lerPreviaRetencaoLeads({ ...valor, tipos: [antiga, valor.tipos[1]] }), null);
+  });
+  test("painel recusa contagem restante incoerente e subcontagem acima do prazo", () => {
+    for (const mudanca of [{ semExcecao: 401 }, { revisaoVigente: 701 }, { revisaoVencida: "100" }]) {
       const valor = previa();
       assert.equal(lerPreviaRetencaoLeads({ ...valor, tipos: [{ ...valor.tipos[0], ...mudanca }, valor.tipos[1]] }), null);
     }

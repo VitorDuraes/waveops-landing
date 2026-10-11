@@ -14,6 +14,7 @@
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
     "test:unit": "tsx --test tests/unit/*.test.ts",
+    "test:integration:leads": "node --conditions=react-server --import tsx --test tests/integration/leads-excecoes.test.ts",
     "check:email": "node scripts/verificar-email.mjs",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",

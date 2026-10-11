@@ -59,6 +59,9 @@ const STATUS_MAP: Record<string, [Tone, string]> = {
   enviado: ["ok", "Enviado"],
   agendado: ["info", "Agendado"],
   falhou: ["danger", "Falhou"],
+  // Leads do site: novo chama atenção, atendido fecha o ciclo.
+  novo: ["accent", "Novo"],
+  atendido: ["ok", "Atendido"],
 };
 
 export function statusMeta(status: string): [Tone, string] {

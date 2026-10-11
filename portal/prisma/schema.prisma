@@ -100,6 +100,16 @@ enum TicketStatus {
   fechado
 }
 
+enum LeadTipo {
+  contato
+  interesse
+}
+
+enum LeadStatus {
+  novo
+  atendido
+}
+
 model User {
   id           String    @id @default(cuid())
   name         String
@@ -277,4 +287,70 @@ model Evento {
   @@index([visitorId])
   @@index([fonte])
   @@map("eventos")
+}
+
+// Lead que chega pelos formulários do site novo (contato e lista de interesse da
+// Plataforma), pelas rotas /api/site/*. Dado pessoal: nome, empresa, e-mail, telefone
+// e mensagem. Apagar a pedido do titular é pelo admin, e a exclusão fica registrada em
+// Auditoria sem o dado apagado. IP não entra: serve só para o limite de volume e para
+// o visitorId, o mesmo hash diário do funil, que liga o lead às visitas.
+model Lead {
+  id                   String     @id @default(cuid())
+  tipo                 LeadTipo
+  status               LeadStatus @default(novo)
+  // Gerado no navegador e repetido no reenvio: a primeira gravação vence.
+  idEnvio              String     @unique @map("id_envio")
+  nome                 String?
+  empresa              String?
+  email                String?
+  // Só dígitos, sem o 55 (normalizado como o site faz).
+  telefone             String?
+  canalRetorno         String?    @map("canal_retorno")
+  melhorHorario        String?    @map("melhor_horario")
+  dor                  String?
+  procura              String?
+  mensagem             String?
+  finalidade           String?
+  // Prova do que a pessoa viu: versões da política e dos textos de ciência e marketing.
+  politicaVersao       String     @map("politica_versao")
+  cienciaTextoVersao   String?    @map("ciencia_texto_versao")
+  marketingAceito      Boolean    @default(false) @map("marketing_aceito")
+  marketingTextoVersao String?    @map("marketing_texto_versao")
+  utmSource            String?    @map("utm_source")
+  utmMedium            String?    @map("utm_medium")
+  utmCampaign          String?    @map("utm_campaign")
+  utmContent           String?    @map("utm_content")
+  utmTerm              String?    @map("utm_term")
+  referrer             String?
+  landingUrl           String?    @map("landing_url")
+  primeiraFonte        String?    @map("primeira_fonte")
+  pagina               String?
+  visitorId            String?    @map("visitor_id")
+  // Relógio do navegador, só referência. A hora oficial é createdAt (servidor).
+  enviadoEm            DateTime?  @map("enviado_em")
+  preenchidoEmMs       Int?       @map("preenchido_em_ms")
+  atendidoEm           DateTime?  @map("atendido_em")
+  createdAt            DateTime   @default(now()) @map("created_at")
+
+  @@index([tipo, createdAt])
+  @@index([email])
+  @@index([telefone])
+  @@map("leads")
+}
+
+// Registro append-only de ação do admin (regra WaveOps: ação comercial relevante
+// grava auditoria). Sem dado pessoal: guarda o que aconteceu, com quem e quando, e o
+// id do alvo. Nunca é editado nem apagado pelo app.
+model Auditoria {
+  id        String   @id @default(cuid())
+  // "lead.atendido" | "lead.reaberto" | "lead.apagado"
+  acao      String
+  alvoId    String   @map("alvo_id")
+  por       String
+  detalhe   Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([alvoId])
+  @@index([createdAt])
+  @@map("auditoria")
 }

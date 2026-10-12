@@ -2,9 +2,9 @@
 
 `npm.cmd run test:integration:site`, executado em `portal/`, verifica a ligação HTTP dos módulos reais de payload e envio do site com o Next e o PostgreSQL. Não altera a aplicação para testar e não aceita URL de banco ou portal fornecida pelo ambiente.
 
-O comando reúne oito cenários de integração e onze verificações dos próprios mecanismos de CORS, contagens, isolamento e limpeza.
+O comando reúne oito cenários de integração e quatorze verificações dos próprios mecanismos de CORS, contagens, isolamento e limpeza.
 
-As onze verificações sem banco também rodam em `npm.cmd run test:unit`, junto dos testes unitários do portal, inclusive na esteira existente. O runner completo com Docker continua sendo um comando explícito de homologação.
+As quatorze verificações sem banco também rodam em `npm.cmd run test:unit`, junto dos testes unitários do portal, inclusive na esteira existente. O runner completo com Docker continua sendo um comando explícito de homologação.
 
 ## Requisitos
 
@@ -26,6 +26,8 @@ O client Prisma instalado deve estar gerado sem referências a arquivos `.env`. 
 6. Consulta autenticada dos leads, com campos comparados ao banco, `no-store` e ausência de `visitorId` ou `idEnvio`.
 7. Os quatro eventos da landing gravados pelo HTTP real e relacionados ao visitante do lead.
 8. Renderização autenticada de `/admin/funil`, conferindo as contagens visíveis de cada sinal.
+
+A leitura do HTML usa [parse5](https://parse5.js.org/functions/parse5.parse.html), somente como dependência de desenvolvimento. Confere os elementos e textos do HTML SSR, resolve entidades e ignora scripts, estilos, templates, noscript e subárvores com `hidden`. Não reescreve HTML nem executa scripts; não calcula visibilidade por CSS. A renderização no navegador tem sua verificação separada.
 
 ## Isolamento e evidência
 

@@ -54,6 +54,24 @@ test('contagens dentro de script não servem como evidência visível do funil',
   assert.throws(() => verificarFunilRenderizado(`<script>${funil()}</script>`, valores));
 });
 
+test('fechamentos permissivos de script não tornam as contagens visíveis', () => {
+  for (const fechamento of ['</script >', '</script foo="bar">', '</SCRIPT\t>']) {
+    assert.throws(() => verificarFunilRenderizado(`<script>${funil()}${fechamento}`, valores));
+  }
+});
+
+test('texto de elementos e entidades HTML equivale ao texto renderizado', () => {
+  const html = funil().replace('Lead enviado', 'Lead <span>enviado</span>')
+    .replace('1 evento', '&#49;&nbsp;evento').replace('<div class="fqtd">1', '<div class="fqtd">&#49;');
+  verificarFunilRenderizado(html, valores);
+});
+
+test('contagens em conteúdo oculto e template não são evidência visível', () => {
+  for (const [inicio, fim] of [['<section hidden>', '</section>'], ['<template>', '</template>']]) {
+    assert.throws(() => verificarFunilRenderizado(`${inicio}${funil()}${fim}`, valores));
+  }
+});
+
 const nome = 'waveops-h5-fixture';
 const execucao = 'execucao-ficticia';
 const etiquetas = { 'com.waveops.qa': 'h5-local', 'com.waveops.qa.run': execucao };

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { parse } from 'parse5';
 
 const itens = (valor) => (valor ?? '').toLowerCase().split(',').map((item) => item.trim());
 
@@ -23,26 +24,41 @@ export function verificarRespostaPublica(resposta, origem) {
   assert.equal(resposta.headers.get('cache-control'), 'no-store');
 }
 
-function texto(html) {
-  return html.replace(/<[^>]*>/g, '').replace(/&nbsp;|&#160;/g, ' ').replace(/\s+/g, ' ').trim();
+// Lê a árvore do HTML, sem reescrever HTML nem executar scripts. O parser resolve
+// entidades e fechamentos permissivos; scripts, templates e hidden não são contadores.
+function* arvore(no) {
+  if (['script', 'style', 'template', 'noscript'].includes(no.tagName) ||
+    no.attrs?.some((atributo) => atributo.name === 'hidden')) return;
+  yield no;
+  for (const filho of no.childNodes ?? []) yield* arvore(filho);
+}
+
+function texto(no) {
+  return [...arvore(no)].filter((item) => item.nodeName === '#text').map((item) => item.value)
+    .join('').replace(/\s+/g, ' ').trim();
+}
+
+function classe(no, nome) {
+  return (no.attrs?.find((atributo) => atributo.name === 'class')?.value ?? '').split(/\s+/).includes(nome);
 }
 
 export function verificarFunilRenderizado(html, valores) {
-  const visivel = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '');
-  const rotulos = [...visivel.matchAll(/<div\s+class="flabel"[^>]*>([\s\S]*?)<\/div>/g)];
+  const elementos = [...arvore(parse(html))].filter((no) => no.tagName === 'div');
+  const rotulos = elementos.filter((no) => classe(no, 'flabel'));
   for (const valor of valores) {
-    const indice = rotulos.findIndex((match) => texto(match[1]) === valor.rotulo);
+    const indice = rotulos.findIndex((no) => texto(no) === valor.rotulo);
     assert.ok(indice >= 0, `Rótulo ausente: ${valor.rotulo}.`);
     const atual = rotulos[indice];
-    const trecho = visivel.slice(atual.index + atual[0].length, rotulos[indice + 1]?.index ?? visivel.length);
-    const contador = trecho.match(/<div class="(?:fqtd|fv)"[^>]*>([\s\S]*?)<\/div>/);
+    const proximo = rotulos[indice + 1];
+    const trecho = elementos.slice(elementos.indexOf(atual) + 1, proximo ? elementos.indexOf(proximo) : elementos.length);
+    const contador = trecho.find((no) => classe(no, 'fqtd') || classe(no, 'fv'));
     assert.ok(contador, `Contagem ausente: ${valor.rotulo}.`);
-    assert.equal(texto(contador[1]).split('·')[0].trim(), valor.visitantes.toLocaleString('pt-BR'),
+    assert.equal(texto(contador).split('·')[0].trim(), valor.visitantes.toLocaleString('pt-BR'),
       `Contagem incorreta: ${valor.rotulo}.`);
     if (valor.eventos !== undefined) {
-      const eventos = trecho.match(/<div class="fsub"[^>]*>([\s\S]*?)<\/div>/);
+      const eventos = trecho.find((no) => classe(no, 'fsub'));
       assert.ok(eventos, `Quantidade de eventos ausente: ${valor.rotulo}.`);
-      assert.equal(texto(eventos[1]), `${valor.eventos.toLocaleString('pt-BR')} ${valor.eventos === 1 ? 'evento' : 'eventos'}`);
+      assert.equal(texto(eventos), `${valor.eventos.toLocaleString('pt-BR')} ${valor.eventos === 1 ? 'evento' : 'eventos'}`);
     }
   }
 }

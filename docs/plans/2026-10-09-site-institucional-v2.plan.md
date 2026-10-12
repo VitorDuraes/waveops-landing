@@ -6,7 +6,7 @@
 
 **Goal:** publicar as 6 páginas do design aprovado no mesmo Netlify, com formulário de contato e lista de interesse persistindo de verdade, sem perder nenhuma função que funciona hoje.
 
-**Architecture (recomendada, depende de D1):** HTML, CSS e JavaScript puro, multipáginas. Parciais carimbadas por `dev/site/build.mjs`, páginas carimbadas commitadas, deploy por cópia como hoje. Formulários em ES modules com funções puras testáveis em Node. Leads e lista de interesse vão ao n8n por contrato versionado.
+**Architecture (D1 aprovada, integração atualizada em 10/10/2026):** HTML, CSS e JavaScript puro, multipáginas. Parciais carimbadas por `dev/site/build.mjs`, páginas carimbadas commitadas, deploy por cópia como hoje. Formulários em ES modules com funções puras testáveis em Node. Leads e lista de interesse gravam no Postgres do portal, conforme o [plano posterior aprovado](2026-10-10-leads-no-portal.plan.md). As etapas históricas de n8n e planilha abaixo não são trabalho pendente.
 
 **Tech Stack:** HTML5, CSS com custom properties, ES modules sem bundler, Node 24 só no ferramental, Playwright, axe-core, TypeScript em modo `checkJs`, n8n Cloud, Netlify.
 
@@ -293,21 +293,23 @@ Netlify: publicar o deploy anterior no painel e `git revert` do merge. n8n: path
 - [x] 301 do portal: `netlify.test` e, no Deploy Preview, os 6 respondem 301 para o portal; `/solucoes` responde 301 para `/solucoes/`
 - [x] `/index.html` sem redirect, por decisão registrada abaixo (o canonical resolve a duplicidade)
 - [x] Links externos respondem: portal (login, termos, privacidade) 200, WhatsApp 302 para o número certo nas 8 mensagens, LinkedIn 200
-- [ ] LinkedIn: confirmar que `linkedin.com/company/waveops` é a página da WaveOps, e não de outra empresa com o mesmo nome (Vitor)
+- [x] Publicação atual, por leitura em 12/10/2026: seis páginas e 404 com conteúdo correspondente ao checkout; rota inexistente retorna 404; 160 links internos e suas âncoras, 33 recursos, seis 301 para o portal e normalização de `/solucoes/`, três páginas públicas do portal. Canonical, robots, sitemap, llms e cabeçalhos de segurança corretos. Três arquivos diferem só em CRLF no Windows, com bytes públicos iguais aos do Git
+- [x] LinkedIn: Vitor confirmou em 11/10/2026 que `linkedin.com/company/waveops` é a página da sua WaveOps. A página pública também aponta para `waveops.com.br`; não confundir com `waveops-sims`, de outra empresa
 
 **Formulários, integrações e medição**
 
 - [x] Formulário: 5 estados, canal condicional, tempo limite, reenvio com o mesmo `idEnvio`, recusa 422 marcada no campo: `contato.spec`, `interesse.spec` e `envio.test`
-- [ ] Envio real grava todas as colunas na planilha e dispara o aviso interno: H2. Os workflows ainda não existem no n8n; roteiro T1 a T20 no documento local `docs/specs/2026-10-10-n8n-site-v2-operacao-restrita.md`
-- [ ] Lista de interesse grava, deduplica e confirma de verdade: H2. No simulado, `n8n-site-v2.test` cobre gravação, repetição e consentimento
-- [ ] Funil em `/admin/funil` (`visita`, `lead_enviado`, `interesse_plataforma`, `whatsapp_click`): H3. `interesse_plataforma` só passa a contar com o PR do portal `feat/portal-funil-interesse`, que precisa estar no ar antes do site. O lado do site está em `funil.test`
+- [x] Preflight publicado, por leitura em 12/10/2026: Contato e Interesse respondem 204, permitem as origens do site com e sem `www`, POST e `content-type`, variam por Origin e não liberam uma origem externa. Seis verificações passaram; nenhum corpo de formulário ou evento foi enviado
+- [x] Homologação nos domínios públicos da recepção: 12/10/2026, autorizada por Vitor. Contato fictício enviado pela interface publicada, HTTP 200 com protocolo, confirmação visível com foco e registro único conferido na consulta autenticada do admin. Canal, campos, ciência, marketing desmarcado e atribuição corretos. A integração local de 19 testes cobre também reenvio, recusa e aviso simulado. Discord dispensado; manter o aviso atual em log. O portal substituiu n8n, planilha e Gmail
+- [x] Homologação nos domínios públicos da lista de interesse: 12/10/2026, autorizada por Vitor. Inscrição fictícia pela interface publicada, HTTP 200 com protocolo, confirmação visível com foco e registro único conferido no admin. Finalidade, ciência, marketing desmarcado e campanha corretos, inclusive depois de navegar pelo menu sem UTM na URL. Reenvio e nova inscrição no mesmo e-mail conferidos localmente; a regra continua sendo idempotência apenas por `idEnvio`, sem confirmação de titularidade por e-mail
+- [x] Conferência nos domínios públicos dos quatro sinais em `/admin/funil`: 12/10/2026. Visita, Lead enviado, Lista de interesse da Plataforma e Clique no WhatsApp com rótulos e contagens positivas renderizados no admin, sem modo mock ou erro. A origem técnica de QA mostra visita e lead. O clique real no link do WhatsApp incrementou o contador, sem envio de mensagem. A suíte local de 19 testes confere gravação por HTTP, vínculo ao visitante e contagens exatas; não publicar totais de negócio nesta evidência
 - [x] Meta Pixel fora da página até existir consentimento (pedido do Vitor): nenhum script do Meta carrega e a CSP não libera o domínio
 
 **Acessibilidade, layout e desempenho**
 
 - [x] axe sem violação séria ou crítica, inclusive nos estados de erro e confirmação: `a11y.spec` e `a11y-estados.spec`
 - [x] Teclado: menu com Esc e retorno de foco, seletor com `aria-pressed`, pular para o conteúdo: `topo.spec`
-- [ ] Leitor de tela no formulário (NVDA ou VoiceOver): não verificado, exige teste manual
+- [ ] Leitor de tela no formulário (NVDA ou VoiceOver): teste parcial no iPhone; Vitor pediu para pular a continuação. Confirmados o anúncio automático de campos faltantes, a leitura do rótulo e do erro do nome ao toque e as mudanças de campos ao selecionar E-mail e Ligação. Não marcar o teste completo como aprovado nem repetir o pedido nesta continuação
 - [x] 360 a 1440 sem rolagem horizontal: `responsivo.spec`, 7 páginas
 - [ ] Aparelhos reais (iPhone e Android): não verificado, exige aparelho
 - [x] Lighthouse celular no build simulado: desempenho 97 a 99; acessibilidade, boas práticas e SEO 100; CLS 0; TBT 0 ms
@@ -321,7 +323,9 @@ Netlify: publicar o deploy anterior no painel e `git revert` do merge. n8n: path
 - [x] Copy sem travessão: `lint.mjs`, no HTML e nos textos publicados
 - [x] Acentuação: nenhuma das 95 formas sem acento mais comuns no texto visível nem nas mensagens dos módulos (heurística de lista fechada, não substitui leitura humana)
 - [x] Nenhum módulo da Plataforma como disponível e toda maquete com aviso de ilustração: `conteudo.test`
-- [ ] Pendências de publicação da spec, seção 12: H4 (política, termos, textos de aceite, e-mail do domínio, claims do design)
+- [ ] Pendências de publicação da spec, seção 12: H4. Vitor já confirmou o responsável pelo WhatsApp, os dois compromissos comerciais e a matriz dos 11 módulos e quatro modelos. A revisão jurídica continua aberta, sem responsável definido; o e-mail do domínio continua inativo
+
+**Retomada de 11/10/2026, atualizada em 12/10/2026:** E/H5 do plano original: conferência técnica local e publicada de formulários, links, atribuição e funil concluída. Roteiro e evidências privadas em `docs/specs/2026-10-11-h5-homologacao-site.md`. Leitor de tela interrompido e ativação do Discord dispensada por Vitor; não repetir essas solicitações. Roteiro completo de aparelhos reais e revisão jurídica H4 mantêm seus estados separados. A preparação do PR de backup não é a próxima tarefa deste plano.
 
 ---
 

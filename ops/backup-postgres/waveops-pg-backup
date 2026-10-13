@@ -1,0 +1,385 @@
+#!/usr/bin/python3
+"""Backup lógico com criptografia antes da gravação e retenção de sete dias."""
+
+import argparse
+import datetime as dt
+import fcntl
+import getpass
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import selectors
+import shutil
+import stat
+import subprocess
+import sys
+import tempfile
+import time
+import uuid
+import warnings
+from urllib.parse import unquote, urlsplit
+
+
+CLIENT_IMAGE = "postgres:18-bookworm@sha256:afc7e2d441324c0388fa80c3d24f733b4194a4eb7f47dd8ee2b08eb1a24a647c"
+CONFIG = Path("/etc/waveops-backup.env")
+DIRECTORY = Path("/var/backups/waveops")
+ARCHIVE = re.compile(r"waveops-pg-(\d{8}T\d{6}Z)-[0-9a-f]{8}\.dump\.gpg\Z")
+REQUIRED = {"PGHOST", "PGPORT", "PGUSER", "PGDATABASE", "PGPASSWORD", "BACKUP_PASSPHRASE"}
+
+
+class BackupError(Exception):
+    def __init__(self, stage, returncode=None):
+        self.stage = stage
+        self.returncode = returncode
+        super().__init__(stage)
+
+
+def private_directory(directory):
+    info = directory.lstat()
+    if (not stat.S_ISDIR(info.st_mode) or directory.resolve() != directory.absolute()
+            or info.st_uid != os.geteuid() or stat.S_IMODE(info.st_mode) != 0o700):
+        raise BackupError("directory")
+
+
+def secret_fd(passphrase):
+    if not 32 <= len(passphrase) <= 1024 or any(c in passphrase for c in "\x00\r\n"):
+        raise BackupError("key")
+    read, write = os.pipe()
+    try:
+        os.write(write, (passphrase + "\n").encode("utf-8"))
+    finally:
+        os.close(write)
+    return read
+
+
+def stop_processes(processes):
+    for process in processes:
+        if process.poll() is None:
+            process.terminate()
+    for process in processes:
+        try:
+            process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait()
+
+
+def stream_file(process, destination, deadline, max_bytes):
+    size = 0
+    digest = hashlib.sha256()
+    with selectors.DefaultSelector() as selector:
+        selector.register(process.stdout, selectors.EVENT_READ)
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise BackupError("timeout")
+            if not selector.select(min(remaining, 1)):
+                continue
+            chunk = os.read(process.stdout.fileno(), 65536)
+            if not chunk:
+                return size, digest.hexdigest()
+            size += len(chunk)
+            if size > max_bytes:
+                raise BackupError("capacity")
+            destination.write(chunk)
+            digest.update(chunk)
+
+
+def wait_process(process, deadline):
+    try:
+        return process.wait(timeout=max(0.01, deadline - time.monotonic()))
+    except subprocess.TimeoutExpired as error:
+        raise BackupError("timeout") from error
+
+
+def gpg_args(home, fd):
+    return ["gpg", "--no-options", "--homedir", str(home), "--batch", "--yes",
+            "--pinentry-mode", "loopback", "--no-symkey-cache", "--passphrase-fd", str(fd)]
+
+
+def verify_archive(path, passphrase, verify_args, home, deadline):
+    processes = []
+    fd = secret_fd(passphrase)
+    try:
+        decrypt = subprocess.Popen(gpg_args(home, fd) + ["--decrypt", str(path)],
+                                   pass_fds=(fd,), stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        processes.append(decrypt)
+        os.close(fd)
+        fd = None
+        validator = subprocess.Popen(verify_args, stdin=decrypt.stdout,
+                                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        processes.append(validator)
+        decrypt.stdout.close()
+        verify_code = wait_process(validator, deadline)
+        decrypt_code = wait_process(decrypt, deadline)
+        if verify_code != 0 or decrypt_code != 0:
+            raise BackupError("verify", verify_code or decrypt_code)
+    finally:
+        if fd is not None:
+            os.close(fd)
+        stop_processes(processes)
+
+
+def create_backup(directory, passphrase, dump_args, verify_args, *, process_env,
+                  dump_input=None, encrypt_args=None, timeout=3300, max_bytes=2 * 1024**3):
+    directory = Path(directory)
+    private_directory(directory)
+    os.umask(0o077)
+    lock_fd = os.open(directory / ".lock", os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+    with os.fdopen(lock_fd, "w") as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as error:
+            raise BackupError("busy") from error
+        available = shutil.disk_usage(directory).free - 1024**3
+        if available <= 0:
+            raise BackupError("capacity")
+        max_bytes = min(max_bytes, available)
+        started = time.monotonic()
+        deadline = started + timeout
+        now = dt.datetime.now(dt.timezone.utc)
+        name = "waveops-pg-" + now.strftime("%Y%m%dT%H%M%SZ-") + uuid.uuid4().hex[:8] + ".dump.gpg"
+        final = directory / name
+        partial = directory / ("." + name + ".partial")
+        manifest_partial = directory / ("." + name + ".json.partial")
+        processes = []
+        fd = None
+        try:
+            with tempfile.TemporaryDirectory(prefix=".gpg-", dir=directory) as home:
+                fd = secret_fd(passphrase)
+                dump = subprocess.Popen(dump_args, env=process_env, stdout=subprocess.PIPE,
+                                        stdin=subprocess.PIPE if dump_input is not None else subprocess.DEVNULL,
+                                        stderr=subprocess.DEVNULL)
+                processes.append(dump)
+                if dump_input is not None:
+                    dump.stdin.write(dump_input)
+                    dump.stdin.close()
+                encrypt = subprocess.Popen(
+                    encrypt_args or gpg_args(home, fd) + ["--cipher-algo", "AES256", "--compress-algo",
+                                                         "none", "--symmetric", "--output", "-"],
+                    stdin=dump.stdout, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, pass_fds=(fd,)
+                )
+                processes.append(encrypt)
+                dump.stdout.close()
+                os.close(fd)
+                fd = None
+                with partial.open("xb") as target:
+                    size, digest = stream_file(encrypt, target, deadline, max_bytes)
+                    target.flush()
+                    os.fsync(target.fileno())
+                encrypt_code = wait_process(encrypt, deadline)
+                dump_code = wait_process(dump, deadline)
+                if encrypt_code != 0:
+                    raise BackupError("encrypt", encrypt_code)
+                if dump_code != 0:
+                    raise BackupError("dump", dump_code)
+                if size == 0:
+                    raise BackupError("encrypt")
+                verify_archive(partial, passphrase, verify_args, home, deadline)
+            result = {"status": "ok", "file": name, "created_at": now.isoformat(),
+                      "duration_seconds": round(time.monotonic() - started, 2),
+                      "bytes": size, "sha256": digest, "format": "pg_dump-custom+gpg-aes256"}
+            with manifest_partial.open("x", encoding="utf-8") as target:
+                json.dump(result, target, sort_keys=True)
+                target.write("\n")
+                target.flush()
+                os.fsync(target.fileno())
+            # link publica sem substituir um arquivo já existente, no mesmo filesystem.
+            os.link(partial, final, follow_symlinks=False)
+            partial.unlink()
+            os.link(manifest_partial, directory / (name + ".json"), follow_symlinks=False)
+            manifest_partial.unlink()
+            directory_fd = os.open(directory, os.O_RDONLY | os.O_DIRECTORY)
+            try:
+                os.fsync(directory_fd)
+            finally:
+                os.close(directory_fd)
+            result["pruned"] = retain_backups(directory, dt.datetime.now(dt.timezone.utc))
+            return result
+        finally:
+            if fd is not None:
+                os.close(fd)
+            stop_processes(processes)
+            for process in processes:
+                if process.stdout:
+                    process.stdout.close()
+            for owned in (partial, manifest_partial):
+                owned.unlink(missing_ok=True)
+
+
+def retain_backups(directory, now):
+    private_directory(directory)
+    cutoff = now.timestamp() - 7 * 86400
+    removed = 0
+    for path in directory.iterdir():
+        match = ARCHIVE.fullmatch(path.name)
+        if not match:
+            continue
+        try:
+            created = dt.datetime.strptime(match[1], "%Y%m%dT%H%M%SZ").replace(tzinfo=dt.timezone.utc)
+        except ValueError:
+            continue
+        info = path.lstat()
+        if not stat.S_ISREG(info.st_mode) or info.st_mtime > cutoff or created.timestamp() > cutoff:
+            continue
+        path.unlink()
+        removed += 1
+        manifest = path.with_suffix(path.suffix + ".json")
+        if manifest.exists() and not manifest.is_symlink():
+            info = manifest.lstat()
+            if stat.S_ISREG(info.st_mode) and info.st_mtime <= cutoff:
+                manifest.unlink()
+    return removed
+
+
+def read_config(path):
+    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
+    with os.fdopen(fd, encoding="utf-8") as source:
+        info = os.fstat(source.fileno())
+        if (not stat.S_ISREG(info.st_mode) or info.st_uid != os.geteuid()
+                or stat.S_IMODE(info.st_mode) != 0o600 or info.st_size > 16384):
+            raise BackupError("config")
+        values = {}
+        for line in source:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            key, sep, encoded = line.partition("=")
+            if not sep or key not in REQUIRED or key in values:
+                raise BackupError("config")
+            value = json.loads(encoded)
+            if not isinstance(value, str) or not value or any(c in value for c in "\x00\r\n"):
+                raise BackupError("config")
+            values[key] = value
+    validate_config(values)
+    return values
+
+
+def validate_config(values):
+    if set(values) != REQUIRED or any(not isinstance(v, str) or not v or any(c in v for c in "\x00\r\n") for v in values.values()):
+        raise BackupError("config")
+    if (not re.fullmatch(r"[a-z0-9.-]+", values["PGHOST"])
+            or not values["PGPORT"].isdigit() or not 1 <= int(values["PGPORT"]) <= 65535
+            or any(not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_-]{0,62}", values[k]) for k in ("PGUSER", "PGDATABASE"))):
+        raise BackupError("config")
+    if not 32 <= len(values["BACKUP_PASSPHRASE"]) <= 1024:
+        raise BackupError("key")
+    if len(values["PGPASSWORD"]) > 1024:
+        raise BackupError("config")
+
+
+def docker_client(name, image=CLIENT_IMAGE):
+    return ["docker", "run", "--rm", "--pull=never", "--name", name,
+            "--read-only", "--cap-drop=ALL", "--security-opt=no-new-privileges",
+            "--user", "65534:65534", "--memory=256m", "--cpus=0.5", "--pids-limit=64",
+            "--log-driver=none", "--tmpfs", "/tmp:rw,noexec,nosuid,size=32m"]
+
+
+def configure(path, expected_host, expected_port):
+    if path != CONFIG or path.exists() or path.is_symlink():
+        raise BackupError("config_exists")
+    if not os.isatty(sys.stdin.fileno()) or not os.isatty(sys.stdout.fileno()):
+        raise BackupError("tty")
+    # getpass deve abortar antes do fallback que ecoaria a entrada.
+    warnings.filterwarnings("error", category=getpass.GetPassWarning)
+    print("Insira somente neste terminal. A entrada ficará oculta; não use o chat.", flush=True)
+    url = urlsplit(getpass.getpass("DATABASE_PUBLIC_URL do serviço Postgres: "))
+    if (url.scheme not in ("postgres", "postgresql") or url.hostname != expected_host
+            or url.port != expected_port or not url.username or not url.password):
+        raise BackupError("endpoint")
+    key = getpass.getpass("Chave de backup aleatória, 32 caracteres ou mais, guardada fora da VPS: ")
+    if key != getpass.getpass("Confirme a chave de backup: "):
+        raise BackupError("key_confirmation")
+    values = {"PGHOST": url.hostname, "PGPORT": str(url.port), "PGUSER": unquote(url.username),
+              "PGDATABASE": unquote(url.path.lstrip("/")), "PGPASSWORD": unquote(url.password),
+              "BACKUP_PASSPHRASE": key}
+    validate_config(values)
+    fd = secret_fd(key)
+    os.close(fd)
+    os.umask(0o077)
+    with path.open("x", encoding="utf-8") as target:
+        for name, value in sorted(values.items()):
+            target.write(name + "=" + json.dumps(value, ensure_ascii=True) + "\n")
+        target.flush()
+        os.fsync(target.fileno())
+    read_config(path)
+    print("WAVEOPS_CONFIG_OK", flush=True)
+
+
+def cleanup_containers(names, runner=subprocess.run):
+    failed = False
+    for name in names:
+        try:
+            check = runner(["docker", "container", "ls", "--all", "--filter", "name=^/" + name + "$",
+                            "--format", "{{.ID}}"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, timeout=15)
+            if check.returncode != 0:
+                failed = True
+            elif check.stdout.strip():
+                removed = runner(["docker", "rm", "-f", name], stdout=subprocess.DEVNULL,
+                                 stderr=subprocess.DEVNULL, timeout=15)
+                if removed.returncode != 0:
+                    failed = True
+        except (subprocess.TimeoutExpired, OSError):
+            failed = True
+    if failed:
+        raise BackupError("cleanup")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--configure", action="store_true")
+    parser.add_argument("--expected-host")
+    parser.add_argument("--expected-port", type=int)
+    args = parser.parse_args()
+    containers = []
+    result = None
+    exit_code = 1
+    try:
+        if args.configure:
+            configure(CONFIG, args.expected_host, args.expected_port)
+            return 0
+        values = read_config(CONFIG)
+        private_directory(DIRECTORY)
+        ca = DIRECTORY / "railway-root.crt"
+        if not ca.is_file() or ca.is_symlink() or ca.stat().st_size > 65536:
+            raise BackupError("certificate")
+        unique = uuid.uuid4().hex
+        dump_name, verify_name = "waveops-dump-" + unique, "waveops-verify-" + unique
+        containers = [dump_name, verify_name]
+        env = {"PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", "HOME": "/tmp"}
+        env.update({k: values[k] for k in REQUIRED if k.startswith("PG") and k != "PGPASSWORD"})
+        env.update({"PGSSLMODE": "verify-ca", "PGSSLROOTCERT": "/run/railway-root.crt",
+                    "PGCONNECT_TIMEOUT": "15", "PGOPTIONS": "-c statement_timeout=3000000"})
+        dump = docker_client(dump_name)
+        for key in sorted(k for k in env if k.startswith("PG")):
+            dump.extend(["--env", key])
+        dump.extend(["--mount", "type=bind,source=" + str(ca) + ",target=/run/railway-root.crt,readonly",
+                     "-i", "--entrypoint", "/bin/sh", CLIENT_IMAGE, "-c",
+                     "IFS= read -r PGPASSWORD || exit 76; export PGPASSWORD; "
+                     "exec pg_dump --no-password --format=custom --compress=6 --lock-wait-timeout=30s"])
+        # pg_restore lê o TOC e sai antes do EOF. cat drena o restante para o GPG validar o MDC.
+        verify = docker_client(verify_name) + ["--network=none", "-i", "--entrypoint", "/bin/sh",
+                 CLIENT_IMAGE, "-c", 'pg_restore --list >/dev/null; result=$?; cat >/dev/null; exit "$result"']
+        result = create_backup(DIRECTORY, values["BACKUP_PASSPHRASE"], dump, verify, process_env=env,
+                               dump_input=(values["PGPASSWORD"] + "\n").encode("utf-8"))
+        exit_code = 0
+    except BackupError as error:
+        result = {"status": "failed", "stage": error.stage, "returncode": error.returncode}
+        exit_code = 75 if error.stage == "busy" else 1
+    except Exception as error:
+        result = {"status": "failed", "stage": "runtime", "error_type": type(error).__name__}
+    finally:
+        try:
+            cleanup_containers(containers)
+        except BackupError:
+            result = {"status": "failed", "stage": "cleanup"}
+            exit_code = 1
+    if result is not None:
+        print(json.dumps(result, sort_keys=True), flush=True)
+    return exit_code
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

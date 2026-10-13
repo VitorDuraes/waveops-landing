@@ -1,0 +1,11 @@
+[Unit]
+Description=Backup diário WaveOps às 03:00 UTC
+
+[Timer]
+OnCalendar=*-*-* 03:00:00 UTC
+Persistent=true
+AccuracySec=1min
+Unit=waveops-pg-backup.service
+
+[Install]
+WantedBy=timers.target

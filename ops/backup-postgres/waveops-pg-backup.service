@@ -1,0 +1,30 @@
+[Unit]
+Description=Backup criptografado do Postgres WaveOps
+Wants=network-online.target
+After=network-online.target docker.service
+Requires=docker.service
+ConditionPathExists=/etc/waveops-backup.env
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/waveops-pg-backup
+User=root
+Group=root
+UMask=0077
+TimeoutStartSec=3600
+Nice=10
+IOSchedulingClass=idle
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/var/backups/waveops
+ProtectHome=true
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryMax=384M
+CPUQuota=50%
+StandardOutput=journal
+StandardError=journal

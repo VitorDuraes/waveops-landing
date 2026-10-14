@@ -1,5 +1,5 @@
-/* WaveOps · peças que só a Home usa: painel "Operação conectada", faixa de frentes de
-   engenharia e o workspace de exemplo da Plataforma. Depende de tokens.css. */
+/* WaveOps · peças que só a Home usa: painel "Operação conectada", faixa das quatro frentes e
+   a seção sob medida. Depende de tokens.css. */
 
 /* ---------- Operação conectada (hero) ---------- */
 .wo-operacao {
@@ -168,169 +168,6 @@
   color: var(--wo-texto-4);
 }
 
-/* ---------- Plataforma na Home ---------- */
-.wo-plataforma__nota {
-  margin-top: 22px;
-  max-width: 560px;
-  color: var(--wo-texto-2);
-  font-size: 14.5px;
-  line-height: 1.65;
-}
-
-.wo-plataforma__acoes {
-  gap: 12px 18px;
-  margin-top: 28px;
-}
-
-.wo-workspace {
-  flex: 1.15 1 480px;
-  gap: 12px;
-  min-width: 0;
-  margin: 0;
-  border-radius: var(--wo-raio-lg);
-}
-
-.wo-workspace .wo-maquete__cabeca {
-  margin-bottom: 0;
-}
-
-.wo-workspace__corpo {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: stretch;
-  gap: 10px;
-}
-
-.wo-workspace__menu {
-  display: flex;
-  flex: 1 1 140px;
-  flex-direction: column;
-  gap: 2px;
-  padding: 8px;
-  border: 1px solid var(--wo-borda);
-  border-radius: var(--wo-raio-sm);
-  background: var(--wo-faixa);
-  color: var(--wo-texto-2);
-  font-size: 13px;
-}
-
-.wo-workspace__menu li {
-  padding: 8px 10px;
-}
-
-.wo-workspace__menu .wo-workspace__menu-ativo {
-  border-radius: 8px;
-  background: var(--wo-acento-fundo);
-  color: var(--wo-acento-texto);
-  font-weight: 600;
-}
-
-.wo-workspace__principal {
-  display: flex;
-  flex: 3 1 300px;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
-}
-
-.wo-workspace__numeros {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(110px, 100%), 1fr));
-  gap: 8px;
-}
-
-.wo-workspace__numeros div {
-  padding: 12px 14px;
-  border: 1px solid var(--wo-borda);
-  border-radius: var(--wo-raio-sm);
-  background: var(--wo-superficie);
-}
-
-.wo-workspace__numeros span {
-  display: block;
-  color: var(--wo-texto-3);
-  font-size: 12px;
-}
-
-.wo-workspace__numeros strong {
-  display: block;
-  margin-top: 5px;
-  font-size: 24px;
-  font-weight: 600;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
-}
-
-.wo-workspace__execucoes {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 8px;
-  padding: 14px;
-  border: 1px solid var(--wo-borda);
-  border-radius: var(--wo-raio-sm);
-  background: var(--wo-superficie);
-}
-
-.wo-workspace__subtitulo {
-  font-size: 13.5px;
-  font-weight: 600;
-}
-
-.wo-workspace__execucoes ul {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.wo-workspace__execucoes li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  color: var(--wo-texto-2);
-  font-size: 13px;
-}
-
-.wo-estado {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 9px;
-  border-radius: var(--wo-raio-pilula);
-  font-size: 11.5px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.wo-estado::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: currentColor;
-}
-
-.wo-estado--ok {
-  background: var(--wo-sucesso-fundo);
-  color: var(--wo-sucesso);
-}
-
-.wo-estado--andamento {
-  background: var(--wo-info-fundo);
-  color: var(--wo-info);
-}
-
-.wo-estado--agendada {
-  background: var(--wo-neutro-fundo);
-  color: var(--wo-texto-2);
-}
-
-.wo-estado--falha {
-  background: var(--wo-erro-fundo-forte);
-  color: var(--wo-erro);
-}
-
 /* ---------- Sob medida na Home ---------- */
 .wo-sobmedida__garantias {
   margin-top: 26px;
@@ -343,9 +180,5 @@
 @media (max-width: 560px) {
   .wo-operacao__sistemas {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .wo-workspace__menu {
-    display: none;
   }
 }

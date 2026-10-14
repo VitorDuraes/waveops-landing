@@ -476,16 +476,6 @@
   background: var(--wo-sucesso-ponto);
 }
 
-.wo-chip--desenvolvimento::before {
-  border-radius: 2px;
-  background: var(--wo-alerta-ponto);
-}
-
-.wo-chip--planejado::before {
-  background: transparent;
-  border: 2px solid var(--wo-texto-3);
-}
-
 /* ---------- Hero de duas colunas ---------- */
 /* overflow: hidden prende o brilho de 1000 px dentro do hero. Sem isso ele vaza
    340 px para a direita e a página rola na horizontal em qualquer largura. */
@@ -604,7 +594,7 @@
   font-size: 10.5px;
 }
 
-/* ---------- Três entradas (cartões-link separados por fio) ---------- */
+/* ---------- Entradas da Home (cartões-link separados por fio) ---------- */
 .wo-entradas {
   display: flex;
   flex-wrap: wrap;
@@ -841,28 +831,6 @@
 
 .wo-lista-check--espacada {
   gap: 12px;
-}
-
-/* ---------- Definições em grade (recursos da plataforma) ---------- */
-.wo-definicoes {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
-  gap: 18px 32px;
-  max-width: 580px;
-  margin-top: 30px;
-}
-
-.wo-definicoes dt {
-  color: var(--wo-texto);
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.wo-definicoes dd {
-  margin-top: 4px;
-  color: var(--wo-texto-3);
-  font-size: 14.5px;
-  line-height: 1.6;
 }
 
 /* ---------- Passos verticais (como trabalhamos) ---------- */
@@ -1117,7 +1085,7 @@
 }
 
 .wo-rodape__coluna--sobmedida {
-  flex: 1.6 1 320px;
+  flex: 1 1 230px;
 }
 
 .wo-rodape__coluna--empresa {
@@ -1132,12 +1100,6 @@
   font-weight: 400;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-}
-
-.wo-rodape__duas {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
-  column-gap: 20px;
 }
 
 .wo-rodape a:not(.wo-marca) {

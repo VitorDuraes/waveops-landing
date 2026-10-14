@@ -1,7 +1,7 @@
 // @ts-check
 /* WaveOps · filtro por frente da página Demonstrações técnicas.
 
-   Melhoria progressiva, nunca requisito: sem este arquivo os seis fluxos aparecem e o grupo
+   Melhoria progressiva, nunca requisito: sem este arquivo todos os fluxos aparecem e o grupo
    de botões some (data-sem-js-oculto, regra no <noscript> do <head>).
 
    Marcação esperada:

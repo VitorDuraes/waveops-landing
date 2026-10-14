@@ -29,15 +29,44 @@ test('nenhum módulo da Plataforma aparece como disponível', { skip: !fs.exists
 });
 
 test('assinatura da plataforma nunca aparece como disponível', () => {
-  let conferidas = 0;
   for (const p of paginas) {
     const html = ler(p.arquivo);
     for (const m of html.matchAll(/Assinatura[^<]{0,40}<\/h3>\s*<span class="wo-selo ([^"]+)"/g)) {
-      conferidas += 1;
       assert.equal(m[1], 'wo-selo--desenvolvimento', `${p.arquivo}: assinatura com ${m[1]}`);
     }
   }
-  assert.ok(conferidas >= 1, 'o teste não achou nenhum selo de assinatura para conferir');
+  // Desde 14/10/2026 a assinatura saiu dos modelos de contratação da Home e de Projetos sob
+  // medida, e o laço acima pode não achar nenhum bloco. Ela continua descrita na página da
+  // Plataforma e no llms.txt, sempre como em definição: é isso que se confere aqui.
+  const plataforma = ler('plataforma/index.html');
+  assert.match(plataforma, /<meta name="description" content="[^"]*sem contratação aberta\./);
+  assert.match(plataforma, /Assinatura por plano e módulos\. Planos em definição/);
+  assert.match(ler('llms.txt'), /A assinatura da plataforma está em desenvolvimento/);
+});
+
+test('a Plataforma só aparece no rodapé, fora da própria página', () => {
+  // Decisão do Vitor em 14/10/2026: menu, Home e páginas de oferta mostram o que está à venda.
+  assert.doesNotMatch(ler('dev/site/parciais/topo.html'), /href="\/plataforma\//, 'menu com link para a Plataforma');
+  const rodape = ler('dev/site/parciais/rodape.html');
+  for (const destino of ['/plataforma/', '/plataforma/#modulos', '/plataforma/#lista']) {
+    assert.ok(rodape.includes(`href="${destino}"`), `rodapé sem ${destino}`);
+  }
+  for (const p of paginas.filter((x) => x.id !== 'plataforma')) {
+    const semRodape = ler(p.arquivo).replace(/<!-- parcial:rodape[\s\S]*?<!-- \/parcial:rodape -->/, '');
+    assert.doesNotMatch(semRodape, /href="\/plataforma\//, `${p.arquivo}: link para a Plataforma fora do rodapé`);
+  }
+});
+
+test('Projetos sob medida apresenta as quatro frentes da base WaveOps', () => {
+  const html = ler('projetos-sob-medida/index.html');
+  const nomes = [...html.matchAll(/<h3 class="wo-sobmedida-frente__nome">([^<]+)<\/h3>/g)].map((m) => m[1]);
+  assert.deepEqual(nomes, ['Automação de processos', 'Integração de sistemas', 'Sistemas e painéis sob medida', 'Agentes de IA supervisionados']);
+});
+
+test('nenhuma página anuncia uma frente retirada em 14/10/2026', () => {
+  const retiradas = /Desenvolvimento web|Engenharia de dados|Consultoria de TI|Sistemas empresariais|E-commerce e pagamentos/;
+  for (const p of paginas) assert.doesNotMatch(ler(p.arquivo), retiradas, p.arquivo);
+  assert.doesNotMatch(ler('llms.txt'), retiradas, 'llms.txt');
 });
 
 test('nenhuma página traz preço, placeholder de caso ou afirmação que o refino retirou', () => {

@@ -17,8 +17,9 @@
 
 /** Versão da Política de Privacidade registrada junto com a ciência. Mudou o texto da
     política (portal/src/app/(public)/privacidade), mude a versão; a revisada pelo jurídico
-    entra no gate H4. 2026-10-11: código diário relacionável aos dados de contato. */
-export const POLITICA_VERSAO = 'rascunho-2026-10-11';
+    entra no gate H4. 2026-10-11: código diário relacionável aos dados de contato.
+    2026-10-14: Hostinger e as cópias de segurança de 7 dias. */
+export const POLITICA_VERSAO = 'rascunho-2026-10-14';
 
 /** Versão do texto da caixa de ciência da política, por formulário. Mudou o texto, mude a versão. */
 export const TEXTO_CIENCIA = Object.freeze({

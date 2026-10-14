@@ -11,11 +11,12 @@ export const metadata: Metadata = {
 // usados pelo portal. Revisar com advogado e preencher a razão social, o CNPJ e o
 // encarregado (DPO) antes de considerar definitiva.
 // Revisão factual de 11/10/2026: código diário relacionável aos dados de contato,
-// tratado como dado pessoal. Não encerra a revisão H4. Mudou o texto, mude
-// POLITICA_VERSAO em assets/site/config.js.
+// tratado como dado pessoal. Revisão factual de 14/10/2026: Hostinger como operadora
+// das cópias de segurança criptografadas, apagadas depois de 7 dias. Nenhuma das duas
+// encerra a revisão H4. Mudou o texto, mude POLITICA_VERSAO em assets/site/config.js.
 export default function PrivacidadePage() {
   return (
-    <LegalDoc title="Política de Privacidade" updatedAt="11 de outubro de 2026">
+    <LegalDoc title="Política de Privacidade" updatedAt="14 de outubro de 2026">
       <p>
         Esta Política descreve como a <strong>{EMPRESA.razaoSocial}</strong> (CNPJ {EMPRESA.cnpj}), que opera a
         marca {EMPRESA.marca}, coleta, usa, compartilha e protege dados pessoais, em conformidade com a Lei
@@ -121,6 +122,10 @@ export default function PrivacidadePage() {
           contatos recebidos pelo site.
         </li>
         <li>
+          <strong>Hostinger</strong>: servidor no Brasil que guarda as cópias de segurança criptografadas do
+          banco do portal, usadas para recuperação em caso de falha.
+        </li>
+        <li>
           <strong>Netlify</strong>: hospedagem do site institucional. Os formulários do site não passam pelo
           Netlify: vão direto para o portal.
         </li>
@@ -150,6 +155,12 @@ export default function PrivacidadePage() {
         Contatos recebidos pelo site e inscrições na lista de interesse ficam guardados enquanto forem
         necessários para atender o pedido e acompanhar a conversa. Você pode pedir a exclusão a qualquer
         momento, pelo canal do item 8.
+      </p>
+      <p>
+        Fazemos todos os dias uma cópia de segurança criptografada do banco do portal, para recuperação em caso
+        de falha. Cada cópia é apagada depois de 7 dias, quando já existe uma cópia mais nova. Por isso, um dado
+        excluído pode continuar nessas cópias até que elas sejam apagadas. O provedor do servidor também faz
+        cópias próprias, que seguem a política dele.
       </p>
 
       <h2>7. Segurança</h2>

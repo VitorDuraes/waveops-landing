@@ -311,7 +311,7 @@ Netlify: publicar o deploy anterior no painel e `git revert` do merge. n8n: path
 - [x] Teclado: menu com Esc e retorno de foco, seletor com `aria-pressed`, pular para o conteúdo: `topo.spec`
 - [ ] Leitor de tela no formulário (NVDA ou VoiceOver): teste parcial no iPhone; Vitor pediu para pular a continuação. Confirmados o anúncio automático de campos faltantes, a leitura do rótulo e do erro do nome ao toque e as mudanças de campos ao selecionar E-mail e Ligação. Não marcar o teste completo como aprovado nem repetir o pedido nesta continuação
 - [x] 360 a 1440 sem rolagem horizontal: `responsivo.spec`, 7 páginas
-- [ ] Aparelhos reais (iPhone e Android): não verificado, exige aparelho
+- [x] Aparelhos reais: iPhone com Safari aprovado por Vitor em 14/10/2026, em retrato e paisagem, já na versão do PR #102: A1 (páginas), A2 (navegação), A3 (layout, inclusive texto em 150%) e A4 (toque, com teclado aberto). Por decisão do Vitor no mesmo dia, o Android e os formulários no aparelho (A5, que exige homologação isolada) ficam cobertos pelo Playwright no projeto celular e pelo teste público de 12/10/2026, sem execução física
 - [x] Lighthouse celular no build simulado: desempenho 97 a 99; acessibilidade, boas práticas e SEO 100; CLS 0; TBT 0 ms
 - [x] Lighthouse celular no Deploy Preview: desempenho e acessibilidade 100 nas 6 páginas; boas práticas 93 só pela barra do Netlify bloqueada pela CSP, e SEO 69 só pelo `noindex` do preview, os dois inexistentes em produção
 - [x] Comparação visual no Deploy Preview contra as capturas do design: altura de -0,4% a +2,4%, 9 das 18 combinações em 0,0%
@@ -325,7 +325,7 @@ Netlify: publicar o deploy anterior no painel e `git revert` do merge. n8n: path
 - [x] Nenhum módulo da Plataforma como disponível e toda maquete com aviso de ilustração: `conteudo.test`
 - [ ] Pendências de publicação da spec, seção 12: H4. Vitor já confirmou o responsável pelo WhatsApp, os dois compromissos comerciais e a matriz dos 11 módulos e quatro modelos. A revisão jurídica continua aberta, sem responsável definido; o e-mail do domínio continua inativo
 
-**Retomada de 11/10/2026, atualizada em 12/10/2026:** E/H5 do plano original: conferência técnica local e publicada de formulários, links, atribuição e funil concluída. Roteiro e evidências privadas em `docs/specs/2026-10-11-h5-homologacao-site.md`. Leitor de tela interrompido e ativação do Discord dispensada por Vitor; não repetir essas solicitações. Roteiro completo de aparelhos reais e revisão jurídica H4 mantêm seus estados separados. A preparação do PR de backup não é a próxima tarefa deste plano.
+**Retomada de 11/10/2026, atualizada em 12/10/2026:** E/H5 do plano original: conferência técnica local e publicada de formulários, links, atribuição e funil concluída. Roteiro e evidências privadas em `docs/specs/2026-10-11-h5-homologacao-site.md`. Leitor de tela interrompido e ativação do Discord dispensada por Vitor; não repetir essas solicitações. Roteiro completo de aparelhos reais e revisão jurídica H4 mantêm seus estados separados. Em 14/10/2026 o roteiro de aparelhos foi concluído no iPhone, conforme o item acima; a revisão jurídica H4 segue aberta. A preparação do PR de backup não é a próxima tarefa deste plano.
 
 ---
 

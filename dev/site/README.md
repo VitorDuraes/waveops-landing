@@ -46,7 +46,7 @@ O site é estático, sem framework e sem dependência em produção. Cada págin
 </html>
 ```
 
-O miolo entre os marcadores pode ficar vazio: o build preenche. `ativo` aceita `home`, `solucoes`, `plataforma`, `sobmedida`, `contato`. Demonstrações fica fora do menu: use `ativo="demonstracoes"`. A chamada final vai dentro do `<main>` (conteúdo fora de landmark reprova no axe).
+O miolo entre os marcadores pode ficar vazio: o build preenche. `ativo` marca item do menu com `home`, `solucoes`, `sobmedida` ou `contato`. Demonstrações e Plataforma ficam fora do menu (a Plataforma desde 14/10/2026): use `ativo="demonstracoes"` e `ativo="plataforma"`, que não marcam item. A chamada final vai dentro do `<main>` (conteúdo fora de landmark reprova no axe).
 
 ## Classes do design system
 

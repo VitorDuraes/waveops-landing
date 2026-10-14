@@ -1,7 +1,8 @@
 # WaveOps · site institucional
 
 Site institucional da WaveOps em PT-BR, só tema escuro, com seis páginas: Início, Soluções,
-Plataforma, Projetos sob medida, Contato e Demonstrações técnicas (fora do menu). O mesmo
+Projetos sob medida, Contato, Demonstrações técnicas e Plataforma (as duas últimas fora do menu,
+com acesso pelo rodapé). O mesmo
 repositório guarda o WaveOps Portal, app Next em `portal/`, publicado à parte em
 `portal.waveops.com.br`.
 

@@ -23,11 +23,13 @@ Páginas do site (`dev/site/paginas.json` é a fonte):
 |---|---|---|
 | Início | `/` | `index.html` |
 | Soluções | `/solucoes/` | `solucoes/index.html` |
-| Plataforma | `/plataforma/` | `plataforma/index.html` |
+| Plataforma (fora do menu desde 14/10/2026, acesso pelo rodapé) | `/plataforma/` | `plataforma/index.html` |
 | Projetos sob medida | `/projetos-sob-medida/` | `projetos-sob-medida/index.html` |
 | Contato | `/contato/` | `contato/index.html` |
 | Demonstrações técnicas (fora do menu) | `/demonstracoes-tecnicas/` | `demonstracoes-tecnicas/index.html` |
 | Não encontrado | qualquer outra | `404.html` (`noindex`) |
+
+Mensagem desde 14/10/2026 (decisão do Vitor): software house especializada na operação de quem vende, com quatro frentes (automação de processos, integração de sistemas, sistemas e painéis sob medida, agentes de IA supervisionados) e serviços gerenciados para cuidar do que está no ar. Não volte a anunciar desenvolvimento web, e-commerce, engenharia de dados ou consultoria de TI como frentes, nem a Plataforma no menu ou na Home, sem nova decisão. Plano: `docs/plans/2026-10-14-foco-mensagem-site.plan.md`; `tests/site/unit/conteudo.test.mjs` guarda as quatro frentes, barra as frentes retiradas e confere que a Plataforma só aparece no rodapé e na própria página.
 
 ## Rodar e verificar
 

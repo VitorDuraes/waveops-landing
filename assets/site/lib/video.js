@@ -1,0 +1,28 @@
+// @ts-check
+/* Vídeos locais do hero. Sem fonte no HTML: a escolha só é aplicada depois do load. */
+export const VIDEOS = Object.freeze({
+  webm: Object.freeze({ 1280: '/assets/site/video/onda-1280.webm', 1920: '/assets/site/video/onda-1920.webm' }),
+  mp4: Object.freeze({ 1280: '/assets/site/video/onda-1280.mp4', 1920: '/assets/site/video/onda-1920.mp4' }),
+});
+
+/**
+ * @param {number} larguraCss
+ * @param {(tipo: string) => CanPlayTypeResult} podeTocar
+ * @returns {{ src: string, tipo: 'video/webm' | 'video/mp4' } | null}
+ */
+export function escolherVideo(larguraCss, podeTocar) {
+  const tamanho = larguraCss > 1280 ? 1920 : 1280;
+  if (podeTocar('video/webm; codecs="vp9"')) return { src: VIDEOS.webm[tamanho], tipo: 'video/webm' };
+  if (podeTocar('video/mp4; codecs="avc1.640028"')) return { src: VIDEOS.mp4[tamanho], tipo: 'video/mp4' };
+  return null;
+}
+
+/**
+ * @param {{ movimentoReduzido: boolean, economiaDeDados: boolean, carregada: boolean,
+ * naTela: boolean, abaVisivel: boolean, pausadoPeloUsuario: boolean }} estado
+ * @returns {boolean}
+ */
+export function deveTocar(estado) {
+  return estado.carregada && estado.naTela && estado.abaVisivel &&
+    !estado.movimentoReduzido && !estado.economiaDeDados && !estado.pausadoPeloUsuario;
+}

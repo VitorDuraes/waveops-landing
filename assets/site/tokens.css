@@ -119,6 +119,26 @@
   --wo-leitura-alto: rgb(0 0 0 / 0.55);
   --wo-leitura-baixo: rgb(0 0 0 / 0.7);
 
+  /* Ritmo das peças editoriais compartilhadas e do hero da Home. */
+  --wo-espaco-1: 8px;
+  --wo-espaco-2: 16px;
+  --wo-espaco-3: 24px;
+  --wo-espaco-4: 32px;
+  --wo-espaco-5: 48px;
+  --wo-espaco-6: 64px;
+  --wo-espaco-7: 128px;
+  --wo-etiqueta-tamanho: 12px;
+  --wo-etiqueta-entreletra: 0.1em;
+  --wo-texto-pequeno: 14px;
+  --wo-texto-corpo: 16px;
+  --wo-texto-destaque: 20px;
+  --wo-linha-fina: 1px;
+  --wo-linha-forte: 2px;
+  --wo-hero-frase-largura: 430px;
+  --wo-hero-contorno: rgb(255 255 255 / 0.25);
+  --wo-hero-controle: rgb(0 0 0 / 0.3);
+  --wo-hero-pausa-tamanho: 44px;
+
   /* Movimento: transição curta de estado. As animações que se movem são o vídeo do hero e o
      palco das cinco frentes, e ambas desligam com prefers-reduced-motion. */
   --wo-transicao: 160ms ease;

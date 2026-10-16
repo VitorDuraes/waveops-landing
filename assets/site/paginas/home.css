@@ -172,10 +172,159 @@ body[data-pagina='home'] {
   opacity: 0.35;
 }
 
-/* Regra provisória, sai na Tarefa 5: o hero de hoje continua claro até ela refazê-lo sobre a
-   onda. Até lá, ele cobre o fundo fixo com o papel, para o texto escuro não cair sobre a onda. */
-.wo-home-escuro > .wo-hero {
-  background: var(--wo-fundo);
+.wo-home-fundo__video {
+  opacity: 0;
+}
+
+.wo-home-fundo__video[data-tocando] {
+  opacity: 1;
+}
+
+/* Um vídeo pausado nunca encobre o pôster, mesmo com capítulo ativo. */
+.wo-home-fundo[data-capitulo] > .wo-home-fundo__video:not([data-tocando]) {
+  opacity: 0;
+}
+
+/* Hero transparente: a onda do fundo fixo é visível entre as peças. Os semânticos
+   claros ficam só no texto e controles; a maquete preserva seu contexto de papel. */
+.wo-home-hero {
+  position: relative;
+  min-height: 100svh;
+  padding: calc(var(--wo-topo-altura) + var(--wo-espaco-5)) 0 var(--wo-espaco-6);
+  color: var(--wo-clara);
+  --wo-texto: var(--wo-clara);
+  --wo-texto-2: var(--wo-clara-2);
+  --wo-texto-3: var(--wo-clara-2);
+  --wo-borda-forte: var(--wo-hero-contorno);
+  --wo-acento-texto: var(--wo-marca-claro);
+  --wo-contorno-fundo: var(--wo-hero-controle);
+}
+
+.wo-home-hero__abertura {
+  display: grid;
+  gap: var(--wo-espaco-5);
+}
+
+.wo-home-hero__etiquetas {
+  display: grid;
+  align-content: start;
+  gap: var(--wo-espaco-1);
+}
+
+.wo-home-hero__frase {
+  max-width: var(--wo-hero-frase-largura);
+  font-size: var(--wo-texto-destaque);
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.wo-home-hero__grade {
+  display: grid;
+  gap: var(--wo-espaco-5);
+  margin-top: var(--wo-espaco-5);
+  align-items: end;
+}
+
+.wo-home-hero__texto h1 {
+  margin: var(--wo-espaco-3) 0 var(--wo-espaco-4);
+  text-wrap: pretty;
+}
+
+.wo-home-hero__texto .wo-etiqueta-hero {
+  border-radius: 0;
+  border: 0;
+  border-left: var(--wo-linha-forte) solid var(--wo-clara);
+  background: var(--wo-hero-controle);
+}
+
+.wo-home-hero__texto .wo-etiqueta-hero::before {
+  display: none;
+}
+
+.wo-home-hero__texto .wo-nota-mono {
+  margin-top: var(--wo-espaco-2);
+  font-size: var(--wo-texto-pequeno);
+}
+
+.wo-home-hero__pausa {
+  display: grid;
+  place-items: center;
+  width: var(--wo-hero-pausa-tamanho);
+  height: var(--wo-hero-pausa-tamanho);
+  margin: var(--wo-espaco-4) var(--wo-margem) 0;
+  border: var(--wo-linha-fina) solid var(--wo-hero-contorno);
+  border-radius: var(--wo-raio-pilula);
+  background: var(--wo-hero-controle);
+  cursor: pointer;
+}
+
+.wo-home-hero__pausa[hidden],
+.wo-home-hero__icone-tocar,
+.wo-home-hero__pausa[aria-pressed='true'] .wo-home-hero__icone-pausa {
+  display: none;
+}
+
+.wo-home-hero__pausa[aria-pressed='true'] .wo-home-hero__icone-tocar {
+  display: block;
+}
+
+.wo-home-hero .wo-operacao {
+  padding: var(--wo-espaco-3);
+}
+
+.wo-home-hero .wo-operacao__sistemas {
+  padding-bottom: var(--wo-espaco-2);
+  border-bottom: var(--wo-linha-fina) solid var(--wo-linha);
+}
+
+.wo-home-hero .wo-operacao__sistemas li {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+.wo-home-hero .wo-operacao__eventos li {
+  padding: var(--wo-espaco-1) 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  border-bottom: var(--wo-linha-fina) solid var(--wo-linha);
+}
+
+.wo-home-hero .wo-operacao__eventos li:last-child {
+  border: 0;
+}
+
+@media (min-width: 1024px) {
+  .wo-home-hero__abertura {
+    grid-template-columns: 1fr 1fr;
+  }
+  .wo-home-hero__frase {
+    justify-self: end;
+    text-align: right;
+  }
+  .wo-home-hero__grade {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    margin-top: var(--wo-espaco-7);
+  }
+  .wo-home-hero__pausa {
+    margin-left: max(var(--wo-margem), calc((100% - var(--wo-conteiner)) / 2 + var(--wo-margem)));
+  }
+}
+
+@media (max-width: 1023.98px) {
+  /* O controle fica entre o topo e as etiquetas, já na primeira tela. A nota
+     reserva o canto do WhatsApp mesmo quando coincide com o fim da janela. */
+  .wo-home-hero__pausa {
+    position: absolute;
+    top: calc(var(--wo-topo-altura) + var(--wo-espaco-1));
+    right: var(--wo-margem);
+    margin: 0;
+  }
+  .wo-home-hero__texto .wo-nota-mono {
+    max-width: calc(100% - var(--wo-flutuante-respiro));
+  }
 }
 
 /* ---------- Folha creme ----------
@@ -950,13 +1099,82 @@ body[data-pagina='home'] {
   }
 }
 
-/* ---------- Sob medida na Home ---------- */
-.wo-sobmedida__garantias {
-  margin-top: 26px;
+/* ---------- Folha editorial ---------- */
+.wo-home-entradas__grade {
+  display: grid;
+  gap: var(--wo-espaco-5);
+  margin-top: var(--wo-espaco-5);
 }
 
-.wo-sobmedida__acao {
-  margin-top: 30px;
+.wo-home-entrada {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wo-espaco-3);
+  padding-top: var(--wo-espaco-4);
+  border-top: var(--wo-linha-forte) solid var(--wo-tinta);
+  color: var(--wo-tinta);
+  text-decoration: none;
+}
+
+.wo-home-entrada__nome {
+  font-family: var(--wo-fonte-titulo);
+  font-size: var(--wo-h2);
+  line-height: 1.05;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+
+.wo-home-entrada__titulo {
+  font-size: var(--wo-texto-destaque);
+  line-height: 1.4;
+}
+
+.wo-home-entrada__texto {
+  color: var(--wo-tinta-2);
+}
+
+.wo-home-entrada__acao {
+  display: flex;
+  align-items: center;
+  gap: var(--wo-espaco-2);
+  margin-top: auto;
+  min-height: var(--wo-alvo);
+  color: var(--wo-violeta-forte);
+  font-size: var(--wo-texto-pequeno);
+  font-weight: 600;
+}
+
+.wo-home-entrada__acao svg {
+  width: var(--wo-espaco-2);
+  height: var(--wo-espaco-2);
+}
+
+.wo-home-entrada:hover .wo-home-entrada__nome {
+  color: var(--wo-violeta-forte);
+}
+
+.wo-home-processo,
+.wo-home-contratar {
+  background: var(--wo-papel-2);
+}
+
+.wo-home-processo__intro {
+  align-self: end;
+  font-size: var(--wo-texto-destaque);
+  color: var(--wo-tinta-2);
+}
+
+.wo-home-processo__garantias {
+  display: grid;
+  gap: var(--wo-espaco-3);
+  margin: var(--wo-espaco-5) 0 var(--wo-espaco-4);
+  padding-top: var(--wo-espaco-4);
+  border-top: var(--wo-linha-fina) solid var(--wo-linha);
+}
+
+@media (min-width: 768px) {
+  .wo-home-entradas__grade { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .wo-home-processo__garantias { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 @media (max-width: 560px) {

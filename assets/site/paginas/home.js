@@ -6,7 +6,7 @@
    painel e a cena montada, lado a lado (desktop) ou um embaixo do outro (celular).
 
    Marcação esperada (index.html):
-     .wo-home-fundo             fundo fixo da página: pôster e, a partir da Tarefa 5, o vídeo
+     .wo-home-fundo             fundo fixo da página: pôster e vídeo
      [data-palco]               a seção das cinco frentes
        [data-frente="..."]      cada capítulo, em ordem, com o .wo-home-painel e a cena
          [data-cena="..."]      a cena do capítulo
@@ -22,6 +22,7 @@
    O CSS (paginas/home.css) só fixa e esconde as cenas quando a seção tem data-palco-modo: se
    este módulo falhar, nada some. As contas ficam em lib/palco.js. */
 import { MIDIA_PALCO, CENA_DESKTOP, CENA_CELULAR, estadoFixo, escalaDaCena } from '../lib/palco.js';
+import { escolherVideo, deveTocar } from '../lib/video.js';
 
 /** A partir desta largura a cena usa o desenho do desktop e o painel fica ao lado dela (home.css). */
 const MIDIA_DESKTOP = '(min-width: 1024px)';
@@ -235,4 +236,102 @@ export function iniciarPalco(doc = document, janela = window) {
   avaliar();
 }
 
-if (typeof document !== 'undefined') iniciarPalco();
+/**
+ * Melhoria progressiva do pôster. Uma falha de reprodução preserva o pôster e deixa
+ * o controle pausado para uma nova tentativa manual, sem tentativas automáticas em laço.
+ * @param {Document} doc
+ * @param {Window} janela
+ */
+export function iniciarVideo(doc = document, janela = window) {
+  const video = doc.querySelector('[data-hero-video]');
+  const botao = doc.querySelector('[data-video-pausa]');
+  const hero = doc.querySelector('[data-hero]');
+  if (!(video instanceof HTMLVideoElement) || !(botao instanceof HTMLButtonElement) || !hero) return;
+  const fonte = escolherVideo(janela.innerWidth, video.canPlayType.bind(video));
+  if (!fonte) return;
+  const preferencia = janela.matchMedia('(prefers-reduced-motion: reduce)');
+  const estado = {
+    movimentoReduzido: preferencia.matches,
+    economiaDeDados: Boolean(janela.navigator.connection?.saveData),
+    carregada: doc.readyState === 'complete',
+    naTela: false,
+    abaVisivel: doc.visibilityState !== 'hidden',
+    pausadoPeloUsuario: false,
+  };
+  let tentativa = 0;
+  let pendente = false;
+  // muted no HTML é o valor padrão. A propriedade também é explícita para o autoplay móvel.
+  video.muted = true;
+
+  const aplicar = () => {
+    botao.hidden = estado.movimentoReduzido || estado.economiaDeDados;
+    botao.setAttribute('aria-pressed', String(estado.pausadoPeloUsuario));
+    if (!deveTocar(estado)) {
+      tentativa += 1;
+      pendente = false;
+      video.pause();
+      video.removeAttribute('data-tocando');
+      return;
+    }
+    if (pendente || !video.paused) return;
+    if (!video.hasAttribute('src')) video.src = fonte.src;
+    video.removeAttribute('data-video-erro');
+    const atual = ++tentativa;
+    pendente = true;
+    video.play().then(() => {
+      if (atual === tentativa) pendente = false;
+    }).catch((erro) => {
+      // pause() pode rejeitar uma tentativa antiga com AbortError. O estado atual já
+      // foi aplicado; uma promessa antiga não pode pausar uma reprodução mais recente.
+      if (atual !== tentativa) return;
+      pendente = false;
+      video.pause();
+      video.removeAttribute('data-tocando');
+      video.setAttribute('data-video-erro', erro instanceof Error ? erro.name : 'FalhaDeReproducao');
+      estado.pausadoPeloUsuario = true;
+      botao.setAttribute('aria-pressed', 'true');
+    });
+  };
+  video.addEventListener('playing', () => {
+    if (deveTocar(estado)) video.setAttribute('data-tocando', '');
+    else aplicar();
+  });
+  botao.addEventListener('click', () => {
+    estado.pausadoPeloUsuario = !estado.pausadoPeloUsuario;
+    aplicar();
+  });
+  preferencia.addEventListener('change', () => {
+    estado.movimentoReduzido = preferencia.matches;
+    aplicar();
+  });
+  doc.addEventListener('visibilitychange', () => {
+    estado.abaVisivel = doc.visibilityState !== 'hidden';
+    aplicar();
+  });
+  janela.addEventListener('load', () => {
+    estado.carregada = true;
+    aplicar();
+  }, { once: true });
+  const medir = () => {
+    const caixa = hero.getBoundingClientRect();
+    estado.naTela = caixa.bottom > 0 && caixa.top < janela.innerHeight;
+    aplicar();
+  };
+  if (typeof IntersectionObserver === 'function') {
+    const observador = new IntersectionObserver((entradas) => {
+      estado.naTela = entradas[entradas.length - 1].isIntersecting;
+      aplicar();
+    });
+    observador.observe(hero);
+  } else {
+    janela.addEventListener('scroll', medir, { passive: true });
+    janela.addEventListener('resize', medir);
+  }
+  janela.addEventListener('pageshow', medir);
+  medir();
+}
+
+if (typeof document !== 'undefined') {
+  iniciarPalco();
+  iniciarVideo();
+}

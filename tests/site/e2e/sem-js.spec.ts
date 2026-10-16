@@ -4,13 +4,15 @@ import { test, expect } from '@playwright/test';
    e todos os painéis, e os formulários dão lugar a um aviso com saída por WhatsApp. */
 test.use({ javaScriptEnabled: false });
 
-test('Home sem JavaScript mostra os cinco resultados e esconde os botões do seletor', async ({ page }, info) => {
+test('Home sem JavaScript mostra o pôster, o vídeo sem fonte e o botão de pausa escondido', async ({ page }, info) => {
   test.skip(info.project.name === 'tablet', 'mesma regra nas outras larguras');
   await page.goto('/');
+  await expect(page.locator('.wo-home-fundo__poster')).toBeVisible();
+  await expect(page.locator('[data-hero-video]')).not.toHaveAttribute('src');
+  await expect(page.locator('[data-video-pausa]')).toBeHidden();
   for (const id of ['vender', 'atender', 'operar', 'decidir', 'crescer']) {
-    await expect(page.locator(`#resultado-${id}`)).toBeVisible();
+    await expect(page.locator(`#solucoes a[href="/solucoes/#${id}"]`)).toBeVisible();
   }
-  await expect(page.locator('[data-opcoes]')).toBeHidden();
 });
 
 test('Home sem JavaScript mostra as cenas montadas', async ({ page }, info) => {

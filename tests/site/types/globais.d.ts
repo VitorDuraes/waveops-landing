@@ -2,6 +2,9 @@
 export {};
 
 declare global {
+  interface Navigator {
+    connection?: { saveData?: boolean };
+  }
   interface Window {
     /** assets/funil.js: medição própria de funil (SPEC-18). */
     WaveFunil?: { enviar(nome: string, props?: Record<string, string | number | boolean>): void };

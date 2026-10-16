@@ -38,18 +38,18 @@ test('pular para o conteúdo é o primeiro foco e leva ao main', async ({ page }
   await expect(page.locator('main#conteudo')).toBeFocused();
 });
 
-test('seletor da Home troca o painel por teclado e marca aria-pressed', async ({ page }, info) => {
+test('seletor da Plataforma troca o painel por teclado e marca aria-pressed', async ({ page }, info) => {
   test.skip(info.project.name === 'tablet', 'mesmo comportamento das outras larguras');
-  await page.goto('/');
-  const operar = page.getByRole('button', { name: 'Operar com menos retrabalho' });
-  await expect(page.locator('#resultado-vender')).toBeVisible();
-  await expect(page.locator('#resultado-operar')).toBeHidden();
-  await operar.focus();
+  await page.goto('/plataforma/');
+  const automacoes = page.getByRole('button', { name: /^Automações/ });
+  await expect(page.locator('#tela-visao-geral')).toBeVisible();
+  await expect(page.locator('#tela-automacoes')).toBeHidden();
+  await automacoes.focus();
   await page.keyboard.press('Enter');
-  await expect(operar).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.getByRole('button', { name: 'Vender mais' })).toHaveAttribute('aria-pressed', 'false');
-  await expect(page.locator('#resultado-operar')).toBeVisible();
-  await expect(page.locator('#resultado-vender')).toBeHidden();
+  await expect(automacoes).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: /^Visão geral/ })).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.locator('#tela-automacoes')).toBeVisible();
+  await expect(page.locator('#tela-visao-geral')).toBeHidden();
 });
 
 /* Topo fixo de dois estados (spec 5.5). O HTML nasce com o topo escuro e solto sobre a faixa

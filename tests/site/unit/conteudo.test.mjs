@@ -12,6 +12,13 @@ const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '.
 const paginas = lerPaginas(raiz).paginas.filter((p) => fs.existsSync(path.join(raiz, p.arquivo)));
 const ler = (rel) => fs.readFileSync(path.join(raiz, rel), 'utf8');
 
+test('o JSON-LD da Home traz a cidade', () => {
+  const json = JSON.parse(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(ler('index.html'))[1]);
+  const empresa = json['@graph'].find((item) => item['@type'] === 'Organization');
+  assert.deepEqual(empresa.address, { '@type': 'PostalAddress', addressLocality: 'Uberlândia', addressRegion: 'MG', addressCountry: 'BR' });
+  assert.ok(!JSON.stringify(empresa).includes('streetAddress'));
+});
+
 test('nenhum módulo da Plataforma aparece como disponível', { skip: !fs.existsSync(path.join(raiz, 'plataforma/index.html')) }, () => {
   const html = ler('plataforma/index.html');
   const inicio = html.indexOf('id="modulos"');

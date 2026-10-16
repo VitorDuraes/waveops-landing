@@ -732,6 +732,154 @@ html[data-topo='fixo'] .wo-topo {
   flex-shrink: 0;
 }
 
+/* ---------- Peças editoriais compartilhadas ----------
+   Usadas pela Home e pelas páginas de oferta. A semântica vem do HTML: ol para
+   etapas, dl para definições e lista de modelos com os destinos de contratação. */
+.wo-etiqueta {
+  font-family: var(--wo-fonte);
+  font-size: var(--wo-etiqueta-tamanho);
+  font-weight: 600;
+  letter-spacing: var(--wo-etiqueta-entreletra);
+  text-transform: uppercase;
+}
+
+.wo-cartao-claro {
+  --wo-texto: var(--wo-tinta);
+  --wo-texto-2: var(--wo-tinta-2);
+  --wo-texto-3: var(--wo-tinta-3);
+  --wo-borda: var(--wo-linha);
+  --wo-borda-forte: var(--wo-linha);
+  --wo-superficie: var(--wo-papel);
+  --wo-acento-texto: var(--wo-violeta-forte);
+  color: var(--wo-texto);
+  color-scheme: light;
+  background: var(--wo-papel);
+  border: 0;
+  border-radius: var(--wo-raio);
+  box-shadow: var(--wo-sombra-cartao);
+}
+
+.wo-colunas-numeradas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--wo-espaco-4);
+  margin-top: var(--wo-espaco-6);
+}
+
+.wo-colunas-numeradas__item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--wo-espaco-2);
+  padding-top: var(--wo-espaco-3);
+  border-top: var(--wo-linha-forte) solid var(--wo-texto);
+}
+
+.wo-colunas-numeradas__numero {
+  color: var(--wo-acento-texto);
+  font-size: var(--wo-texto-destaque);
+  font-weight: 600;
+}
+
+.wo-colunas-numeradas__item h3 {
+  font-family: var(--wo-fonte-titulo);
+  font-size: var(--wo-h3-etapa);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.wo-colunas-numeradas__item p {
+  color: var(--wo-texto-2);
+  font-size: var(--wo-texto-corpo);
+}
+
+.wo-colunas-numeradas__recebe {
+  padding-top: var(--wo-espaco-2);
+  margin-top: auto;
+}
+
+.wo-colunas-numeradas__recebe .wo-etiqueta {
+  display: block;
+  margin-bottom: var(--wo-espaco-1);
+  color: var(--wo-acento-texto);
+}
+
+.wo-definicoes {
+  border-top: var(--wo-linha-forte) solid var(--wo-texto);
+}
+
+.wo-definicoes__linha {
+  display: grid;
+  gap: var(--wo-espaco-2);
+  padding: var(--wo-espaco-3) 0;
+  border-bottom: var(--wo-linha-fina) solid var(--wo-borda);
+}
+
+.wo-definicoes dt {
+  font-family: var(--wo-fonte-titulo);
+  font-size: var(--wo-h3-etapa);
+  line-height: 1.2;
+  font-weight: 600;
+}
+
+.wo-definicoes dt a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wo-espaco-2);
+  min-height: var(--wo-alvo);
+  color: var(--wo-texto);
+  text-decoration: none;
+}
+
+.wo-definicoes dt a:hover {
+  color: var(--wo-acento-texto);
+}
+
+.wo-definicoes dt svg {
+  flex-shrink: 0;
+}
+
+.wo-definicoes dd {
+  color: var(--wo-texto-2);
+}
+
+.wo-modelos.wo-tabela-modelos {
+  border-top: var(--wo-linha-forte) solid var(--wo-texto);
+}
+
+.wo-tabela-modelos .wo-modelo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--wo-espaco-3);
+  padding: var(--wo-espaco-4) 0;
+}
+
+.wo-tabela-modelos .wo-modelo__nome h3 {
+  font-family: var(--wo-fonte-titulo);
+  font-size: var(--wo-h3-linha);
+}
+
+.wo-tabela-modelos__seta {
+  display: grid;
+  place-items: center;
+  width: var(--wo-alvo);
+  height: var(--wo-alvo);
+  color: var(--wo-acento-texto);
+  border: var(--wo-linha-fina) solid var(--wo-borda);
+  border-radius: var(--wo-raio-pilula);
+}
+
+@media (min-width: 640px) {
+  .wo-colunas-numeradas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .wo-definicoes__linha { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--wo-espaco-4); }
+}
+
+@media (min-width: 1024px) {
+  .wo-colunas-numeradas { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .wo-tabela-modelos .wo-modelo { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) auto; gap: var(--wo-espaco-5); }
+}
+
 /* ---------- Seletor (botões à esquerda, um painel por vez) ----------
    Sem JavaScript, todos os painéis aparecem em sequência e os botões somem
    (regra no <noscript> do <head>). Com JavaScript, o site.js marca data-pronto e

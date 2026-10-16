@@ -6,6 +6,38 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { VIDEOS, escolherVideo, deveTocar } from '../../../assets/site/lib/video.js';
+
+test('escolherVideo prefere WebM e escolhe o tamanho pela largura', () => {
+  const soWebm = (t) => t.startsWith('video/webm') ? 'probably' : '';
+  const soMp4 = (t) => t.startsWith('video/mp4') ? 'maybe' : '';
+  assert.deepEqual(escolherVideo(1440, soWebm), { src: '/assets/site/video/onda-1920.webm', tipo: 'video/webm' });
+  assert.deepEqual(escolherVideo(1280, soWebm), { src: '/assets/site/video/onda-1280.webm', tipo: 'video/webm' });
+  assert.deepEqual(escolherVideo(390, soMp4), { src: '/assets/site/video/onda-1280.mp4', tipo: 'video/mp4' });
+  assert.deepEqual(escolherVideo(1920, () => 'probably'), { src: '/assets/site/video/onda-1920.webm', tipo: 'video/webm' });
+  assert.equal(escolherVideo(1920, () => ''), null);
+});
+
+test('deveTocar exige página carregada, hero na tela, aba visível e nenhum bloqueio', () => {
+  const livre = { movimentoReduzido: false, economiaDeDados: false, carregada: true, naTela: true, abaVisivel: true, pausadoPeloUsuario: false };
+  assert.equal(deveTocar(livre), true);
+  for (const [chave, valor] of [['movimentoReduzido', true], ['economiaDeDados', true], ['carregada', false], ['naTela', false], ['abaVisivel', false], ['pausadoPeloUsuario', true]]) {
+    assert.equal(deveTocar({ ...livre, [chave]: valor }), false, chave);
+  }
+});
+
+test('os caminhos dos vídeos e do pôster da Home existem em disco', () => {
+  const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
+  assert.ok(Object.isFrozen(VIDEOS));
+  for (const formato of Object.values(VIDEOS)) {
+    assert.ok(Object.isFrozen(formato));
+    for (const src of Object.values(formato)) assert.ok(fs.existsSync(path.join(raiz, src)));
+  }
+  const html = fs.readFileSync(path.join(raiz, 'index.html'), 'utf8');
+  const src = /class="wo-home-fundo__poster" src="([^"]+)"/.exec(html)?.[1];
+  assert.ok(src);
+  assert.ok(fs.existsSync(path.join(raiz, src)));
+});
 
 const pasta = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'assets', 'site', 'video');
 const KB = 1024;

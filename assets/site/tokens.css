@@ -1,87 +1,188 @@
-/* WaveOps · tokens do site institucional.
-   Valores copiados do design aprovado (canvas "WaveOps · Site institucional", 09/10/2026).
-   Só variáveis: nenhuma regra de componente mora aqui. Cor nova entra aqui antes de ser usada. */
+/* WaveOps · tokens do site institucional (novo visual).
+   Duas camadas. Primitivos: a paleta da spec 5.1, um valor por nome, igual em qualquer contexto.
+   Semânticos: o papel que a cor cumpre (fundo, texto, borda, acento). Valem no claro, em :root,
+   e são redefinidos em .wo-noite, então a mesma peça serve às faixas claras e às escuras.
+   Só variáveis: nenhuma regra de componente mora aqui. Valor novo entra aqui antes de ser usado.
+   tests/site/unit/cores.test.mjs confere o contraste dos pares: mexeu em cor, rode o teste. */
 :root {
-  color-scheme: dark;
+  /* Controles nativos acompanham o claro. Toda faixa escura declara color-scheme: dark. */
+  color-scheme: light;
 
-  /* Fundos, do mais fundo ao mais elevado */
-  --wo-fundo: #0a0b0e;
-  --wo-faixa: #101115;
-  --wo-superficie: #121317;
+  /* Primitivos: papel e tinta, para as seções claras */
+  --wo-papel: #faf8f4;
+  --wo-papel-2: #f1ede6;
+  --wo-tinta: #16130f;
+  --wo-tinta-2: #48433c;
+  --wo-tinta-3: #6b655c;
+  --wo-linha: rgb(22 19 15 / 0.14);
+  --wo-branco: #ffffff;
+
+  /* Primitivos: noite, para hero, contato, chamada final e rodapé */
+  --wo-noite: #0a0a0a;
+  --wo-noite-hero: #05010e;
+  --wo-cartao-noite: #171717;
+  --wo-clara: #f3f3f1;
+  --wo-clara-2: rgb(255 255 255 / 0.75);
+  --wo-linha-noite: rgb(255 255 255 / 0.15);
+
+  /* Primitivos: marca */
+  --wo-violeta: #7c3aed;
+  --wo-violeta-forte: #6d28d9;
+  /* Verde do WhatsApp escurecido: 4,1:1 com o ícone branco e 3,9:1 com o papel. */
+  --wo-whatsapp: #128c7e;
+  /* A cor mais clara do degradê violeta das aberturas escuras. */
+  --wo-abertura-brilho: rgb(124 58 237 / 0.35);
+  /* As duas pontas do degradê do quadrado da logo (spec D14). */
+  --wo-marca-claro: #a78bfa;
+  --wo-marca-escuro: #8b5cf6;
+
+  /* Semânticos, no claro */
+  --wo-fundo: var(--wo-papel);
+  --wo-fundo-2: var(--wo-papel-2);
+  --wo-superficie: var(--wo-branco);
+  --wo-texto: var(--wo-tinta);
+  --wo-texto-2: var(--wo-tinta-2);
+  --wo-texto-3: var(--wo-tinta-3);
+  --wo-borda: var(--wo-linha);
+  --wo-borda-forte: var(--wo-tinta);
+  --wo-acento: var(--wo-violeta);
+  --wo-acento-hover: var(--wo-violeta-forte);
+  --wo-acento-texto: var(--wo-violeta-forte);
+  --wo-sobre-acento: var(--wo-branco);
+  /* Situação no claro: 4,5:1 ou mais sobre o papel, o papel 2 e o branco. */
+  --wo-sucesso: #166534;
+  --wo-alerta: #92400e;
+  --wo-erro: #b91c1c;
+  --wo-info: #0369a1;
+
+  /* Tipografia: Geist nos títulos e Inter no texto (spec 5.2) */
+  --wo-fonte-titulo: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --wo-fonte: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --wo-h1: clamp(44px, 33.6px + 2.667vw, 72px);
+  --wo-h2: clamp(34px, 28.8px + 1.333vw, 48px);
+  --wo-h3-linha: clamp(24px, 21.77px + 0.571vw, 30px);
+  --wo-h3-etapa: clamp(22px, 21.26px + 0.19vw, 24px);
+  --wo-lead-hero: clamp(18px, 17.26px + 0.19vw, 20px);
+
+  /* Layout e efeitos (spec 5.3). Margem e respiro de seção crescem nos @media abaixo. */
+  --wo-conteiner: 1280px;
+  --wo-margem: 20px;
+  --wo-secao: 96px;
+  --wo-topo-altura: 66px;
+  --wo-raio: 10px;
+  --wo-raio-pilula: 999px;
+  --wo-sombra-cartao: 0 25px 50px -12px rgb(0 0 0 / 0.3);
+  --wo-sombra-folha: 0 -24px 60px rgb(0 0 0 / 0.35);
+  /* Altura de rolagem que cada frente ocupa no palco da Home (spec 13). */
+  --wo-palco-trecho: 70vh;
+  --wo-alvo: 44px;
+
+  /* Movimento: transição curta de estado. As animações que se movem são o vídeo do hero e o
+     palco das cinco frentes, e ambas desligam com prefers-reduced-motion. */
+  --wo-transicao: 160ms ease;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --wo-margem: 32px;
+    --wo-secao: 128px;
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --wo-margem: 48px;
+  }
+}
+
+/* Faixa escura: redefine os semânticos. Fundo, texto e color-scheme vêm de base.css. */
+.wo-noite {
+  --wo-fundo: var(--wo-noite);
+  --wo-fundo-2: var(--wo-cartao-noite);
+  --wo-superficie: var(--wo-cartao-noite);
+  --wo-texto: var(--wo-clara);
+  --wo-texto-2: var(--wo-clara-2);
+  --wo-texto-3: #a3a3af;
+  --wo-borda: var(--wo-linha-noite);
+  --wo-borda-forte: rgb(255 255 255 / 0.25);
+  --wo-acento: var(--wo-violeta);
+  --wo-acento-hover: var(--wo-violeta-forte);
+  --wo-acento-texto: #c2b2ff;
+  --wo-sobre-acento: var(--wo-branco);
+  --wo-sucesso: #4ade80;
+  --wo-alerta: #fbbf24;
+  --wo-erro: #f87171;
+  --wo-info: #7dd3fc;
+
+  /* Nomes que os formulários já usam, com os valores escuros de hoje: o formulário continua
+     igual sobre fundo escuro. */
   --wo-superficie-2: #17181e;
   --wo-superficie-3: #1d1e26;
-
-  /* Bordas */
-  --wo-borda: rgba(208, 200, 237, 0.1);
-  --wo-borda-forte: rgba(208, 200, 237, 0.19);
   /* Borda de campo e de caixa de marcar: 0,45 dá 3,2:1 sobre #17181e. O design usava 0,19
      (1,6:1), abaixo dos 3:1 que a WCAG 1.4.11 pede para o contorno de um controle. */
   --wo-borda-campo: rgba(208, 200, 237, 0.45);
-
-  /* Texto */
-  --wo-texto: #f3f1f7;
-  --wo-texto-2: #b9b4c9;
-  --wo-texto-3: #a3a3af;
-  --wo-texto-4: #8c8d9d;
-
-  /* Acento violeta */
-  --wo-acento: #a28bf9;
-  --wo-acento-texto: #c2b2ff;
-  --wo-acento-hover: #e0d7ff;
-  --wo-sobre-acento: #181026;
   --wo-acento-fundo: rgba(162, 139, 249, 0.14);
   --wo-acento-fundo-forte: rgba(162, 139, 249, 0.16);
   --wo-acento-borda: rgba(162, 139, 249, 0.5);
   --wo-acento-borda-forte: rgba(162, 139, 249, 0.6);
-  --wo-acento-marca: #7c3aed;
-
-  /* Situação: disponível, em desenvolvimento, planejado, erro, informação */
-  --wo-sucesso: #4ade80;
-  --wo-sucesso-ponto: #22c55e;
   --wo-sucesso-fundo: rgba(34, 197, 94, 0.12);
-  --wo-alerta: #fbbf24;
-  --wo-alerta-ponto: #f59e0b;
-  --wo-alerta-fundo: rgba(245, 158, 11, 0.12);
-  --wo-erro: #f87171;
+  --wo-sucesso-ponto: #22c55e;
   --wo-erro-fundo: rgba(239, 68, 68, 0.08);
   --wo-erro-fundo-forte: rgba(239, 68, 68, 0.12);
   --wo-erro-borda: rgba(239, 68, 68, 0.4);
-  --wo-info: #7dd3fc;
-  --wo-info-fundo: rgba(56, 189, 248, 0.12);
-  --wo-neutro-fundo: rgba(148, 163, 184, 0.14);
+}
 
-  /* Tipografia */
-  --wo-fonte: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --wo-mono: 'Space Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
-  --wo-h1: clamp(38px, 4.6vw, 66px);
-  --wo-h2: clamp(30px, 3.9vw, 56px);
-  --wo-h2-medio: clamp(28px, 3.2vw, 46px);
-  --wo-h2-menor: clamp(26px, 2.9vw, 40px);
-  --wo-h3-painel: clamp(24px, 2.4vw, 32px);
+/* Legado: nomes do site anterior que o CSS de hoje ainda usa. Cada um aponta para o valor novo
+   mais próximo, então as páginas seguem renderizando até serem refeitas. Não use estes nomes em
+   CSS novo. A Tarefa 12 do plano apaga este bloco. */
+:root {
+  /* Fundos */
+  --wo-faixa: var(--wo-fundo-2);
+  --wo-superficie-2: var(--wo-fundo-2);
+  --wo-superficie-3: var(--wo-fundo-2);
+  /* Texto */
+  --wo-texto-4: var(--wo-texto-3);
+  /* Borda de campo e de caixa de marcar: 0,5 de tinta dá 3,4:1 sobre o branco e 3,3:1 sobre o
+     papel, acima dos 3:1 da WCAG 1.4.11. */
+  --wo-borda-campo: rgb(22 19 15 / 0.5);
+  /* Acento */
+  --wo-acento-marca: var(--wo-violeta);
+  --wo-acento-fundo: rgb(124 58 237 / 0.1);
+  --wo-acento-fundo-forte: rgb(124 58 237 / 0.14);
+  --wo-acento-borda: rgb(124 58 237 / 0.5);
+  --wo-acento-borda-forte: rgb(124 58 237 / 0.6);
+  /* Situação */
+  --wo-sucesso-ponto: var(--wo-sucesso);
+  --wo-sucesso-fundo: rgb(34 197 94 / 0.12);
+  --wo-alerta-fundo: rgb(245 158 11 / 0.12);
+  --wo-erro-fundo: rgb(239 68 68 / 0.08);
+  --wo-erro-fundo-forte: rgb(239 68 68 / 0.12);
+  --wo-erro-borda: rgb(239 68 68 / 0.4);
+  --wo-info-fundo: rgb(56 189 248 / 0.12);
+  --wo-neutro-fundo: rgb(148 163 184 / 0.14);
+  /* Tipografia: o texto mono virou Inter e os títulos de seção ganharam um tamanho só */
+  --wo-mono: var(--wo-fonte);
+  --wo-h2-medio: var(--wo-h2);
+  --wo-h2-menor: var(--wo-h2);
+  --wo-h3-painel: var(--wo-h3-linha);
+  /* Raios: o novo visual usa um raio só */
+  --wo-raio-xs: var(--wo-raio);
+  --wo-raio-campo: var(--wo-raio);
+  --wo-raio-btn: var(--wo-raio);
+  --wo-raio-sm: var(--wo-raio);
+  --wo-raio-md: var(--wo-raio);
+  --wo-raio-painel: var(--wo-raio);
+  --wo-raio-lg: var(--wo-raio);
+  --wo-raio-xl: var(--wo-raio);
+  /* Sombras e espaço */
+  --wo-sombra-btn: 0 1px 0 rgb(255 255 255 / 0.3) inset, 0 4px 20px -12px rgb(124 58 237 / 0.35);
+  --wo-sombra-card: var(--wo-sombra-cartao);
+  --wo-secao-menor: calc(var(--wo-secao) / 2);
+}
 
-  /* Raios */
-  --wo-raio-xs: 6px;
-  --wo-raio-campo: 8px;
-  --wo-raio-btn: 9px;
-  --wo-raio-sm: 12px;
-  --wo-raio-md: 18px;
-  --wo-raio-painel: 20px;
-  --wo-raio-lg: 22px;
-  --wo-raio-xl: 24px;
-  --wo-raio-pilula: 999px;
-
-  /* Sombras */
-  --wo-sombra-btn: 0 1px 0 rgba(255, 255, 255, 0.3) inset, 0 4px 20px -12px rgba(162, 139, 249, 0.35);
-  --wo-sombra-card: 0 24px 60px -20px rgba(0, 0, 0, 0.7);
-
-  /* Layout */
-  --wo-conteiner: 1328px;
-  --wo-margem: clamp(22px, 3.4vw, 48px);
-  --wo-secao: clamp(65px, 7.8vw, 112px);
-  --wo-secao-menor: clamp(48px, 5.6vw, 80px);
-  --wo-topo-altura: clamp(70px, 6.25vw, 90px);
-  --wo-alvo: 44px;
-
-  /* Movimento: só transição curta de estado. O site não tem animação contínua. */
-  --wo-transicao: 160ms ease;
+/* Estes dois apontam para um semântico que muda na faixa escura. Um var() é trocado onde a
+   propriedade é declarada, então precisam ser declarados de novo dentro de .wo-noite. */
+.wo-noite {
+  --wo-faixa: var(--wo-fundo-2);
+  --wo-texto-4: var(--wo-texto-3);
 }

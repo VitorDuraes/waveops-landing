@@ -1,39 +1,23 @@
-/* WaveOps · base do site institucional: fontes, reset, tipografia, foco, contêiner e seção.
-   Depende de tokens.css. */
+/* WaveOps · base do site institucional: fontes, reset, tipografia, foco, contêiner, seção,
+   faixa escura e grade editorial. Depende de tokens.css. */
 
-/* Hanken Grotesk é fonte VARIÁVEL (tem fvar e gvar): um arquivo por subconjunto cobre
-   400 a 700. hanken-variavel-* são cópias dos arquivos hankengrotesk-400-* com nome
-   neutro, que a página antiga continua usando. */
+/* Geist (títulos) e Inter (texto) são fontes VARIÁVEIS (têm fvar e gvar): um arquivo por família
+   cobre 400 a 700. Só o recorte latino, que cobre o português inteiro. Licença OFL em
+   assets/fonts/OFL-geist.txt e OFL-inter.txt. Para baixar de novo: node dev/site/fontes.mjs. */
 @font-face {
-  font-family: 'Hanken Grotesk';
+  font-family: 'Geist';
   font-style: normal;
   font-weight: 400 700;
   font-display: swap;
-  src: url('/assets/fonts/hanken-variavel-latin-ext.woff2') format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-@font-face {
-  font-family: 'Hanken Grotesk';
-  font-style: normal;
-  font-weight: 400 700;
-  font-display: swap;
-  src: url('/assets/fonts/hanken-variavel-latin.woff2') format('woff2');
+  src: url('/assets/fonts/geist-variavel-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
-  font-family: 'Space Mono';
+  font-family: 'Inter';
   font-style: normal;
-  font-weight: 400;
+  font-weight: 400 700;
   font-display: swap;
-  src: url('/assets/fonts/spacemono-400-normal-latin-ext.woff2') format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-@font-face {
-  font-family: 'Space Mono';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('/assets/fonts/spacemono-400-normal-latin.woff2') format('woff2');
+  src: url('/assets/fonts/inter-variavel-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
@@ -43,10 +27,12 @@
   box-sizing: border-box;
 }
 
+/* Com o topo fixo (spec 5.5), âncora e foco não podem parar embaixo dele. Fica sempre ligado:
+   a rolagem até a âncora acontece antes do JavaScript. */
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  scroll-padding-top: 16px;
+  scroll-padding-top: calc(var(--wo-topo-altura) + 16px);
 }
 
 body {
@@ -56,7 +42,7 @@ body {
   color: var(--wo-texto);
   font-family: var(--wo-fonte);
   font-size: 16px;
-  line-height: 1.6;
+  line-height: 1.625;
   overflow-x: clip;
   -webkit-font-smoothing: antialiased;
 }
@@ -99,12 +85,15 @@ a {
   text-underline-offset: 3px;
 }
 
+/* --wo-acento-hover é o hover do botão principal (violeta forte nos dois contextos), baixo
+   demais para texto sobre o escuro. O link passa para a cor de texto do contexto. */
 a:hover {
-  color: var(--wo-acento-hover);
+  color: var(--wo-texto);
 }
 
+/* Anel de 2 px em --wo-acento: 5,4:1 sobre o papel e 3,5:1 sobre a noite. */
 :focus-visible {
-  outline: 2px solid var(--wo-acento-texto);
+  outline: 2px solid var(--wo-acento);
   outline-offset: 2px;
 }
 
@@ -184,12 +173,50 @@ main:focus {
   border-bottom: 1px solid var(--wo-borda);
 }
 
-/* Títulos de seção */
+/* Faixa escura: dentro dela os semânticos de tokens.css trocam de valor. Hero, aberturas,
+   contato, chamada final e rodapé usam esta classe. */
+.wo-noite {
+  background: var(--wo-fundo);
+  color: var(--wo-texto);
+  color-scheme: dark;
+}
+
+/* Grade editorial (spec 5.3): 12 colunas com vão de 48 px, título nas colunas 1 a 5 e conteúdo
+   nas colunas 6 a 12. Abaixo de 1024 px, uma coluna. Toda seção nova usa esta grade. */
+.wo-editorial {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 48px;
+}
+
+@media (min-width: 1024px) {
+  .wo-editorial {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+
+  .wo-editorial__cabeca {
+    grid-column: 1 / span 5;
+  }
+
+  .wo-editorial__corpo {
+    grid-column: 6 / span 7;
+  }
+}
+
+/* Títulos (spec 5.2): Geist, peso 600, entreletra -0,035em, altura de linha 1,05. O tamanho
+   vem das classes. */
+h1,
+h2,
+.wo-h1,
+.wo-h2 {
+  font-family: var(--wo-fonte-titulo);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+}
+
 .wo-h1 {
   font-size: var(--wo-h1);
-  font-weight: 500;
-  line-height: 1.06;
-  letter-spacing: -0.055em;
   text-wrap: balance;
 }
 
@@ -197,9 +224,6 @@ main:focus {
   margin-top: 16px;
   max-width: 900px;
   font-size: var(--wo-h2);
-  font-weight: 500;
-  line-height: 1.12;
-  letter-spacing: -0.045em;
   text-wrap: balance;
 }
 
@@ -211,8 +235,6 @@ main:focus {
 .wo-h2--menor {
   margin-top: 14px;
   font-size: var(--wo-h2-menor);
-  line-height: 1.15;
-  letter-spacing: -0.04em;
 }
 
 .wo-linha {

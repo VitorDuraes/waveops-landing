@@ -358,7 +358,7 @@ A Tarefa 2 entregou o palco em cartão. Esta tarefa troca o layout pelo palco de
 - `assets/site/lib/palco.js`:
   - Ficam `progressoNoTrecho` e `passoPorProgresso`, sem mudança.
   - `estadoFixo(blocos, alturaJanela, totais)` passa a receber os capítulos e devolve `{ ativa: -1, passo: 0 }` quando nenhum capítulo passou da linha: antes do primeiro capítulo, nenhuma cena aparece.
-  - Saem `MIDIA_FIXO` e `passoLocal`. Entram `export const MIDIA_PALCO = '(min-height: 560px)'`, `export const CENA_DESKTOP = { largura: 720, altura: 480 }`, `export const CENA_CELULAR = { largura: 350, altura: 420 }` e `export function escalaDaCena(area, cena): number`, igual a `Math.min(1, area.largura / cena.largura, area.altura / cena.altura)`.
+  - Saem `MIDIA_FIXO` e `passoLocal`. Entram `export const MIDIA_PALCO = '(min-height: 560px)'`, `export const CENA_DESKTOP = { largura: 720, altura: 480 }`, `export const CENA_CELULAR = { largura: 350, altura: 420 }` (420 virou 492 no ajuste do celular de 16/10, commit `6294f4f`) e `export function escalaDaCena(area, cena): number`, igual a `Math.min(1, area.largura / cena.largura, area.altura / cena.altura)`.
 - `assets/site/paginas/home.js`, `iniciarPalco`: palco ligado com movimento liberado e `MIDIA_PALCO`; senão, desligado. A cada quadro mede a área útil (desktop: colunas 6 a 12, do topo fixo mais 32 px até 32 px do fim da janela; celular: do topo fixo mais 16 px até 16 px acima do painel ativo), calcula `escalaDaCena` com a cena base do layout e escreve `--wo-palco-escala` na seção. Com um capítulo ativo, marca `data-capitulo` no `.wo-home-fundo`.
 - Tokens novos ou mudados em `tokens.css`: `--wo-palco-trecho: 130vh` (era 70vh), `--wo-palco-abertura: 70vh`, `--wo-palco-transicao: 240ms` e `--wo-sombra-palco` (a sombra que a Tarefa 2 deixou literal em `home.css`).
 - Marcação:
@@ -765,7 +765,7 @@ const TOTAL = 5;
 - Modificar: `index.html`, `assets/site/paginas/home.css`, `tests/site/unit/palco.test.mjs`, `tests/site/e2e/palco.spec.ts`
 
 **Interfaces:**
-- Consome o contrato de marcação, o estilo e as peças da cena 1 no palco de fundo (Tarefa 2R): cartões claros, fios de luz violeta com brilho, título e aviso num canto, base de 720 × 480 no desktop e 350 × 420 no celular. Peças que as cenas repetem (cartão, fio, etiqueta, barra) ficam num bloco comum de `home.css`, não uma vez por cena.
+- Consome o contrato de marcação, o estilo e as peças da cena 1 no palco de fundo (Tarefa 2R): cartões claros, fios de luz violeta com brilho, título e aviso num canto, base de 720 × 480 no desktop e 350 × 492 no celular, onde os cartões ficam a 80% da largura, em zigue-zague, ligados por fios curvos (ajuste do celular aprovado pelo Vitor em 16/10, commit `6294f4f`). Peças que as cenas repetem (cartão, fio, etiqueta, barra) ficam num bloco comum de `home.css`, não uma vez por cena.
 - Cada cena nova passa no teste "a cena ativa cabe na área útil" da Tarefa 2R, nas quatro janelas.
 
 - [ ] **Passo 1: Testes.** Em `palco.test.mjs`, toda cena passa a exigir `assert.deepEqual(passosDe(cena), [1, 2, 3, 4, 5, 6], cena)`. Em `palco.spec.ts`, caso "desktop: as cinco cenas se sucedem na ordem": para cada frente, `rolarProgresso(frente, 1)` deixa aquela cena com `data-ativa` e 6 peças montadas.

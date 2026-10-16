@@ -15,7 +15,7 @@
 | Data | 15/10/2026 |
 | Decisões | Vitor, 15/10/2026: desenho, spec, copy da seção 8 e palco das cinco frentes (opção A) |
 | Branch | `feat/site-novo-visual`, no worktree `.claude/worktrees/feat+site-novo-visual` |
-| Estimativa | Cerca de 20 h de execução, mais as duas esperas de aprovação |
+| Estimativa | Cerca de 24 h de execução, mais as duas esperas de aprovação (a troca para o palco de fundo, em 16/10, somou a Tarefa 2R) |
 
 ## Restrições globais
 
@@ -43,11 +43,11 @@ Valem para toda tarefa, mesmo quando ela não repete.
 
 Cinco situações que a spec implica e que são fáceis de quebrar sem ninguém ver. Cada uma tem teste na tarefa indicada.
 
-1. **Desktop de tela baixa ou zoom de 200%.** Em 1280 × 650 o palco e a última peça cabem na janela; abaixo de 1024 px de largura ou de 600 px de altura ele vira cena embaixo do texto. Tarefa 2.
-2. **Recarregar ou voltar no meio da Home.** Com a rolagem restaurada, palco e topo nascem no estado certo, sem esperar a pessoa rolar. Tarefas 2 e 3.
+1. **Tela pequena, baixa ou com zoom alto.** A cena ativa cabe inteira na área útil, sem ficar sob o topo nem sob o painel, de 360 × 640 a 1440 × 900; com menos de 560 px de altura, o palco desliga. Tarefa 2R.
+2. **Recarregar ou voltar no meio da Home.** Com a rolagem restaurada, palco e topo nascem no estado certo, sem esperar a pessoa rolar. Tarefas 2R e 3.
 3. **Teclado com o topo fixo.** Foco e âncora nunca param embaixo do topo (WCAG 2.4.11), e "Pular para o conteúdo" aparece por cima dele. Tarefa 3.
 4. **Botão flutuante cobrindo alvo.** Em 360 px ele não cobre o envio da lista de interesse da Plataforma nem os links do fim do rodapé. Tarefa 3.
-5. **Preferência de movimento mudando com a página aberta.** O palco desliga e mostra tudo montado; o vídeo pausa e o botão some. Tarefas 2 e 5.
+5. **Preferência de movimento mudando com a página aberta.** O palco desliga e mostra tudo montado; o vídeo pausa e o botão some. Tarefas 2R e 5.
 
 ## Ordem e portões
 
@@ -56,9 +56,10 @@ As tarefas rodam na ordem numérica, uma por vez, porque dividem `index.html` e 
 | Tarefa | Depende de | Espera o Portão A? |
 |---|---|---|
 | 1. Fundação visual | nada | não |
-| 2. Palco com a cena 1 | 1 | não (é ela que abre o portão) |
+| 2. Palco em cartão com a cena 1 (feita; substituída pela 2R) | 1 | não |
 | 3. Parciais, topo fixo, WhatsApp flutuante e 404 | 1 | não |
 | 4. Vídeo do hero | nada | não |
+| 2R. Palco de fundo em tela cheia com a cena 1 | 1, 2 e 4 | não (é ela que reabre o portão) |
 | 5. Home | 1 a 4 | não |
 | 6. Projetos sob medida e rodapé das frentes | 3, 5 | não |
 | 7. Soluções | 6 | não |
@@ -69,7 +70,7 @@ As tarefas rodam na ordem numérica, uma por vez, porque dividem `index.html` e 
 | 12. Textos fora das páginas, limpeza e documentação | 2 a 11 | sim |
 | 13. Verificação final, revisão e PR | todas | sim |
 
-- **Portão A**, depois da Tarefa 2: o Vitor aprova a cena 1. Só a 11 espera.
+- **Portão A**, depois da Tarefa 2R: o Vitor aprova a cena 1 no palco de fundo. Só a 11 espera. Ordem de execução desde 16/10: 1, 2, 4, 2R, 3, 5 e as seguintes.
 - **Portão B**, na Tarefa 13: o Vitor confere o Deploy Preview e o iPhone antes do merge.
 
 ## Comandos
@@ -339,6 +340,89 @@ test('a Home tem as cinco cenas na ordem das frentes, com passos contínuos e av
 
 - [ ] **Portão A.** Mandar ao Vitor as 12 capturas e o vídeo. As Tarefas 3 a 10 seguem sem esperar. A 11 só começa com o OK, e ajuste pedido na cena 1 entra antes dela.
 
+**Situação em 16/10/2026:** feita (commit `234d0c9`) e substituída pela Tarefa 2R. O Vitor viu a cena 1 em cartão e trocou para o palco de fundo em tela cheia (D12 revista).
+
+---
+
+### Tarefa 2R: Palco de fundo em tela cheia, com a cena 1 (reabre o Portão A)
+
+**Estimativa:** 3,5 h. **Depende de:** 1, 2 e 4. **Leia antes:** spec 6.3, 7.1, 8.1, 8.2 e a seção 13 inteira (revista em 16/10).
+
+A Tarefa 2 entregou o palco em cartão. Esta tarefa troca o layout pelo palco de fundo e reaproveita o motor, os textos da cena 1 e os testes. A correção pendente da revisão da Tarefa 2 (a cena da última frente saindo do sticky) deixa de existir, porque as cenas passam a ser fixas na tela.
+
+**Arquivos:**
+- Modificar: `index.html`, `assets/site/tokens.css`, `assets/site/lib/palco.js`, `assets/site/paginas/home.js`, `assets/site/paginas/home.css`, `tests/site/unit/palco.test.mjs`, `tests/site/e2e/palco.spec.ts`, `tests/site/e2e/sem-js.spec.ts`, `tests/site/qa/palco.mjs`
+
+**Interfaces:**
+- Consome da Tarefa 4: `/assets/site/video/onda-poster.webp`.
+- `assets/site/lib/palco.js`:
+  - Ficam `progressoNoTrecho` e `passoPorProgresso`, sem mudança.
+  - `estadoFixo(blocos, alturaJanela, totais)` passa a receber os capítulos e devolve `{ ativa: -1, passo: 0 }` quando nenhum capítulo passou da linha: antes do primeiro capítulo, nenhuma cena aparece.
+  - Saem `MIDIA_FIXO` e `passoLocal`. Entram `export const MIDIA_PALCO = '(min-height: 560px)'`, `export const CENA_DESKTOP = { largura: 720, altura: 480 }`, `export const CENA_CELULAR = { largura: 350, altura: 420 }` e `export function escalaDaCena(area, cena): number`, igual a `Math.min(1, area.largura / cena.largura, area.altura / cena.altura)`.
+- `assets/site/paginas/home.js`, `iniciarPalco`: palco ligado com movimento liberado e `MIDIA_PALCO`; senão, desligado. A cada quadro mede a área útil (desktop: colunas 6 a 12, do topo fixo mais 32 px até 32 px do fim da janela; celular: do topo fixo mais 16 px até 16 px acima do painel ativo), calcula `escalaDaCena` com a cena base do layout e escreve `--wo-palco-escala` na seção. Com um capítulo ativo, marca `data-capitulo` no `.wo-home-fundo`.
+- Tokens novos ou mudados em `tokens.css`: `--wo-palco-trecho: 130vh` (era 70vh), `--wo-palco-abertura: 70vh`, `--wo-palco-transicao: 240ms` e `--wo-sombra-palco` (a sombra que a Tarefa 2 deixou literal em `home.css`).
+- Marcação:
+
+```html
+<main id="conteudo" tabindex="-1">
+  <div class="wo-home-fundo" aria-hidden="true">
+    <img class="wo-home-fundo__poster" src="/assets/site/video/onda-poster.webp" alt="" width="1920" height="1080" fetchpriority="high" />
+    <!-- a Tarefa 5 acrescenta o <video> aqui -->
+  </div>
+  <div class="wo-home-escuro" data-faixa-escura>
+    <!-- hero de hoje; a Tarefa 5 refaz -->
+    <section class="wo-home-frentes" id="frentes" aria-labelledby="frentes-titulo" data-palco>
+      <div class="wo-home-frentes__abertura"><!-- h2 "Cinco frentes.", texto e link de 8.2 --></div>
+      <div class="wo-home-capitulo" data-frente="atendimento">
+        <div class="wo-home-painel"><!-- número, h3, frase curta e etiquetas de 8.1 --></div>
+        <figure class="wo-maquete wo-home-cena wo-home-cena--atendimento" data-cena="atendimento"><!-- figcaption e tela, como na Tarefa 2 --></figure>
+      </div>
+      <!-- o mesmo capítulo para agentes, dashboards, crms e saas, nesta ordem -->
+    </section>
+  </div>
+  <div class="wo-home-folha"><!-- Duas formas de começar e os blocos seguintes, com fundo opaco --></div>
+  <!-- parcial:cta-final -->
+</main>
+```
+
+- Estado escrito só pelo JavaScript: `data-palco-modo="fundo"` na seção (sem o atributo, palco desligado), `data-ativa` na cena e no capítulo ativos, `data-visivel` nas peças montadas, `data-capitulo` no `.wo-home-fundo` e `--wo-palco-escala` na seção.
+- CSS em `home.css`:
+  - `.wo-home-fundo`: `position: fixed; inset: 0; z-index: -1`, pôster com `object-fit: cover`, degradê de leitura; com `[data-capitulo]`, opacidade 0,35 em `--wo-palco-transicao`.
+  - Com `[data-palco-modo="fundo"]`: cada cena em `position: fixed` na área útil do layout, todas no mesmo lugar, com `transform: scale(var(--wo-palco-escala))` a partir do centro; cena sem `data-ativa` com `opacity: 0` e `pointer-events: none`. Capítulo com `min-height: var(--wo-palco-trecho)`; abertura com `min-height: var(--wo-palco-abertura)`.
+  - Painel: `rgb(10 10 10 / 0.72)`, `backdrop-filter` e `-webkit-backdrop-filter` com `blur(12px)`, borda `--wo-linha-noite`, raio `--wo-raio`. Desktop: colunas 1 a 5, `position: sticky` perto do topo. Celular: preso na parte de baixo da tela enquanto o capítulo passa.
+  - Cena no estilo da spec 13.3: cartões claros com `--wo-sombra-palco`, ligados por fios de luz violeta com brilho, sem a janela branca da versão em cartão; título e aviso "Ilustração" num canto, em texto claro.
+  - Palco desligado: cada capítulo é uma faixa escura com o painel e a cena montada, lado a lado a partir de 1024 px e empilhados abaixo disso.
+  - `.wo-home-folha`: fundo opaco (`--wo-fundo`), `position: relative`, `z-index: 1` e `--wo-sombra-folha`.
+  - Nenhum ancestral das cenas com `transform`, `filter` ou `contain`.
+- Correções menores da revisão da Tarefa 2 que entram aqui: `finish()` só em `CSSTransition`; escrever `data-visivel` só nas peças que mudaram; listeners de rolagem só com o palco ligado; comentários e títulos de teste com a geometria nova.
+
+- [ ] **Passo 1: Testes de unidade.** Em `palco.test.mjs`: saem os casos de `passoLocal` e `MIDIA_FIXO`. `estadoFixo(blocos(500), 900, totais)` passa a esperar `{ ativa: -1, passo: 0 }`; os outros dois casos de `estadoFixo` continuam. Entram `assert.equal(MIDIA_PALCO, '(min-height: 560px)')` e `escalaDaCena`: `escalaDaCena({ largura: 800, altura: 600 }, CENA_DESKTOP)` igual a 1, `escalaDaCena({ largura: 360, altura: 240 }, CENA_DESKTOP)` igual a 0,5 e `escalaDaCena({ largura: 350, altura: 210 }, CENA_CELULAR)` igual a 0,5. O teste de conteúdo continua.
+
+- [ ] **Passo 2: Testes de navegador.** `palco.spec.ts` reescrito com os ajudantes da Tarefa 2 (`quadro`, `rolarProgresso` sobre `[data-frente]`, `montadas`):
+
+| Projeto | Teste | Esperado |
+|---|---|---|
+| desktop e celular | antes do primeiro capítulo nenhuma cena aparece | na abertura: seção com `data-palco-modo="fundo"` e nenhum `[data-cena][data-ativa]` |
+| desktop e celular | a cena do capítulo da vez fica ativa e as outras não | `rolarProgresso(atendimento, 0.2)`: `atendimento` ativa, `agentes` não; `.wo-home-fundo` com `data-capitulo` |
+| desktop | os passos crescem ao descer e diminuem ao subir | progresso 0 dá `montadas` 1; 1 dá 6; de volta a 0,1 dá 1 |
+| desktop | rolar até o segundo capítulo troca a cena | `rolarProgresso(agentes, 0.2)`: `agentes` ativa, `atendimento` não |
+| desktop | o estado vale ao recarregar e ao voltar do histórico | os dois casos da Tarefa 2, sobre os capítulos |
+| em 1440 × 900, 1280 × 650, 390 × 844 e 360 × 640 | a cena ativa cabe na área útil | `rolarProgresso(atendimento, 1)`: a caixa do corpo da cena começa abaixo do fim do `.wo-topo`, termina acima do fim da janela, fica entre 0 e a largura da janela e não cruza a caixa do painel ativo |
+| desktop | a folha creme cobre o fundo depois do palco | rolado até "Duas formas de começar": `elementFromPoint` no centro da janela cai dentro de `.wo-home-folha` |
+| desktop | com menos de 560 px de altura o palco desliga | `setViewportSize({ width: 1280, height: 550 })`: seção sem `data-palco-modo` e toda peça com `opacity` 1 |
+| todos, com `reducedMotion: 'reduce'` | palco desligado e tudo montado | como na Tarefa 2 |
+| desktop | a preferência muda com a página aberta | como na Tarefa 2 |
+| desktop | o axe não acusa nada grave na seção | palco ligado com a cena 1 montada (esperando as transições terminarem) e palco desligado com `reduce`: nenhuma violação séria ou crítica em `[data-palco]` |
+
+  Em `sem-js.spec.ts`, o caso da Tarefa 2 continua: seção sem `data-palco-modo` e toda peça da cena 1 com `opacity` 1.
+
+- [ ] **Passo 3: Ver falhar.** `node --test tests/site/unit/palco.test.mjs` e `npx playwright test palco sem-js`.
+- [ ] **Passo 4: Implementar** o módulo, a marcação, os tokens e o CSS acima. A cena 1 mantém os textos de 13.2 e ganha o estilo novo. `node dev/site/build.mjs`.
+- [ ] **Passo 5: Ver passar.** Os testes dos passos 1 e 2 nos três projetos, `npx playwright test fumaca responsivo resiliencia`, `node --test tests/site/unit/peso.test.mjs` e o portão local.
+- [ ] **Passo 6: Material do Portão A.** `qa/palco.mjs` passa a capturar a janela inteira (fundo, painel e cena) em cada passo, em 1440 × 900 e em 390 × 844, e a gravar a rolagem pelo capítulo nos dois tamanhos (`.tmp-qa/palco/atendimento-rolagem-1440.webm` e `-390.webm`). Rodar para `atendimento` e olhar as capturas.
+- [ ] **Passo 7: Commit.** `git commit -m "feat(site): palco de fundo em tela cheia com a cena de atendimento"`.
+- [ ] **Portão A.** Mandar ao Vitor as capturas e os dois vídeos. A Tarefa 11 só começa com o OK.
+
 ---
 
 ### Tarefa 3: Parciais, topo fixo, WhatsApp flutuante e 404
@@ -355,7 +439,7 @@ test('a Home tem as cinco cenas na ordem das frentes, com passos contínuos e av
 - Sem JavaScript, a regra do `<noscript>` que já existe em `head.html` ganha `.wo-topo{position:relative;background:var(--wo-noite)}`: o topo entra no fluxo com fundo escuro, e o menu aberto do celular empurra o título em vez de cobri-lo.
 - `base.css` ganha `html { scroll-padding-bottom: 88px }`, para foco e rolagem até um alvo não pararem embaixo do botão flutuante.
 - Marcador `<!-- parcial:whatsapp-flutuante --><!-- /parcial:whatsapp-flutuante -->` no fim do `<main>` de toda página menos `contato/index.html`. O parcial é `<a class="wo-whatsapp-flutuante" href="https://wa.me/5534991775784?text=Ol%C3%A1%2C%20WaveOps.%20Vim%20pelo%20site." data-whatsapp="flutuante" aria-label="Falar no WhatsApp">` com o ícone SVG de hoje.
-- `data-faixa-escura` marca a primeira faixa escura de cada página: o hero da Home, a abertura das páginas internas e do 404, e o `<main>` do Contato.
+- `data-faixa-escura` marca a primeira faixa escura de cada página: na Home, o invólucro `.wo-home-escuro` que a Tarefa 2R criou (hero e palco); nas páginas internas e no 404, a abertura; no Contato, o `<main>`.
 - Logo (spec D14 e 5.4): nos parciais `topo` e `rodape`, o `<img>` do selo 3D sai e `.wo-marca__selo` vira o quadrado plano de 34 px, raio `--wo-raio`, `linear-gradient(150deg, var(--wo-marca-claro), var(--wo-marca-escuro))`, sombra `0 6px 18px -6px rgb(139 92 246 / 0.7), inset 0 0 0 1px rgb(139 92 246 / 0.3)`, com o símbolo branco de 23 px. "Wave" no peso normal; `.wo-marca__ops` em peso 700 e `--wo-acento-texto`.
 - Peças novas em `components.css`, usadas pelas Tarefas 5 a 10:
   - `.wo-btn--primario`: pílula em `--wo-acento`, texto `--wo-sobre-acento` 14 px peso 500, 40 px de altura (44 px abaixo de 768 px), hover em `--wo-acento-hover`.
@@ -443,24 +527,29 @@ test('a Home tem as cinco cenas na ordem das frentes, com passos contínuos e av
   - `export function deveTocar(estado): boolean`, com `estado: { movimentoReduzido, economiaDeDados, carregada, naTela, abaVisivel, pausadoPeloUsuario }`, todos booleanos: verdadeiro só com `carregada`, `naTela` e `abaVisivel` verdadeiros e os outros três falsos.
 - Produz em `home.js`: `export function iniciarVideo(doc = document, janela = window): void`.
 - `globais.d.ts` declara `Navigator.connection?: { saveData?: boolean }`.
-- Marcação do hero:
+- Marcação do hero e do vídeo. O fundo fixo `.wo-home-fundo` e o invólucro `.wo-home-escuro` já existem desde a Tarefa 2R; esta tarefa só põe o `<video>` no fundo e refaz o hero dentro do invólucro:
 
 ```html
-<section class="wo-home-hero wo-noite" aria-labelledby="home-titulo" data-faixa-escura data-hero>
-  <div class="wo-home-hero__fundo" aria-hidden="true">
-    <img class="wo-home-hero__poster" src="/assets/site/video/onda-poster.webp" alt="" width="1920" height="1080" fetchpriority="high" />
-    <video class="wo-home-hero__video" muted playsinline loop preload="none" disablepictureinpicture tabindex="-1" data-hero-video></video>
-  </div>
-  <!-- conteúdo de 7.1 linha 1, com a copy de 8.2 -->
-  <button class="wo-home-hero__pausa" type="button" aria-pressed="false" aria-label="Pausar vídeo" hidden data-video-pausa><!-- ícones de pausar e tocar --></button>
-</section>
+<div class="wo-home-fundo" aria-hidden="true">
+  <img class="wo-home-fundo__poster" src="/assets/site/video/onda-poster.webp" alt="" width="1920" height="1080" fetchpriority="high" />
+  <video class="wo-home-fundo__video" muted playsinline loop preload="none" disablepictureinpicture tabindex="-1" data-hero-video></video>
+</div>
+<div class="wo-home-escuro" data-faixa-escura>
+  <section class="wo-home-hero" aria-labelledby="home-titulo" data-hero>
+    <!-- conteúdo de 7.1 linha 1, com a copy de 8.2 -->
+    <button class="wo-home-hero__pausa" type="button" aria-pressed="false" aria-label="Pausar vídeo" hidden data-video-pausa><!-- ícones de pausar e tocar --></button>
+  </section>
+  <!-- a seção #frentes da Tarefa 2R, sem mudança -->
+</div>
+<div class="wo-home-folha"><!-- blocos 3 a 6 de 7.1 --></div>
 ```
 
-- O fundo é `position: fixed` em `inset: 0` com `z-index: -1`, atrás da página; o degradê de 55% a 70% e a vinheta ficam no CSS do fundo. O conteúdo depois do hero é `.wo-folha`.
-- Duas armadilhas desse fundo: `.wo-home-hero` troca o fundo da `.wo-noite` por `transparent`, senão cobre o vídeo; e o `<html>` não pode ter fundo próprio, para o fundo do `body` ir para o canvas e não pintar por cima do `z-index: -1`.
+- O degradê de leitura de 55% a 70% e a vinheta ficam no CSS do fundo. A Tarefa 4 avisou que essa camada deixa o vídeo com 30% a 45% do brilho: calibre a força dela olhando o hero, sem baixar o contraste do texto.
+- Duas armadilhas desse fundo: o hero e o invólucro são transparentes (`.wo-noite` não entra neles, senão o fundo opaco cobre o vídeo; as cores claras do texto vêm de classes próprias); e o `<html>` não pode ter fundo próprio, para o fundo do `body` ir para o canvas e não pintar por cima do `z-index: -1`.
 - O hero da Home usa classes `wo-home-hero...` em `home.css`. O `.wo-hero` de `components.css` continua servindo Soluções, Plataforma e Projetos sob medida até as tarefas delas, e sai na Tarefa 12 se ficar sem uso.
+- O teste de vídeo que espera o `.webm` se apoia na ordem do `canPlayType` (WebM primeiro): o Chromium do Playwright desta máquina também toca o MP4.
 - Peças compartilhadas novas em `components.css`, que Projetos sob medida, Soluções, Contato e Demonstrações usam: colunas numeradas, linhas de definição, tabela de modelos, cartão claro sobre o escuro, selo de situação (forma e cor de 5.4) e etiqueta em caixa alta (5.2).
-- Conteúdo: linhas 1, 2, 4, 5 e 6 de 7.1, com a copy de 8.2 (title, description, Open Graph, Twitter, JSON-LD, etiquetas, frase, selo, título e texto do bloco 4). O `Organization` do JSON-LD ganha `"address": { "@type": "PostalAddress", "addressLocality": "Uberlândia", "addressRegion": "MG", "addressCountry": "BR" }` (D18), sem rua e sem afirmar atendimento presencial. O seletor e os painéis de resultado saem da Home; o conteúdo deles continua em Soluções. O bloco 5 mantém `id="solucoes"` e o 6, `id="como-contratar"`.
+- Conteúdo: linhas 1, 3, 4, 5 e 6 de 7.1 (a 2 é o palco da Tarefa 2R), com a copy de 8.2 (title, description, Open Graph, Twitter, JSON-LD, etiquetas, frase, selo, título e texto do bloco 4). O `Organization` do JSON-LD ganha `"address": { "@type": "PostalAddress", "addressLocality": "Uberlândia", "addressRegion": "MG", "addressCountry": "BR" }` (D18), sem rua e sem afirmar atendimento presencial. O seletor e os painéis de resultado saem da Home; o conteúdo deles continua em Soluções. O bloco 5 mantém `id="solucoes"` e o 6, `id="como-contratar"`.
 
 - [ ] **Passo 1: Testes.**
   - `video.test.mjs`, casos novos:
@@ -484,7 +573,7 @@ test('deveTocar exige página carregada, hero na tela, aba visível e nenhum blo
 });
 ```
 
-  Mais um caso: todo caminho de `VIDEOS` e o `src` do `.wo-home-hero__poster` de `index.html` existem em disco.
+  Mais um caso: todo caminho de `VIDEOS` e o `src` do `.wo-home-fundo__poster` de `index.html` existem em disco.
   - `conteudo.test.mjs`, caso "o JSON-LD da Home traz a cidade": o objeto `Organization` do `@graph` de `index.html` tem `address` igual a `{ "@type": "PostalAddress", "addressLocality": "Uberlândia", "addressRegion": "MG", "addressCountry": "BR" }`, e nenhum campo `streetAddress`.
   - `video.spec.ts`, nos projetos desktop e celular:
 
@@ -498,7 +587,7 @@ test('deveTocar exige página carregada, hero na tela, aba visível e nenhum blo
 | se `play()` falhar, fica o pôster | `page.addInitScript` troca `HTMLMediaElement.prototype.play` por uma promessa rejeitada: pôster visível, vídeo sem `data-tocando`, console sem erro |
 | com economia de dados, não toca | `page.addInitScript` define `navigator.connection` como `{ saveData: true }`: `currentSrc` vazio e botão escondido |
 | nada de vídeo antes do `load` | `page.addInitScript` embrulha o setter de `HTMLMediaElement.prototype.src` e anota se ele rodou antes do evento `load`: nunca rodou antes |
-| o fundo do hero aparece atrás do texto (só desktop) | com `reducedMotion: 'reduce'`: `background-color` de `html` e de `.wo-home-hero` é `rgba(0, 0, 0, 0)`; uma captura de 40 × 40 px colada na borda esquerda, a 40% da altura do hero (margem sem texto), decodificada num canvas de uma aba em branco, tem luminância média abaixo de 0,3 (o creme passa de 0,9) |
+| o fundo do hero aparece atrás do texto (só desktop) | com `reducedMotion: 'reduce'`: `background-color` de `html`, de `.wo-home-escuro` e de `.wo-home-hero` é `rgba(0, 0, 0, 0)`; uma captura de 40 × 40 px colada na borda esquerda, a 40% da altura do hero (margem sem texto), decodificada num canvas de uma aba em branco, tem luminância média abaixo de 0,3 (o creme passa de 0,9) |
 | nenhum erro no console | `console` do tipo erro e `pageerror` vazios em todos os casos acima |
 
   - `topo.spec.ts`: "seletor da Home troca o painel" vira "seletor da Plataforma troca o painel por teclado", em `/plataforma/`, com os botões de nome `/^Automações/` e `/^Visão geral/` e os painéis `#tela-automacoes` e `#tela-visao-geral`.
@@ -676,7 +765,8 @@ const TOTAL = 5;
 - Modificar: `index.html`, `assets/site/paginas/home.css`, `tests/site/unit/palco.test.mjs`, `tests/site/e2e/palco.spec.ts`
 
 **Interfaces:**
-- Consome o contrato de marcação e as peças da cena 1 (Tarefa 2). Peças que as cenas repetem (janela, cartão, fio, etiqueta, barra) ficam num bloco comum de `home.css`, não uma vez por cena.
+- Consome o contrato de marcação, o estilo e as peças da cena 1 no palco de fundo (Tarefa 2R): cartões claros, fios de luz violeta com brilho, título e aviso num canto, base de 720 × 480 no desktop e 350 × 420 no celular. Peças que as cenas repetem (cartão, fio, etiqueta, barra) ficam num bloco comum de `home.css`, não uma vez por cena.
+- Cada cena nova passa no teste "a cena ativa cabe na área útil" da Tarefa 2R, nas quatro janelas.
 
 - [ ] **Passo 1: Testes.** Em `palco.test.mjs`, toda cena passa a exigir `assert.deepEqual(passosDe(cena), [1, 2, 3, 4, 5, 6], cena)`. Em `palco.spec.ts`, caso "desktop: as cinco cenas se sucedem na ordem": para cada frente, `rolarProgresso(frente, 1)` deixa aquela cena com `data-ativa` e 6 peças montadas.
 - [ ] **Passo 2: Ver falhar.** `node --test tests/site/unit/palco.test.mjs` e `npx playwright test palco`.

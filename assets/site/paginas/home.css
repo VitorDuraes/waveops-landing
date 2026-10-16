@@ -188,6 +188,23 @@ body[data-pagina='home'] {
   box-shadow: var(--wo-sombra-folha);
 }
 
+/* ---------- Botão flutuante de WhatsApp sobre o palco (celular e tablet) ----------
+   Abaixo de 1024 px o painel de texto do palco fica preso embaixo da janela, no canto do botão
+   flutuante, que cobriria o fim das etiquetas. O controlador do palco sinaliza quando esse canto
+   está ocupado e libera o botão quando a folha o cobre. Sem JavaScript, com menos movimento ou
+   com a janela baixa, não há sinal e o botão permanece disponível. */
+@media (max-width: 1023.98px) {
+  .wo-home-fundo ~ .wo-whatsapp-flutuante {
+    transition: transform var(--wo-transicao), opacity var(--wo-palco-transicao) ease;
+  }
+
+  .wo-home-fundo ~ .wo-whatsapp-flutuante[data-palco-oculto] {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
 /* ---------- Cinco frentes: abertura, capítulos e painel (spec 13) ----------
    Uma abertura e cinco capítulos, cada um com o painel de texto e a cena da frente. Sem
    data-palco-modo (sem JavaScript, com menos movimento ou com a janela baixa), cada capítulo é

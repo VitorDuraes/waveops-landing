@@ -41,43 +41,55 @@ export function iniciarTopo(doc = document) {
   });
 }
 
+/** Altura da linha, em % da janela, em que o topo confere a cor do que passa por baixo dele. */
+const LINHA_DO_TOPO = 4;
+
 /**
- * Liga o topo fixo de dois estados (spec 5.5). O HTML nasce com o topo solto (position:
- * absolute) e data-estado="escuro", sobre a faixa escura de abertura. Aqui o topo passa a fixo
- * (data-topo="fixo" no <html>) e data-estado vira "claro" quando o primeiro [data-faixa-escura]
- * deixa de cobrir o fundo do topo.
+ * Liga o topo fixo de dois estados (spec 5.5). O HTML nasce com o topo solto e escuro. Aqui ele
+ * passa a fixo (data-topo="fixo" no <html>) e data-estado acompanha as faixas que marcam
+ * [data-faixa-escura] (abertura, chamada final e rodapé): "escuro" enquanto alguma passa pela
+ * linha do topo, "claro" quando nenhuma passa.
  *
- * O estado de partida sai de uma medida feita na hora, para quem recarrega no meio da página
- * não ver o topo escuro sobre o creme. Depois, um IntersectionObserver com rootMargin igual a
- * menos a altura do topo, no alto, acompanha a rolagem: a faixa só conta enquanto passa da linha
- * de baixo do topo. Sem IntersectionObserver ou sem faixa escura, nada muda: o topo continua solto
- * e escuro, o estado em que nunca aparece texto branco sobre creme.
+ * A linha fica a 4% da altura da janela, dentro do topo. Olhar a janela abaixo do topo não serve:
+ * uma faixa escura que só aparece embaixo deixaria texto branco sobre o creme. A raiz sem altura
+ * (o recurso do scrollspy) só avisa quando uma borda cruza a linha, e duas faixas coladas trocam no
+ * mesmo quadro. O estado de partida sai de uma medida na hora, para quem recarrega no meio da
+ * página. Sem IntersectionObserver ou sem faixa, nada muda: o topo fica solto e escuro.
  * @param {Document} doc
  * @param {Window & typeof globalThis} janela
  */
 export function iniciarTopoFixo(doc = document, janela = window) {
   const topo = doc.querySelector('.wo-topo');
-  const faixa = doc.querySelector('[data-faixa-escura]');
-  if (!(topo instanceof HTMLElement) || !faixa || typeof janela.IntersectionObserver !== 'function') return;
+  const faixas = [...doc.querySelectorAll('[data-faixa-escura]')];
+  if (!(topo instanceof HTMLElement) || !faixas.length || typeof janela.IntersectionObserver !== 'function') return;
 
-  const altura = Math.round(topo.getBoundingClientRect().height);
   /** @param {boolean} sobreEscuro */
   const definir = (sobreEscuro) => {
     topo.dataset.estado = sobreEscuro ? 'escuro' : 'claro';
   };
 
-  const medida = faixa.getBoundingClientRect();
-  definir(medida.bottom > altura && medida.top < janela.innerHeight);
+  const linha = (LINHA_DO_TOPO / 100) * janela.innerHeight;
+  definir(
+    faixas.some((faixa) => {
+      const medida = faixa.getBoundingClientRect();
+      return medida.top <= linha && medida.bottom >= linha;
+    }),
+  );
   doc.documentElement.dataset.topo = 'fixo';
 
+  /** @type {Set<Element>} faixas que passam pela linha agora */
+  const passando = new Set();
   const observador = new janela.IntersectionObserver(
     (entradas) => {
-      const ultima = entradas[entradas.length - 1];
-      if (ultima) definir(ultima.isIntersecting);
+      for (const entrada of entradas) {
+        if (entrada.isIntersecting) passando.add(entrada.target);
+        else passando.delete(entrada.target);
+      }
+      definir(passando.size > 0);
     },
-    { rootMargin: `-${altura}px 0px 0px 0px` },
+    { rootMargin: `-${LINHA_DO_TOPO}% 0px -${100 - LINHA_DO_TOPO}% 0px` },
   );
-  observador.observe(faixa);
+  for (const faixa of faixas) observador.observe(faixa);
 }
 
 /**

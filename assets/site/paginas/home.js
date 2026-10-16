@@ -18,6 +18,7 @@
      data-ativa                no capítulo e na cena da vez
      data-visivel              em cada peça já montada
      data-capitulo             no fundo, com o nome do capítulo da vez
+     data-palco-oculto         no WhatsApp flutuante enquanto o painel ocupa o canto dele
    O CSS (paginas/home.css) só fixa e esconde as cenas quando a seção tem data-palco-modo: se
    este módulo falhar, nada some. As contas ficam em lib/palco.js. */
 import { MIDIA_PALCO, CENA_DESKTOP, CENA_CELULAR, estadoFixo, escalaDaCena } from '../lib/palco.js';
@@ -70,6 +71,8 @@ export function iniciarPalco(doc = document, janela = window) {
   const cenasProntas = /** @type {HTMLElement[]} */ (cenas);
   const paineisProntos = /** @type {HTMLElement[]} */ (paineis);
   const fundo = doc.querySelector('.wo-home-fundo');
+  const folha = doc.querySelector('.wo-home-folha');
+  const flutuante = doc.querySelector('.wo-whatsapp-flutuante');
   const pecas = cenasProntas.map((cena) => /** @type {HTMLElement[]} */ ([...cena.querySelectorAll('[data-passo]')]));
   const totais = pecas.map((lista) => Math.max(0, ...lista.map(passoDe)));
 
@@ -82,6 +85,7 @@ export function iniciarPalco(doc = document, janela = window) {
   let ativaEscrita = -1;
   let passosEscritos = cenasProntas.map(() => 0);
   let escalaEscrita = '';
+  let flutuanteOcultoEscrito = false;
   let acabouDeLigar = false;
   let pedido = 0;
 
@@ -109,8 +113,18 @@ export function iniciarPalco(doc = document, janela = window) {
     const base = midiaDesktop.matches ? CENA_DESKTOP : CENA_CELULAR;
     const escala = escalaDaCena({ largura: area.width, altura: Math.max(0, fimDaArea - area.top) }, base);
     const passos = totais.map((total, i) => (i < ativa ? total : i === ativa ? passo : 0));
+    // O último capítulo continua ativo depois do palco. A folha libera o botão quando cobre
+    // toda a área dele, usando a caixa real para respeitar o tamanho e a área segura do CSS.
+    const ocultarFlutuante = Boolean(
+      ativa >= 0 && !midiaDesktop.matches && folha && flutuante &&
+      folha.getBoundingClientRect().top > flutuante.getBoundingClientRect().top,
+    );
 
     // Depois as escritas, só do que mudou.
+    if (flutuante && ocultarFlutuante !== flutuanteOcultoEscrito) {
+      marcar(flutuante, 'data-palco-oculto', ocultarFlutuante);
+      flutuanteOcultoEscrito = ocultarFlutuante;
+    }
     const escalaTexto = String(Math.round(Math.max(0, escala) * 1000) / 1000);
     if (escalaTexto !== escalaEscrita) {
       secao.style.setProperty('--wo-palco-escala', escalaTexto);
@@ -198,11 +212,13 @@ export function iniciarPalco(doc = document, janela = window) {
     secao.removeAttribute('data-palco-modo');
     secao.style.removeProperty('--wo-palco-escala');
     fundo?.removeAttribute('data-capitulo');
+    flutuante?.removeAttribute('data-palco-oculto');
     for (const elemento of [...capitulos, ...cenasProntas]) elemento.removeAttribute('data-ativa');
     for (const lista of pecas) for (const peca of lista) peca.removeAttribute('data-visivel');
     ativaEscrita = -1;
     passosEscritos = cenasProntas.map(() => 0);
     escalaEscrita = '';
+    flutuanteOcultoEscrito = false;
   };
 
   const avaliar = () => {

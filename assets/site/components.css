@@ -1055,8 +1055,7 @@ html[data-topo='fixo'] .wo-topo {
   margin-top: 32px;
 }
 
-.wo-cta__lista li,
-.wo-cta__promessas li {
+.wo-cta__lista li {
   display: flex;
   align-items: center;
   gap: 11px;
@@ -1064,15 +1063,16 @@ html[data-topo='fixo'] .wo-topo {
 }
 
 .wo-cta__lista svg,
-.wo-cta__promessas svg {
+.wo-cta__promessa svg {
   width: 18px;
   height: 18px;
   flex-shrink: 0;
   color: var(--wo-acento-texto);
 }
 
-/* Quem responde (spec 14.1): avatar de 48 px, nome, cargo e as duas promessas aprovadas. Sem
-   foto até o Vitor mandar: o avatar mostra as iniciais sobre o violeta da marca. */
+/* Quem responde (spec 14.1): avatar de 48 px, nome, cargo e a promessa da primeira conversa. O prazo
+   de resposta já está nas garantias da esquerda, então não se repete aqui. Sem foto até o Vitor
+   mandar: o avatar mostra as iniciais sobre o violeta da marca. */
 .wo-cta__quem {
   display: flex;
   align-items: center;
@@ -1108,12 +1108,13 @@ html[data-topo='fixo'] .wo-topo {
   line-height: 1.45;
 }
 
-.wo-cta__promessas {
+.wo-cta__promessa {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  gap: 11px;
   margin-top: 20px;
   color: var(--wo-texto-2);
+  font-size: 14px;
 }
 
 .wo-cta__cartao-titulo {

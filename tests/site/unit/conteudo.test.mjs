@@ -92,9 +92,23 @@ test('maquete de interface sempre leva o aviso de ilustração', () => {
   }
 });
 
-test('toda página marca a primeira faixa escura, que decide o estado do topo', () => {
+// A página sem o miolo dos parciais carimbados (a chamada final e o rodapé também marcam faixa
+// escura, então o atributo deles não prova que a abertura da página marcou a dela).
+const semParciais = (html) => html.replace(/<!--\s*parcial:([a-z0-9-]+)[^>]*-->[\s\S]*?<!--\s*\/parcial:\1\s*-->/g, '');
+
+test('toda página marca a faixa escura de abertura, que decide o estado do topo', () => {
   for (const p of paginas) {
-    assert.match(ler(p.arquivo), /\sdata-faixa-escura(?=[\s>])/, `${p.arquivo}: sem data-faixa-escura`);
+    assert.match(semParciais(ler(p.arquivo)), /\sdata-faixa-escura(?=[\s>])/, `${p.arquivo}: a abertura não tem data-faixa-escura`);
+  }
+});
+
+test('a chamada final e o rodapé marcam a própria faixa escura', () => {
+  // O topo fica escuro sobre qualquer faixa escura, não só sobre a primeira (iniciarTopoFixo).
+  for (const [nome, tag] of [['cta-final', 'section'], ['rodape', 'footer']]) {
+    const parcial = ler(`dev/site/parciais/${nome}.html`);
+    const abertura = new RegExp(`^<${tag}\\b[^>]*>`).exec(parcial)?.[0] ?? '';
+    assert.match(abertura, /\sdata-faixa-escura(?=[\s>])/, `${nome}: o elemento de fundo escuro não tem data-faixa-escura`);
+    assert.match(abertura, /\bwo-noite\b/, `${nome}: a faixa marcada tem de ser a escura`);
   }
 });
 
@@ -127,11 +141,16 @@ test('a logo é a plana de antes do selo 3D', () => {
   }
 });
 
-test('a chamada final mostra quem responde', () => {
+test('a chamada final mostra quem responde, sem repetir a promessa do prazo', () => {
   const parcial = ler('dev/site/parciais/cta-final.html');
-  for (const texto of ['Vitor Duraes', 'Fundador da WaveOps', 'Primeira conversa sem custo e sem compromisso.', 'Resposta em até 1 dia útil.']) {
+  for (const texto of ['Vitor Duraes', 'Fundador da WaveOps', 'Primeira conversa sem custo e sem compromisso.', 'Resposta em até 1 dia útil']) {
     assert.ok(parcial.includes(texto), `cta-final sem "${texto}"`);
   }
+  // Cada promessa aparece uma vez: o prazo nas garantias da esquerda e a primeira conversa no cartão.
+  const cartao = parcial.slice(parcial.indexOf('wo-cartao-noite'));
+  assert.equal(parcial.split('Resposta em até 1 dia útil').length - 1, 1, 'o prazo aparece uma vez só');
+  assert.ok(!cartao.includes('Resposta em até 1 dia útil'), 'o cartão de quem responde não repete o prazo');
+  assert.ok(cartao.includes('Primeira conversa sem custo e sem compromisso.'), 'o cartão traz a primeira conversa');
   // Sem o link real da agenda, a opção não existe: nunca sai link morto ou provisório.
   assert.doesNotMatch(parcial, /calendly|cal\.com|calendar|agendar/i, 'agenda sem link real');
 });

@@ -184,3 +184,88 @@ test('sem IntersectionObserver o topo continua solto e escuro', async ({ page },
   await rolarPara(page, 1500);
   await expect(page.locator('.wo-topo')).toHaveAttribute('data-estado', 'escuro');
 });
+
+/* Topo escuro sobre qualquer faixa escura, não só a primeira (spec 5.5): a chamada final e o
+   rodapé também marcam data-faixa-escura. O estado é o da faixa que passa pela linha de dentro do
+   topo, então uma faixa escura que só aparece embaixo da janela não escurece o topo sobre creme.
+   Cada teste rola, espera o IntersectionObserver entregar e só então lê o estado: sem a espera,
+   "escuro" (o estado de partida) passaria antes de o observador ter feito qualquer coisa. */
+const alturaDaPagina = (page: Page) => page.evaluate(() => document.documentElement.scrollHeight);
+const estadoDoTopo = (page: Page) => page.locator('.wo-topo').getAttribute('data-estado');
+
+/** Dois quadros e uma folga: o tempo de o observador entregar o que a rolagem mudou. */
+const esperarOObservador = (page: Page) =>
+  page.evaluate(() => new Promise<void>((pronto) => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(pronto, 40)))));
+
+async function rolarEEsperar(page: Page, y: number) {
+  await rolarPara(page, y);
+  await esperarOObservador(page);
+}
+
+test.describe('topo escuro sobre a chamada final e o rodapé', () => {
+  test.beforeEach(({}, info) => {
+    test.skip(info.project.name === 'tablet', 'mesmo comportamento do desktop e do celular');
+  });
+
+  test('no Contato, rolado até o rodapé, o topo está escuro', async ({ page }) => {
+    await page.goto('/contato/');
+    await expect(page.locator('html')).toHaveAttribute('data-topo', 'fixo');
+    await rolarEEsperar(page, await alturaDaPagina(page));
+    expect(await estadoDoTopo(page)).toBe('escuro');
+  });
+
+  test('na Home, rolado até a chamada final, o topo está escuro', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('html')).toHaveAttribute('data-topo', 'fixo');
+    // A chamada final passa por baixo do topo: 40 px dentro dela, a linha do topo está na faixa escura.
+    const topoDaCta = await page.locator('.wo-cta').evaluate((cta) => Math.round(cta.getBoundingClientRect().top + window.scrollY));
+    await rolarEEsperar(page, topoDaCta + 40);
+    expect(await estadoDoTopo(page)).toBe('escuro');
+  });
+
+  test('em Soluções, rolado até o rodapé, o topo está escuro', async ({ page }) => {
+    await page.goto('/solucoes/');
+    await expect(page.locator('html')).toHaveAttribute('data-topo', 'fixo');
+    await rolarEEsperar(page, await alturaDaPagina(page));
+    expect(await estadoDoTopo(page)).toBe('escuro');
+  });
+
+  test('o topo continua claro enquanto a chamada final só aparece embaixo da janela', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('html')).toHaveAttribute('data-topo', 'fixo');
+    const topoDaCta = await page.locator('.wo-cta').evaluate((cta) => Math.round(cta.getBoundingClientRect().top + window.scrollY));
+    const altura = await page.evaluate(() => window.innerHeight);
+    // Com a chamada final a 60% da altura da janela, o topo ainda está sobre a folha creme.
+    await rolarEEsperar(page, topoDaCta - Math.round(0.6 * altura));
+    expect(await estadoDoTopo(page)).toBe('claro');
+  });
+
+  test('entre a chamada final e o rodapé o topo não pisca', async ({ page }, info) => {
+    test.skip(info.project.name !== 'celular', 'só no celular o rodapé é mais alto que a janela');
+    await page.goto('/solucoes/');
+    await expect(page.locator('html')).toHaveAttribute('data-topo', 'fixo');
+    const divisa = await page.locator('footer').evaluate((rodape) => Math.round(rodape.getBoundingClientRect().top + window.scrollY));
+    const estados = new Set<string | null>();
+    for (let y = divisa - 300; y <= divisa + 300; y += 12) {
+      await rolarEEsperar(page, y);
+      estados.add(await estadoDoTopo(page));
+    }
+    expect([...estados]).toEqual(['escuro']);
+  });
+});
+
+
+test('a faixa só muda o topo quando alcança a barra, em qualquer proporção da janela', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('data-topo', 'fixo');
+  const inicio = await page.locator('.wo-cta').evaluate((cta) => cta.getBoundingClientRect().top + scrollY);
+  for (const distancia of [100, 50, 20]) {
+    await rolarEEsperar(page, inicio - distancia);
+    expect(await estadoDoTopo(page), `chamada final a ${distancia} px do alto`).toBe(distancia > 33 ? 'claro' : 'escuro');
+  }
+  const largura = page.viewportSize()!.width;
+  await page.setViewportSize({ width: largura, height: 1200 });
+  const novoInicio = await page.locator('.wo-cta').evaluate((cta) => cta.getBoundingClientRect().top + scrollY);
+  await rolarEEsperar(page, novoInicio - 100);
+  expect(await estadoDoTopo(page), 'faixa abaixo da barra depois de redimensionar').toBe('claro');
+});

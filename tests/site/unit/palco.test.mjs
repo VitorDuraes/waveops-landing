@@ -1,10 +1,18 @@
-// Palco das cinco frentes da Home (spec 13): as contas de progresso, passo e frente ativa, e o
-// conteúdo das cenas no index.html (ordem das frentes, passos sem buraco, aviso de ilustração e
-// nada de moeda ou porcentagem).
+// Palco de fundo da Home (spec 13): as contas de progresso, passo, capítulo ativo e escala da
+// cena, e o conteúdo das cenas no index.html (ordem das frentes, passos sem buraco, aviso de
+// ilustração e nada de moeda ou porcentagem).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { MIDIA_FIXO, progressoNoTrecho, passoPorProgresso, estadoFixo, passoLocal } from '../../../assets/site/lib/palco.js';
+import {
+  MIDIA_PALCO,
+  CENA_DESKTOP,
+  CENA_CELULAR,
+  progressoNoTrecho,
+  passoPorProgresso,
+  estadoFixo,
+  escalaDaCena,
+} from '../../../assets/site/lib/palco.js';
 
 // Trecho do index.html que vai de data-palco ao </section> seguinte.
 const html = fs.readFileSync(new URL('../../../index.html', import.meta.url), 'utf8');
@@ -45,20 +53,22 @@ test('passoPorProgresso mostra o primeiro passo no início e o último no fim', 
   assert.deepEqual([0, -0.2, 0.5, 0.51, 1, 1.4].map((p) => passoPorProgresso(p, 6)), [1, 1, 3, 4, 6, 6]);
 });
 
-test('estadoFixo ativa a frente cujo topo passou da metade da janela', () => {
+test('estadoFixo ativa o capítulo cujo topo passou da metade da janela, e nenhum antes do primeiro', () => {
   const totais = [6, 6, 6, 6, 6];
   const blocos = (primeiro) => [0, 1, 2, 3, 4].map((i) => ({ topo: primeiro + i * 600, altura: 600 }));
-  assert.deepEqual(estadoFixo(blocos(500), 900, totais), { ativa: 0, passo: 1 });
+  assert.deepEqual(estadoFixo(blocos(500), 900, totais), { ativa: -1, passo: 0 });
   assert.deepEqual(estadoFixo(blocos(-375), 900, totais), { ativa: 1, passo: 3 });
   assert.deepEqual(estadoFixo(blocos(-2800), 900, totais), { ativa: 4, passo: 6 });
 });
 
-test('passoLocal monta a cena enquanto o topo dela sobe de 90% para 35% da janela', () => {
-  assert.deepEqual([1200, 900, 625, 350, -100].map((topo) => passoLocal({ topo }, 1000, 6)), [1, 1, 3, 6, 6]);
+test('o palco pede 560 px de altura', () => {
+  assert.equal(MIDIA_PALCO, '(min-height: 560px)');
 });
 
-test('o palco fixo pede 1024 px de largura e 600 px de altura', () => {
-  assert.equal(MIDIA_FIXO, '(min-width: 1024px) and (min-height: 600px)');
+test('escalaDaCena encolhe a cena até caber na área útil, sem nunca aumentar', () => {
+  assert.equal(escalaDaCena({ largura: 800, altura: 600 }, CENA_DESKTOP), 1);
+  assert.equal(escalaDaCena({ largura: 360, altura: 240 }, CENA_DESKTOP), 0.5);
+  assert.equal(escalaDaCena({ largura: 350, altura: 210 }, CENA_CELULAR), 0.5);
 });
 
 test('a Home tem as cinco cenas na ordem das frentes, com passos contínuos e aviso', () => {

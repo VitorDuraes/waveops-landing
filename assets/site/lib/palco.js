@@ -1,15 +1,20 @@
 // @ts-check
-/* WaveOps · contas do palco das cinco frentes da Home (spec 13). Funções puras, sem DOM:
-   recebem as medidas que o módulo da página lê com getBoundingClientRect e devolvem qual cena
-   está ativa e até qual passo ela está montada. Testadas em tests/site/unit/palco.test.mjs. */
+/* WaveOps · contas do palco de fundo da Home (spec 13). Funções puras, sem DOM: recebem as
+   medidas que o módulo da página lê com getBoundingClientRect e devolvem qual capítulo está
+   ativo, até qual passo a cena dele está montada e quanto a cena encolhe para caber na tela.
+   Testadas em tests/site/unit/palco.test.mjs. */
 
-/** Janela em que o palco fica fixo ao lado da lista. Abaixo de 600 px de altura o palco não
-    cabe, e cada cena passa a se montar embaixo do texto da sua frente (spec 13.3). */
-export const MIDIA_FIXO = '(min-width: 1024px) and (min-height: 600px)';
+/** Janela em que o palco liga. Abaixo de 560 px de altura a cena não cabe junto com o topo e o
+    painel, e cada capítulo vira uma faixa com a cena montada (spec 13.3). */
+export const MIDIA_PALCO = '(min-height: 560px)';
+
+/** Tamanho para o qual a cena é desenhada no desktop e no celular (spec 13.3). */
+export const CENA_DESKTOP = Object.freeze({ largura: 720, altura: 480 });
+export const CENA_CELULAR = Object.freeze({ largura: 350, altura: 420 });
 
 /**
  * Quanto do trecho entre `inicio` e `fim` o `valor` já percorreu, de 0 a 1. O trecho pode ser
- * decrescente (o topo de uma cena sobe na tela). Trecho vazio vale 1 a partir do início.
+ * decrescente (o topo de um capítulo sobe na tela). Trecho vazio vale 1 a partir do início.
  * @param {number} inicio
  * @param {number} fim
  * @param {number} valor
@@ -32,31 +37,31 @@ export function passoPorProgresso(progresso, total) {
 }
 
 /**
- * Palco fixo (desktop): a frente ativa é a última cujo topo passou da metade da janela, ou a
- * primeira. A cena dela se monta enquanto a metade da janela percorre os primeiros 75% do bloco.
- * @param {{ topo: number, altura: number }[]} blocos blocos de texto das frentes, em ordem
+ * O capítulo ativo é o último cujo topo passou da metade da janela. A cena dele se monta
+ * enquanto a metade da janela percorre os primeiros 75% do capítulo. Antes do primeiro
+ * capítulo, nenhum fica ativo e nenhuma cena aparece: `{ ativa: -1, passo: 0 }`.
+ * @param {{ topo: number, altura: number }[]} capitulos caixas dos capítulos, em ordem
  * @param {number} alturaJanela
  * @param {number[]} totais quantos passos tem cada cena
  * @returns {{ ativa: number, passo: number }}
  */
-export function estadoFixo(blocos, alturaJanela, totais) {
+export function estadoFixo(capitulos, alturaJanela, totais) {
   const linha = alturaJanela / 2;
-  let ativa = 0;
-  blocos.forEach((bloco, i) => {
-    if (bloco.topo <= linha) ativa = i;
+  let ativa = -1;
+  capitulos.forEach((capitulo, i) => {
+    if (capitulo.topo <= linha) ativa = i;
   });
-  const { topo, altura } = blocos[ativa];
+  if (ativa === -1) return { ativa, passo: 0 };
+  const { topo, altura } = capitulos[ativa];
   return { ativa, passo: passoPorProgresso(progressoNoTrecho(topo, topo + 0.75 * altura, linha), totais[ativa]) };
 }
 
 /**
- * Cena embaixo do texto (celular, tablet e desktop baixo): ela se monta enquanto o próprio topo
- * sobe de 90% para 35% da altura da janela.
- * @param {{ topo: number }} cena
- * @param {number} alturaJanela
- * @param {number} total
+ * Escala da cena para ela caber inteira na área útil. Nunca aumenta: no máximo 1.
+ * @param {{ largura: number, altura: number }} area
+ * @param {{ largura: number, altura: number }} cena
  * @returns {number}
  */
-export function passoLocal(cena, alturaJanela, total) {
-  return passoPorProgresso(progressoNoTrecho(0.9 * alturaJanela, 0.35 * alturaJanela, cena.topo), total);
+export function escalaDaCena(area, cena) {
+  return Math.min(1, area.largura / cena.largura, area.altura / cena.altura);
 }

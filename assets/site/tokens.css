@@ -73,9 +73,22 @@
   --wo-raio-pilula: 999px;
   --wo-sombra-cartao: 0 25px 50px -12px rgb(0 0 0 / 0.3);
   --wo-sombra-folha: 0 -24px 60px rgb(0 0 0 / 0.35);
-  /* Altura de rolagem que cada frente ocupa no palco da Home (spec 13). */
-  --wo-palco-trecho: 70vh;
   --wo-alvo: 44px;
+
+  /* Palco de fundo da Home (spec 13): altura de rolagem da abertura e de cada capítulo, troca de
+     cena e de peça, sombra dos cartões das cenas e fundo do painel de texto, que garante a
+     leitura sobre a onda. */
+  --wo-palco-abertura: 70vh;
+  --wo-palco-trecho: 130vh;
+  --wo-palco-transicao: 240ms;
+  --wo-sombra-palco: 0 24px 48px -24px rgb(22 19 15 / 0.25);
+  --wo-palco-painel: rgb(10 10 10 / 0.72);
+  /* Fundo do selo de sucesso nos cartões das cenas: o verde de --wo-sucesso a 10%. */
+  --wo-palco-ok: rgb(22 101 52 / 0.1);
+  /* Camada de leitura sobre o pôster e o vídeo da onda (spec 6.3): preto de 55% no alto a 70%
+     embaixo, mais a vinheta nas bordas. */
+  --wo-leitura-alto: rgb(0 0 0 / 0.55);
+  --wo-leitura-baixo: rgb(0 0 0 / 0.7);
 
   /* Movimento: transição curta de estado. As animações que se movem são o vídeo do hero e o
      palco das cinco frentes, e ambas desligam com prefers-reduced-motion. */

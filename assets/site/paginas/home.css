@@ -1,5 +1,5 @@
-/* WaveOps · peças que só a Home usa: painel "Operação conectada", faixa das quatro frentes e
-   a seção sob medida. Depende de tokens.css. */
+/* WaveOps · peças que só a Home usa: painel "Operação conectada", palco das cinco frentes e a
+   seção sob medida. Depende de tokens.css. */
 
 /* ---------- Operação conectada (hero) ---------- */
 .wo-operacao {
@@ -130,42 +130,409 @@
   font-size: 11.5px;
 }
 
-/* ---------- Frentes de engenharia ---------- */
-.wo-frentes {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 10px 22px;
-  margin-top: 26px;
+/* ---------- Cinco frentes: lista e palco (spec 13) ----------
+   Cada frente é um bloco de texto seguido da sua cena. Sem JavaScript ou com menos movimento,
+   cada cena aparece montada ao lado (desktop) ou embaixo (celular) da frente. O módulo
+   paginas/home.js escreve data-palco-modo na seção: "fixo" deixa a cena da vez parada ao lado
+   da lista; "local" monta cada cena embaixo do texto conforme ela entra na tela. */
+.wo-home-frentes__cabeca {
+  row-gap: 20px;
 }
 
-.wo-frentes__rotulo {
-  color: var(--wo-texto-3);
-  font-family: var(--wo-mono);
-  font-size: 11.5px;
-  letter-spacing: 0.08em;
+.wo-home-frentes__titulo {
+  margin-top: 0;
+}
+
+.wo-home-frentes__texto {
+  max-width: 560px;
+  color: var(--wo-tinta-2);
+}
+
+.wo-home-frentes__link {
+  margin-top: 8px;
+}
+
+.wo-home-palco {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 24px;
+  margin-top: 56px;
+}
+
+/* Lista editorial: primeira linha em tinta, demais em linha fina. */
+.wo-home-frente {
+  padding-top: 24px;
+  border-top: 1px solid var(--wo-linha);
+  color: var(--wo-tinta);
+}
+
+.wo-home-frente:first-child {
+  border-top-color: var(--wo-tinta);
+}
+
+.wo-home-frente__numero {
+  display: block;
+  color: var(--wo-violeta);
+  font-family: var(--wo-fonte-titulo);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.33;
+}
+
+.wo-home-frente__nome {
+  margin-top: 12px;
+  font-family: var(--wo-fonte-titulo);
+  font-size: var(--wo-h3-linha);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.wo-home-frente__frase {
+  max-width: 460px;
+  margin-top: 12px;
+  color: var(--wo-tinta-2);
+}
+
+.wo-home-frente__etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  color: var(--wo-tinta-3);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+/* Ponto médio entre as etiquetas, fora do que o leitor de tela lê. Fica no fim da etiqueta,
+   para a linha que quebra no celular não começar com o ponto. */
+.wo-home-frente__etiquetas li:not(:last-child)::after {
+  content: '·';
+  content: '·' / '';
+  margin: 0 8px;
+}
+
+/* A cena: janela branca com o cabeçalho (título e aviso) e a tela desenhada para 420 px de
+   altura, o que sobra na menor janela do modo fixo (1280 x 600). */
+.wo-home-cena {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin-bottom: 24px;
+  padding: 0;
+  border: 1px solid var(--wo-linha);
+  border-radius: var(--wo-raio);
+  background: var(--wo-branco);
+  box-shadow: 0 24px 48px -24px rgb(22 19 15 / 0.25);
+  overflow: hidden;
+  transition: opacity 240ms ease;
+}
+
+.wo-home-cena__cabeca {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px 10px 20px;
+  border-bottom: 1px solid var(--wo-linha);
+}
+
+.wo-home-cena__titulo {
+  color: var(--wo-tinta);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.43;
+}
+
+.wo-home-cena__cabeca .wo-maquete__aviso {
+  border-color: var(--wo-linha);
+}
+
+.wo-home-cena__tela {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  background-color: var(--wo-branco);
+  background-image: radial-gradient(var(--wo-linha) 1px, transparent 1.5px);
+  background-size: 16px 16px;
+}
+
+.wo-home-cena__fluxo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+/* Nó do fluxo, com as portas onde o fio encosta. */
+.wo-home-cena__no {
+  position: relative;
+  width: min(100%, 400px);
+  padding: 12px;
+  border: 1px solid var(--wo-linha);
+  border-radius: var(--wo-raio);
+  background: var(--wo-branco);
+}
+
+.wo-home-cena__no::before,
+.wo-home-cena__no::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  display: none;
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  border-radius: var(--wo-raio-pilula);
+  background: var(--wo-violeta);
+  box-shadow: 0 0 0 2px var(--wo-branco);
+}
+
+.wo-home-cena__no--entrada::before {
+  top: -4px;
+  display: block;
+}
+
+.wo-home-cena__no--saida::after {
+  bottom: -4px;
+  display: block;
+}
+
+.wo-home-cena__no-cabeca {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wo-home-cena__icone {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: var(--wo-raio-pilula);
+  color: var(--wo-branco);
+}
+
+.wo-home-cena__icone svg {
+  width: 14px;
+  height: 14px;
+}
+
+.wo-home-cena__icone--whatsapp {
+  background: var(--wo-whatsapp);
+}
+
+.wo-home-cena__icone--triagem {
+  background: var(--wo-violeta);
+}
+
+.wo-home-cena__icone--crm {
+  background: var(--wo-tinta);
+}
+
+.wo-home-cena__nome {
+  color: var(--wo-tinta);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.wo-home-cena__meta {
+  margin-left: auto;
+  color: var(--wo-tinta-3);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.wo-home-cena__balao {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 0 var(--wo-raio) var(--wo-raio) var(--wo-raio);
+  background: var(--wo-papel-2);
+  color: var(--wo-tinta);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.wo-home-cena__etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.wo-home-cena__etiqueta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border: 1px solid var(--wo-linha);
+  border-radius: var(--wo-raio-pilula);
+  color: var(--wo-tinta-2);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.wo-home-cena__etiqueta::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: var(--wo-raio-pilula);
+  background: var(--wo-violeta);
+}
+
+.wo-home-cena__etiqueta--alerta::before {
+  background: var(--wo-alerta);
+}
+
+.wo-home-cena__itens {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  margin-top: 8px;
+  color: var(--wo-tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.wo-home-cena__itens li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wo-home-cena__itens svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--wo-sucesso);
+}
+
+.wo-home-cena__ok {
+  color: var(--wo-sucesso);
+  font-weight: 500;
+}
+
+.wo-home-cena__rotulo {
+  color: var(--wo-tinta-3);
+}
+
+.wo-home-cena__valor {
+  color: var(--wo-tinta);
+  font-weight: 500;
+}
+
+/* Registro: painel encostado no pé da tela, como o log de uma execução. */
+.wo-home-cena__registro {
+  padding: 10px 20px 12px;
+  border-top: 1px solid var(--wo-linha);
+  background: var(--wo-branco);
+}
+
+.wo-home-cena__registro-titulo {
+  display: block;
+  color: var(--wo-tinta-3);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  line-height: 1.35;
   text-transform: uppercase;
 }
 
-.wo-frentes__lista {
-  display: flex;
-  flex: 1 1 520px;
-  flex-wrap: wrap;
-  gap: 4px 0;
-  min-width: 0;
-  color: var(--wo-texto-2);
-  font-size: 14.5px;
-  line-height: 1.7;
+.wo-home-cena__registro .wo-home-cena__itens {
+  margin-top: 6px;
 }
 
-.wo-frentes__lista li {
-  white-space: nowrap;
+.wo-home-cena__fio {
+  flex: none;
+  color: var(--wo-violeta);
 }
 
-.wo-frentes__lista li:not(:last-child)::after {
-  content: '/';
-  margin: 0 12px;
-  color: var(--wo-texto-4);
+/* pathLength="1" no path: o traço inteiro mede 1, e o stroke-dashoffset vai de 1 a 0. */
+.wo-home-cena__fio path {
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-dasharray: 1;
+  transition: stroke-dashoffset 240ms ease;
+}
+
+/* Montagem: a peça sem data-visivel some só com o palco ligado. Ela entra com opacidade e 8 px
+   de deslocamento; o fio se desenha pelo stroke-dashoffset, sem deslocamento. */
+.wo-home-cena [data-passo] {
+  transition: opacity 240ms ease, transform 240ms ease;
+}
+
+[data-palco-modo] [data-passo]:not([data-visivel]) {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+[data-palco-modo] .wo-home-cena__fio:not([data-visivel]) {
+  transform: none;
+}
+
+[data-palco-modo] .wo-home-cena__fio:not([data-visivel]) path {
+  stroke-dashoffset: 1;
+}
+
+/* A partir de 1024 px, a mesma grade de 12 colunas da cabeça editorial (base.css): lista nas
+   colunas 1 a 5 e cenas nas colunas 6 a 12, alinhadas com o texto da cabeça. Com 5fr e 7fr num
+   vão só, a cena ficaria 8 px fora da coluna 6. */
+@media (min-width: 1024px) {
+  .wo-home-palco {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 48px;
+    row-gap: 64px;
+  }
+
+  .wo-home-frente {
+    grid-column: 1 / span 5;
+  }
+
+  .wo-home-cena {
+    grid-column: 6 / span 7;
+    margin-bottom: 0;
+  }
+}
+
+/* Modo fixo: cada frente ocupa um trecho de rolagem, e as cinco cenas ficam empilhadas na
+   coluna da direita, paradas logo abaixo do topo. Só a cena da vez aparece. */
+[data-palco-modo='fixo'] .wo-home-palco {
+  row-gap: 0;
+}
+
+[data-palco-modo='fixo'] .wo-home-frente {
+  min-height: var(--wo-palco-trecho);
+}
+
+[data-palco-modo='fixo'] .wo-home-frente:not([data-ativa]),
+[data-palco-modo='fixo'] .wo-home-frente:not([data-ativa]) .wo-home-frente__frase {
+  color: var(--wo-tinta-3);
+}
+
+[data-palco-modo='fixo'] .wo-home-cena {
+  grid-column: 6 / span 7;
+  grid-row: 1 / span 5;
+  position: sticky;
+  top: calc(var(--wo-topo-altura) + 32px);
+  align-self: start;
+  height: min(560px, calc(100vh - var(--wo-topo-altura) - 64px));
+}
+
+[data-palco-modo='fixo'] .wo-home-cena:not([data-ativa]) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wo-home-cena,
+  .wo-home-cena [data-passo],
+  .wo-home-cena__fio path {
+    transition: none;
+  }
 }
 
 /* ---------- Sob medida na Home ---------- */

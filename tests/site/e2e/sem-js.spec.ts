@@ -13,6 +13,17 @@ test('Home sem JavaScript mostra os cinco resultados e esconde os botões do sel
   await expect(page.locator('[data-opcoes]')).toBeHidden();
 });
 
+test('Home sem JavaScript mostra as cenas montadas', async ({ page }, info) => {
+  test.skip(info.project.name === 'tablet', 'mesma regra nas outras larguras');
+  await page.goto('/');
+  await expect(page.locator('[data-palco]')).not.toHaveAttribute('data-palco-modo');
+  const opacidades = await page
+    .locator('[data-cena="atendimento"] [data-passo]')
+    .evaluateAll((pecas) => pecas.map((peca) => getComputedStyle(peca).opacity));
+  expect(opacidades.length).toBeGreaterThanOrEqual(6);
+  expect(opacidades.filter((opacidade) => opacidade !== '1')).toEqual([]);
+});
+
 test('no celular sem JavaScript os links do menu ficam visíveis', async ({ page }, info) => {
   test.skip(info.project.name !== 'celular', 'só o celular usa o painel');
   await page.goto('/');

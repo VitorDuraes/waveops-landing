@@ -15,7 +15,7 @@
 | Data | 15/10/2026 |
 | Decisões | Vitor, 15/10/2026: desenho, spec, copy da seção 8 e palco das cinco frentes (opção A) |
 | Branch | `feat/site-novo-visual`, no worktree `.claude/worktrees/feat+site-novo-visual` |
-| Estimativa | Cerca de 19 h de execução, mais as duas esperas de aprovação |
+| Estimativa | Cerca de 20 h de execução, mais as duas esperas de aprovação |
 
 ## Restrições globais
 
@@ -24,7 +24,7 @@ Valem para toda tarefa, mesmo quando ela não repete.
 1. **Sigilo.** Nenhum arquivo versionado, commit, PR ou comentário cita pelo nome a referência visual. Escreva "novo visual". Só a spec local cita.
 2. **Branch.** Tudo em `feat/site-novo-visual`. Nada de commit na `main`; o merge é do Vitor.
 3. **Escrita.** PT-BR com acento em copy, comentário e commit. Nunca travessão nem meia-risca (o lint barra no HTML).
-4. **Afirmações.** Texto de página vem das seções 8 e 13.2 da spec, ou é o de hoje. Nada de cliente, preço (`R$`), prazo ou resultado inventado. Toda `wo-maquete` leva `wo-maquete__aviso`.
+4. **Afirmações.** Texto de página vem das seções 8, 13.2 e 14 da spec, ou é o de hoje. Nada de cliente, preço (`R$`), prazo ou resultado inventado. Toda `wo-maquete` leva `wo-maquete__aviso`.
 5. **Melhoria progressiva.** Nada é injetado por JavaScript; sem JavaScript a página fica inteira. Sem script inline, sem evento inline e sem origem nova na CSP.
 6. **Movimento.** Menos movimento e sem JavaScript mostram sempre o estado final: cenas montadas e pôster no hero.
 7. **Peso por página** (gzip nível 9, `tests/site/unit/peso.test.mjs`): JavaScript até 15 KB (20 KB com formulário) e CSS até 25 KB. Vídeo, pôster e fontes ficam fora dessa conta e têm os tetos da spec 6.2.
@@ -343,7 +343,7 @@ test('a Home tem as cinco cenas na ordem das frentes, com passos contínuos e av
 
 ### Tarefa 3: Parciais, topo fixo, WhatsApp flutuante e 404
 
-**Estimativa:** 2 h. **Depende de:** 1. **Leia antes:** spec 5.4, 5.5, 7.7, 7.8, 8.4 e 8.7.
+**Estimativa:** 2,5 h. **Depende de:** 1. **Leia antes:** spec 5.4, 5.5, 7.7, 7.8, 8.4, 8.7, D16 e D18 (seção 14) e 14.1.
 
 **Arquivos:**
 - Criar: `dev/site/parciais/whatsapp-flutuante.html`, `tests/site/e2e/whatsapp.spec.ts`
@@ -365,11 +365,13 @@ test('a Home tem as cinco cenas na ordem das frentes, com passos contínuos e av
   - `.wo-cartao-noite`: cartão escuro de 5.4 (fundo `--wo-cartao-noite`, borda `--wo-linha-noite`, raio `--wo-raio`, respiro de 36 px).
   - `.wo-whatsapp-flutuante`: círculo de 56 px em `--wo-whatsapp` com ícone branco, `position: fixed` a 16 px da direita e a `calc(16px + env(safe-area-inset-bottom))` do fim.
   - Topo nos dois estados de 5.5, com 66 px e desfoque em `backdrop-filter` e `-webkit-backdrop-filter`; "Pular para o conteúdo" acima do topo na pilha; rodapé com respiro inferior de 88 px.
-- Copy: `cta-final` de 8.4 (à esquerda, os textos de hoje; à direita, `.wo-cartao-noite` com "Como prefere começar?", a opção para `/contato/` e "Falar agora no WhatsApp." com o link e o `data-whatsapp="cta-final"` de hoje). `rodape` com `.wo-noite`, descrição e linha de baixo de 8.7, mais "© 2026 WaveOps. Todos os direitos reservados."; a coluna Projetos sob medida fica com os 4 links de hoje até a Tarefa 6. `404.html` de 7.7, com `wo-abertura wo-noite`.
+- Copy: `cta-final` de 8.4 (à esquerda, os textos de hoje; à direita, `.wo-cartao-noite` com "Como prefere começar?", a opção para `/contato/` e "Falar agora no WhatsApp." com o link e o `data-whatsapp="cta-final"` de hoje). No alto do cartão, o bloco "quem responde" de 14.1: avatar de 48 px com as iniciais "VD" sobre `--wo-acento` (sem foto até o Vitor mandar), "Vitor Duraes", "Fundador da WaveOps" e as duas promessas aprovadas. Sem opção de agenda enquanto não houver link. `rodape` com `.wo-noite`, descrição e linha de baixo de 8.7 mais "Uberlândia, MG" (D18), e "© 2026 WaveOps. Todos os direitos reservados."; a coluna Projetos sob medida fica com os 4 links de hoje até a Tarefa 6. `404.html` de 7.7, com `wo-abertura wo-noite`.
 
 - [ ] **Passo 1: Testes.**
   - `conteudo.test.mjs`, caso "botão flutuante de WhatsApp em toda página menos Contato": cada página de `paginas.json` tem `<!-- parcial:whatsapp-flutuante` se, e só se, `id !== 'contato'`.
   - `conteudo.test.mjs`, caso "a logo é a plana de antes do selo 3D": nenhuma página de `paginas.json` nem os parciais `topo` e `rodape` citam `waveops-badge-3d`, e os dois parciais têm o símbolo Sine Nodes dentro de `wo-marca__selo`.
+  - `conteudo.test.mjs`, caso "a chamada final mostra quem responde": o parcial `cta-final` tem "Vitor Duraes", "Fundador da WaveOps", "Primeira conversa sem custo e sem compromisso." e "Resposta em até 1 dia útil."; nenhum link dele aponta para agenda (`calendly`, `cal.com` ou `calendar`) enquanto o link real não existir.
+  - `conteudo.test.mjs`, caso "o rodapé traz a cidade": o parcial `rodape` tem "Uberlândia, MG".
   - `topo.spec.ts`, casos novos:
 
 | Projeto | Teste | Esperado |
@@ -428,11 +430,11 @@ test('a Home tem as cinco cenas na ordem das frentes, com passos contínuos e av
 
 ### Tarefa 5: Home
 
-**Estimativa:** 2 h. **Depende de:** 1 a 4. **Leia antes:** spec 5.4, 6.3, 6.4, 7.1 e 8.2.
+**Estimativa:** 2 h. **Depende de:** 1 a 4. **Leia antes:** spec 5.4, 6.3, 6.4, 7.1, 8.2 e D18 (seção 14).
 
 **Arquivos:**
 - Criar: `assets/site/lib/video.js`, `tests/site/e2e/video.spec.ts`
-- Modificar: `index.html`, `assets/site/paginas/home.js`, `assets/site/paginas/home.css`, `assets/site/components.css`, `tests/site/unit/video.test.mjs`, `tests/site/e2e/topo.spec.ts`, `tests/site/e2e/sem-js.spec.ts`, `tests/site/types/globais.d.ts`
+- Modificar: `index.html`, `assets/site/paginas/home.js`, `assets/site/paginas/home.css`, `assets/site/components.css`, `tests/site/unit/video.test.mjs`, `tests/site/unit/conteudo.test.mjs`, `tests/site/e2e/topo.spec.ts`, `tests/site/e2e/sem-js.spec.ts`, `tests/site/types/globais.d.ts`
 
 **Interfaces:**
 - Produz `assets/site/lib/video.js`:
@@ -458,7 +460,7 @@ test('a Home tem as cinco cenas na ordem das frentes, com passos contínuos e av
 - Duas armadilhas desse fundo: `.wo-home-hero` troca o fundo da `.wo-noite` por `transparent`, senão cobre o vídeo; e o `<html>` não pode ter fundo próprio, para o fundo do `body` ir para o canvas e não pintar por cima do `z-index: -1`.
 - O hero da Home usa classes `wo-home-hero...` em `home.css`. O `.wo-hero` de `components.css` continua servindo Soluções, Plataforma e Projetos sob medida até as tarefas delas, e sai na Tarefa 12 se ficar sem uso.
 - Peças compartilhadas novas em `components.css`, que Projetos sob medida, Soluções, Contato e Demonstrações usam: colunas numeradas, linhas de definição, tabela de modelos, cartão claro sobre o escuro, selo de situação (forma e cor de 5.4) e etiqueta em caixa alta (5.2).
-- Conteúdo: linhas 1, 2, 4, 5 e 6 de 7.1, com a copy de 8.2 (title, description, Open Graph, Twitter, JSON-LD, etiquetas, frase, selo, título e texto do bloco 4). O seletor e os painéis de resultado saem da Home; o conteúdo deles continua em Soluções. O bloco 5 mantém `id="solucoes"` e o 6, `id="como-contratar"`.
+- Conteúdo: linhas 1, 2, 4, 5 e 6 de 7.1, com a copy de 8.2 (title, description, Open Graph, Twitter, JSON-LD, etiquetas, frase, selo, título e texto do bloco 4). O `Organization` do JSON-LD ganha `"address": { "@type": "PostalAddress", "addressLocality": "Uberlândia", "addressRegion": "MG", "addressCountry": "BR" }` (D18), sem rua e sem afirmar atendimento presencial. O seletor e os painéis de resultado saem da Home; o conteúdo deles continua em Soluções. O bloco 5 mantém `id="solucoes"` e o 6, `id="como-contratar"`.
 
 - [ ] **Passo 1: Testes.**
   - `video.test.mjs`, casos novos:
@@ -483,6 +485,7 @@ test('deveTocar exige página carregada, hero na tela, aba visível e nenhum blo
 ```
 
   Mais um caso: todo caminho de `VIDEOS` e o `src` do `.wo-home-hero__poster` de `index.html` existem em disco.
+  - `conteudo.test.mjs`, caso "o JSON-LD da Home traz a cidade": o objeto `Organization` do `@graph` de `index.html` tem `address` igual a `{ "@type": "PostalAddress", "addressLocality": "Uberlândia", "addressRegion": "MG", "addressCountry": "BR" }`, e nenhum campo `streetAddress`.
   - `video.spec.ts`, nos projetos desktop e celular:
 
 | Teste | Esperado |
@@ -510,7 +513,7 @@ test('deveTocar exige página carregada, hero na tela, aba visível e nenhum blo
 
 ### Tarefa 6: Projetos sob medida, com o rodapé das cinco frentes
 
-**Estimativa:** 1,5 h. **Depende de:** 3 e 5. **Leia antes:** spec 7.3, 8.1, 8.3 e 8.7.
+**Estimativa:** 1,5 h. **Depende de:** 3 e 5. **Leia antes:** spec 7.3, 8.1, 8.3, 8.7 e 14.2.
 
 **Arquivos:**
 - Modificar: `projetos-sob-medida/index.html`, `assets/site/paginas/sobmedida.css`, `assets/site/components.css`, `dev/site/parciais/rodape.html`, `tests/site/unit/conteudo.test.mjs`
@@ -547,8 +550,10 @@ test('o rodapé leva às cinco frentes', () => {
 });
 ```
 
+  Mais um caso, "as perguntas do HTML e do JSON-LD batem, com a do freelancer por último" (D17): os textos dos `<summary>` de `#perguntas`, em ordem, são iguais aos `name` das `Question` do `FAQPage`; são 7; a última é "Qual a diferença para contratar um freelancer?", e a resposta dela no JSON-LD é o texto exato de 14.2.
+
 - [ ] **Passo 2: Ver falhar.** `node --test tests/site/unit/conteudo.test.mjs`.
-- [ ] **Passo 3: Implementar** a página (7.3, com a copy de 8.3), a coluna do rodapé (os 5 nomes de 8.1 com as âncoras novas) e o CSS. `node dev/site/build.mjs`.
+- [ ] **Passo 3: Implementar** a página (7.3, com a copy de 8.3), a sétima pergunta de 14.2 no HTML e no JSON-LD, a coluna do rodapé (os 5 nomes de 8.1 com as âncoras novas) e o CSS. `node dev/site/build.mjs`.
 - [ ] **Passo 4: Ver passar.** Teste do passo 1; `MSYS_NO_PATHCONV=1 npx playwright test a11y fumaca responsivo -g "/projetos-sob-medida/"`; `npx playwright test legado`; portão local. O teste de links do portal roda na Tarefa 13.
 - [ ] **Passo 5: Commit.** `git commit -m "feat(site): Projetos sob medida com as cinco frentes no novo visual"`.
 
@@ -630,7 +635,7 @@ test('Soluções indica as cinco frentes em Como contratar (spec 8.5)', () => {
 
 ### Tarefa 10: Demonstrações técnicas
 
-**Estimativa:** 0,5 h. **Depende de:** 5. **Leia antes:** spec 7.6 e 8.6.
+**Estimativa:** 1 h. **Depende de:** 5. **Leia antes:** spec 7.6, 8.6 e 14.3.
 
 **Arquivos:**
 - Modificar: `demonstracoes-tecnicas/index.html`, `assets/site/paginas/demonstracoes.css`, `tests/site/e2e/demonstracoes.spec.ts`
@@ -654,8 +659,10 @@ const TOTAL = 5;
 
   Os outros casos do arquivo que citam frente antiga mudam junto: em "trocar de frente sem acumular", "Integração" vira "CRMs"; em "anunciar a contagem", "Automação" vira "Atendimento" e o texto esperado vira "Mostrando 1 de 5 demonstrações. Frente: Atendimento."; em "filtrar pelo teclado", "Sistemas e painéis" vira "Dashboards".
 
+  Caso novo, "deve abrir cada demonstração com a ficha de case" (D19): cada um dos 5 `article` tem um `dl` cujos `dt` são, em ordem, "Frente", "Cenário" e "Situação de partida", e o `dd` de "Cenário" é "Simulado, sem dados de clientes".
+
 - [ ] **Passo 2: Ver falhar.** `npx playwright test demonstracoes`.
-- [ ] **Passo 3: Implementar** a 7.6 e o texto de abertura de 8.6.
+- [ ] **Passo 3: Implementar** a 7.6, o texto de abertura de 8.6 e a ficha de case de 14.3. "Situação de partida" sai do parágrafo e entra na ficha; título, selo e as colunas Entrada, Regra e Saída continuam.
 - [ ] **Passo 4: Ver passar.** `npx playwright test demonstracoes` nos três projetos; `MSYS_NO_PATHCONV=1 npx playwright test a11y fumaca responsivo -g "/demonstracoes-tecnicas/"`; portão local.
 - [ ] **Passo 5: Commit.** `git commit -m "feat(site): Demonstrações técnicas com as cinco frentes no novo visual"`.
 

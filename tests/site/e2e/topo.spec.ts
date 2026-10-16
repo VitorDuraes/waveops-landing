@@ -171,3 +171,16 @@ test('pular para o conteúdo aparece por cima do topo', async ({ page }) => {
   });
   expect(noTopo, 'elementFromPoint no centro do link devolve o próprio link').toBe(true);
 });
+
+test('sem IntersectionObserver o topo continua solto e escuro', async ({ page }, info) => {
+  test.skip(info.project.name === 'tablet', 'mesmo comportamento do desktop e do celular');
+  await page.addInitScript(() => {
+    Reflect.deleteProperty(window, 'IntersectionObserver');
+  });
+  await page.goto('/solucoes/');
+  await expect(page.locator('.wo-topo')).toHaveAttribute('data-estado', 'escuro');
+  await expect(page.locator('html')).not.toHaveAttribute('data-topo');
+  expect(await page.locator('.wo-topo').evaluate((el) => getComputedStyle(el).position)).toBe('absolute');
+  await rolarPara(page, 1500);
+  await expect(page.locator('.wo-topo')).toHaveAttribute('data-estado', 'escuro');
+});

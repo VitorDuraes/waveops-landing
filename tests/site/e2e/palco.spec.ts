@@ -225,6 +225,98 @@ for (const { projeto, ...janela } of JANELAS) {
   });
 }
 
+/* Celular (spec 13.3, ajuste de 16/10): a cena fica centrada na área livre entre o topo fixo e o
+   painel do capítulo da vez, o painel é compacto e só o do capítulo da vez aparece. */
+for (const janela of [
+  { width: 390, height: 844 },
+  { width: 360, height: 640 },
+]) {
+  test.describe(`celular em ${janela.width} x ${janela.height}`, () => {
+    test.use({ viewport: janela });
+    test.beforeEach(({}, info) => {
+      test.skip(info.project.name !== 'celular', 'o layout do celular roda no projeto celular');
+    });
+
+    test('a cena fica centrada na área livre entre o topo e o painel', async ({ page }) => {
+      await page.goto('/');
+      await page.evaluate(() => document.fonts.ready);
+      await rolarProgresso(page, 'atendimento', 1);
+      await expect.poll(() => montadas(page, 'atendimento')).toBe(6);
+      await semTransicao(page);
+      const folgas = await page.evaluate(() => {
+        const caixa = (seletor: string) => {
+          const elemento = document.querySelector(seletor);
+          if (!elemento) throw new Error(`${seletor} não encontrado`);
+          return elemento.getBoundingClientRect();
+        };
+        const topoFixo = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--wo-topo-altura'));
+        const corpo = caixa('[data-cena="atendimento"][data-ativa] .wo-home-cena__tela');
+        const painel = caixa('[data-frente="atendimento"][data-ativa] .wo-home-painel');
+        const inicio = Math.max(caixa('.wo-topo').bottom, topoFixo) + 16;
+        return { acima: corpo.top - inicio, abaixo: painel.top - 16 - corpo.bottom };
+      });
+      expect(Math.abs(folgas.acima - folgas.abaixo), JSON.stringify(folgas)).toBeLessThanOrEqual(24);
+    });
+
+    test('só o painel do capítulo ativo aparece e recebe ponteiro', async ({ page }) => {
+      await page.goto('/');
+      await rolarProgresso(page, 'atendimento', 0.5);
+      await expect(page.locator('[data-frente="atendimento"]')).toHaveAttribute('data-ativa');
+      await semTransicao(page);
+      const paineis = await page.locator('.wo-home-painel').evaluateAll((lista) =>
+        lista.map((painel) => `${getComputedStyle(painel).opacity} ${getComputedStyle(painel).pointerEvents}`),
+      );
+      expect(paineis).toEqual(['1 auto', '0 none', '0 none', '0 none', '0 none']);
+    });
+  });
+}
+
+test.describe('celular em 390 x 844', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test('o painel ativo ocupa no máximo 32% da altura da janela', async ({ page }, info) => {
+    test.skip(info.project.name !== 'celular', 'o layout do celular roda no projeto celular');
+    await page.goto('/');
+    await page.evaluate(() => document.fonts.ready);
+    await rolarProgresso(page, 'atendimento', 0.5);
+    await semTransicao(page);
+    const altura = await page.locator('[data-frente="atendimento"][data-ativa] .wo-home-painel').evaluate((painel) => painel.getBoundingClientRect().height);
+    expect(altura).toBeLessThanOrEqual(0.32 * 844);
+  });
+});
+
+/* No instante em que o capítulo 1 liga, o texto da abertura já saiu do lugar da cena, mesmo em
+   tela baixa. */
+for (const janela of [
+  { width: 390, height: 844 },
+  { width: 360, height: 640 },
+  { width: 320, height: 568 },
+]) {
+  test.describe(`celular em ${janela.width} x ${janela.height}, na entrada do capítulo 1`, () => {
+    test.use({ viewport: janela });
+
+    test('o link da abertura não cruza a cena', async ({ page }, info) => {
+      test.skip(info.project.name !== 'celular', 'o layout do celular roda no projeto celular');
+      await page.goto('/');
+      await page.evaluate(() => document.fonts.ready);
+      await rolarProgresso(page, 'atendimento', 0);
+      await expect(page.locator('[data-cena="atendimento"]')).toHaveAttribute('data-ativa');
+      const caixas = await page.evaluate(() => {
+        const caixa = (seletor: string) => {
+          const elemento = document.querySelector(seletor);
+          if (!elemento) throw new Error(`${seletor} não encontrado`);
+          const { top, bottom, left, right } = elemento.getBoundingClientRect();
+          return { top, bottom, left, right };
+        };
+        return { link: caixa('.wo-home-frentes__link'), cena: caixa('[data-cena="atendimento"]') };
+      });
+      const { link, cena } = caixas;
+      const cruza = link.left < cena.right && link.right > cena.left && link.top < cena.bottom && link.bottom > cena.top;
+      expect(cruza, JSON.stringify(caixas)).toBe(false);
+    });
+  });
+}
+
 test.describe('com menos movimento', () => {
   test.use({ reducedMotion: 'reduce' });
 

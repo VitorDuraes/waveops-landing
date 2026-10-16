@@ -97,14 +97,15 @@ export function iniciarPalco(doc = document, janela = window) {
     const { ativa, passo } = estadoFixo(caixas, janela.innerHeight, totais);
     // Área útil: o CSS fixa as cinco cenas no mesmo lugar, e a caixa delas já é a área (desktop:
     // colunas 6 a 12, do topo fixo mais 32 px até 32 px do fim; celular: do topo fixo mais 16 px
-    // até o fim). No celular, o painel fica embaixo da cena, e a área para 16 px acima dele.
-    const area = cenasProntas[Math.max(0, ativa)].getBoundingClientRect();
-    let fimDaArea = area.bottom;
-    if (ativa >= 0) {
-      const painel = paineisProntos[ativa].getBoundingClientRect();
-      const embaixo = painel.top > area.top && painel.left < area.right && painel.right > area.left;
-      if (embaixo) fimDaArea = Math.min(fimDaArea, painel.top - RESPIRO_DO_PAINEL);
-    }
+    // até 16 px acima do painel do capítulo). Onde não há posicionamento por âncora, a caixa do
+    // celular vai até o fim da janela, e a área para aqui, 16 px acima do painel. Sem capítulo
+    // ativo, valem a cena e o painel do primeiro, para a cena 1 já entrar na escala certa e não
+    // encolher durante o esmaecimento.
+    const indice = Math.max(0, ativa);
+    const area = cenasProntas[indice].getBoundingClientRect();
+    const painel = paineisProntos[indice].getBoundingClientRect();
+    const embaixo = painel.top > area.top && painel.left < area.right && painel.right > area.left;
+    const fimDaArea = embaixo ? Math.min(area.bottom, painel.top - RESPIRO_DO_PAINEL) : area.bottom;
     const base = midiaDesktop.matches ? CENA_DESKTOP : CENA_CELULAR;
     const escala = escalaDaCena({ largura: area.width, altura: Math.max(0, fimDaArea - area.top) }, base);
     const passos = totais.map((total, i) => (i < ativa ? total : i === ativa ? passo : 0));

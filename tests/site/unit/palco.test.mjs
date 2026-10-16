@@ -40,6 +40,36 @@ function textoDe(trechoHtml) {
   return trechoHtml.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
+/**
+ * Declarações de uma propriedade no CSS, com o @media que as envolve ('' fora de @media).
+ * @param {string} css
+ * @param {string} propriedade
+ */
+function declaracoes(css, propriedade) {
+  const limpo = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  /** @type {string[]} */
+  const pilha = [];
+  /** @type {{ media: string, valor: string }[]} */
+  const achadas = [];
+  let inicio = 0;
+  for (let i = 0; i < limpo.length; i += 1) {
+    const c = limpo[i];
+    if (c === '{') {
+      pilha.push(limpo.slice(inicio, i).trim());
+      inicio = i + 1;
+    } else if (c === '}' || c === ';') {
+      const trecho = limpo.slice(inicio, i).trim();
+      const par = trecho.match(/^(--[\w-]+)\s*:\s*(.+)$/);
+      if (par && par[1] === propriedade) {
+        achadas.push({ media: pilha.filter((cabeca) => cabeca.startsWith('@media')).join(' '), valor: par[2].trim() });
+      }
+      if (c === '}') pilha.pop();
+      inicio = i + 1;
+    }
+  }
+  return achadas;
+}
+
 test('progressoNoTrecho vai de 0 a 1 e satura nas pontas', () => {
   assert.equal(progressoNoTrecho(100, 200, 150), 0.5);
   assert.equal(progressoNoTrecho(100, 200, 50), 0);
@@ -65,10 +95,27 @@ test('o palco pede 560 px de altura', () => {
   assert.equal(MIDIA_PALCO, '(min-height: 560px)');
 });
 
+test('o tamanho de desenho da cena no CSS é o mesmo das constantes do módulo', () => {
+  const css = fs.readFileSync(new URL('../../../assets/site/paginas/home.css', import.meta.url), 'utf8');
+  /** @param {string} propriedade */
+  const porMedia = (propriedade) => Object.fromEntries(declaracoes(css, propriedade).map(({ media, valor }) => [media, valor]));
+  const esperado = {
+    '@media (min-width: 1024px)': [`${CENA_DESKTOP.largura}px`, `${CENA_DESKTOP.altura}px`],
+    '@media (max-width: 1023.98px)': [`${CENA_CELULAR.largura}px`, `${CENA_CELULAR.altura}px`],
+  };
+  const largura = porMedia('--wo-palco-cena-largura');
+  const altura = porMedia('--wo-palco-cena-altura');
+  assert.deepEqual(Object.keys(largura).sort(), Object.keys(esperado).sort());
+  for (const [media, [l, a]] of Object.entries(esperado)) {
+    assert.equal(largura[media], l, media);
+    assert.equal(altura[media], a, media);
+  }
+});
+
 test('escalaDaCena encolhe a cena até caber na área útil, sem nunca aumentar', () => {
   assert.equal(escalaDaCena({ largura: 800, altura: 600 }, CENA_DESKTOP), 1);
   assert.equal(escalaDaCena({ largura: 360, altura: 240 }, CENA_DESKTOP), 0.5);
-  assert.equal(escalaDaCena({ largura: 350, altura: 210 }, CENA_CELULAR), 0.5);
+  assert.equal(escalaDaCena({ largura: 350, altura: 246 }, CENA_CELULAR), 0.5);
 });
 
 test('a Home tem as cinco cenas na ordem das frentes, com passos contínuos e aviso', () => {

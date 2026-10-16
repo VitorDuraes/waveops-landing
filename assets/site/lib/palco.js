@@ -8,9 +8,11 @@
     painel, e cada capítulo vira uma faixa com a cena montada (spec 13.3). */
 export const MIDIA_PALCO = '(min-height: 560px)';
 
-/** Tamanho para o qual a cena é desenhada no desktop e no celular (spec 13.3). */
+/** Tamanho para o qual a cena é desenhada no desktop e no celular (spec 13.3). As mesmas medidas
+    ficam em --wo-palco-cena-largura e --wo-palco-cena-altura, em paginas/home.css; um teste de
+    unidade confere que batem. */
 export const CENA_DESKTOP = Object.freeze({ largura: 720, altura: 480 });
-export const CENA_CELULAR = Object.freeze({ largura: 350, altura: 420 });
+export const CENA_CELULAR = Object.freeze({ largura: 350, altura: 492 });
 
 /**
  * Quanto do trecho entre `inicio` e `fim` o `valor` já percorreu, de 0 a 1. O trecho pode ser

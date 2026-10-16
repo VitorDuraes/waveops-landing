@@ -172,8 +172,8 @@ body[data-pagina='home'] {
   opacity: 0.35;
 }
 
-/* O hero de hoje continua claro até a Tarefa 5, que o refaz sobre a onda. Até lá, ele cobre o
-   fundo fixo com o papel, para o texto escuro não cair sobre a onda. */
+/* Regra provisória, sai na Tarefa 5: o hero de hoje continua claro até ela refazê-lo sobre a
+   onda. Até lá, ele cobre o fundo fixo com o papel, para o texto escuro não cair sobre a onda. */
 .wo-home-escuro > .wo-hero {
   background: var(--wo-fundo);
 }
@@ -188,6 +188,9 @@ body[data-pagina='home'] {
   box-shadow: var(--wo-sombra-folha);
 }
 
+/* Regra provisória, sai na Tarefa 3: o parcial da chamada final ainda não tem fundo próprio, e
+   na Home ele ficaria sobre o fundo fixo. Ela dá à chamada final o creme de hoje até a Tarefa 3
+   deixá-la escura. */
 .wo-home-folha + .wo-cta {
   position: relative;
   z-index: 1;
@@ -344,9 +347,12 @@ body[data-pagina='home'] {
   font-size: 11px;
 }
 
+/* Com o palco ligado, a tela tem a altura de desenho (a variável só existe nesse modo); sem ele,
+   a altura da coluna de peças. */
 .wo-home-cena__tela {
   display: flex;
   flex-direction: column;
+  height: var(--wo-palco-cena-altura, auto);
 }
 
 /* Cartões: branco para os nós do fluxo e papel para o registro. */
@@ -554,7 +560,8 @@ body[data-pagina='home'] {
   transition: stroke-dashoffset calc(var(--wo-palco-transicao) * 2) ease;
 }
 
-.wo-home-cena__traco--largo {
+.wo-home-cena__traco--largo,
+.wo-home-cena__traco--estreito {
   display: none;
 }
 
@@ -620,12 +627,13 @@ body[data-pagina='home'] {
 
 /* ---------- Palco ligado: data-palco-modo="fundo" ----------
    Cada capítulo ocupa um trecho de rolagem. As cinco cenas ficam fixas no mesmo lugar da tela,
-   atrás do texto, e só a do capítulo da vez aparece. A cena é a área útil inteira; o título e a
-   tela desenhada ficam no tamanho de desenho (720 x 480 no desktop, 350 x 420 no celular) e
-   encolhem juntos por --wo-palco-escala, que o módulo da Home calcula. As cenas e o painel fixo
-   do celular ficam atrás do conteúdo (z-index -1): depois do palco, a folha, a chamada final e
-   o rodapé cobrem a última cena. Nenhum ancestral das cenas pode ter transform, filter ou
-   contain, que quebrariam o position: fixed. */
+   atrás do texto, e só a do capítulo da vez aparece. A caixa da cena é a área útil inteira; o
+   título e a tela desenhada ficam no tamanho de desenho (--wo-palco-cena-largura e
+   --wo-palco-cena-altura, as medidas de CENA_DESKTOP e CENA_CELULAR em lib/palco.js, conferidas
+   por teste) e encolhem juntos por --wo-palco-escala, que o módulo da Home calcula, a partir do
+   centro da área. As cenas e o painel fixo do celular ficam atrás do conteúdo (z-index -1):
+   depois do palco, a folha, a chamada final e o rodapé cobrem a última cena. Nenhum ancestral das
+   cenas pode ter transform, filter ou contain, que quebrariam o position: fixed. */
 [data-palco-modo='fundo'] .wo-home-frentes__abertura {
   min-height: var(--wo-palco-abertura);
 }
@@ -654,7 +662,11 @@ body[data-pagina='home'] {
 [data-palco-modo='fundo'] .wo-home-cena__cabeca,
 [data-palco-modo='fundo'] .wo-home-cena__tela {
   position: absolute;
+  top: calc(50% - var(--wo-palco-cena-altura) / 2);
+  left: calc(50% - var(--wo-palco-cena-largura) / 2);
+  width: var(--wo-palco-cena-largura);
   transform: scale(var(--wo-palco-escala, 1));
+  transform-origin: calc(var(--wo-palco-cena-largura) / 2) calc(var(--wo-palco-cena-altura) / 2);
   transition: transform var(--wo-palco-transicao) ease;
 }
 
@@ -669,33 +681,63 @@ body[data-pagina='home'] {
   opacity: 0.6;
 }
 
-/* Celular e tablet: cena no alto, logo abaixo do topo, encolhendo a partir do alto; painel preso
-   embaixo, só o do capítulo da vez. O módulo mede o painel e para a área útil 16 px acima dele. */
+/* Desenho da cena 1 com o palco ligado: cartões em posição fixa no desenho e fios curvos sobre a
+   tela inteira. As posições ficam em cada tamanho, abaixo; os fios (em index.html) saem delas:
+   mudou um cartão de lugar, mude o fio junto. */
+[data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__cartao {
+  position: absolute;
+  margin: 0;
+}
+
+[data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__balao {
+  font-size: 14px;
+}
+
+[data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__etiquetas,
+[data-palco-modo='fundo'] .wo-home-cena__no--crm .wo-home-cena__itens {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+[data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__fio {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--wo-palco-cena-largura);
+  height: var(--wo-palco-cena-altura);
+}
+
+[data-palco-modo='fundo'] .wo-home-cena__traco--curto {
+  display: none;
+}
+
+/* Celular e tablet: cena centrada na área livre entre o topo e o painel, que fica preso embaixo
+   (só o do capítulo da vez aparece e recebe ponteiro). */
 @media (max-width: 1023.98px) {
-  /* A abertura sobe antes: quando o primeiro capítulo liga, o texto dela já passou do lugar em
-     que o título da cena aparece. */
   [data-palco-modo='fundo'] .wo-home-frentes__abertura {
     padding-top: calc(var(--wo-secao) / 2);
+    /* Quando o capítulo 1 liga (topo dele na metade da janela), o texto da abertura já passou
+       do alto da área da cena: em tela baixa, a abertura cresce o necessário. */
+    padding-bottom: calc(50vh - var(--wo-topo-altura) - 16px);
   }
 
   [data-palco-modo='fundo'] .wo-home-cena {
+    /* Tamanho de desenho da cena no celular: CENA_CELULAR em lib/palco.js. */
+    --wo-palco-cena-largura: 350px;
+    --wo-palco-cena-altura: 492px;
     top: calc(var(--wo-topo-altura) + 16px);
     right: var(--wo-margem);
     bottom: 16px;
     left: var(--wo-margem);
   }
 
+  /* Sem posicionamento por âncora, a caixa da cena vai até o fim da janela, atrás do painel: o
+     desenho fica no alto dela e encolhe a partir do alto, e o módulo da Home para a área 16 px
+     acima do painel. */
   [data-palco-modo='fundo'] .wo-home-cena__cabeca,
   [data-palco-modo='fundo'] .wo-home-cena__tela {
     top: 0;
-    left: calc(50% - 175px);
-    width: 350px;
-    transform-origin: 175px 0;
-  }
-
-  [data-palco-modo='fundo'] .wo-home-cena__tela {
-    height: 420px;
-    padding-top: 30px;
+    transform-origin: calc(var(--wo-palco-cena-largura) / 2) 0;
   }
 
   [data-palco-modo='fundo'] .wo-home-painel {
@@ -711,6 +753,103 @@ body[data-pagina='home'] {
 
   [data-palco-modo='fundo'] .wo-home-capitulo[data-ativa] .wo-home-painel {
     opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Com âncora, a caixa de cada cena termina 16 px acima do painel do próprio capítulo (o último
+     painel antes dela no documento), e o desenho fica centrado na área livre. */
+  @supports (anchor-name: --wo-a) {
+    [data-palco-modo='fundo'] .wo-home-painel {
+      anchor-name: --wo-painel-celular;
+    }
+
+    [data-palco-modo='fundo'] .wo-home-cena {
+      bottom: calc(anchor(--wo-painel-celular top) + 16px);
+    }
+
+    [data-palco-modo='fundo'] .wo-home-cena__cabeca,
+    [data-palco-modo='fundo'] .wo-home-cena__tela {
+      top: calc(50% - var(--wo-palco-cena-altura) / 2);
+      transform-origin: calc(var(--wo-palco-cena-largura) / 2) calc(var(--wo-palco-cena-altura) / 2);
+    }
+  }
+
+  /* Zigue-zague da cena 1: cartões com 80% da largura, alternando esquerda e direita, ligados
+     por fios que saem pela lateral e descem até o próximo cartão; o registro fecha o fluxo. */
+  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__cartao {
+    width: 280px;
+    padding: 11px 13px 12px;
+  }
+
+  /* No celular o cartão é mais baixo que no desktop: sem a linha do cabeçalho e com menos respiro. */
+  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__balao,
+  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__etiquetas,
+  [data-palco-modo='fundo'] .wo-home-cena__no--crm .wo-home-cena__itens {
+    margin-top: 8px;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena__no--whatsapp {
+    top: 34px;
+    left: 0;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena__no--triagem {
+    top: 160px;
+    left: 70px;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena__no--crm {
+    top: 283px;
+    left: 0;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__registro {
+    top: 393px;
+    left: 70px;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__nome {
+    font-size: 15px;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__itens {
+    font-size: 14px;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__registro-titulo {
+    color: var(--wo-tinta);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: normal;
+    line-height: 1.4;
+    text-transform: none;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena__traco--estreito {
+    display: inline;
+  }
+
+  /* Portas: a saída do WhatsApp na lateral direita e a da triagem na esquerda, a 52 px do alto;
+     as entradas no alto do cartão, do lado de onde o fio vem. */
+  [data-palco-modo='fundo'] .wo-home-cena__no--whatsapp::after {
+    top: 48px;
+    right: -4px;
+    bottom: auto;
+    left: auto;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena__no--triagem::before {
+    left: 226px;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena__no--triagem::after {
+    top: 48px;
+    bottom: auto;
+    left: -4px;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena__no--crm::before {
+    left: 46px;
   }
 }
 
@@ -723,31 +862,19 @@ body[data-pagina='home'] {
   }
 
   [data-palco-modo='fundo'] .wo-home-cena {
+    /* Tamanho de desenho da cena no desktop: CENA_DESKTOP em lib/palco.js. */
+    --wo-palco-cena-largura: 720px;
+    --wo-palco-cena-altura: 480px;
     top: calc(var(--wo-topo-altura) + 32px);
     right: var(--wo-palco-margem);
     bottom: 32px;
     left: calc(var(--wo-palco-margem) + (var(--wo-palco-conteudo) + 48px) * 5 / 12);
   }
 
-  [data-palco-modo='fundo'] .wo-home-cena__cabeca,
-  [data-palco-modo='fundo'] .wo-home-cena__tela {
-    top: calc(50% - 240px);
-    left: calc(50% - 360px);
-    width: 720px;
-    transform-origin: 360px 240px;
-  }
-
-  [data-palco-modo='fundo'] .wo-home-cena__tela {
-    height: 480px;
-  }
-
   /* Desenho largo da cena 1: WhatsApp no alto à esquerda, triagem no meio à direita, CRM embaixo
-     à esquerda e registro embaixo à direita. Os fios (traço largo, em index.html) saem destas
-     coordenadas: mudou um cartão de lugar, mude o fio junto. */
+     à esquerda e registro embaixo à direita. */
   [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__cartao {
-    position: absolute;
     width: 320px;
-    margin: 0;
     padding: 14px 16px 15px;
   }
 
@@ -771,51 +898,28 @@ body[data-pagina='home'] {
     left: 400px;
   }
 
-  /* No desenho largo há espaço: cabeçalho com linha, como num editor de fluxo, e texto maior. */
+  /* No desktop há espaço: cabeçalho com linha, como num editor de fluxo, e mais respiro. */
   [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__no-cabeca {
     padding-bottom: 10px;
     border-bottom: 1px solid var(--wo-linha);
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__balao,
+  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__etiquetas,
+  [data-palco-modo='fundo'] .wo-home-cena__no--crm .wo-home-cena__itens {
+    margin-top: 12px;
   }
 
   [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__nome {
     font-size: 14px;
   }
 
-  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__balao {
-    margin-top: 12px;
-    font-size: 14px;
-  }
-
-  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__etiquetas {
-    flex-direction: column;
-    align-items: flex-start;
-    margin-top: 12px;
-  }
-
   [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__etiqueta {
     font-size: 12.5px;
   }
 
-  [data-palco-modo='fundo'] .wo-home-cena__no--crm .wo-home-cena__itens {
-    flex-direction: column;
-    align-items: flex-start;
-    margin-top: 12px;
-  }
-
   [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__itens {
     font-size: 13.5px;
-  }
-
-  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__fio {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 720px;
-    height: 480px;
-  }
-
-  [data-palco-modo='fundo'] .wo-home-cena__traco--curto {
-    display: none;
   }
 
   [data-palco-modo='fundo'] .wo-home-cena__traco--largo {

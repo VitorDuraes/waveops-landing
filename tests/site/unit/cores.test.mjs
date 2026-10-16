@@ -194,3 +194,41 @@ for (const frente of ['--wo-clara', '--wo-clara-2']) {
     assert.ok(razao >= 4.5, `${razao.toFixed(2)}:1`);
   });
 }
+
+// Topo (spec 5.5). Depois da faixa escura o fundo é o papel a 85% sobre um desfoque do que passa
+// por baixo: o pior caso é a noite inteira por baixo. Sobre a faixa escura o fundo é transparente,
+// então o texto precisa passar sobre a noite, sobre o fundo do hero e sobre o ponto mais claro do
+// degradê das aberturas.
+const NOITE = resolver(':root', '--wo-noite');
+const TOPO_CLARO = { css: resolver(':root', '--wo-topo-claro'), base: NOITE };
+for (const frente of ['--wo-texto', '--wo-texto-2', '--wo-acento-texto']) {
+  test(`topo claro: ${frente} sobre o papel a 85% com a noite por baixo passa 4.5:1`, () => {
+    const razao = contraste(cor(':root', frente), TOPO_CLARO);
+    assert.ok(razao >= 4.5, `${razao.toFixed(2)}:1`);
+  });
+}
+
+const FUNDOS_DO_TOPO_ESCURO = [
+  ['a noite', { css: NOITE }],
+  ['o fundo do hero', { css: resolver(':root', '--wo-noite-hero') }],
+  ['o ponto mais claro da abertura', { css: resolver(':root', '--wo-abertura-brilho'), base: NOITE }],
+];
+for (const [nome, fundo] of FUNDOS_DO_TOPO_ESCURO) {
+  test(`topo escuro: o texto do menu (branco a 85%) sobre ${nome} passa 4.5:1`, () => {
+    const razao = contraste({ css: resolver(':root', '--wo-topo-texto-noite') }, fundo);
+    assert.ok(razao >= 4.5, `${razao.toFixed(2)}:1`);
+  });
+  test(`topo escuro: o lilás do "Ops" sobre ${nome} passa 4.5:1`, () => {
+    const razao = contraste(cor('.wo-noite', '--wo-acento-texto'), fundo);
+    assert.ok(razao >= 4.5, `${razao.toFixed(2)}:1`);
+  });
+}
+
+// O botão do topo sobre a faixa escura é o de contorno: texto claro sobre o preto a 30%, que por
+// sua vez fica sobre o ponto mais claro da abertura.
+test('botão de contorno no escuro: texto claro sobre o preto a 30% passa 4.5:1', () => {
+  const abertura = compor(lerCor(resolver(':root', '--wo-abertura-brilho')), lerCor(NOITE));
+  const fundo = { css: resolver('.wo-noite', '--wo-contorno-fundo'), base: `rgb(${abertura.r} ${abertura.g} ${abertura.b})` };
+  const razao = contraste(cor('.wo-noite', '--wo-texto'), fundo);
+  assert.ok(razao >= 4.5, `${razao.toFixed(2)}:1`);
+});

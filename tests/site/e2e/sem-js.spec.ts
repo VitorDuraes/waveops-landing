@@ -39,3 +39,22 @@ test('Contato sem JavaScript troca o formulário pelo aviso com WhatsApp', async
   await expect(page.locator('.wo-form__semjs')).toBeVisible();
   await expect(page.locator('.wo-form__semjs').getByRole('link', { name: 'WhatsApp' })).toHaveAttribute('href', /wa\.me\/5534991775784/);
 });
+
+/* Sem JavaScript o topo não é fixo: entra no fluxo com fundo escuro (regra do <noscript> do head),
+   e o menu aberto do celular empurra o título em vez de cobri-lo. */
+for (const url of ['/', '/solucoes/', '/404.html']) {
+  test(`${url} sem JavaScript, o topo não fica fixo`, async ({ page }, info) => {
+    test.skip(info.project.name === 'tablet', 'mesma regra nas outras larguras');
+    await page.goto(url);
+    await expect(page.locator('html')).not.toHaveAttribute('data-topo');
+    const topo = page.locator('.wo-topo');
+    await expect(topo).toHaveAttribute('data-estado', 'escuro');
+    expect(await topo.evaluate((el) => getComputedStyle(el).position)).not.toBe('fixed');
+    if (info.project.name !== 'celular') return;
+    const menu = await page.locator('#menu-movel').boundingBox();
+    const titulo = await page.locator('h1').boundingBox();
+    expect(menu, '#menu-movel visível sem JavaScript').not.toBeNull();
+    expect(titulo, 'h1 visível').not.toBeNull();
+    expect(titulo!.y, 'o h1 começa depois do fim do menu').toBeGreaterThanOrEqual(menu!.y + menu!.height);
+  });
+}

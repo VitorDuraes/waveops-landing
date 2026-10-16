@@ -91,3 +91,63 @@ test('maquete de interface sempre leva o aviso de ilustração', () => {
     assert.ok(avisos >= maquetes, `${p.arquivo}: ${maquetes} maquete(s) e só ${avisos} aviso(s)`);
   }
 });
+
+test('toda página marca a primeira faixa escura, que decide o estado do topo', () => {
+  for (const p of paginas) {
+    assert.match(ler(p.arquivo), /\sdata-faixa-escura(?=[\s>])/, `${p.arquivo}: sem data-faixa-escura`);
+  }
+});
+
+test('botão flutuante de WhatsApp em toda página menos Contato', () => {
+  for (const p of paginas) {
+    const tem = ler(p.arquivo).includes('<!-- parcial:whatsapp-flutuante');
+    assert.equal(tem, p.id !== 'contato', `${p.arquivo}: ${p.id === 'contato' ? 'Contato já tem o canal e o formulário' : 'falta o marcador do botão flutuante'}`);
+  }
+});
+
+test('o parcial do botão flutuante tem o link do site, o nome acessível e o gancho do funil', () => {
+  const parcial = ler('dev/site/parciais/whatsapp-flutuante.html');
+  assert.match(parcial, /class="wo-whatsapp-flutuante"/);
+  assert.ok(parcial.includes('href="https://wa.me/5534991775784?text=Ol%C3%A1%2C%20WaveOps.%20Vim%20pelo%20site."'));
+  assert.match(parcial, /data-whatsapp="flutuante"/);
+  assert.match(parcial, /aria-label="Falar no WhatsApp"/);
+  assert.match(parcial, /<svg[^>]*aria-hidden="true"/, 'o ícone é decorativo');
+});
+
+test('a logo é a plana de antes do selo 3D', () => {
+  for (const p of paginas) assert.doesNotMatch(ler(p.arquivo), /waveops-badge-3d/, p.arquivo);
+  for (const nome of ['topo', 'rodape']) {
+    const parcial = ler(`dev/site/parciais/${nome}.html`);
+    assert.doesNotMatch(parcial, /waveops-badge-3d/, `parcial ${nome}`);
+    const selo = /<span class="wo-marca__selo">([\s\S]*?)<\/span>/.exec(parcial);
+    assert.ok(selo, `parcial ${nome}: sem wo-marca__selo`);
+    assert.match(selo[1], /M18 50 Q 30 33 41 50/, `parcial ${nome}: falta a primeira onda do Sine Nodes`);
+    assert.match(selo[1], /M59 50 Q 70 67 82 50/, `parcial ${nome}: falta a segunda onda do Sine Nodes`);
+    assert.match(selo[1], /<circle cx="50" cy="50" r="9" fill="none"/, `parcial ${nome}: falta o núcleo vazado do Sine Nodes`);
+  }
+});
+
+test('a chamada final mostra quem responde', () => {
+  const parcial = ler('dev/site/parciais/cta-final.html');
+  for (const texto of ['Vitor Duraes', 'Fundador da WaveOps', 'Primeira conversa sem custo e sem compromisso.', 'Resposta em até 1 dia útil.']) {
+    assert.ok(parcial.includes(texto), `cta-final sem "${texto}"`);
+  }
+  // Sem o link real da agenda, a opção não existe: nunca sai link morto ou provisório.
+  assert.doesNotMatch(parcial, /calendly|cal\.com|calendar|agendar/i, 'agenda sem link real');
+});
+
+test('a chamada final oferece formulário e WhatsApp no cartão escuro', () => {
+  const parcial = ler('dev/site/parciais/cta-final.html');
+  const texto = parcial.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+  assert.match(parcial, /class="wo-cartao-noite/);
+  assert.ok(texto.includes('Como prefere começar?'));
+  assert.ok(texto.includes('Contar o problema pelo formulário. Você escolhe como quer o retorno.'));
+  assert.ok(texto.includes('Falar agora no WhatsApp.'));
+  assert.match(parcial, /href="\/contato\/"/);
+  assert.match(parcial, /data-whatsapp="cta-final"/);
+  assert.ok(parcial.includes('href="https://wa.me/5534991775784?text=Ol%C3%A1%2C%20WaveOps.%20Quero%20conversar%20sobre%20a%20minha%20opera%C3%A7%C3%A3o."'));
+});
+
+test('o rodapé traz a cidade', () => {
+  assert.ok(ler('dev/site/parciais/rodape.html').includes('Uberlândia, MG'));
+});

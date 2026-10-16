@@ -28,11 +28,13 @@
 }
 
 /* Com o topo fixo (spec 5.5), âncora e foco não podem parar embaixo dele. Fica sempre ligado:
-   a rolagem até a âncora acontece antes do JavaScript. */
+   a rolagem até a âncora acontece antes do JavaScript. Embaixo, o mesmo vale para o botão
+   flutuante de WhatsApp (spec 5.4): rolar até um alvo o deixa acima do botão. */
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   scroll-padding-top: calc(var(--wo-topo-altura) + 16px);
+  scroll-padding-bottom: var(--wo-flutuante-respiro);
 }
 
 body {
@@ -117,12 +119,13 @@ main:focus {
   display: none !important;
 }
 
-/* Pular para o conteúdo: invisível até receber foco pelo teclado. */
+/* Pular para o conteúdo: invisível até receber foco pelo teclado. Fica acima do topo na pilha
+   (spec 5.5), senão o topo cobriria o link justo quando ele aparece. */
 .wo-pular {
   position: absolute;
   left: 12px;
   top: -100px;
-  z-index: 20;
+  z-index: var(--wo-z-pular);
   display: inline-flex;
   align-items: center;
   min-height: var(--wo-alvo);

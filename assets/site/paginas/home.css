@@ -188,15 +188,6 @@ body[data-pagina='home'] {
   box-shadow: var(--wo-sombra-folha);
 }
 
-/* Regra provisória, sai na Tarefa 3: o parcial da chamada final ainda não tem fundo próprio, e
-   na Home ele ficaria sobre o fundo fixo. Ela dá à chamada final o creme de hoje até a Tarefa 3
-   deixá-la escura. */
-.wo-home-folha + .wo-cta {
-  position: relative;
-  z-index: 1;
-  background: var(--wo-fundo);
-}
-
 /* ---------- Cinco frentes: abertura, capítulos e painel (spec 13) ----------
    Uma abertura e cinco capítulos, cada um com o painel de texto e a cena da frente. Sem
    data-palco-modo (sem JavaScript, com menos movimento ou com a janela baixa), cada capítulo é

@@ -32,9 +32,17 @@
   --wo-whatsapp: #128c7e;
   /* A cor mais clara do degradê violeta das aberturas escuras. */
   --wo-abertura-brilho: rgb(124 58 237 / 0.35);
-  /* As duas pontas do degradê do quadrado da logo (spec D14). */
+  /* As duas pontas do degradê do quadrado da logo (spec D14) e o brilho violeta em volta dele:
+     sombra a 70% e anel interno a 30%. */
   --wo-marca-claro: #a78bfa;
   --wo-marca-escuro: #8b5cf6;
+  --wo-sombra-marca: 0 6px 18px -6px rgb(139 92 246 / 0.7), inset 0 0 0 1px rgb(139 92 246 / 0.3);
+
+  /* Primitivos: topo (spec 5.5). Depois da faixa escura, o fundo é o papel a 85%; sobre ela, o
+     texto do menu é branco a 85%. Os dois ficam sobre desfoque, então o contraste vale também
+     contra a faixa escura que passa por baixo (cores.test.mjs confere o pior caso). */
+  --wo-topo-claro: rgb(250 248 244 / 0.85);
+  --wo-topo-texto-noite: rgb(255 255 255 / 0.85);
 
   /* Semânticos, no claro */
   --wo-fundo: var(--wo-papel);
@@ -49,6 +57,8 @@
   --wo-acento-hover: var(--wo-violeta-forte);
   --wo-acento-texto: var(--wo-violeta-forte);
   --wo-sobre-acento: var(--wo-branco);
+  /* Fundo do botão de contorno: nenhum no claro, preto a 30% no escuro (spec 5.4). */
+  --wo-contorno-fundo: transparent;
   /* Situação no claro: 4,5:1 ou mais sobre o papel, o papel 2 e o branco. */
   --wo-sucesso: #166534;
   --wo-alerta: #92400e;
@@ -74,6 +84,25 @@
   --wo-sombra-cartao: 0 25px 50px -12px rgb(0 0 0 / 0.3);
   --wo-sombra-folha: 0 -24px 60px rgb(0 0 0 / 0.35);
   --wo-alvo: 44px;
+  /* Botão (spec 5.4): 40 px de altura no desktop. Abaixo de 768 px vale o alvo de toque de
+     44 px, e o @media abaixo troca o valor. */
+  --wo-btn-altura: var(--wo-alvo);
+  /* Desfoque do fundo do topo (spec 5.5), o mesmo valor do painel de texto do palco. */
+  --wo-desfoque: 12px;
+
+  /* Botão flutuante de WhatsApp (spec 5.4): círculo de 56 px a 16 px do canto. O respiro de 88 px
+     é o círculo, a margem e mais 16 px de ar: o rodapé guarda esse espaço embaixo e o
+     scroll-padding-bottom da página também, para o botão nunca cobrir texto, foco ou âncora. */
+  --wo-flutuante-tamanho: 56px;
+  --wo-flutuante-margem: 16px;
+  --wo-flutuante-respiro: 88px;
+  --wo-sombra-flutuante: 0 8px 24px -6px rgb(0 0 0 / 0.4);
+
+  /* Pilha das peças que flutuam sobre a página. "Pular para o conteúdo" vence o topo, e o topo
+     vence o botão flutuante e a folha creme da Home (z-index 1). */
+  --wo-z-flutuante: 20;
+  --wo-z-topo: 30;
+  --wo-z-pular: 40;
 
   /* Palco de fundo da Home (spec 13): altura de rolagem da abertura e de cada capítulo, troca de
      cena e de peça, sombra dos cartões das cenas e fundo do painel de texto, que garante a
@@ -105,11 +134,15 @@
 @media (min-width: 768px) {
   :root {
     --wo-margem: 48px;
+    --wo-btn-altura: 40px;
   }
 }
 
-/* Faixa escura: redefine os semânticos. Fundo, texto e color-scheme vêm de base.css. */
-.wo-noite {
+/* Faixa escura: redefine os semânticos. Fundo, texto e color-scheme vêm de base.css. O topo
+   sobre a faixa escura (spec 5.5) usa os mesmos valores, sem a classe .wo-noite, porque o
+   fundo dele é transparente e quem escreve o estado é o JavaScript, em data-estado. */
+.wo-noite,
+.wo-topo[data-estado='escuro'] {
   --wo-fundo: var(--wo-noite);
   --wo-fundo-2: var(--wo-cartao-noite);
   --wo-superficie: var(--wo-cartao-noite);
@@ -122,6 +155,7 @@
   --wo-acento-hover: var(--wo-violeta-forte);
   --wo-acento-texto: #c2b2ff;
   --wo-sobre-acento: var(--wo-branco);
+  --wo-contorno-fundo: rgb(0 0 0 / 0.3);
   --wo-sucesso: #4ade80;
   --wo-alerta: #fbbf24;
   --wo-erro: #f87171;
@@ -143,6 +177,13 @@
   --wo-erro-fundo: rgba(239, 68, 68, 0.08);
   --wo-erro-fundo-forte: rgba(239, 68, 68, 0.12);
   --wo-erro-borda: rgba(239, 68, 68, 0.4);
+}
+
+/* Texto do menu do topo sobre a faixa escura: branco a 85% (spec 5.5), um pouco acima dos 75% do
+   texto secundário do escuro. Vem depois do bloco acima, que tem o mesmo seletor para o topo, então
+   este valor vence. */
+.wo-topo[data-estado='escuro'] {
+  --wo-texto-2: var(--wo-topo-texto-noite);
 }
 
 /* Legado: nomes do site anterior que o CSS de hoje ainda usa. Cada um aponta para o valor novo
@@ -188,7 +229,6 @@
   --wo-raio-lg: var(--wo-raio);
   --wo-raio-xl: var(--wo-raio);
   /* Sombras e espaço */
-  --wo-sombra-btn: 0 1px 0 rgb(255 255 255 / 0.3) inset, 0 4px 20px -12px rgb(124 58 237 / 0.35);
   --wo-sombra-card: var(--wo-sombra-cartao);
   --wo-secao-menor: calc(var(--wo-secao) / 2);
 }

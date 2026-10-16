@@ -2,15 +2,19 @@
    Cada bloco corresponde a uma peça do design aprovado. Componente que só uma página usa
    mora em assets/site/paginas/<pagina>.css. Depende de tokens.css e base.css. */
 
-/* ---------- Marca ---------- */
+/* ---------- Marca ----------
+   A logo de antes do selo 3D (spec D14 e 5.4): o símbolo Sine Nodes branco de 23 px num quadrado
+   de 34 px com degradê violeta. "Wave" no peso normal e "Ops" em 700, na cor de acento do contexto:
+   violeta forte no claro, lilás no escuro. A mesma peça serve ao topo e ao rodapé. */
 .wo-marca {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 11px;
   min-height: var(--wo-alvo);
   color: var(--wo-texto);
-  font-size: 23px;
-  font-weight: 700;
+  font-family: var(--wo-fonte-titulo);
+  font-size: 20px;
+  font-weight: 400;
   letter-spacing: -0.02em;
   text-decoration: none;
   white-space: nowrap;
@@ -21,61 +25,75 @@
 }
 
 .wo-marca__selo {
-  position: relative;
-  display: block;
-  width: 42px;
-  height: 42px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
   flex-shrink: 0;
-}
-
-.wo-marca__selo img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+  border-radius: var(--wo-raio);
+  background: linear-gradient(150deg, var(--wo-marca-claro), var(--wo-marca-escuro));
+  box-shadow: var(--wo-sombra-marca);
 }
 
 .wo-marca__selo svg {
-  position: absolute;
-  left: 19%;
-  top: 19%;
-  width: 62%;
-  height: 62%;
+  width: 23px;
+  height: 23px;
 }
 
 .wo-marca__ops {
-  font-weight: 400;
+  color: var(--wo-acento-texto);
+  font-weight: 700;
 }
 
-.wo-marca--rodape {
-  align-self: flex-start;
-  font-size: 21px;
-}
-
-.wo-marca--rodape .wo-marca__selo {
-  width: 38px;
-  height: 38px;
-}
-
-/* ---------- Topo ---------- */
+/* ---------- Topo (spec 5.5) ----------
+   66 px de altura, por cima da página. Nasce em position: absolute sobre a faixa escura de
+   abertura, com data-estado="escuro" já no HTML: nada pisca e, se o JavaScript falhar, o topo
+   rola junto com a faixa e nunca fica texto branco sobre o creme. O site.js liga o modo fixo
+   (data-topo="fixo" no <html>) e passa data-estado para "claro" quando a faixa escura acaba. Sem
+   JavaScript, a regra do <noscript> do head põe o topo no fluxo, com fundo escuro. As cores do
+   estado escuro vêm de tokens.css (.wo-topo[data-estado='escuro']). */
 .wo-topo {
-  position: relative;
-  z-index: 5;
-  background: var(--wo-fundo);
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: var(--wo-z-topo);
   border-bottom: 1px solid var(--wo-borda);
+  color: var(--wo-texto);
+  -webkit-backdrop-filter: blur(var(--wo-desfoque));
+  backdrop-filter: blur(var(--wo-desfoque));
+  transition: background-color var(--wo-transicao), border-color var(--wo-transicao);
+}
+
+html[data-topo='fixo'] .wo-topo {
+  position: fixed;
+}
+
+.wo-topo[data-estado='escuro'] {
+  color-scheme: dark;
+}
+
+.wo-topo[data-estado='claro'] {
+  background: var(--wo-topo-claro);
 }
 
 .wo-topo__barra {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   gap: 28px;
   width: 100%;
   max-width: var(--wo-conteiner);
-  height: var(--wo-topo-altura);
+  /* A linha de baixo do topo conta nos 66 px. */
+  height: calc(var(--wo-topo-altura) - 1px);
   margin: 0 auto;
   padding: 0 var(--wo-margem);
+}
+
+/* Na grade do topo o link da logo esticaria até o fim da coluna, e o anel de foco e a área de
+   clique acompanhariam. */
+.wo-topo__barra > .wo-marca {
+  justify-self: start;
 }
 
 .wo-topo__links {
@@ -89,16 +107,26 @@
   align-items: center;
   min-height: var(--wo-alvo);
   padding: 0 13px;
-  border-radius: var(--wo-raio-btn);
+  border-radius: var(--wo-raio-pilula);
   color: var(--wo-texto-2);
-  font-size: 13.5px;
+  font-size: 14px;
   text-decoration: none;
   white-space: nowrap;
   transition: color var(--wo-transicao);
 }
 
+.wo-topo__painel a:not(.wo-btn) {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  color: var(--wo-texto-2);
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
 .wo-topo__links a:hover,
-.wo-topo__painel a:hover {
+.wo-topo__painel a:not(.wo-btn):hover {
   color: var(--wo-texto);
 }
 
@@ -110,6 +138,7 @@
 .wo-topo__acoes {
   display: flex;
   align-items: center;
+  justify-self: end;
   gap: 12px;
 }
 
@@ -117,10 +146,9 @@
   display: inline-flex;
   align-items: center;
   min-height: var(--wo-alvo);
-  padding: 0 6px;
+  padding: 0 8px;
   color: var(--wo-texto);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -129,11 +157,16 @@
   color: var(--wo-acento-texto);
 }
 
-/* 0,2,0 de propósito: .wo-btn vem depois no arquivo e devolveria o tamanho padrão. */
-.wo-topo .wo-topo__cta {
-  min-height: var(--wo-alvo);
-  padding: 0 18px;
-  font-size: 13px;
+/* Sobre a faixa escura o botão do topo é o de contorno, e depois dela volta a ser o principal
+   (spec 5.5). Especificidade 0,3,0 de propósito: vence .wo-btn--primario e o hover dele. */
+.wo-topo[data-estado='escuro'] .wo-topo__cta {
+  border-color: var(--wo-borda-forte);
+  background: var(--wo-contorno-fundo);
+}
+
+.wo-topo[data-estado='escuro'] .wo-topo__cta:hover {
+  border-color: var(--wo-acento-borda);
+  background: var(--wo-contorno-fundo);
 }
 
 .wo-topo__menu {
@@ -143,8 +176,8 @@
   height: var(--wo-alvo);
   padding: 0;
   border: 1px solid var(--wo-borda-forte);
-  border-radius: 10px;
-  background: var(--wo-superficie);
+  border-radius: var(--wo-raio-pilula);
+  background: var(--wo-contorno-fundo);
   color: var(--wo-texto);
   cursor: pointer;
 }
@@ -163,10 +196,15 @@
   display: block;
 }
 
+/* Com o topo fixo, o painel aberto não pode passar do fim da janela: em tela baixa ele rola por
+   dentro, porque a página não rola mais por baixo dele. */
 .wo-topo__painel {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  max-height: calc(100vh - var(--wo-topo-altura));
+  max-height: calc(100dvh - var(--wo-topo-altura));
+  overflow-y: auto;
   padding: 8px var(--wo-margem) 20px;
   border-top: 1px solid var(--wo-borda);
   background: var(--wo-fundo);
@@ -176,25 +214,16 @@
   display: none;
 }
 
-.wo-topo__painel a {
-  display: flex;
-  align-items: center;
-  min-height: 48px;
-  color: var(--wo-texto-2);
-  font-size: 16px;
-  font-weight: 500;
-  text-decoration: none;
-}
-
 .wo-topo__painel .wo-btn {
-  justify-content: center;
-  min-height: 50px;
   margin-top: 10px;
-  color: var(--wo-sobre-acento);
-  font-size: 14px;
 }
 
 @media (max-width: 1180px) {
+  .wo-topo__barra {
+    display: flex;
+    justify-content: space-between;
+  }
+
   .wo-topo__links {
     display: none;
   }
@@ -219,23 +248,25 @@
   }
 }
 
-/* ---------- Botões e links de ação ---------- */
+/* ---------- Botões e links de ação ----------
+   Pílula de 40 px de altura (44 px abaixo de 768 px, alvo de toque), Inter 14 px, peso 500 (spec
+   5.4). O principal é violeta e o hover escurece para o violeta forte. O de contorno usa a borda
+   forte do contexto e, no escuro, o fundo preto a 30% de --wo-contorno-fundo. */
 .wo-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 9px;
-  min-height: 50px;
+  min-height: var(--wo-btn-altura);
   padding: 0 20px;
   border: 1px solid transparent;
-  border-radius: var(--wo-raio-btn);
+  border-radius: var(--wo-raio-pilula);
   background: transparent;
   color: var(--wo-texto);
   font-family: inherit;
-  font-size: 13.5px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.43;
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
@@ -249,19 +280,18 @@
 }
 
 .wo-btn--primario {
-  border-width: 0;
   background: var(--wo-acento);
   color: var(--wo-sobre-acento);
-  box-shadow: var(--wo-sombra-btn);
 }
 
 .wo-btn--primario:hover {
-  background: #b29ffa;
+  background: var(--wo-acento-hover);
   color: var(--wo-sobre-acento);
 }
 
 .wo-btn--secundario {
   border-color: var(--wo-borda-forte);
+  background: var(--wo-contorno-fundo);
   color: var(--wo-texto);
 }
 
@@ -273,7 +303,6 @@
 .wo-btn--grande {
   min-height: 52px;
   padding: 0 22px;
-  font-size: 14px;
 }
 
 .wo-btn[aria-disabled='true'] {
@@ -474,6 +503,33 @@
   flex-shrink: 0;
   border-radius: 50%;
   background: var(--wo-sucesso-ponto);
+}
+
+/* ---------- Faixas do novo visual: abertura escura, folha e cartão noite (spec 5.4 e 7) ----------
+   Toda página abre com uma faixa escura. O topo flutua sobre ela, então o respiro de cima é a
+   altura do topo mais o ritmo da seção. Depois dela, o conteúdo claro sobe como uma folha. */
+.wo-abertura {
+  position: relative;
+  padding: calc(var(--wo-topo-altura) + var(--wo-secao) / 2) 0 var(--wo-secao);
+  background:
+    radial-gradient(ellipse 70% 90% at 80% 0%, var(--wo-abertura-brilho), transparent 70%),
+    var(--wo-fundo);
+}
+
+.wo-folha {
+  position: relative;
+  z-index: 1;
+  background: var(--wo-fundo);
+  box-shadow: var(--wo-sombra-folha);
+}
+
+/* Cartão escuro (spec 5.4): sempre dentro de uma faixa .wo-noite. */
+.wo-cartao-noite {
+  padding: 36px;
+  border: 1px solid var(--wo-linha-noite);
+  border-radius: var(--wo-raio);
+  background: var(--wo-cartao-noite);
+  color: var(--wo-clara);
 }
 
 /* ---------- Hero de duas colunas ---------- */
@@ -971,97 +1027,184 @@
   line-height: 1.7;
 }
 
-/* ---------- Chamada final ---------- */
+/* ---------- Chamada final (spec 8.4 e 14.1) ----------
+   Faixa escura (a classe .wo-noite vai no parcial): o texto à esquerda e, à direita, o cartão
+   escuro com quem responde e as duas formas de começar. Usa a grade editorial de base.css. */
 .wo-cta {
-  padding: clamp(56px, 6.6vw, 96px) 0 clamp(65px, 7.8vw, 112px);
-}
-
-.wo-cta__caixa {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 40px 64px;
-  padding: clamp(28px, 4vw, 56px);
-  border: 1px solid rgba(162, 139, 249, 0.3);
-  border-radius: var(--wo-raio-lg);
-  background: radial-gradient(ellipse at 0 100%, rgba(162, 139, 249, 0.1), var(--wo-superficie) 65%);
-}
-
-.wo-cta__texto {
-  flex: 1 1 440px;
-  min-width: 0;
+  padding: var(--wo-secao) 0;
 }
 
 .wo-cta__titulo {
   margin-top: 16px;
-  font-size: clamp(28px, 3.2vw, 46px);
-  font-weight: 500;
-  line-height: 1.08;
-  letter-spacing: -0.045em;
+  font-size: var(--wo-h2);
   text-wrap: balance;
 }
 
 .wo-cta__lead {
-  margin-top: 16px;
+  margin-top: 20px;
   max-width: 480px;
-  color: var(--wo-texto-3);
-  font-size: 15px;
-  line-height: 1.75;
+  color: var(--wo-texto-2);
+  line-height: 1.625;
   text-wrap: pretty;
-}
-
-.wo-cta__lado {
-  display: flex;
-  flex: 1 1 360px;
-  flex-direction: column;
-  gap: 26px;
-  min-width: 0;
 }
 
 .wo-cta__lista {
   display: flex;
   flex-direction: column;
   gap: 13px;
+  margin-top: 32px;
 }
 
-.wo-cta__lista li {
+.wo-cta__lista li,
+.wo-cta__promessas li {
   display: flex;
   align-items: center;
   gap: 11px;
   font-size: 14px;
 }
 
-.wo-cta__lista svg {
+.wo-cta__lista svg,
+.wo-cta__promessas svg {
   width: 18px;
   height: 18px;
   flex-shrink: 0;
   color: var(--wo-acento-texto);
 }
 
-.wo-cta .wo-btn {
-  font-size: 13px;
+/* Quem responde (spec 14.1): avatar de 48 px, nome, cargo e as duas promessas aprovadas. Sem
+   foto até o Vitor mandar: o avatar mostra as iniciais sobre o violeta da marca. */
+.wo-cta__quem {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
-/* ---------- Rodapé ---------- */
-.wo-rodape {
-  padding: 54px 0 36px;
+.wo-cta__avatar {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--wo-acento);
+  color: var(--wo-sobre-acento);
+  font-family: var(--wo-fonte-titulo);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.wo-cta__nome {
+  font-family: var(--wo-fonte-titulo);
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.wo-cta__cargo {
+  color: var(--wo-texto-3);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.wo-cta__promessas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 20px;
+  color: var(--wo-texto-2);
+}
+
+.wo-cta__cartao-titulo {
+  margin-top: 28px;
+  padding-top: 28px;
   border-top: 1px solid var(--wo-borda);
-  background: var(--wo-faixa);
+  font-family: var(--wo-fonte-titulo);
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.wo-cta__opcoes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+/* Opção como botão largo: o contorno do escuro (spec 5.4), com o texto à esquerda e a seta à
+   direita. Raio de cartão, não de pílula, porque o texto pode quebrar em duas ou três linhas. */
+.wo-cta__opcao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 56px;
+  padding: 14px 18px;
+  border: 1px solid var(--wo-borda-forte);
+  border-radius: var(--wo-raio);
+  background: var(--wo-contorno-fundo);
+  color: var(--wo-texto);
+  font-size: 15px;
+  line-height: 1.45;
+  text-decoration: none;
+  transition: border-color var(--wo-transicao);
+}
+
+.wo-cta__opcao:hover {
+  border-color: var(--wo-acento-borda);
+  color: var(--wo-texto);
+}
+
+.wo-cta__opcao strong {
+  font-weight: 500;
+}
+
+.wo-cta__opcao-apoio {
+  color: var(--wo-texto-2);
+}
+
+.wo-cta__opcao svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--wo-acento-texto);
+}
+
+/* ---------- Rodapé (spec 7.8 e 8.7) ----------
+   Faixa escura (.wo-noite no parcial). Embaixo, 88 px de respiro para o botão flutuante de
+   WhatsApp nunca cobrir texto. */
+.wo-rodape {
+  padding: 56px 0 var(--wo-flutuante-respiro);
+  border-top: 1px solid var(--wo-borda);
   font-size: 14.5px;
   line-height: 1.6;
+}
+
+.wo-rodape__topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 32px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--wo-borda);
 }
 
 .wo-rodape__grade {
   display: flex;
   flex-wrap: wrap;
   gap: 36px 32px;
+  padding-top: 40px;
 }
 
 .wo-rodape__marca {
   display: flex;
-  flex: 0 1 250px;
+  flex: 1.2 1 250px;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -1093,12 +1236,13 @@
 }
 
 .wo-rodape__titulo {
-  margin: 0 0 6px;
-  color: var(--wo-texto-4);
-  font-family: var(--wo-mono);
-  font-size: 11.5px;
-  font-weight: 400;
-  letter-spacing: 0.1em;
+  margin: 0 0 8px;
+  color: var(--wo-texto-3);
+  font-family: var(--wo-fonte);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  line-height: 1.35;
   text-transform: uppercase;
 }
 
@@ -1119,28 +1263,60 @@
   color: var(--wo-texto);
 }
 
-.wo-rodape__base {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-top: 44px;
-  padding-top: 24px;
-  border-top: 1px solid var(--wo-borda);
-  color: var(--wo-texto-4);
-  font-size: 13px;
+/* Alvo de toque de 44 px no celular. No desktop o espaçamento das colunas fica mais fechado. */
+@media (min-width: 768px) {
+  .wo-rodape a:not(.wo-marca) {
+    min-height: 36px;
+  }
 }
 
 .wo-rodape__legal {
   display: flex;
   flex-wrap: wrap;
-  gap: 18px;
+  gap: 0 24px;
 }
 
-.wo-rodape .wo-rodape__legal a {
-  display: inline-flex;
-  color: var(--wo-texto-4);
+.wo-rodape__base {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 32px;
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid var(--wo-borda);
+  color: var(--wo-texto-3);
+  font-size: 13px;
+}
+
+/* ---------- Botão flutuante de WhatsApp (spec 5.4) ----------
+   Círculo de 56 px no canto inferior direito, em toda página menos Contato. O respiro do rodapé e o
+   scroll-padding-bottom da página (base.css) o mantêm longe de texto, de foco e de âncora. */
+.wo-whatsapp-flutuante {
+  position: fixed;
+  right: var(--wo-flutuante-margem);
+  bottom: calc(var(--wo-flutuante-margem) + env(safe-area-inset-bottom));
+  z-index: var(--wo-z-flutuante);
+  display: grid;
+  place-items: center;
+  width: var(--wo-flutuante-tamanho);
+  height: var(--wo-flutuante-tamanho);
+  border-radius: 50%;
+  background: var(--wo-whatsapp);
+  color: var(--wo-branco);
+  box-shadow: var(--wo-sombra-flutuante);
+  text-decoration: none;
+  transition: transform var(--wo-transicao);
+}
+
+.wo-whatsapp-flutuante:hover {
+  color: var(--wo-branco);
+  transform: scale(1.06);
+}
+
+.wo-whatsapp-flutuante svg {
+  width: 28px;
+  height: 28px;
 }
 
 /* ---------- Formulário ---------- */

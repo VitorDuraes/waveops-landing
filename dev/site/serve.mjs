@@ -25,6 +25,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import { pipeline } from 'node:stream';
 import { fileURLToPath } from 'node:url';
 import { executadoDireto, lerNetlify } from './build.mjs';
 
@@ -187,9 +188,10 @@ export function criarServidor({ raiz, atrasoLentoMs = 15000 }) {
     if (intervalo) cabecalhos['Content-Range'] = `bytes ${inicio}-${fim}/${tamanho}`;
     res.writeHead(intervalo ? 206 : status, cabecalhos);
     if (cabeca || tamanho === 0) return res.end();
-    fs.createReadStream(abs, { start: inicio, end: fim })
-      .on('error', () => res.destroy())
-      .pipe(res);
+    // pipeline, não .pipe: quando o cliente desiste no meio (o navegador faz isso com vídeo),
+    // o stream do arquivo é destruído e solta o descritor; se a leitura falha, a resposta cai.
+    // O erro que chega ao callback é um desses dois, e os dois já foram tratados.
+    pipeline(fs.createReadStream(abs, { start: inicio, end: fim }), res, () => {});
   };
 
   /** @param {http.ServerResponse} res @param {boolean} cabeca */

@@ -168,6 +168,30 @@ test('Range fora do arquivo responde 416 com o tamanho total', async () => {
   await r.arrayBuffer();
 });
 
+test('pedido abortado no meio destrói o stream do arquivo e solta o descritor', async (t) => {
+  // Bem maior que os buffers do socket: o servidor ainda está lendo quando o cliente desiste,
+  // como o navegador faz com vídeo ao trocar de intervalo.
+  fs.writeFileSync(path.join(raiz, 'assets', 'grande.webm'), Buffer.alloc(32 * 1024 * 1024));
+  const espiao = t.mock.method(fs, 'createReadStream');
+  await new Promise((resolver, rejeitar) => {
+    const req = http.request(`${base}/assets/grande.webm`, { headers: { Range: 'bytes=0-' } }, (res) => {
+      res.on('error', () => {});
+      if (res.statusCode !== 206) return rejeitar(new Error(`status ${res.statusCode}`));
+      res.once('data', () => {
+        req.destroy();
+        resolver(undefined);
+      });
+    });
+    req.on('error', () => {}); // o socket fechado por nós mesmos
+    req.end();
+  });
+  const stream = espiao.mock.calls.find((c) => String(c.arguments[0]).endsWith('grande.webm'))?.result;
+  assert.ok(stream, 'o servidor não abriu o arquivo');
+  for (let i = 0; i < 100 && !stream.closed; i++) await new Promise((ok) => setTimeout(ok, 20));
+  assert.equal(stream.destroyed, true, 'o stream do arquivo ficou vivo depois do aborto');
+  assert.equal(stream.closed, true, 'o descritor do arquivo ficou aberto depois do aborto');
+});
+
 test('Range inválido ou com vários intervalos é ignorado: 200 com o arquivo inteiro', async () => {
   for (const intervalo of ['bytes=50-10', 'bytes=0-9,20-29', 'linhas=0-9']) {
     const r = await pedirIntervalo(intervalo);

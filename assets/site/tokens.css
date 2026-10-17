@@ -73,6 +73,8 @@
   --wo-h3-linha: clamp(24px, 21.77px + 0.571vw, 30px);
   --wo-h3-etapa: clamp(22px, 21.26px + 0.19vw, 24px);
   --wo-lead-hero: clamp(18px, 17.26px + 0.19vw, 20px);
+  /* Número de etapa: Geist de 24 px fixos, peso 500, altura de linha 1,33 (5.2). */
+  --wo-numero-etapa: 24px;
 
   /* Layout e efeitos (spec 5.3). Margem e respiro de seção crescem nos @media abaixo. */
   --wo-conteiner: 1280px;
@@ -128,7 +130,8 @@
   --wo-espaco-6: 64px;
   --wo-espaco-7: 128px;
   --wo-etiqueta-tamanho: 12px;
-  --wo-etiqueta-entreletra: 0.1em;
+  /* Etiqueta em caixa alta e selo do hero (5.2): 0,15em nos dois. */
+  --wo-etiqueta-entreletra: 0.15em;
   --wo-texto-pequeno: 14px;
   --wo-texto-corpo: 16px;
   --wo-texto-destaque: 20px;

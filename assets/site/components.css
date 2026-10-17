@@ -369,7 +369,9 @@ html[data-topo='fixo'] .wo-topo {
   color: var(--wo-texto-2);
   font-family: var(--wo-mono);
   font-size: 11px;
-  letter-spacing: 0.1em;
+  font-weight: 500;
+  letter-spacing: var(--wo-etiqueta-entreletra);
+  line-height: 1.5;
   text-transform: uppercase;
 }
 
@@ -738,8 +740,9 @@ html[data-topo='fixo'] .wo-topo {
 .wo-etiqueta {
   font-family: var(--wo-fonte);
   font-size: var(--wo-etiqueta-tamanho);
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: var(--wo-etiqueta-entreletra);
+  line-height: 1.35;
   text-transform: uppercase;
 }
 
@@ -777,15 +780,18 @@ html[data-topo='fixo'] .wo-topo {
 
 .wo-colunas-numeradas__numero {
   color: var(--wo-acento-texto);
-  font-size: var(--wo-texto-destaque);
-  font-weight: 600;
+  font-family: var(--wo-fonte-titulo);
+  font-size: var(--wo-numero-etapa);
+  font-weight: 500;
+  line-height: 1.33;
 }
 
 .wo-colunas-numeradas__item h3 {
   font-family: var(--wo-fonte-titulo);
   font-size: var(--wo-h3-etapa);
-  font-weight: 600;
-  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.33;
 }
 
 .wo-colunas-numeradas__item p {
@@ -818,8 +824,9 @@ html[data-topo='fixo'] .wo-topo {
 .wo-definicoes dt {
   font-family: var(--wo-fonte-titulo);
   font-size: var(--wo-h3-etapa);
-  line-height: 1.2;
-  font-weight: 600;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.33;
 }
 
 .wo-definicoes dt a {
@@ -858,16 +865,26 @@ html[data-topo='fixo'] .wo-topo {
 .wo-tabela-modelos .wo-modelo__nome h3 {
   font-family: var(--wo-fonte-titulo);
   font-size: var(--wo-h3-linha);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
+.wo-tabela-modelos .wo-modelo__campo .wo-etiqueta {
+  display: block;
+  color: var(--wo-texto-3);
+}
+
+.wo-tabela-modelos .wo-modelo__campo p {
+  font-size: var(--wo-texto-corpo);
+  line-height: 1.625;
+}
+
+/* A seta é só desenho: svg com aria-hidden, fora de link, sem borda, sem cursor e sem hover que
+   sugiram um botão. */
 .wo-tabela-modelos__seta {
-  display: grid;
-  place-items: center;
-  width: var(--wo-alvo);
-  height: var(--wo-alvo);
+  align-self: center;
   color: var(--wo-acento-texto);
-  border: var(--wo-linha-fina) solid var(--wo-borda);
-  border-radius: var(--wo-raio-pilula);
 }
 
 @media (min-width: 640px) {

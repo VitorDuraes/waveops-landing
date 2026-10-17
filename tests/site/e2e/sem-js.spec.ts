@@ -44,7 +44,7 @@ test('Contato sem JavaScript troca o formulário pelo aviso com WhatsApp', async
 
 /* Sem JavaScript o topo não é fixo: entra no fluxo com fundo escuro (regra do <noscript> do head),
    e o menu aberto do celular empurra o título em vez de cobri-lo. */
-for (const url of ['/', '/solucoes/', '/404.html']) {
+for (const url of ['/', '/solucoes/', '/projetos-sob-medida/', '/404.html']) {
   test(`${url} sem JavaScript, o topo não fica fixo`, async ({ page }, info) => {
     test.skip(info.project.name === 'tablet', 'mesma regra nas outras larguras');
     await page.goto(url);

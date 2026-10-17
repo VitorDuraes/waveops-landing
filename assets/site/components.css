@@ -317,6 +317,7 @@ html[data-topo='fixo'] .wo-topo {
   gap: 12px;
 }
 
+/* "Botão e menu" de 5.2, em peso 500. */
 .wo-link-seta {
   display: inline-flex;
   align-items: center;
@@ -324,7 +325,8 @@ html[data-topo='fixo'] .wo-topo {
   min-height: var(--wo-alvo);
   color: var(--wo-acento-texto);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
+  line-height: 1.43;
   text-decoration: none;
 }
 
@@ -340,14 +342,17 @@ html[data-topo='fixo'] .wo-topo {
 }
 
 /* ---------- Rótulos ---------- */
+/* "Etiqueta em caixa alta" de 5.2, com o traço na frente. */
 .wo-sobretitulo {
   display: inline-flex;
   align-items: center;
   gap: 9px;
   color: var(--wo-acento-texto);
-  font-family: var(--wo-mono);
-  font-size: 11px;
-  letter-spacing: 0.15em;
+  font-family: var(--wo-fonte);
+  font-size: var(--wo-etiqueta-tamanho);
+  font-weight: 500;
+  letter-spacing: var(--wo-etiqueta-entreletra);
+  line-height: 1.35;
   text-transform: uppercase;
 }
 
@@ -518,6 +523,47 @@ html[data-topo='fixo'] .wo-topo {
     var(--wo-fundo);
 }
 
+/* Abertura de duas colunas (7.2 a 7.4): abaixo de 1024 px o cartão desce para baixo do texto. O selo
+   fica só com a borda esquerda de 2 px (5.2). */
+.wo-abertura__grade {
+  display: grid;
+  align-items: center;
+  gap: var(--wo-espaco-5);
+}
+
+.wo-abertura__texto .wo-h1 {
+  margin-top: var(--wo-espaco-3);
+}
+
+.wo-abertura__lead {
+  max-width: 560px;
+  margin-top: var(--wo-espaco-3);
+  color: var(--wo-texto-2);
+  font-size: var(--wo-lead-hero);
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+.wo-abertura__texto .wo-acoes {
+  margin-top: var(--wo-espaco-4);
+}
+
+.wo-abertura .wo-etiqueta-hero {
+  border: 0;
+  border-left: var(--wo-linha-forte) solid var(--wo-texto);
+  border-radius: 0;
+}
+
+.wo-abertura .wo-etiqueta-hero::before {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .wo-abertura__grade {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  }
+}
+
 .wo-folha {
   position: relative;
   z-index: 1;
@@ -635,11 +681,14 @@ html[data-topo='fixo'] .wo-topo {
   margin-bottom: 14px;
 }
 
+/* "Etiqueta em caixa alta" de 5.2. */
 .wo-maquete__titulo {
   color: var(--wo-texto-3);
-  font-family: var(--wo-mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
+  font-family: var(--wo-fonte);
+  font-size: var(--wo-etiqueta-tamanho);
+  font-weight: 500;
+  letter-spacing: var(--wo-etiqueta-entreletra);
+  line-height: 1.35;
   text-transform: uppercase;
 }
 
@@ -754,6 +803,10 @@ html[data-topo='fixo'] .wo-topo {
   --wo-borda-forte: var(--wo-linha);
   --wo-superficie: var(--wo-papel);
   --wo-acento-texto: var(--wo-violeta-forte);
+  --wo-sucesso: var(--wo-sucesso-claro);
+  --wo-alerta: var(--wo-alerta-claro);
+  --wo-erro: var(--wo-erro-claro);
+  --wo-info: var(--wo-info-claro);
   color: var(--wo-texto);
   color-scheme: light;
   background: var(--wo-papel);
@@ -851,6 +904,52 @@ html[data-topo='fixo'] .wo-topo {
   color: var(--wo-texto-2);
 }
 
+/* Lista editorial (5.4): primeira linha em tinta, demais em linha fina. O h3 é o "Título de linha" de
+   5.2, o mesmo do nome do modelo. */
+.wo-lista-editorial {
+  border-top: var(--wo-linha-forte) solid var(--wo-texto);
+}
+
+.wo-lista-editorial__item {
+  display: grid;
+  gap: var(--wo-espaco-2);
+  padding: var(--wo-espaco-4) 0;
+  border-bottom: var(--wo-linha-fina) solid var(--wo-borda);
+}
+
+.wo-lista-editorial__item .wo-etiqueta {
+  color: var(--wo-acento-texto);
+}
+
+.wo-lista-editorial__item h3,
+.wo-modelo__nome h3 {
+  font-family: var(--wo-fonte-titulo);
+  font-size: var(--wo-h3-linha);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.wo-lista-editorial__item p {
+  color: var(--wo-texto-2);
+}
+
+/* "Nota" de 5.2. O ponto médio fica no fim da etiqueta e fora do leitor de tela. */
+.wo-lista-editorial__etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: var(--wo-espaco-1);
+  color: var(--wo-texto-3);
+  font-size: var(--wo-texto-pequeno);
+  line-height: 1.45;
+}
+
+.wo-lista-editorial__etiquetas li:not(:last-child)::after {
+  content: '·';
+  content: '·' / '';
+  margin: 0 var(--wo-espaco-1);
+}
+
 .wo-modelos.wo-tabela-modelos {
   border-top: var(--wo-linha-forte) solid var(--wo-texto);
 }
@@ -860,14 +959,6 @@ html[data-topo='fixo'] .wo-topo {
   grid-template-columns: minmax(0, 1fr);
   gap: var(--wo-espaco-3);
   padding: var(--wo-espaco-4) 0;
-}
-
-.wo-tabela-modelos .wo-modelo__nome h3 {
-  font-family: var(--wo-fonte-titulo);
-  font-size: var(--wo-h3-linha);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
 }
 
 .wo-tabela-modelos .wo-modelo__campo .wo-etiqueta {
@@ -1158,13 +1249,6 @@ html[data-topo='fixo'] .wo-topo {
   min-width: 0;
 }
 
-.wo-modelo__nome h3 {
-  font-size: 22px;
-  font-weight: 500;
-  line-height: 1.25;
-  letter-spacing: -0.035em;
-}
-
 .wo-modelo__campo {
   flex: 1.5 1 210px;
   min-width: 0;
@@ -1186,10 +1270,11 @@ html[data-topo='fixo'] .wo-topo {
   margin-top: 22px;
 }
 
+/* "Nota" de 5.2. */
 .wo-modelos__rodape p {
   color: var(--wo-texto-3);
-  font-size: 15.5px;
-  line-height: 1.7;
+  font-size: var(--wo-texto-pequeno);
+  line-height: 1.45;
 }
 
 /* ---------- Chamada final (spec 8.4 e 14.1) ----------

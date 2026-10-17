@@ -64,10 +64,60 @@ test('a Plataforma só aparece no rodapé, fora da própria página', () => {
   }
 });
 
-test('Projetos sob medida apresenta as quatro frentes da base WaveOps', () => {
+test('Projetos sob medida apresenta as cinco frentes da base WaveOps', () => {
   const html = ler('projetos-sob-medida/index.html');
   const nomes = [...html.matchAll(/<h3 class="wo-sobmedida-frente__nome">([^<]+)<\/h3>/g)].map((m) => m[1]);
-  assert.deepEqual(nomes, ['Automação de processos', 'Integração de sistemas', 'Sistemas e painéis sob medida', 'Agentes de IA supervisionados']);
+  assert.deepEqual(nomes, ['Automação de atendimento', 'Agentes de IA', 'Dashboards', 'CRMs sob medida', 'SaaS']);
+});
+
+test('as âncoras das frentes existem, as novas e as de antes de 15/10/2026', () => {
+  const html = ler('projetos-sob-medida/index.html');
+  const secao = html.slice(html.indexOf('id="frentes"'));
+  for (const id of ['atendimento', 'agentes', 'dashboards', 'crms', 'saas', 'automacoes', 'integracoes', 'sistemas']) {
+    assert.ok(secao.includes(`id="${id}"`), `#${id} fora da seção #frentes`);
+  }
+  for (const antiga of ['automacoes', 'integracoes', 'sistemas']) {
+    assert.ok(secao.indexOf(`id="${antiga}"`) < secao.indexOf('id="atendimento"'), `#${antiga} tem de cair no topo da seção`);
+  }
+});
+
+test('o rodapé leva às cinco frentes', () => {
+  const rodape = ler('dev/site/parciais/rodape.html');
+  const destinos = [...rodape.matchAll(/href="\/projetos-sob-medida\/#([a-z]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(destinos, ['atendimento', 'agentes', 'dashboards', 'crms', 'saas']);
+  const nomes = [...rodape.matchAll(/href="\/projetos-sob-medida\/#[a-z]+">([^<]+)</g)].map((m) => m[1]);
+  assert.deepEqual(nomes, ['Automação de atendimento', 'Agentes de IA', 'Dashboards', 'CRMs sob medida', 'SaaS']);
+});
+
+test('as perguntas do HTML e do JSON-LD batem, com a do freelancer por último', () => {
+  const html = ler('projetos-sob-medida/index.html');
+  const inicio = html.indexOf('id="perguntas"');
+  assert.ok(inicio > 0, 'seção #perguntas não encontrada');
+  const secao = html.slice(inicio, html.indexOf('</section>', inicio));
+  const texto = (trecho) => trecho.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  const resumos = [...secao.matchAll(/<summary\b[^>]*>([\s\S]*?)<\/summary>/g)].map((m) => texto(m[1]));
+  const respostas = [...secao.matchAll(/<p class="wo-sobmedida-faq__resposta">([\s\S]*?)<\/p>/g)].map((m) => texto(m[1]));
+  const json = JSON.parse(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(html)[1]);
+  const faq = json['@graph'].find((item) => item['@type'] === 'FAQPage').mainEntity;
+  assert.equal(faq.length, 7, 'o FAQPage tem 7 perguntas');
+  assert.deepEqual(resumos, faq.map((q) => q.name), 'perguntas do HTML e do JSON-LD, na mesma ordem');
+  assert.deepEqual(respostas, faq.map((q) => q.acceptedAnswer.text), 'respostas do HTML e do JSON-LD, na mesma ordem');
+  const ultima = faq[faq.length - 1];
+  assert.equal(ultima.name, 'Qual a diferença para contratar um freelancer?');
+  assert.equal(
+    ultima.acceptedAnswer.text,
+    'Você contrata uma empresa, com CNPJ, proposta por escrito e contrato. O escopo é aprovado por você antes de começar, e cada entrega é documentada. Com serviços gerenciados, a WaveOps continua cuidando do que está no ar: operação, monitoramento e evolução.',
+  );
+});
+
+test('a descrição de Projetos sob medida é a de 8.3 na meta, no og e no twitter', () => {
+  const html = ler('projetos-sob-medida/index.html');
+  const esperada = 'Automação de atendimento, agentes de IA com revisão humana, dashboards, CRMs sob medida e SaaS. Escopo escrito antes de começar.';
+  for (const chave of ['name="description"', 'property="og:description"', 'name="twitter:description"']) {
+    const meta = new RegExp(`<meta ${chave} content="([^"]*)"`).exec(html);
+    assert.ok(meta, `meta ${chave} não encontrada`);
+    assert.equal(meta[1], esperada, `meta ${chave}`);
+  }
 });
 
 test('nenhuma página anuncia uma frente retirada em 14/10/2026', () => {

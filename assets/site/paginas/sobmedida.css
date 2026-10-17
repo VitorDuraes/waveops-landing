@@ -1,344 +1,135 @@
-/* WaveOps · peças que só a página Projetos sob medida usa: variação do hero, cartão "Proposta",
-   atalhos das frentes, lista de frentes, trilha de etapas, notas dos modelos e perguntas
-   frequentes. Depende de tokens.css, base.css e components.css. */
-
-/* ---------- Hero ---------- */
-/* Medidas desta página no design: título menor que o da Home, brilho mais alto e colunas 1,2 : 1. */
-.wo-sobmedida-hero {
-  --wo-h1: clamp(36px, 4.4vw, 64px);
-  padding-top: clamp(44px, 5.4vw, 84px);
-}
-
-.wo-sobmedida-hero .wo-hero__brilho {
-  top: -620px;
-  opacity: 0.4;
-}
-
-.wo-sobmedida-hero .wo-hero__grade {
-  gap: 44px 64px;
-}
-
-.wo-sobmedida-hero .wo-hero__texto {
-  flex: 1.2 1 500px;
-}
-
-.wo-sobmedida-hero .wo-hero__visual {
-  flex: 1 1 400px;
-}
-
-.wo-sobmedida-hero .wo-h1 {
-  margin-top: 18px;
-}
-
-.wo-sobmedida-hero .wo-hero__lead {
-  margin-top: 22px;
-  max-width: 580px;
-}
+/* WaveOps · peças que só a página Projetos sob medida usa: o conteúdo do cartão "Proposta", o atalho
+   das frentes, o ajuste da tabela de modelos para três campos, as notas dos modelos e as perguntas.
+   A abertura, a lista editorial das frentes, as colunas numeradas e a tabela de modelos são peças de
+   components.css. O h3 de cada frente leva a classe wo-sobmedida-frente__nome, que serve de gancho
+   para teste e não tem regra própria: o estilo vem de .wo-lista-editorial__item h3.
+   Depende de tokens.css, base.css e components.css. */
 
 /* ---------- Cartão "Proposta" (modelo ilustrativo) ---------- */
 .wo-sobmedida-proposta {
-  padding: clamp(22px, 2.4vw, 30px);
-  border-radius: var(--wo-raio-lg);
+  padding: var(--wo-espaco-3);
 }
 
 .wo-sobmedida-proposta .wo-maquete__cabeca {
   margin-bottom: 0;
 }
 
+/* "Título de cartão" de 5.2. */
 .wo-sobmedida-proposta__texto {
-  margin-top: 16px;
-  font-size: 16.5px;
+  margin-top: var(--wo-espaco-2);
+  font-family: var(--wo-fonte-titulo);
+  font-size: var(--wo-h3-cartao);
   font-weight: 500;
-  line-height: 1.5;
+  letter-spacing: -0.02em;
+  line-height: 1.55;
 }
 
 .wo-sobmedida-proposta__itens {
-  display: flex;
-  flex-direction: column;
-  margin-top: 16px;
+  margin-top: var(--wo-espaco-2);
+  border-top: var(--wo-linha-fina) solid var(--wo-borda);
 }
 
 .wo-sobmedida-proposta__itens > div {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 13px 0;
-  border-top: 1px solid var(--wo-borda);
-}
-
-.wo-sobmedida-proposta__itens > div:last-child {
-  border-bottom: 1px solid var(--wo-borda);
+  gap: var(--wo-espaco-2);
+  min-height: var(--wo-alvo);
+  padding: var(--wo-espaco-1) 0;
+  border-bottom: var(--wo-linha-fina) solid var(--wo-borda);
 }
 
 .wo-sobmedida-proposta__itens dt {
   color: var(--wo-texto-2);
-  font-size: 15px;
 }
 
+/* "Nota e etiqueta de tecnologia" de 5.2, em tinta 3. */
 .wo-sobmedida-proposta__itens dd {
-  font-family: var(--wo-mono);
-  font-size: 12.5px;
+  color: var(--wo-texto-3);
+  font-size: var(--wo-texto-pequeno);
+  line-height: 1.45;
+  text-align: right;
 }
 
-/* O selo "aguardando" usa a aparência de .wo-selo--desenvolvimento, mas em Hanken Grotesk
-   e com 3 px de padding vertical, como no design. */
-.wo-sobmedida-proposta__itens .wo-selo {
-  padding-block: 3px;
-  font-family: var(--wo-fonte);
-  line-height: 1.6;
+@media (min-width: 768px) {
+  .wo-sobmedida-proposta {
+    padding: var(--wo-espaco-4);
+  }
 }
 
-/* O design não define line-height no selo: ele herda 1,6 do corpo. O .wo-selo compartilhado usa 1,4,
-   o que deixa cada selo 2,4 px mais baixo. */
-.wo-sobmedida-hero .wo-selo,
-.wo-sobmedida-modelos .wo-selo {
-  line-height: 1.6;
-}
-
-/* ---------- Frentes ---------- */
-/* 660 px, não os 640 px do .wo-lead: com 640 a primeira linha perde a palavra "o" para a segunda. */
-.wo-sobmedida-frentes .wo-lead {
-  max-width: 660px;
-}
-
+/* ---------- Atalho das frentes ---------- */
 .wo-sobmedida-atalhos {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 28px;
-}
-
-.wo-sobmedida-atalho {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--wo-alvo);
-  padding: 0 14px;
-  border: 1px solid var(--wo-borda-forte);
-  border-radius: var(--wo-raio-btn);
-  color: var(--wo-texto);
-  font-size: 13.5px;
-  font-weight: 500;
-  text-decoration: none;
-  transition: border-color var(--wo-transicao);
-}
-
-.wo-sobmedida-atalho:hover {
-  border-color: var(--wo-acento-borda);
-  color: var(--wo-texto);
-}
-
-.wo-sobmedida-frentes__lista {
-  margin-top: 36px;
-  border-bottom: 1px solid var(--wo-borda);
-}
-
-/* Três colunas que quebram sozinhas: título, descrição e itens. Os valores de flex são os
-   do design, então em 768 px a lista desce para baixo do título. */
-.wo-sobmedida-frente {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 14px 44px;
-  padding: 30px 0;
-  border-top: 1px solid var(--wo-borda);
-}
-
-.wo-sobmedida-frente__cabeca {
-  flex: 1 1 230px;
-  min-width: 0;
-}
-
-/* 11,5 px como no design (o .wo-rotulo-mono compartilhado usa 11 px). Em 768 px e no celular o
-   cabeçalho da frente é a linha mais alta, então 0,8 px por frente chega a 7 px na página. */
-.wo-sobmedida-frente__cabeca .wo-rotulo-mono {
-  font-size: 11.5px;
-}
-
-.wo-sobmedida-frente__nome {
-  margin-top: 8px;
-  font-size: 23px;
-  font-weight: 500;
-  line-height: 1.2;
-  letter-spacing: -0.035em;
-}
-
-.wo-sobmedida-frente__texto {
-  flex: 1.3 1 290px;
-  min-width: 0;
-  color: var(--wo-texto-2);
-  font-size: 15.5px;
-  line-height: 1.7;
-}
-
-.wo-sobmedida-frente__itens {
-  flex: 1.5 1 320px;
-  gap: 8px;
-  min-width: 0;
-  color: var(--wo-texto-3);
-  font-size: 14.5px;
-  line-height: 1.55;
-}
-
-.wo-sobmedida-frente__itens li {
-  gap: 9px;
-}
-
-.wo-sobmedida-frente__itens svg {
-  width: 15px;
-  height: 15px;
-  margin-top: 4px;
-}
-
-/* ---------- Como trabalhamos (trilha horizontal) ---------- */
-/* #1c1830 é a "superfície de acento escura" do design. Fica opaca de propósito: o círculo
-   cobre o fio da etapa. Candidata a token em tokens.css. */
-.wo-sobmedida-etapas {
-  --wo-sobmedida-acento-escuro: #1c1830;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 48px 0;
-  margin-top: 64px;
-}
-
-.wo-sobmedida-etapa {
-  min-width: 0;
-  padding-right: 28px;
-  border-top: 1px solid var(--wo-borda-forte);
-}
-
-/* 40 px: o design soma 38 px de conteúdo e 1 px de borda de cada lado. */
-.wo-sobmedida-etapa__numero {
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  margin-top: -20px;
-  border: 1px solid var(--wo-acento-borda);
-  border-radius: 50%;
-  background: var(--wo-sobmedida-acento-escuro);
-  color: var(--wo-acento-texto);
-  font-family: var(--wo-mono);
-  font-size: 13px;
-}
-
-.wo-sobmedida-etapa__titulo {
-  margin-top: 18px;
-  font-size: 21px;
-  font-weight: 600;
-  line-height: 1.25;
-  letter-spacing: -0.03em;
-}
-
-.wo-sobmedida-etapa__texto {
-  margin-top: 8px;
-  color: var(--wo-texto-3);
-  font-size: 15px;
-  line-height: 1.7;
-}
-
-.wo-sobmedida-etapa__recebe {
-  margin-top: 14px;
-  color: var(--wo-texto-2);
-  font-size: 14.5px;
-  line-height: 1.6;
-}
-
-.wo-sobmedida-etapa__recebe .wo-rotulo-mono {
-  margin-bottom: 4px;
+  margin-top: var(--wo-espaco-4);
 }
 
 /* ---------- Modelos de contratação ---------- */
-/* O componente .wo-modelos nasceu com dois campos por linha (Home). Aqui são três. */
-.wo-sobmedida-modelos .wo-modelo {
-  gap: 14px 36px;
+/* Três campos por modelo, onde a Home tem dois. A coluna do nome tem 1,2 parte contra 1 de cada campo,
+   igual em todas as linhas para os campos alinharem. O vão fecha em 32 px até 1279 px: em 1024 px,
+   "Implementação" cabe na coluna dela. */
+@media (min-width: 1024px) {
+  .wo-sobmedida-modelos .wo-modelo {
+    grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(0, 1fr)) auto;
+    gap: var(--wo-espaco-4);
+  }
 }
 
-.wo-sobmedida-modelos .wo-modelo__campo {
-  flex: 1.3 1 210px;
+@media (min-width: 1280px) {
+  .wo-sobmedida-modelos .wo-modelo {
+    gap: var(--wo-espaco-5);
+  }
 }
 
-.wo-sobmedida-notas {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
-  gap: 16px 48px;
-  margin-top: 28px;
-  color: var(--wo-texto-3);
-  font-size: 15px;
-  line-height: 1.7;
+.wo-sobmedida-notas p {
+  flex: 1 1 320px;
 }
 
 .wo-sobmedida-notas strong {
   color: var(--wo-texto);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 /* ---------- Perguntas frequentes ---------- */
-.wo-sobmedida-faq {
-  padding-bottom: clamp(20px, 2.4vw, 36px);
-}
-
-.wo-sobmedida-faq__grade {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 36px 72px;
-}
-
-.wo-sobmedida-faq__intro {
-  flex: 1 1 320px;
-  min-width: 0;
-}
-
-.wo-sobmedida-faq__titulo {
-  max-width: none;
-  font-size: clamp(30px, 3.6vw, 52px);
-}
-
-.wo-sobmedida-faq__caixa {
+.wo-sobmedida-faq__ajuda {
   max-width: 420px;
-  margin-top: 28px;
-  padding: 20px 22px;
-  border: 1px solid rgba(162, 139, 249, 0.3);
-  border-radius: 14px;
-  background: rgba(162, 139, 249, 0.08);
+  margin-top: var(--wo-espaco-4);
 }
 
-.wo-sobmedida-faq__caixa p {
+.wo-sobmedida-faq__ajuda p {
   color: var(--wo-texto-2);
-  font-size: 15px;
-  line-height: 1.7;
 }
 
 .wo-sobmedida-faq__lista {
-  display: flex;
-  flex: 2 1 560px;
-  flex-direction: column;
-  min-width: 0;
-  border-bottom: 1px solid var(--wo-borda);
+  border-top: var(--wo-linha-forte) solid var(--wo-texto);
 }
 
 .wo-sobmedida-faq__item {
-  border-top: 1px solid var(--wo-borda);
+  border-bottom: var(--wo-linha-fina) solid var(--wo-borda);
 }
 
-/* O design soma 44 px de conteúdo mínimo a 20 px de padding em cima e embaixo: 84 px por pergunta. */
+/* A pergunta é um título de cartão (5.2) que abre a resposta. */
 .wo-sobmedida-faq__pergunta {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  min-height: 84px;
-  padding: 20px 0;
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1.35;
+  gap: var(--wo-espaco-3);
+  min-height: var(--wo-alvo);
+  padding: var(--wo-espaco-3) 0;
+  font-family: var(--wo-fonte-titulo);
+  font-size: var(--wo-h3-cartao);
+  font-weight: 500;
   letter-spacing: -0.02em;
+  line-height: 1.55;
   list-style: none;
   cursor: pointer;
+  transition: color var(--wo-transicao);
 }
 
 .wo-sobmedida-faq__pergunta::-webkit-details-marker {
   display: none;
+}
+
+.wo-sobmedida-faq__pergunta:hover {
+  color: var(--wo-acento-texto);
 }
 
 .wo-sobmedida-faq__icone {
@@ -350,29 +141,11 @@
 }
 
 .wo-sobmedida-faq__item[open] .wo-sobmedida-faq__icone {
-  transform: rotate(45deg);
+  transform: rotate(180deg);
 }
 
-/* 680 px de texto mais 44 px de respiro à direita, como no design. */
 .wo-sobmedida-faq__resposta {
-  max-width: 724px;
-  padding: 0 44px 22px 0;
-  color: var(--wo-texto-3);
-  font-size: 15.5px;
-  line-height: 1.75;
-}
-
-/* ---------- Responsivo ---------- */
-/* Etapas: 4 colunas, depois 2 por 2, depois 1. O design deixava o flex-wrap decidir e entre
-   773 e 1029 px sobrava 3 mais 1, com a última etapa esticada na largura toda. */
-@media (max-width: 1029px) {
-  .wo-sobmedida-etapas {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 523px) {
-  .wo-sobmedida-etapas {
-    grid-template-columns: minmax(0, 1fr);
-  }
+  max-width: 680px;
+  padding: 0 var(--wo-espaco-5) var(--wo-espaco-3) 0;
+  color: var(--wo-texto-2);
 }

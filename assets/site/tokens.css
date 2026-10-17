@@ -25,6 +25,13 @@
   --wo-clara-2: rgb(255 255 255 / 0.75);
   --wo-linha-noite: rgb(255 255 255 / 0.15);
 
+  /* Primitivos: situação no claro, 4,5:1 sobre o papel, o papel 2 e o branco. O cartão claro volta a
+     eles dentro de .wo-noite. */
+  --wo-sucesso-claro: #166534;
+  --wo-alerta-claro: #92400e;
+  --wo-erro-claro: #b91c1c;
+  --wo-info-claro: #0369a1;
+
   /* Primitivos: marca */
   --wo-violeta: #7c3aed;
   --wo-violeta-forte: #6d28d9;
@@ -59,11 +66,10 @@
   --wo-sobre-acento: var(--wo-branco);
   /* Fundo do botão de contorno: nenhum no claro, preto a 30% no escuro (spec 5.4). */
   --wo-contorno-fundo: transparent;
-  /* Situação no claro: 4,5:1 ou mais sobre o papel, o papel 2 e o branco. */
-  --wo-sucesso: #166534;
-  --wo-alerta: #92400e;
-  --wo-erro: #b91c1c;
-  --wo-info: #0369a1;
+  --wo-sucesso: var(--wo-sucesso-claro);
+  --wo-alerta: var(--wo-alerta-claro);
+  --wo-erro: var(--wo-erro-claro);
+  --wo-info: var(--wo-info-claro);
 
   /* Tipografia: Geist nos títulos e Inter no texto (spec 5.2) */
   --wo-fonte-titulo: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -72,6 +78,7 @@
   --wo-h2: clamp(34px, 28.8px + 1.333vw, 48px);
   --wo-h3-linha: clamp(24px, 21.77px + 0.571vw, 30px);
   --wo-h3-etapa: clamp(22px, 21.26px + 0.19vw, 24px);
+  --wo-h3-cartao: 18px;
   --wo-lead-hero: clamp(18px, 17.26px + 0.19vw, 20px);
   /* Número de etapa: Geist de 24 px fixos, peso 500, altura de linha 1,33 (5.2). */
   --wo-numero-etapa: 24px;

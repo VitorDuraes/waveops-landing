@@ -1,11 +1,16 @@
 import { test, expect } from '@playwright/test';
 
-/* Tipografia da Home contra a tabela 5.2 da spec: Geist nos títulos e Inter no texto. Cada papel
-   da tabela vira uma linha de PAPEIS, com família, faixa de tamanho (do celular ao desktop, porque
-   vários tamanhos são clamp()), peso, entreletra em em e altura de linha como proporção do
-   tamanho. Os valores saem de getComputedStyle, nos projetos desktop e celular, com a página já
-   renderizada: o que a pessoa vê, não o que o CSS declara. Peça nova em components.css que a
-   Home consome entra aqui junto, para a Tarefa 6 em diante herdar o valor certo. */
+/* Tipografia das páginas contra a tabela 5.2 da spec: Geist nos títulos e Inter no texto. Cada
+   papel da tabela vira uma linha de PAPEIS_*, com família, faixa de tamanho (do celular ao
+   desktop, porque vários tamanhos são clamp()), peso, entreletra em em e altura de linha como
+   proporção do tamanho. Os valores saem de getComputedStyle, nos projetos desktop e celular, com a
+   página já renderizada: o que a pessoa vê, não o que o CSS declara. Peça nova em components.css
+   que uma página consome entra aqui junto, para a página seguinte herdar o valor certo.
+
+   Peça sem linha em 5.2 vale a linha mais próxima pela função (decisão de 16/10/2026):
+   .wo-sobretitulo e .wo-maquete__titulo são "Etiqueta em caixa alta"; .wo-lead e o parágrafo de
+   abertura de uma seção são "Texto", e só o de dentro de uma abertura é "Texto de apoio do hero";
+   .wo-link-seta é "Botão e menu" em peso 500; a nota de rodapé de uma tabela é "Nota". */
 
 type Papel = {
   /** Nome da linha em 5.2. */
@@ -26,19 +31,40 @@ type Papel = {
   bordaEsquerda?: string;
 };
 
-const PAPEIS: readonly Papel[] = [
+const PAPEIS_HOME: readonly Papel[] = [
   { nome: 'Título do hero', seletor: 'h1#home-titulo', minimo: 1, familia: 'Geist', tamanho: [44, 72], peso: 600, entreletra: -0.035, altura: 1.05 },
   { nome: 'Título de seção', seletor: 'main h2, .wo-home-entrada__nome', minimo: 8, familia: 'Geist', tamanho: [34, 48], peso: 600, entreletra: -0.035, altura: 1.05 },
   { nome: 'Título de linha (modelos)', seletor: '.wo-tabela-modelos .wo-modelo__nome h3', minimo: 3, familia: 'Geist', tamanho: [24, 30], peso: 500, entreletra: -0.02, altura: 1.2 },
   { nome: 'Título de etapa', seletor: '.wo-colunas-numeradas__item h3', minimo: 4, familia: 'Geist', tamanho: [22, 24], peso: 500, entreletra: -0.02, altura: 1.33 },
   { nome: 'Termo das definições (título de etapa)', seletor: '.wo-definicoes dt', minimo: 5, familia: 'Geist', tamanho: [22, 24], peso: 500, entreletra: -0.02, altura: 1.33 },
   { nome: 'Número de etapa', seletor: '.wo-colunas-numeradas__numero', minimo: 4, familia: 'Geist', tamanho: [24, 24], peso: 500, entreletra: 0, altura: 1.33, cor: 'rgb(109, 40, 217)' },
-  { nome: 'Texto', seletor: '.wo-colunas-numeradas__item p, .wo-definicoes dd, .wo-tabela-modelos .wo-modelo__campo p', minimo: 19, familia: 'Inter', tamanho: [16, 16], peso: 400, entreletra: 0, altura: 1.625 },
+  { nome: 'Texto', seletor: '.wo-colunas-numeradas__item p, .wo-definicoes dd, .wo-tabela-modelos .wo-modelo__campo p, .wo-lead', minimo: 21, familia: 'Inter', tamanho: [16, 16], peso: 400, entreletra: 0, altura: 1.625 },
   { nome: 'Texto de apoio do hero', seletor: '.wo-home-hero__frase', minimo: 1, familia: 'Inter', tamanho: [18, 20], peso: 400, entreletra: 0, altura: 1.6 },
-  { nome: 'Nota', seletor: '.wo-home-hero__texto .wo-nota-mono', minimo: 1, familia: 'Inter', tamanho: [14, 14], peso: 400, entreletra: 0, altura: 1.45 },
-  { nome: 'Etiqueta em caixa alta (hero, "Você recebe", modelos)', seletor: '.wo-home-hero__etiquetas li, .wo-colunas-numeradas__recebe .wo-etiqueta, .wo-tabela-modelos .wo-etiqueta', minimo: 13, familia: 'Inter', tamanho: [12, 12], peso: 500, entreletra: 0.15, altura: 1.35, caixaAlta: true },
+  { nome: 'Nota', seletor: '.wo-home-hero__texto .wo-nota-mono, .wo-modelos__rodape p', minimo: 2, familia: 'Inter', tamanho: [14, 14], peso: 400, entreletra: 0, altura: 1.45 },
+  { nome: 'Etiqueta em caixa alta (hero, "Você recebe", modelos, sobretítulo)', seletor: '.wo-home-hero__etiquetas li, .wo-colunas-numeradas__recebe .wo-etiqueta, .wo-tabela-modelos .wo-etiqueta, .wo-sobretitulo, .wo-maquete__titulo', minimo: 19, familia: 'Inter', tamanho: [12, 12], peso: 500, entreletra: 0.15, altura: 1.35, caixaAlta: true },
   { nome: 'Selo do hero', seletor: '.wo-home-hero .wo-etiqueta-hero', minimo: 1, familia: 'Inter', tamanho: [11, 11], peso: 500, entreletra: 0.15, altura: 1.5, caixaAlta: true, bordaEsquerda: '2px solid' },
   { nome: 'Botão', seletor: '.wo-home-hero .wo-btn', minimo: 2, familia: 'Inter', tamanho: [14, 14], peso: 500, entreletra: 0, altura: 1.43 },
+  { nome: 'Link com seta (botão e menu, peso 500)', seletor: '.wo-link-seta', minimo: 2, familia: 'Inter', tamanho: [14, 14], peso: 500, entreletra: 0, altura: 1.43 },
+];
+
+/* Projetos sob medida (Tarefa 6): a abertura é o hero da página, então o título e o parágrafo dela
+   seguem as linhas "do hero". A lista editorial das frentes, as colunas numeradas, a tabela de
+   modelos e as perguntas são as peças de 5.4. A pergunta é o título de uma linha que abre, e o
+   título do cartão "Proposta" é "Título de cartão". */
+const PAPEIS_SOBMEDIDA: readonly Papel[] = [
+  { nome: 'Título do hero', seletor: 'h1#sobmedida-titulo', minimo: 1, familia: 'Geist', tamanho: [44, 72], peso: 600, entreletra: -0.035, altura: 1.05 },
+  { nome: 'Título de seção', seletor: 'main h2', minimo: 5, familia: 'Geist', tamanho: [34, 48], peso: 600, entreletra: -0.035, altura: 1.05 },
+  { nome: 'Título de linha (frentes e modelos)', seletor: '.wo-lista-editorial__item h3, .wo-tabela-modelos .wo-modelo__nome h3', minimo: 8, familia: 'Geist', tamanho: [24, 30], peso: 500, entreletra: -0.02, altura: 1.2 },
+  { nome: 'Título de etapa', seletor: '.wo-colunas-numeradas__item h3', minimo: 4, familia: 'Geist', tamanho: [22, 24], peso: 500, entreletra: -0.02, altura: 1.33 },
+  { nome: 'Título de cartão (Proposta e perguntas)', seletor: '.wo-sobmedida-proposta__texto, .wo-sobmedida-faq__pergunta', minimo: 8, familia: 'Geist', tamanho: [18, 18], peso: 500, entreletra: -0.02, altura: 1.55 },
+  { nome: 'Número de etapa', seletor: '.wo-colunas-numeradas__numero', minimo: 4, familia: 'Geist', tamanho: [24, 24], peso: 500, entreletra: 0, altura: 1.33, cor: 'rgb(109, 40, 217)' },
+  { nome: 'Texto', seletor: '.wo-lead, .wo-lista-editorial__item p, .wo-colunas-numeradas__item p, .wo-tabela-modelos .wo-modelo__campo p, .wo-sobmedida-faq__resposta, .wo-sobmedida-faq__ajuda p, .wo-sobmedida-proposta__itens dt', minimo: 39, familia: 'Inter', tamanho: [16, 16], peso: 400, entreletra: 0, altura: 1.625 },
+  { nome: 'Texto de apoio do hero', seletor: '.wo-abertura__lead', minimo: 1, familia: 'Inter', tamanho: [18, 20], peso: 400, entreletra: 0, altura: 1.6 },
+  { nome: 'Nota e etiqueta de tecnologia', seletor: '.wo-lista-editorial__etiquetas, .wo-modelos__rodape p, .wo-sobmedida-proposta__itens dd', minimo: 13, familia: 'Inter', tamanho: [14, 14], peso: 400, entreletra: 0, altura: 1.45 },
+  { nome: 'Etiqueta em caixa alta (sobretítulo, "Frente 0N", "Você recebe", campos dos modelos)', seletor: '.wo-sobretitulo, .wo-etiqueta, .wo-maquete__titulo', minimo: 24, familia: 'Inter', tamanho: [12, 12], peso: 500, entreletra: 0.15, altura: 1.35, caixaAlta: true },
+  { nome: 'Selo do hero', seletor: '.wo-abertura .wo-etiqueta-hero', minimo: 1, familia: 'Inter', tamanho: [11, 11], peso: 500, entreletra: 0.15, altura: 1.5, caixaAlta: true, bordaEsquerda: '2px solid' },
+  { nome: 'Botão', seletor: '.wo-abertura .wo-btn, .wo-sobmedida-atalhos .wo-btn', minimo: 7, familia: 'Inter', tamanho: [14, 14], peso: 500, entreletra: 0, altura: 1.43 },
+  { nome: 'Link com seta (botão e menu, peso 500)', seletor: '.wo-link-seta', minimo: 1, familia: 'Inter', tamanho: [14, 14], peso: 500, entreletra: 0, altura: 1.43 },
 ];
 
 type Medida = {
@@ -76,35 +102,40 @@ function divergencias(papel: Papel, medida: Medida): string[] {
   return erros;
 }
 
-test.describe('tipografia da Home (spec 5.2)', () => {
-  test.use({ reducedMotion: 'reduce' });
-  test.beforeEach(async ({}, info) => {
-    test.skip(info.project.name === 'tablet', 'mesmas regras no desktop e no celular');
-  });
-
-  for (const papel of PAPEIS) {
-    test(`${papel.nome}: ${papel.familia}, ${papel.tamanho[0]} a ${papel.tamanho[1]} px, peso ${papel.peso}`, async ({ page }) => {
-      await page.goto('/');
-      const medidas: Medida[] = await page.locator(papel.seletor).evaluateAll((elementos) => elementos.map((elemento) => {
-        const estilo = getComputedStyle(elemento);
-        return {
-          texto: (elemento.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 32),
-          familia: estilo.fontFamily,
-          tamanho: estilo.fontSize,
-          peso: estilo.fontWeight,
-          entreletra: estilo.letterSpacing,
-          altura: estilo.lineHeight,
-          caixa: estilo.textTransform,
-          cor: estilo.color,
-          borda: `${estilo.borderLeftWidth} ${estilo.borderLeftStyle}`,
-        };
-      }));
-      expect.soft(medidas.length, `elementos achados por ${papel.seletor}`).toBeGreaterThanOrEqual(papel.minimo);
-      const erros = medidas.flatMap((medida) => divergencias(papel, medida).map((erro) => `"${medida.texto}": ${erro}`));
-      expect(erros).toEqual([]);
+function medirPapeis(titulo: string, url: string, papeis: readonly Papel[]): void {
+  test.describe(titulo, () => {
+    test.use({ reducedMotion: 'reduce' });
+    test.beforeEach(async ({}, info) => {
+      test.skip(info.project.name === 'tablet', 'mesmas regras no desktop e no celular');
     });
-  }
-});
+
+    for (const papel of papeis) {
+      test(`${papel.nome}: ${papel.familia}, ${papel.tamanho[0]} a ${papel.tamanho[1]} px, peso ${papel.peso}`, async ({ page }) => {
+        await page.goto(url);
+        const medidas: Medida[] = await page.locator(papel.seletor).evaluateAll((elementos) => elementos.map((elemento) => {
+          const estilo = getComputedStyle(elemento);
+          return {
+            texto: (elemento.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 32),
+            familia: estilo.fontFamily,
+            tamanho: estilo.fontSize,
+            peso: estilo.fontWeight,
+            entreletra: estilo.letterSpacing,
+            altura: estilo.lineHeight,
+            caixa: estilo.textTransform,
+            cor: estilo.color,
+            borda: `${estilo.borderLeftWidth} ${estilo.borderLeftStyle}`,
+          };
+        }));
+        expect.soft(medidas.length, `elementos achados por ${papel.seletor}`).toBeGreaterThanOrEqual(papel.minimo);
+        const erros = medidas.flatMap((medida) => divergencias(papel, medida).map((erro) => `"${medida.texto}": ${erro}`));
+        expect(erros).toEqual([]);
+      });
+    }
+  });
+}
+
+medirPapeis('tipografia da Home (spec 5.2)', '/', PAPEIS_HOME);
+medirPapeis('tipografia de Projetos sob medida (spec 5.2)', '/projetos-sob-medida/', PAPEIS_SOBMEDIDA);
 
 /* Spec 5.4, tabela de modelos: nome com subtítulo, descrição, três pontos e seta. A seta é só
    desenho. Link para /contato/ com nome acessível inventado não está na spec nem no plano, e

@@ -514,7 +514,7 @@ A Tarefa 2 entregou o palco em cartão. Esta tarefa troca o layout pelo palco de
 
 ### Tarefa 5: Home
 
-**Estimativa:** 2 h. **Depende de:** 1 a 4. **Leia antes:** spec 5.4, 6.3, 6.4, 7.1, 8.2 e D18 (seção 14).
+**Estimativa:** 2 h. **Depende de:** 1 a 4. **Leia antes:** spec 5.2, 5.4, 6.3, 6.4, 7.1, 8.2 e D18 (seção 14).
 
 **Arquivos:**
 - Criar: `assets/site/lib/video.js`, `tests/site/e2e/video.spec.ts`
@@ -602,7 +602,7 @@ test('deveTocar exige página carregada, hero na tela, aba visível e nenhum blo
 
 ### Tarefa 6: Projetos sob medida, com o rodapé das cinco frentes
 
-**Estimativa:** 1,5 h. **Depende de:** 3 e 5. **Leia antes:** spec 7.3, 8.1, 8.3, 8.7 e 14.2.
+**Estimativa:** 1,5 h. **Depende de:** 3 e 5. **Leia antes:** spec 5.2, 5.4, 7.3, 8.1, 8.3, 8.7 e 14.2.
 
 **Arquivos:**
 - Modificar: `projetos-sob-medida/index.html`, `assets/site/paginas/sobmedida.css`, `assets/site/components.css`, `dev/site/parciais/rodape.html`, `tests/site/unit/conteudo.test.mjs`
@@ -650,7 +650,7 @@ test('o rodapé leva às cinco frentes', () => {
 
 ### Tarefa 7: Soluções
 
-**Estimativa:** 1 h. **Depende de:** 6. **Leia antes:** spec 7.2 e 8.5.
+**Estimativa:** 1 h. **Depende de:** 6. **Leia antes:** spec 5.2, 5.4, 7.2 e 8.5.
 
 **Arquivos:**
 - Modificar: `solucoes/index.html`, `assets/site/paginas/solucoes.css`, `tests/site/unit/conteudo.test.mjs`
@@ -690,7 +690,7 @@ test('Soluções indica as cinco frentes em Como contratar (spec 8.5)', () => {
 
 ### Tarefa 8: Plataforma (só o visual)
 
-**Estimativa:** 1 h. **Depende de:** 3 e 5. **Leia antes:** spec 5.4 e 7.4.
+**Estimativa:** 1 h. **Depende de:** 3 e 5. **Leia antes:** spec 5.2, 5.4 e 7.4.
 
 **Arquivos:**
 - Modificar: `plataforma/index.html` (só classes e estrutura visual), `assets/site/paginas/plataforma.css`, `assets/site/components.css` se surgir peça compartilhada
@@ -707,7 +707,7 @@ test('Soluções indica as cinco frentes em Como contratar (spec 8.5)', () => {
 
 ### Tarefa 9: Contato
 
-**Estimativa:** 1 h. **Depende de:** 3 e 5. **Leia antes:** spec 5.4 e 7.5.
+**Estimativa:** 1 h. **Depende de:** 3 e 5. **Leia antes:** spec 5.2, 5.4 e 7.5.
 
 **Arquivos:**
 - Modificar: `contato/index.html`, `assets/site/paginas/contato.css`
@@ -724,7 +724,7 @@ test('Soluções indica as cinco frentes em Como contratar (spec 8.5)', () => {
 
 ### Tarefa 10: Demonstrações técnicas
 
-**Estimativa:** 1 h. **Depende de:** 5. **Leia antes:** spec 7.6, 8.6 e 14.3.
+**Estimativa:** 1 h. **Depende de:** 5. **Leia antes:** spec 5.2, 5.4, 7.6, 8.6 e 14.3.
 
 **Arquivos:**
 - Modificar: `demonstracoes-tecnicas/index.html`, `assets/site/paginas/demonstracoes.css`, `tests/site/e2e/demonstracoes.spec.ts`

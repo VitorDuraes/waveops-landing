@@ -169,11 +169,17 @@ test.describe('vídeo do hero', () => {
     await aba.close();
   });
 
-  /* Só o pôster: com menos movimento o vídeo nem carrega, e o pôster é também o quadro de 0 s.
-     O pior caso fica sem a camada preta própria do selo (visibility: hidden esconde o fundo do
-     elemento junto com o texto). Medido em 16/10/2026 com o vídeo tocando em 0, 3, 6 e 9 s, em
-     1440 x 900 e 390 x 844: a menor razão do selo foi 9,07 e a da nota, 11,39. */
-  test('o selo e a nota do hero têm contraste AA sobre o pôster', async ({ page, context }) => {
+  /* O fundo do hero é fixo e o texto sobe por cima dele quando a página rola, então o texto passa
+     por todas as alturas do pôster, inclusive pelo brilho da onda. O teste rola de 12 px em 12 px,
+     do repouso até o texto chegar embaixo do topo, e em cada passo acha o pixel mais claro dentro
+     da caixa do texto, escondido com visibility: hidden (o pior caso: o selo perde a camada preta
+     própria). O passo é menor que a linha do selo (14 px), então as caixas de passos vizinhos se
+     encostam e nenhuma altura do fundo fica sem medir. Só o pôster: com menos movimento o vídeo
+     nem carrega, e o pôster é o quadro de 0 s. A medição dos 24 quadros do laço, uma só vez, está
+     no relatório da Tarefa 5. */
+  test('o selo e a nota do hero mantêm 4,5:1 sobre o pôster durante toda a rolagem', async ({ page, context }) => {
+    test.setTimeout(120_000);
+    const PASSO = 12;
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/');
     await page.evaluate(() => document.fonts.ready);
@@ -181,50 +187,81 @@ test.describe('vídeo do hero', () => {
     await expect(page.locator('video')).toHaveJSProperty('currentSrc', '');
     // Com menos movimento o CSS põe transition-duration em tudo; sem transição, esconder vale na hora.
     await page.addStyleTag({ content: '*, *::before, *::after { transition: none !important; }' });
+    const topo = await page.locator('.wo-topo').evaluate((elemento) => elemento.getBoundingClientRect().bottom);
+    const altura = page.viewportSize()!.height;
     const alvos = await page.evaluate(() => [
       { nome: 'selo', seletor: '.wo-home-hero .wo-etiqueta-hero' },
       { nome: 'nota', seletor: '.wo-home-hero__texto .wo-nota-mono' },
     ].map(({ nome, seletor }) => {
       const elemento = document.querySelector<HTMLElement>(seletor)!;
-      const faixa = document.createRange();
-      faixa.selectNodeContents(elemento);
-      const retangulos = [...faixa.getClientRects()].map((r) => ({ x: r.x, y: r.y, w: r.width, h: r.height }));
+      elemento.setAttribute('data-medir', nome);
       const cor = getComputedStyle(elemento).color;
       elemento.style.setProperty('visibility', 'hidden', 'important');
-      return { nome, cor, retangulos };
+      return { nome, cor };
     }));
-    const png = await page.screenshot({ scale: 'css' });
-    const aba = await context.newPage();
-    const claros = await aba.evaluate(async ({ base64, retangulosPorAlvo }) => {
-      const img = new Image(); img.src = `data:image/png;base64,${base64}`; await img.decode();
-      const canvas = document.createElement('canvas'); canvas.width = img.width; canvas.height = img.height;
-      const ctx = canvas.getContext('2d', { willReadFrequently: true })!; ctx.drawImage(img, 0, 0);
-      const lin = (canal: number) => { const s = canal / 255; return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4; };
-      return retangulosPorAlvo.map((retangulos) => {
-        let melhor = { luz: -1, rgb: [0, 0, 0] };
-        let pixels = 0;
-        for (const r of retangulos) {
-          const x0 = Math.max(0, Math.floor(r.x)); const y0 = Math.max(0, Math.floor(r.y));
-          const x1 = Math.min(img.width, Math.ceil(r.x + r.w)); const y1 = Math.min(img.height, Math.ceil(r.y + r.h));
-          if (x1 <= x0 || y1 <= y0) continue;
-          const dados = ctx.getImageData(x0, y0, x1 - x0, y1 - y0).data;
-          for (let i = 0; i < dados.length; i += 4) {
-            pixels += 1;
-            const luz = 0.2126 * lin(dados[i]!) + 0.7152 * lin(dados[i + 1]!) + 0.0722 * lin(dados[i + 2]!);
-            if (luz > melhor.luz) melhor = { luz, rgb: [dados[i]!, dados[i + 1]!, dados[i + 2]!] };
-          }
-        }
-        return { rgb: melhor.rgb, pixels };
+    /** Rola até `y` e devolve as caixas do texto na janela, cortadas entre o fim do topo e o fim da janela. */
+    const rolarPara = (y: number) => page.evaluate(async ({ y, topo, altura }) => {
+      scrollTo({ top: y, behavior: 'instant' });
+      await new Promise<void>((ok) => requestAnimationFrame(() => requestAnimationFrame(() => ok())));
+      return [...document.querySelectorAll<HTMLElement>('[data-medir]')].map((elemento) => {
+        const faixa = document.createRange();
+        faixa.selectNodeContents(elemento);
+        const retangulos = [...faixa.getClientRects()]
+          .map((r) => ({ x: r.x, y: Math.max(r.y, topo), w: r.width, h: Math.min(r.y + r.height, altura) - Math.max(r.y, topo) }))
+          .filter((r) => r.w > 0 && r.h > 0);
+        return { nome: elemento.dataset.medir!, retangulos };
       });
-    }, { base64: png.toString('base64'), retangulosPorAlvo: alvos.map((alvo) => alvo.retangulos) });
-    await aba.close();
-    for (const [i, alvo] of alvos.entries()) {
-      const claro = claros[i]!;
-      expect(claro.pixels, `${alvo.nome}: pixels dentro da janela`).toBeGreaterThan(0);
-      const [r = 255, g = 255, b = 255, alfa = 1] = (alvo.cor.match(/[\d.]+/g) ?? []).map(Number);
-      const composto = [r, g, b].map((canal, k) => canal * alfa + claro.rgb[k]! * (1 - alfa));
-      const razao = razaoDeContraste(luminancia(composto[0]!, composto[1]!, composto[2]!), luminancia(claro.rgb[0]!, claro.rgb[1]!, claro.rgb[2]!));
-      expect(razao, `${alvo.nome}: ${alvo.cor} sobre rgb(${claro.rgb.join(', ')}) dá ${razao.toFixed(2)}:1`).toBeGreaterThanOrEqual(4.5);
+    }, { y, topo, altura });
+    const leitor = await context.newPage();
+    const piores = new Map<string, { razao: number; rgb: number[]; rolagem: number }>();
+    const passos = new Map<string, number>();
+    let terminou = false;
+    for (let rolagem = 0; rolagem < 6000; rolagem += PASSO) {
+      const visiveis = (await rolarPara(rolagem)).filter((alvo) => alvo.retangulos.length > 0);
+      if (visiveis.length === 0) { terminou = true; break; }
+      const xs = visiveis.flatMap((alvo) => alvo.retangulos.flatMap((r) => [r.x, r.x + r.w]));
+      const recorte = { x: Math.floor(Math.min(...xs)), y: Math.ceil(topo), width: 0, height: altura - Math.ceil(topo) };
+      recorte.width = Math.ceil(Math.max(...xs)) - recorte.x;
+      const png = await page.screenshot({ clip: recorte, scale: 'css' });
+      const claros = await leitor.evaluate(async ({ base64, recorte, retangulosPorAlvo }) => {
+        const img = new Image(); img.src = `data:image/png;base64,${base64}`; await img.decode();
+        const canvas = document.createElement('canvas'); canvas.width = img.width; canvas.height = img.height;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true })!; ctx.drawImage(img, 0, 0);
+        const lin = (canal: number) => { const s = canal / 255; return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4; };
+        return retangulosPorAlvo.map((retangulos) => {
+          let melhor = { luz: -1, rgb: [0, 0, 0] };
+          let pixels = 0;
+          for (const r of retangulos) {
+            const x0 = Math.max(0, Math.floor(r.x - recorte.x)); const y0 = Math.max(0, Math.floor(r.y - recorte.y));
+            const x1 = Math.min(img.width, Math.ceil(r.x - recorte.x + r.w)); const y1 = Math.min(img.height, Math.ceil(r.y - recorte.y + r.h));
+            if (x1 <= x0 || y1 <= y0) continue;
+            const dados = ctx.getImageData(x0, y0, x1 - x0, y1 - y0).data;
+            for (let i = 0; i < dados.length; i += 4) {
+              pixels += 1;
+              const luz = 0.2126 * lin(dados[i]!) + 0.7152 * lin(dados[i + 1]!) + 0.0722 * lin(dados[i + 2]!);
+              if (luz > melhor.luz) melhor = { luz, rgb: [dados[i]!, dados[i + 1]!, dados[i + 2]!] };
+            }
+          }
+          return { rgb: melhor.rgb, pixels };
+        });
+      }, { base64: png.toString('base64'), recorte, retangulosPorAlvo: visiveis.map((alvo) => alvo.retangulos) });
+      for (const [i, alvo] of visiveis.entries()) {
+        const claro = claros[i]!;
+        if (claro.pixels === 0) continue;
+        const cor = alvos.find((candidato) => candidato.nome === alvo.nome)!.cor;
+        const [r = 255, g = 255, b = 255, alfa = 1] = (cor.match(/[\d.]+/g) ?? []).map(Number);
+        const composto = [r, g, b].map((canal, k) => canal * alfa + claro.rgb[k]! * (1 - alfa));
+        const razao = razaoDeContraste(luminancia(composto[0]!, composto[1]!, composto[2]!), luminancia(claro.rgb[0]!, claro.rgb[1]!, claro.rgb[2]!));
+        passos.set(alvo.nome, (passos.get(alvo.nome) ?? 0) + 1);
+        if (razao < (piores.get(alvo.nome)?.razao ?? Infinity)) piores.set(alvo.nome, { razao, rgb: claro.rgb, rolagem });
+      }
+    }
+    await leitor.close();
+    expect(terminou, 'a rolagem levou o texto até o topo').toBe(true);
+    for (const { nome, cor } of alvos) {
+      expect(passos.get(nome) ?? 0, `${nome}: passos medidos`).toBeGreaterThanOrEqual(nome === 'selo' ? 20 : 40);
+      const pior = piores.get(nome)!;
+      expect.soft(pior.razao, `${nome}: ${cor} sobre rgb(${pior.rgb.join(', ')}) na rolagem de ${pior.rolagem} px dá ${pior.razao.toFixed(2)}:1`).toBeGreaterThanOrEqual(4.5);
     }
   });
 });

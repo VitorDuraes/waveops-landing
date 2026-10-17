@@ -193,8 +193,8 @@ body[data-pagina='home'] {
   padding: calc(var(--wo-topo-altura) + var(--wo-espaco-5)) 0 var(--wo-espaco-6);
   color: var(--wo-clara);
   --wo-texto: var(--wo-clara);
-  --wo-texto-2: var(--wo-clara-2);
-  --wo-texto-3: var(--wo-clara-2);
+  --wo-texto-2: var(--wo-hero-texto-secundario);
+  --wo-texto-3: var(--wo-hero-texto-secundario);
   --wo-borda-forte: var(--wo-hero-contorno);
   --wo-acento-texto: var(--wo-marca-claro);
   --wo-contorno-fundo: var(--wo-hero-controle);

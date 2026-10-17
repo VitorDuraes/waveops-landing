@@ -140,6 +140,12 @@
   --wo-hero-frase-largura: 430px;
   --wo-hero-contorno: rgb(255 255 255 / 0.25);
   --wo-hero-controle: rgb(0 0 0 / 0.3);
+  /* Texto secundário sobre o vídeo do hero (selo e nota). O fundo é fixo e o texto sobe por cima
+     dele quando a página rola, então passa pelo brilho da onda: o pixel mais claro atrás dele
+     chega a rgb(107, 107, 107). O branco a 75% (--wo-clara-2) dá 3,81:1 nesse pixel, e o
+     --wo-clara sólido dá 4,80:1. Vale só no hero da Home: a nota das outras páginas segue em
+     tinta 3 (cores.test.mjs confere o par). */
+  --wo-hero-texto-secundario: var(--wo-clara);
   --wo-hero-pausa-tamanho: 44px;
 
   /* Movimento: transição curta de estado. As animações que se movem são o vídeo do hero e o

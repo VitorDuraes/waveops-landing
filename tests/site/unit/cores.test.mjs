@@ -195,6 +195,17 @@ for (const frente of ['--wo-clara', '--wo-clara-2']) {
   });
 }
 
+// Hero da Home (spec 6.3): o texto secundário (selo e nota) fica sobre o vídeo. O fundo é fixo e o
+// texto sobe por cima dele quando a página rola, então passa pelo brilho da onda. O pixel mais claro
+// atrás do texto, depois da camada de leitura, foi medido numa varredura de rolagem em 16/10/2026
+// (pôster e 24 quadros do laço, em 1440 x 900 e 390 x 844): rgb(107, 107, 107). O branco a 75%
+// (--wo-clara-2) dá 3,81:1 nesse pixel, abaixo dos 4,5:1; o --wo-clara sólido dá 4,80:1.
+const PIXEL_MAIS_CLARO_DO_HERO = 'rgb(107, 107, 107)';
+test('hero: o texto secundário sobre o vídeo passa 4.5:1 no pixel mais claro do fundo', () => {
+  const razao = contraste(cor(':root', '--wo-hero-texto-secundario'), { css: PIXEL_MAIS_CLARO_DO_HERO });
+  assert.ok(razao >= 4.5, `${razao.toFixed(2)}:1`);
+});
+
 // Topo (spec 5.5). Depois da faixa escura o fundo é o papel a 85% sobre um desfoque do que passa
 // por baixo: o pior caso é a noite inteira por baixo. Sobre a faixa escura o fundo é transparente,
 // então o texto precisa passar sobre a noite, sobre o fundo do hero e sobre o ponto mais claro do

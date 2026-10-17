@@ -164,9 +164,21 @@ test.describe('tabela de modelos com três campos', () => {
     test.skip(info.project.name !== 'desktop', 'a spec controla a largura sozinha');
     await page.setViewportSize({ width: 1024, height: 900 });
     await page.goto(URL);
-    const estouros = await page.locator('#modelos .wo-modelo__nome h3').evaluateAll((titulos) =>
-      titulos.filter((titulo) => titulo.scrollWidth > titulo.clientWidth).map((titulo) => titulo.textContent),
+    await page.evaluate(() => document.fonts.ready);
+    await expect(page.locator('#modelos .wo-modelo')).toHaveCount(3);
+    // O h3 é item de um flex em coluna com align-items: flex-start: toma a largura do próprio texto e
+    // nunca estoura a si mesmo, então scrollWidth contra clientWidth dele não acusa nada. Quem estoura é
+    // a coluna do nome (.wo-modelo__nome), que o minmax(0, 1.2fr) deixa ficar mais estreita que a
+    // palavra. O que vale é a borda direita do h3 contra a borda direita da coluna.
+    const passamDaColuna = await page.locator('#modelos .wo-modelo').evaluateAll((linhas) =>
+      linhas.flatMap((linha) => {
+        const nome = linha.querySelector(':scope > .wo-modelo__nome');
+        const titulo = nome?.querySelector('h3');
+        if (!nome || !titulo) throw new Error('faltou o nome ou o h3 do modelo');
+        const sobra = titulo.getBoundingClientRect().right - nome.getBoundingClientRect().right;
+        return sobra > 0.5 ? [`${titulo.textContent} passa ${Math.round(sobra)} px da coluna do nome`] : [];
+      }),
     );
-    expect(estouros).toEqual([]);
+    expect(passamDaColuna).toEqual([]);
   });
 });

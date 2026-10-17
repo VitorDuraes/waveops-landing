@@ -2,7 +2,7 @@
 
 > **Para quem executa com agentes:** SUB-SKILL OBRIGATÓRIA: use superpowers:subagent-driven-development (recomendado) ou superpowers:executing-plans para executar este plano tarefa por tarefa. Os passos usam caixas (`- [ ]`) para acompanhar.
 
-**Objetivo:** as seis páginas e o 404 de waveops.com.br no novo visual (papel e tinta, títulos em Geist, botões em pílula, grade editorial), com vídeo em loop no hero da Home, um palco que monta uma cena por frente conforme a rolagem e as cinco frentes da base WaveOps.
+**Objetivo:** as seis páginas e o 404 de waveops.com.br no novo visual (escuro sobre a onda animada em todas as páginas desde a D20, títulos em Geist, botões em pílula, grade editorial), com o vídeo da onda em loop no fundo, um palco na Home que monta uma cena por frente conforme a rolagem e as cinco frentes da base WaveOps.
 
 **Arquitetura:** continua o site estático de hoje: HTML com parciais carimbados por `dev/site/build.mjs`, CSS em `tokens.css`, `base.css` e `components.css` mais uma folha por página, e JavaScript puro como melhoria progressiva. Os tokens ganham duas camadas: a paleta primitiva e nomes semânticos que trocam de valor dentro de `.wo-noite`, então a mesma peça funciona no claro e no escuro. O vídeo é gerado por código; o palco é HTML e CSS ligado por um módulo que só a Home carrega.
 
@@ -15,7 +15,7 @@
 | Data | 15/10/2026 |
 | Decisões | Vitor, 15/10/2026: desenho, spec, copy da seção 8 e palco das cinco frentes (opção A) |
 | Branch | `feat/site-novo-visual`, no worktree `.claude/worktrees/feat+site-novo-visual` |
-| Estimativa | Cerca de 24 h de execução, mais as duas esperas de aprovação (a troca para o palco de fundo, em 16/10, somou a Tarefa 2R) |
+| Estimativa | Cerca de 28,5 h de execução, mais as duas esperas de aprovação (a troca para o palco de fundo, em 16/10, somou a Tarefa 2R; o fundo vivo no site inteiro, no mesmo dia, somou a 5F) |
 
 ## Restrições globais
 
@@ -38,6 +38,7 @@ Valem para toda tarefa, mesmo quando ela não repete.
 15. **Commits.** Um ou mais por tarefa, em PT-BR, com prefixo `feat(site):`, `test(site):`, `docs(site):` ou `docs(plano):`, terminando com a linha `Co-Authored-By` do modelo que fez o commit.
 16. **Marca.** O símbolo Sine Nodes não muda. No topo, no rodapé e na imagem de compartilhamento, ele volta para o quadrado violeta plano de antes de 06/09/2026 (spec D14 e 5.4). O selo 3D sai das páginas, e os arquivos dele ficam no repo.
 17. **Spec na mão.** Cada tarefa tem uma linha **Leia antes** com as seções da spec que ela implementa. Quem despacha a tarefa anexa essas seções ao pedido do implementador. Quem implementa não inventa texto nem valor que não esteja nelas ou neste plano.
+18. **Fundo vivo (D20, desde 16/10).** Toda página tem a onda animada atrás e fica no contexto escuro. Onde a seção 7 da spec diz "Papel", a seção usa o véu; onde diz "Papel 2" ou "Noite", o véu forte (spec 15.2). Creme só em cartão claro. Texto nunca abaixo de 4,5:1 sobre o fundo.
 
 ## Foco da revisão
 
@@ -48,6 +49,7 @@ Cinco situações que a spec implica e que são fáceis de quebrar sem ninguém 
 3. **Teclado com o topo fixo.** Foco e âncora nunca param embaixo do topo (WCAG 2.4.11), e "Pular para o conteúdo" aparece por cima dele. Tarefa 3.
 4. **Botão flutuante cobrindo alvo.** Em 360 px ele não cobre o envio da lista de interesse da Plataforma nem os links do fim do rodapé. Tarefa 3.
 5. **Preferência de movimento mudando com a página aberta.** O palco desliga e mostra tudo montado; o vídeo pausa e o botão some. Tarefas 2R e 5.
+6. **Texto sobre o fundo vivo.** Em nenhuma página e em nenhum ponto da rolagem o texto fica abaixo de 4,5:1 sobre a onda; o botão do topo pausa a animação em qualquer ponto. Tarefa 5F.
 
 ## Ordem e portões
 
@@ -62,6 +64,7 @@ As tarefas rodam na ordem numérica, uma por vez, porque dividem `index.html` e 
 | 2R. Palco de fundo em tela cheia com a cena 1 | 1, 2 e 4 | não (é ela que reabre o portão) |
 | 5. Home | 1 a 4 | não |
 | 6. Projetos sob medida e rodapé das frentes | 3, 5 | não |
+| 5F. Fundo vivo no site inteiro (D20) | 3, 5, 6 | não |
 | 7. Soluções | 6 | não |
 | 8. Plataforma | 3, 5 | não |
 | 9. Contato | 3, 5 | não |
@@ -70,7 +73,7 @@ As tarefas rodam na ordem numérica, uma por vez, porque dividem `index.html` e 
 | 12. Textos fora das páginas, limpeza e documentação | 2 a 11 | sim |
 | 13. Verificação final, revisão e PR | todas | sim |
 
-- **Portão A**, depois da Tarefa 2R: o Vitor aprova a cena 1 no palco de fundo. Só a 11 espera. Ordem de execução desde 16/10: 1, 2, 4, 2R, 3, 5 e as seguintes.
+- **Portão A**, depois da Tarefa 2R: o Vitor aprova a cena 1 no palco de fundo. Só a 11 espera. Ordem de execução desde 16/10: 1, 2, 4, 2R, 3, 5, 6, 5F e as seguintes.
 - **Portão B**, na Tarefa 13: o Vitor confere o Deploy Preview e o iPhone antes do merge.
 
 ## Comandos
@@ -648,9 +651,37 @@ test('o rodapé leva às cinco frentes', () => {
 
 ---
 
+### Tarefa 5F: Fundo vivo no site inteiro (D20)
+
+**Estimativa:** 4,5 h. **Depende de:** 3, 5 e 6. **Leia antes:** spec 15 inteira, 5.5, 6.3, 6.4, 13.3 e 13.4.
+
+Pedido do Vitor em 16/10, depois de ver a Home: a animação do fundo fica na página inteira e em todas as páginas, com as seções escuras ("Tudo escuro"). Roda depois da 6 e antes da 7, porque as páginas seguintes já nascem no escuro.
+
+**Arquivos:**
+- Criar: `dev/site/parciais/fundo.html`, um módulo do vídeo compartilhado em `assets/site/` (com o nome no padrão dos módulos de lá), `tests/site/e2e/fundo.spec.ts`
+- Modificar: as sete páginas (carimbo do parcial e contexto escuro), `dev/site/parciais/topo.html`, `assets/site/tokens.css`, `assets/site/base.css`, `assets/site/components.css`, `assets/site/site.js`, `assets/site/paginas/home.css`, `assets/site/paginas/home.js`, `assets/site/paginas/sobmedida.css`, `index.html`, `projetos-sob-medida/index.html`, `.gitignore`, e os testes que hoje afirmam o que a spec 15.6 substitui (`topo.spec.ts`, `video.spec.ts`, `palco.spec.ts`, `whatsapp.spec.ts`, `sem-js.spec.ts`, `tipografia.spec.ts` e as unidades de cores e conteúdo, onde couber)
+
+**Interfaces:**
+- Produz o parcial `fundo`, carimbado como primeiro filho do `<main>` de toda página, com o pôster e o `<video>` de 6.3 num bloco com `aria-hidden="true"`. O bloco deixa de ser só da Home; o palco da Home continua escurecendo esse mesmo bloco com `data-capitulo`.
+- Produz o controle do vídeo num módulo que toda página carrega; `home.js` fica só com o palco e com o sinal `data-palco-oculto` da Tarefa 3.
+- Produz os tokens `--wo-veu` e `--wo-veu-forte` (15.2) e uma classe de seção para cada um, que as Tarefas 7 a 10 usam no lugar de "Papel", "Papel 2" e "Noite".
+- O botão de pausa vive no parcial do topo, com o nome de 15.3, e guarda a escolha em `sessionStorage`.
+
+- [ ] **Passo 1: Testes que falham.**
+  - Unidade, em `cores.test.mjs` ou num arquivo novo: cada cor de texto do contexto escuro tem pelo menos 4,5:1 sobre o pior pixel da onda (`rgb(107, 107, 107)`, medido na Tarefa 5) coberto pelo véu e pelo véu forte.
+  - `fundo.spec.ts`, nos três projetos: em cada uma das sete páginas, o bloco do fundo existe, é fixo e mostra o pôster; com movimento liberado, o vídeo toca e continua tocando com a página rolada até a metade; o botão do topo pausa e devolve o pôster, e a página seguinte da mesma visita já nasce pausada; com menos movimento, com `saveData` e sem JavaScript, fica só o pôster e o botão some; o topo fica no estado escuro do início ao fim da página.
+  - Varredura de contraste de 15.5 na Home e em Projetos sob medida, no desktop e no celular: texto escondido, passos de 12 px, pelo menos 4,5:1 em cada passo, no hero e na primeira seção depois dele.
+  - Os testes que afirmam o que 15.6 substitui (folha creme, topo claro, pausa no hero, vídeo só com o hero na tela, `data-faixa-escura`) passam a afirmar o comportamento novo. Nenhum teste sai sem um substituto que cubra o comportamento novo.
+- [ ] **Passo 2: Ver falhar.** `node --test tests/site/unit/*.test.mjs` e, de `tests/site`, `npx playwright test fundo`.
+- [ ] **Passo 3: Implementar.** Parcial do fundo e carimbo; contexto escuro na página inteira e contexto claro só no cartão claro; véus nas seções da Home e de Projetos sob medida pela regra de 15.2; folha creme da Home fora; fundo de volta ao brilho inteiro depois do palco; topo sempre escuro; botão de pausa no topo; módulo do vídeo compartilhado; volta do WhatsApp na primeira seção depois do palco; `tests/site/test-results*/` no `.gitignore`. As páginas das Tarefas 7 a 10 só ganham o parcial e o contexto escuro; o conteúdo delas fica para as tarefas delas (restrição 14). `node dev/site/build.mjs`.
+- [ ] **Passo 4: Ver passar.** Os testes do passo 1; a suíte inteira do Playwright uma vez, nos três projetos, com a lista das falhas de axe que sobrarem, todas em páginas das Tarefas 7 a 10; `node --test tests/site/unit/*.test.mjs`, que inclui o peso de toda página; portão local. Capturas da Home e de Projetos sob medida em 1440 × 900 e 390 × 844, conferidas a olho.
+- [ ] **Passo 5: Commit.** `git commit -m "feat(site): fundo vivo da onda em todas as páginas, com seções escuras"`.
+
+---
+
 ### Tarefa 7: Soluções
 
-**Estimativa:** 1 h. **Depende de:** 6. **Leia antes:** spec 5.2, 5.4, 7.2 e 8.5.
+**Estimativa:** 1 h. **Depende de:** 6 e 5F. **Leia antes:** spec 5.2, 5.4, 7.2, 8.5 e 15.
 
 **Arquivos:**
 - Modificar: `solucoes/index.html`, `assets/site/paginas/solucoes.css`, `tests/site/unit/conteudo.test.mjs`
@@ -690,7 +721,7 @@ test('Soluções indica as cinco frentes em Como contratar (spec 8.5)', () => {
 
 ### Tarefa 8: Plataforma (só o visual)
 
-**Estimativa:** 1 h. **Depende de:** 3 e 5. **Leia antes:** spec 5.2, 5.4 e 7.4.
+**Estimativa:** 1 h. **Depende de:** 3, 5 e 5F. **Leia antes:** spec 5.2, 5.4, 7.4 e 15.
 
 **Arquivos:**
 - Modificar: `plataforma/index.html` (só classes e estrutura visual), `assets/site/paginas/plataforma.css`, `assets/site/components.css` se surgir peça compartilhada
@@ -707,7 +738,7 @@ test('Soluções indica as cinco frentes em Como contratar (spec 8.5)', () => {
 
 ### Tarefa 9: Contato
 
-**Estimativa:** 1 h. **Depende de:** 3 e 5. **Leia antes:** spec 5.2, 5.4 e 7.5.
+**Estimativa:** 1 h. **Depende de:** 3, 5 e 5F. **Leia antes:** spec 5.2, 5.4, 7.5 e 15.
 
 **Arquivos:**
 - Modificar: `contato/index.html`, `assets/site/paginas/contato.css`
@@ -724,7 +755,7 @@ test('Soluções indica as cinco frentes em Como contratar (spec 8.5)', () => {
 
 ### Tarefa 10: Demonstrações técnicas
 
-**Estimativa:** 1 h. **Depende de:** 5. **Leia antes:** spec 5.2, 5.4, 7.6, 8.6 e 14.3.
+**Estimativa:** 1 h. **Depende de:** 5 e 5F. **Leia antes:** spec 5.2, 5.4, 7.6, 8.6, 14.3 e 15.
 
 **Arquivos:**
 - Modificar: `demonstracoes-tecnicas/index.html`, `assets/site/paginas/demonstracoes.css`, `tests/site/e2e/demonstracoes.spec.ts`
@@ -759,7 +790,7 @@ const TOTAL = 5;
 
 ### Tarefa 11: Cenas 2 a 5 (depois do Portão A)
 
-**Estimativa:** 2,5 h. **Depende de:** 2, 5 e o OK do Vitor na cena 1. **Leia antes:** spec 13.2 a 13.5 e os ajustes que o Vitor pediu no Portão A.
+**Estimativa:** 2,5 h. **Depende de:** 2, 5 e o OK do Vitor na cena 1. **Leia antes:** spec 13.2 a 13.5, 15.3 e 15.4 e os ajustes que o Vitor pediu no Portão A.
 
 **Arquivos:**
 - Modificar: `index.html`, `assets/site/paginas/home.css`, `tests/site/unit/palco.test.mjs`, `tests/site/e2e/palco.spec.ts`
@@ -778,7 +809,7 @@ const TOTAL = 5;
 
 ### Tarefa 12: Textos fora das páginas, limpeza e documentação
 
-**Estimativa:** 1 h. **Depende de:** 2 a 11. **Leia antes:** spec 8.8 e 10.
+**Estimativa:** 1 h. **Depende de:** 2 a 11. **Leia antes:** spec 8.8, 10 e 15.
 
 **Arquivos:**
 - Criar: `tests/site/unit/css-morto.test.mjs`
@@ -815,7 +846,7 @@ test('nenhuma página nem o llms.txt falam em quatro frentes', () => {
 
 ### Tarefa 13: Verificação final, revisão e PR (Portão B)
 
-**Estimativa:** 1 h, mais a espera da revisão. **Depende de:** todas. **Leia antes:** spec 2, 9.3 e 9.4.
+**Estimativa:** 1 h, mais a espera da revisão. **Depende de:** todas. **Leia antes:** spec 2, 9.3, 9.4 e 15.
 
 - [ ] **Passo 1: Portão completo** da spec 9.3, com as duas rodadas do Playwright (o Chromium dele, como o CI, e `PW_CHANNEL=chrome`), mais `npm ci --prefix portal` (precisa de rede: o `postinstall` roda o `prisma generate`) e `npm --prefix portal run test:unit`, que guarda os links do portal para o site. Tudo verde.
 - [ ] **Passo 2: Capturas.** `DESIGN_CAPTURAS=<pasta vazia> PW_CHANNEL=chrome node qa/visual.mjs` grava `.tmp-qa/capturas/`. Comparar a olho, em 1440 e 390 px, com as capturas locais da referência (caminho no cabeçalho da spec): paleta, tipografia, ritmo das seções e componentes. Anotar as diferenças.

@@ -15,7 +15,7 @@
 | Data | 15/10/2026 |
 | Decisões | Vitor, 15/10/2026: desenho, spec, copy da seção 8 e palco das cinco frentes (opção A) |
 | Branch | `feat/site-novo-visual`, no worktree `.claude/worktrees/feat+site-novo-visual` |
-| Estimativa | Cerca de 28,5 h de execução, mais as duas esperas de aprovação (a troca para o palco de fundo, em 16/10, somou a Tarefa 2R; o fundo vivo no site inteiro, no mesmo dia, somou a 5F) |
+| Estimativa | Cerca de 29 h de execução, mais as duas esperas de aprovação (a troca para o palco de fundo, em 16/10, somou a Tarefa 2R; o fundo vivo no site inteiro, no mesmo dia, somou a 5F) |
 
 ## Restrições globais
 
@@ -653,9 +653,9 @@ test('o rodapé leva às cinco frentes', () => {
 
 ### Tarefa 5F: Fundo vivo no site inteiro (D20)
 
-**Estimativa:** 4,5 h. **Depende de:** 3, 5 e 6. **Leia antes:** spec 15 inteira, 5.5, 6.3, 6.4, 13.3 e 13.4.
+**Estimativa:** 5 h. **Depende de:** 3, 5 e 6. **Leia antes:** spec 15 inteira, 5.5, 5.6, 6.3, 6.4, 13.3 e 13.4.
 
-Pedido do Vitor em 16/10, depois de ver a Home: a animação do fundo fica na página inteira e em todas as páginas, com as seções escuras ("Tudo escuro"). Roda depois da 6 e antes da 7, porque as páginas seguintes já nascem no escuro.
+Pedido do Vitor em 16/10, depois de ver a Home: a animação do fundo fica na página inteira e em todas as páginas, com as seções escuras ("Tudo escuro"). Em 17/10 ele reforçou que o fundo não pode parar durante as frentes e perguntou pela entrada da referência, que entra aqui (spec 15.3). Roda depois da 6 e antes da 7, porque as páginas seguintes já nascem no escuro.
 
 **Arquivos:**
 - Criar: `dev/site/parciais/fundo.html`, um módulo do vídeo compartilhado em `assets/site/` (com o nome no padrão dos módulos de lá), `tests/site/e2e/fundo.spec.ts`
@@ -669,11 +669,12 @@ Pedido do Vitor em 16/10, depois de ver a Home: a animação do fundo fica na p�
 
 - [ ] **Passo 1: Testes que falham.**
   - Unidade, em `cores.test.mjs` ou num arquivo novo: cada cor de texto do contexto escuro tem pelo menos 4,5:1 sobre o pior pixel da onda (`rgb(107, 107, 107)`, medido na Tarefa 5) coberto pelo véu e pelo véu forte.
-  - `fundo.spec.ts`, nos três projetos: em cada uma das sete páginas, o bloco do fundo existe, é fixo e mostra o pôster; com movimento liberado, o vídeo toca e continua tocando com a página rolada até a metade; o botão do topo pausa e devolve o pôster, e a página seguinte da mesma visita já nasce pausada; com menos movimento, com `saveData` e sem JavaScript, fica só o pôster e o botão some; o topo fica no estado escuro do início ao fim da página.
+  - `fundo.spec.ts`, nos três projetos: em cada uma das sete páginas, o bloco do fundo existe, é fixo e mostra o pôster; com movimento liberado, o vídeo toca e continua tocando com a página rolada até a metade; o botão do topo pausa e devolve o pôster, e a página seguinte da mesma visita já nasce pausada; com menos movimento, com `saveData` e sem JavaScript, fica só o pôster e o botão some; o topo fica no estado escuro do início ao fim da página; na Home, o vídeo continua tocando com um capítulo do palco ativo.
+  - Entrada em cascata (15.3), em toda página: com movimento liberado, os blocos do hero têm a animação de entrada, com atrasos crescentes de 70 ms e fim em menos de 1 s; com menos movimento, nenhum bloco anima e todos nascem com opacidade 1; sem JavaScript, a cascata acontece igual.
   - Varredura de contraste de 15.5 na Home e em Projetos sob medida, no desktop e no celular: texto escondido, passos de 12 px, pelo menos 4,5:1 em cada passo, no hero e na primeira seção depois dele.
   - Os testes que afirmam o que 15.6 substitui (folha creme, topo claro, pausa no hero, vídeo só com o hero na tela, `data-faixa-escura`) passam a afirmar o comportamento novo. Nenhum teste sai sem um substituto que cubra o comportamento novo.
 - [ ] **Passo 2: Ver falhar.** `node --test tests/site/unit/*.test.mjs` e, de `tests/site`, `npx playwright test fundo`.
-- [ ] **Passo 3: Implementar.** Parcial do fundo e carimbo; contexto escuro na página inteira e contexto claro só no cartão claro; véus nas seções da Home e de Projetos sob medida pela regra de 15.2; folha creme da Home fora; fundo de volta ao brilho inteiro depois do palco; topo sempre escuro; botão de pausa no topo; módulo do vídeo compartilhado; volta do WhatsApp na primeira seção depois do palco; `tests/site/test-results*/` no `.gitignore`. As páginas das Tarefas 7 a 10 só ganham o parcial e o contexto escuro; o conteúdo delas fica para as tarefas delas (restrição 14). `node dev/site/build.mjs`.
+- [ ] **Passo 3: Implementar.** Parcial do fundo e carimbo; contexto escuro na página inteira e contexto claro só no cartão claro; véus nas seções da Home e de Projetos sob medida pela regra de 15.2; folha creme da Home fora; fundo de volta ao brilho inteiro depois do palco; vídeo sem pausa nos capítulos do palco; topo sempre escuro; botão de pausa no topo; entrada em cascata do hero em CSS, com os tempos de 15.3; módulo do vídeo compartilhado; volta do WhatsApp na primeira seção depois do palco; `tests/site/test-results*/` no `.gitignore`. As páginas das Tarefas 7 a 10 só ganham o parcial e o contexto escuro; o conteúdo delas fica para as tarefas delas (restrição 14). `node dev/site/build.mjs`.
 - [ ] **Passo 4: Ver passar.** Os testes do passo 1; a suíte inteira do Playwright uma vez, nos três projetos, com a lista das falhas de axe que sobrarem, todas em páginas das Tarefas 7 a 10; `node --test tests/site/unit/*.test.mjs`, que inclui o peso de toda página; portão local. Capturas da Home e de Projetos sob medida em 1440 × 900 e 390 × 844, conferidas a olho.
 - [ ] **Passo 5: Commit.** `git commit -m "feat(site): fundo vivo da onda em todas as páginas, com seções escuras"`.
 

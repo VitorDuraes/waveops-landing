@@ -1,5 +1,14 @@
 import { test, expect } from '@playwright/test';
 
+/* Contraste WCAG 2.x. O axe não mede texto sobre imagem nem sobre vídeo (marca como incompleto),
+   então o teste do pôster mede na mão: pixel mais claro atrás do texto contra a cor computada. */
+const linear = (canal: number): number => {
+  const s = canal / 255;
+  return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+};
+const luminancia = (r: number, g: number, b: number): number => 0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b);
+const razaoDeContraste = (a: number, b: number): number => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+
 test.describe('vídeo do hero', () => {
   test.use({ reducedMotion: 'no-preference' });
   const erros = new WeakMap<object, string[]>();
@@ -158,5 +167,64 @@ test.describe('vídeo do hero', () => {
     }, png.toString('base64'));
     expect(luminancia).toBeLessThan(0.3);
     await aba.close();
+  });
+
+  /* Só o pôster: com menos movimento o vídeo nem carrega, e o pôster é também o quadro de 0 s.
+     O pior caso fica sem a camada preta própria do selo (visibility: hidden esconde o fundo do
+     elemento junto com o texto). Medido em 16/10/2026 com o vídeo tocando em 0, 3, 6 e 9 s, em
+     1440 x 900 e 390 x 844: a menor razão do selo foi 9,07 e a da nota, 11,39. */
+  test('o selo e a nota do hero têm contraste AA sobre o pôster', async ({ page, context }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/');
+    await page.evaluate(() => document.fonts.ready);
+    await expect(page.locator('.wo-home-fundo__poster')).toHaveJSProperty('complete', true);
+    await expect(page.locator('video')).toHaveJSProperty('currentSrc', '');
+    // Com menos movimento o CSS põe transition-duration em tudo; sem transição, esconder vale na hora.
+    await page.addStyleTag({ content: '*, *::before, *::after { transition: none !important; }' });
+    const alvos = await page.evaluate(() => [
+      { nome: 'selo', seletor: '.wo-home-hero .wo-etiqueta-hero' },
+      { nome: 'nota', seletor: '.wo-home-hero__texto .wo-nota-mono' },
+    ].map(({ nome, seletor }) => {
+      const elemento = document.querySelector<HTMLElement>(seletor)!;
+      const faixa = document.createRange();
+      faixa.selectNodeContents(elemento);
+      const retangulos = [...faixa.getClientRects()].map((r) => ({ x: r.x, y: r.y, w: r.width, h: r.height }));
+      const cor = getComputedStyle(elemento).color;
+      elemento.style.setProperty('visibility', 'hidden', 'important');
+      return { nome, cor, retangulos };
+    }));
+    const png = await page.screenshot({ scale: 'css' });
+    const aba = await context.newPage();
+    const claros = await aba.evaluate(async ({ base64, retangulosPorAlvo }) => {
+      const img = new Image(); img.src = `data:image/png;base64,${base64}`; await img.decode();
+      const canvas = document.createElement('canvas'); canvas.width = img.width; canvas.height = img.height;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })!; ctx.drawImage(img, 0, 0);
+      const lin = (canal: number) => { const s = canal / 255; return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4; };
+      return retangulosPorAlvo.map((retangulos) => {
+        let melhor = { luz: -1, rgb: [0, 0, 0] };
+        let pixels = 0;
+        for (const r of retangulos) {
+          const x0 = Math.max(0, Math.floor(r.x)); const y0 = Math.max(0, Math.floor(r.y));
+          const x1 = Math.min(img.width, Math.ceil(r.x + r.w)); const y1 = Math.min(img.height, Math.ceil(r.y + r.h));
+          if (x1 <= x0 || y1 <= y0) continue;
+          const dados = ctx.getImageData(x0, y0, x1 - x0, y1 - y0).data;
+          for (let i = 0; i < dados.length; i += 4) {
+            pixels += 1;
+            const luz = 0.2126 * lin(dados[i]!) + 0.7152 * lin(dados[i + 1]!) + 0.0722 * lin(dados[i + 2]!);
+            if (luz > melhor.luz) melhor = { luz, rgb: [dados[i]!, dados[i + 1]!, dados[i + 2]!] };
+          }
+        }
+        return { rgb: melhor.rgb, pixels };
+      });
+    }, { base64: png.toString('base64'), retangulosPorAlvo: alvos.map((alvo) => alvo.retangulos) });
+    await aba.close();
+    for (const [i, alvo] of alvos.entries()) {
+      const claro = claros[i]!;
+      expect(claro.pixels, `${alvo.nome}: pixels dentro da janela`).toBeGreaterThan(0);
+      const [r = 255, g = 255, b = 255, alfa = 1] = (alvo.cor.match(/[\d.]+/g) ?? []).map(Number);
+      const composto = [r, g, b].map((canal, k) => canal * alfa + claro.rgb[k]! * (1 - alfa));
+      const razao = razaoDeContraste(luminancia(composto[0]!, composto[1]!, composto[2]!), luminancia(claro.rgb[0]!, claro.rgb[1]!, claro.rgb[2]!));
+      expect(razao, `${alvo.nome}: ${alvo.cor} sobre rgb(${claro.rgb.join(', ')}) dá ${razao.toFixed(2)}:1`).toBeGreaterThanOrEqual(4.5);
+    }
   });
 });

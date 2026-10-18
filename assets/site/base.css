@@ -93,9 +93,10 @@ a:hover {
   color: var(--wo-texto);
 }
 
-/* Anel de 2 px em --wo-acento: 5,4:1 sobre o papel e 3,5:1 sobre a noite. */
+/* Anel de 2 px em --wo-foco (tokens.css): branco no escuro, 5,33:1 no pixel mais claro da onda e 19,8:1
+   na noite; violeta no cartão claro, 5,4:1 sobre o papel. */
 :focus-visible {
-  outline: 2px solid var(--wo-acento);
+  outline: 2px solid var(--wo-foco);
   outline-offset: 2px;
 }
 

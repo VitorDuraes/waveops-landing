@@ -67,6 +67,9 @@
   --wo-acento-hover: var(--wo-violeta-forte);
   --wo-acento-texto: #c2b2ff;
   --wo-sobre-acento: var(--wo-branco);
+  /* Anel de foco (WCAG 1.4.11, 3:1): branco no escuro, porque o violeta cai a 1,07:1 no brilho da
+     onda; o cartão claro volta ao violeta. */
+  --wo-foco: var(--wo-branco);
   /* Fundo do botão de contorno: preto a 30% no escuro, nenhum no claro (spec 5.4). */
   --wo-contorno-fundo: rgb(0 0 0 / 0.3);
   --wo-sucesso: #4ade80;
@@ -209,6 +212,7 @@
   --wo-borda: var(--wo-linha);
   --wo-borda-forte: var(--wo-linha);
   --wo-acento-texto: var(--wo-violeta-forte);
+  --wo-foco: var(--wo-violeta);
   --wo-contorno-fundo: transparent;
   --wo-sucesso: var(--wo-sucesso-claro);
   --wo-alerta: var(--wo-alerta-claro);

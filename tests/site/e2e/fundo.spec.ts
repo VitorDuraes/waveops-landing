@@ -245,6 +245,29 @@ test.describe('o topo', () => {
   }
 });
 
+/* Anel de foco (WCAG 1.4.11): sobre a onda e os véus ele é o --wo-foco do escuro, branco, com a
+   largura e o afastamento de sempre. O contraste do token fica em cores.test.mjs; aqui, que a página
+   desenha esse token. O link da primeira seção depois do palco fica sobre o véu. */
+test.describe('o anel de foco', () => {
+  test.beforeEach(({}, info) => {
+    test.skip(info.project.name === 'tablet', 'mesma regra no desktop e no celular');
+  });
+
+  test('é branco sobre o escuro, com 2 px e 2 px de afastamento', async ({ page }) => {
+    await page.goto('/');
+    const lerAnel = (seletor: string) => page.locator(seletor).first().evaluate((el) => {
+      const estilo = getComputedStyle(el);
+      return { visivel: el.matches(':focus-visible'), estilo: estilo.outlineStyle, largura: estilo.outlineWidth, afastamento: estilo.outlineOffset, cor: estilo.outlineColor };
+    });
+    const ANEL = { visivel: true, estilo: 'solid', largura: '2px', afastamento: '2px', cor: 'rgb(255, 255, 255)' };
+    // O primeiro Tab da página leva ao "Pular para o conteúdo".
+    await page.keyboard.press('Tab');
+    expect(await lerAnel('.wo-pular')).toEqual(ANEL);
+    await page.locator('[data-palco] + section a').first().focus();
+    expect(await lerAnel('[data-palco] + section a')).toEqual(ANEL);
+  });
+});
+
 /* Entrada em cascata (spec 15.3): ao abrir a página, cada bloco do hero sai de transparente e 16 px
    abaixo para o lugar, em 500 ms, com 70 ms entre um bloco e o seguinte, e tudo acaba antes de 1 s.
    Só no hero, só CSS: acontece igual sem JavaScript e não acontece com menos movimento. */

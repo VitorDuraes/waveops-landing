@@ -247,6 +247,26 @@ for (const [nome, fundo] of FUNDOS_DO_TOPO) {
   });
 }
 
+// Anel de foco (WCAG 1.4.11, 3:1 para componente). Quase todo elemento focável fica sobre a onda: no
+// hero e no palco sem véu, nas seções sob o véu e o véu forte, e no topo, na chamada final e no
+// rodapé sobre a noite. Dentro do cartão claro, o anel fica sobre o papel.
+const FUNDOS_DO_ANEL = [
+  ['a onda sem véu', { css: PIXEL_MAIS_CLARO_DA_ONDA }],
+  ['o véu sobre a onda', { css: resolver(':root', '--wo-veu'), base: PIXEL_MAIS_CLARO_DA_ONDA }],
+  ['o véu forte sobre a onda', { css: resolver(':root', '--wo-veu-forte'), base: PIXEL_MAIS_CLARO_DA_ONDA }],
+  ['a noite', { css: NOITE }],
+];
+for (const [nome, fundo] of FUNDOS_DO_ANEL) {
+  test(`anel de foco sobre ${nome} passa 3:1`, () => {
+    const razao = contraste(cor(':root', '--wo-foco'), fundo);
+    assert.ok(razao >= 3, `${razao.toFixed(2)}:1`);
+  });
+}
+test('anel de foco dentro do cartão claro passa 3:1 sobre o papel', () => {
+  const razao = contraste(cor('.wo-cartao-claro', '--wo-foco'), cor('.wo-cartao-claro', '--wo-fundo'));
+  assert.ok(razao >= 3, `${razao.toFixed(2)}:1`);
+});
+
 // O botão de contorno do hero fica sobre a onda: texto claro sobre o preto a 30%, que por sua vez fica
 // sobre o pixel mais claro da onda.
 test('botão de contorno sobre a onda: texto claro sobre o preto a 30% passa 4.5:1', () => {

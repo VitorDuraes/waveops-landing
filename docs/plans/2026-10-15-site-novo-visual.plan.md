@@ -38,7 +38,7 @@ Valem para toda tarefa, mesmo quando ela não repete.
 15. **Commits.** Um ou mais por tarefa, em PT-BR, com prefixo `feat(site):`, `test(site):`, `docs(site):` ou `docs(plano):`, terminando com a linha `Co-Authored-By` do modelo que fez o commit.
 16. **Marca.** O símbolo Sine Nodes não muda. No topo, no rodapé e na imagem de compartilhamento, ele volta para o quadrado violeta plano de antes de 06/09/2026 (spec D14 e 5.4). O selo 3D sai das páginas, e os arquivos dele ficam no repo.
 17. **Spec na mão.** Cada tarefa tem uma linha **Leia antes** com as seções da spec que ela implementa. Quem despacha a tarefa anexa essas seções ao pedido do implementador. Quem implementa não inventa texto nem valor que não esteja nelas ou neste plano.
-18. **Fundo vivo (D20, desde 16/10).** Toda página tem a onda animada atrás e fica no contexto escuro. Onde a seção 7 da spec diz "Papel", a seção usa o véu; onde diz "Papel 2" ou "Noite", o véu forte (spec 15.2). Creme só em cartão claro. Texto nunca abaixo de 4,5:1 sobre o fundo.
+18. **Fundo vivo (D20, desde 16/10).** Toda página tem a onda animada atrás e fica no contexto escuro. Onde a seção 7 da spec diz "Papel", a seção usa o véu; onde diz "Papel 2" ou "Noite", o véu forte (spec 15.2). Creme só em cartão claro. Sobre o fundo, texto comum com pelo menos 4,5:1 e texto grande (24 px ou mais, ou 18,66 px em negrito) com pelo menos 3:1; o destaque violeta dos títulos grandes usa o token de 3:1 da spec 15.2.
 
 ## Foco da revisão
 

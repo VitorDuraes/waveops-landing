@@ -18,24 +18,27 @@ test('escolherVideo prefere WebM e escolhe o tamanho pela largura', () => {
   assert.equal(escolherVideo(1920, () => ''), null);
 });
 
-test('deveTocar exige página carregada, hero na tela, aba visível e nenhum bloqueio', () => {
-  const livre = { movimentoReduzido: false, economiaDeDados: false, carregada: true, naTela: true, abaVisivel: true, pausadoPeloUsuario: false };
+// Desde a D20 (spec 15.3) o vídeo toca em qualquer ponto da página: sair do hero não pausa mais.
+test('deveTocar exige página carregada, aba visível e nenhum bloqueio, em qualquer ponto da rolagem', () => {
+  const livre = { movimentoReduzido: false, economiaDeDados: false, carregada: true, abaVisivel: true, pausadoPeloUsuario: false };
   assert.equal(deveTocar(livre), true);
-  for (const [chave, valor] of [['movimentoReduzido', true], ['economiaDeDados', true], ['carregada', false], ['naTela', false], ['abaVisivel', false], ['pausadoPeloUsuario', true]]) {
+  for (const [chave, valor] of [['movimentoReduzido', true], ['economiaDeDados', true], ['carregada', false], ['abaVisivel', false], ['pausadoPeloUsuario', true]]) {
     assert.equal(deveTocar({ ...livre, [chave]: valor }), false, chave);
   }
+  // Um estado antigo que ainda diga "fora do hero" não pausa o fundo.
+  assert.equal(deveTocar({ ...livre, naTela: false }), true, 'naTela não conta mais');
 });
 
-test('os caminhos dos vídeos e do pôster da Home existem em disco', () => {
+test('os caminhos dos vídeos e do pôster do fundo existem em disco', () => {
   const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
   assert.ok(Object.isFrozen(VIDEOS));
   for (const formato of Object.values(VIDEOS)) {
     assert.ok(Object.isFrozen(formato));
     for (const src of Object.values(formato)) assert.ok(fs.existsSync(path.join(raiz, src)));
   }
-  const html = fs.readFileSync(path.join(raiz, 'index.html'), 'utf8');
-  const src = /class="wo-home-fundo__poster" src="([^"]+)"/.exec(html)?.[1];
-  assert.ok(src);
+  const parcial = fs.readFileSync(path.join(raiz, 'dev/site/parciais/fundo.html'), 'utf8');
+  const src = /class="wo-fundo__poster" src="([^"]+)"/.exec(parcial)?.[1];
+  assert.ok(src, 'o parcial do fundo não traz o pôster');
   assert.ok(fs.existsSync(path.join(raiz, src)));
 });
 

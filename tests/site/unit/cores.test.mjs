@@ -1,7 +1,8 @@
-// Contraste dos tokens de cor (spec do novo visual, 5.1): texto 4,5:1; componente e anel de
-// foco 3:1. O teste lê assets/site/tokens.css, resolve var() em cada contexto (.wo-noite herda
-// de :root), compõe cor com alfa sobre o fundo sem arredondar o canal e só então aplica a conta
-// da WCAG. Cor nova ou valor mudado em tokens.css passa por aqui antes de chegar às páginas.
+// Contraste dos tokens de cor (spec do novo visual, 5.1 e 15.2): texto 4,5:1; componente e anel de
+// foco 3:1. O teste lê assets/site/tokens.css, resolve var() em cada contexto (:root é o escuro da
+// página inteira e .wo-cartao-claro herda dele), compõe cor com alfa sobre o fundo sem arredondar o
+// canal e só então aplica a conta da WCAG. Cor nova ou valor mudado em tokens.css passa por aqui
+// antes de chegar às páginas.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -77,7 +78,7 @@ const blocos = lerBlocos(tokens);
 
 /**
  * Valor calculado de uma propriedade num contexto, como o navegador faz: var() é trocado onde a
- * propriedade foi declarada. Em .wo-noite, o que o bloco não declara vem de :root já resolvido
+ * propriedade foi declarada. No cartão claro, o que o bloco não declara vem de :root já resolvido
  * lá, então um nome de :root que aponta para outro nome não acompanha a troca de contexto.
  */
 function resolver(contexto, nome, pilha = []) {
@@ -179,7 +180,9 @@ for (const [frente, fundo, minimo] of PRIMITIVOS) {
     assert.ok(razao >= minimo, `${razao.toFixed(2)}:1`);
   });
 }
-for (const contexto of [':root', '.wo-noite']) {
+// Desde a D20 (spec 15.2) o contexto escuro vale para a página inteira, em :root, e o claro só
+// existe dentro do cartão claro.
+for (const contexto of [':root', '.wo-cartao-claro']) {
   for (const [frente, fundo, minimo] of SEMANTICOS) {
     test(`${contexto}: ${frente} sobre ${fundo} passa ${minimo}:1`, () => {
       const razao = contraste(cor(contexto, frente), cor(contexto, fundo));
@@ -187,59 +190,67 @@ for (const contexto of [':root', '.wo-noite']) {
     });
   }
 }
-// Texto claro sobre o ponto mais claro do degradê das aberturas (composto sobre a noite).
-for (const frente of ['--wo-clara', '--wo-clara-2']) {
-  test(`.wo-noite: ${frente} sobre --wo-abertura-brilho passa 4.5:1`, () => {
-    const razao = contraste(cor('.wo-noite', frente), cor('.wo-noite', '--wo-abertura-brilho'));
-    assert.ok(razao >= 4.5, `${razao.toFixed(2)}:1`);
-  });
-}
 
-// Hero da Home (spec 6.3): o texto secundário (selo e nota) fica sobre o vídeo. O fundo é fixo e o
-// texto sobe por cima dele quando a página rola, então passa pelo brilho da onda. O pixel mais claro
-// atrás do texto, depois da camada de leitura, foi medido numa varredura de rolagem em 16/10/2026
-// (pôster e 24 quadros do laço, em 1440 x 900 e 390 x 844): rgb(107, 107, 107). O branco a 75%
-// (--wo-clara-2) dá 3,81:1 nesse pixel, abaixo dos 4,5:1; o --wo-clara sólido dá 4,80:1.
-const PIXEL_MAIS_CLARO_DO_HERO = 'rgb(107, 107, 107)';
+test('a página inteira fica no contexto escuro e o cartão claro volta ao papel e à tinta', () => {
+  assert.equal(blocos.get(':root')?.get('color-scheme'), 'dark');
+  assert.equal(resolver(':root', '--wo-fundo'), resolver(':root', '--wo-noite'));
+  assert.equal(resolver(':root', '--wo-texto'), resolver(':root', '--wo-clara'));
+  assert.equal(resolver('.wo-cartao-claro', '--wo-fundo'), resolver(':root', '--wo-papel'));
+  assert.equal(resolver('.wo-cartao-claro', '--wo-texto'), resolver(':root', '--wo-tinta'));
+  // O escuro é o da página: nenhuma faixa precisa de classe própria para ficar escura.
+  assert.equal(blocos.has('.wo-noite'), false, 'tokens.css ainda tem um bloco .wo-noite');
+});
+
+// O fundo vivo (spec 15) fica atrás de toda página. O fundo é fixo e o texto sobe por cima dele
+// quando a página rola, então passa pelo brilho da onda. O pixel mais claro atrás do texto do hero,
+// depois da camada de leitura, foi medido numa varredura de rolagem em 16/10/2026 (pôster e 24
+// quadros do laço, em 1440 x 900 e 390 x 844): rgb(107, 107, 107). O branco a 75% (--wo-clara-2) dá
+// 3,81:1 nesse pixel, abaixo dos 4,5:1; o --wo-clara sólido dá 4,80:1.
+const PIXEL_MAIS_CLARO_DA_ONDA = 'rgb(107, 107, 107)';
 test('hero: o texto secundário sobre o vídeo passa 4.5:1 no pixel mais claro do fundo', () => {
-  const razao = contraste(cor(':root', '--wo-hero-texto-secundario'), { css: PIXEL_MAIS_CLARO_DO_HERO });
+  const razao = contraste(cor(':root', '--wo-hero-texto-secundario'), { css: PIXEL_MAIS_CLARO_DA_ONDA });
   assert.ok(razao >= 4.5, `${razao.toFixed(2)}:1`);
 });
 
-// Topo (spec 5.5). Depois da faixa escura o fundo é o papel a 85% sobre um desfoque do que passa
-// por baixo: o pior caso é a noite inteira por baixo. Sobre a faixa escura o fundo é transparente,
-// então o texto precisa passar sobre a noite, sobre o fundo do hero e sobre o ponto mais claro do
-// degradê das aberturas.
-const NOITE = resolver(':root', '--wo-noite');
-const TOPO_CLARO = { css: resolver(':root', '--wo-topo-claro'), base: NOITE };
-for (const frente of ['--wo-texto', '--wo-texto-2', '--wo-acento-texto']) {
-  test(`topo claro: ${frente} sobre o papel a 85% com a noite por baixo passa 4.5:1`, () => {
-    const razao = contraste(cor(':root', frente), TOPO_CLARO);
-    assert.ok(razao >= 4.5, `${razao.toFixed(2)}:1`);
-  });
+// Seções sobre a onda (spec 15.2 e 15.5): onde a seção 7 diz "Papel", o véu (preto noite a 72%);
+// onde diz "Papel 2" ou "Noite", o véu forte (a 84%). Toda cor de texto do contexto escuro passa
+// 4,5:1 sobre o pior pixel da onda coberto por cada um dos dois.
+test('os véus são o preto noite a 72% e a 84%', () => {
+  assert.deepEqual(lerCor(resolver(':root', '--wo-veu')), { r: 10, g: 10, b: 10, a: 0.72 });
+  assert.deepEqual(lerCor(resolver(':root', '--wo-veu-forte')), { r: 10, g: 10, b: 10, a: 0.84 });
+});
+const TEXTOS_DO_ESCURO = ['--wo-texto', '--wo-texto-2', '--wo-texto-3', '--wo-acento-texto', '--wo-sucesso', '--wo-alerta', '--wo-erro', '--wo-info'];
+for (const veu of ['--wo-veu', '--wo-veu-forte']) {
+  for (const frente of TEXTOS_DO_ESCURO) {
+    test(`${frente} sobre ${veu} por cima do pixel mais claro da onda passa 4.5:1`, () => {
+      const razao = contraste(cor(':root', frente), { css: resolver(':root', veu), base: PIXEL_MAIS_CLARO_DA_ONDA });
+      assert.ok(razao >= 4.5, `${razao.toFixed(2)}:1`);
+    });
+  }
 }
 
-const FUNDOS_DO_TOPO_ESCURO = [
+// Topo (spec 5.5 e 15.2): sempre no estado sobre o escuro, com fundo transparente e desfoque. Por
+// baixo dele passam a noite, o fundo do hero antes do pôster e a onda, com ou sem véu.
+const NOITE = resolver(':root', '--wo-noite');
+const FUNDOS_DO_TOPO = [
   ['a noite', { css: NOITE }],
   ['o fundo do hero', { css: resolver(':root', '--wo-noite-hero') }],
-  ['o ponto mais claro da abertura', { css: resolver(':root', '--wo-abertura-brilho'), base: NOITE }],
 ];
-for (const [nome, fundo] of FUNDOS_DO_TOPO_ESCURO) {
-  test(`topo escuro: o texto do menu (branco a 85%) sobre ${nome} passa 4.5:1`, () => {
+for (const [nome, fundo] of FUNDOS_DO_TOPO) {
+  test(`topo: o texto do menu (branco a 85%) sobre ${nome} passa 4.5:1`, () => {
     const razao = contraste({ css: resolver(':root', '--wo-topo-texto-noite') }, fundo);
     assert.ok(razao >= 4.5, `${razao.toFixed(2)}:1`);
   });
-  test(`topo escuro: o lilás do "Ops" sobre ${nome} passa 4.5:1`, () => {
-    const razao = contraste(cor('.wo-noite', '--wo-acento-texto'), fundo);
+  test(`topo: o lilás do "Ops" sobre ${nome} passa 4.5:1`, () => {
+    const razao = contraste(cor(':root', '--wo-acento-texto'), fundo);
     assert.ok(razao >= 4.5, `${razao.toFixed(2)}:1`);
   });
 }
 
-// O botão do topo sobre a faixa escura é o de contorno: texto claro sobre o preto a 30%, que por
-// sua vez fica sobre o ponto mais claro da abertura.
-test('botão de contorno no escuro: texto claro sobre o preto a 30% passa 4.5:1', () => {
-  const abertura = compor(lerCor(resolver(':root', '--wo-abertura-brilho')), lerCor(NOITE));
-  const fundo = { css: resolver('.wo-noite', '--wo-contorno-fundo'), base: `rgb(${abertura.r} ${abertura.g} ${abertura.b})` };
-  const razao = contraste(cor('.wo-noite', '--wo-texto'), fundo);
+// O botão de contorno do hero fica sobre a onda: texto claro sobre o preto a 30%, que por sua vez fica
+// sobre o pixel mais claro da onda.
+test('botão de contorno sobre a onda: texto claro sobre o preto a 30% passa 4.5:1', () => {
+  const fundo = { css: resolver(':root', '--wo-contorno-fundo'), base: PIXEL_MAIS_CLARO_DA_ONDA };
+  const razao = contraste(cor(':root', '--wo-texto'), fundo);
   assert.ok(razao >= 4.5, `${razao.toFixed(2)}:1`);
 });

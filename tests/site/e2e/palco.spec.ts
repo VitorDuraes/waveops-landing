@@ -67,7 +67,7 @@ test.describe('palco ligado no desktop e no celular', () => {
     await quadro(page);
     await expect(page.locator('[data-palco]')).toHaveAttribute('data-palco-modo', 'fundo');
     await expect(page.locator('[data-cena][data-ativa]')).toHaveCount(0);
-    await expect(page.locator('.wo-home-fundo')).not.toHaveAttribute('data-capitulo');
+    await expect(page.locator('.wo-fundo')).not.toHaveAttribute('data-capitulo');
   });
 
   test('a cena do capítulo da vez fica ativa e as outras não', async ({ page }) => {
@@ -77,7 +77,7 @@ test.describe('palco ligado no desktop e no celular', () => {
     await expect(page.locator('[data-cena="atendimento"]')).toHaveAttribute('data-ativa');
     await expect(page.locator('[data-frente="atendimento"]')).toHaveAttribute('data-ativa');
     await expect(page.locator('[data-cena="agentes"]')).not.toHaveAttribute('data-ativa');
-    await expect(page.locator('.wo-home-fundo')).toHaveAttribute('data-capitulo', 'atendimento');
+    await expect(page.locator('.wo-fundo')).toHaveAttribute('data-capitulo', 'atendimento');
   });
 });
 
@@ -101,7 +101,7 @@ test.describe('palco no desktop', () => {
     await rolarProgresso(page, 'agentes', 0.2);
     await expect(page.locator('[data-cena="agentes"]')).toHaveAttribute('data-ativa');
     await expect(page.locator('[data-cena="atendimento"]')).not.toHaveAttribute('data-ativa');
-    await expect(page.locator('.wo-home-fundo')).toHaveAttribute('data-capitulo', 'agentes');
+    await expect(page.locator('.wo-fundo')).toHaveAttribute('data-capitulo', 'agentes');
   });
 
   test('o estado vale depois de recarregar no meio da seção', async ({ page }) => {
@@ -123,15 +123,45 @@ test.describe('palco no desktop', () => {
     await expect(page.locator('[data-cena="atendimento"]')).not.toHaveAttribute('data-ativa');
   });
 
-  test('a folha creme cobre o fundo depois do palco', async ({ page }) => {
+  /* Spec 15.4: a folha creme saiu. Depois do quinto capítulo, nenhuma cena fica na tela, a onda volta
+     ao brilho inteiro e o véu da primeira seção faz a leitura. O palco acaba quando o fim dele passa
+     da metade da janela, a mesma linha que liga um capítulo. */
+  test('depois do palco nenhuma cena aparece e o fundo volta ao brilho inteiro', async ({ page }) => {
     await page.goto('/');
+    await rolarProgresso(page, 'saas', 1);
+    await expect(page.locator('[data-cena="saas"]')).toHaveAttribute('data-ativa');
+    await expect(page.locator('.wo-fundo')).toHaveAttribute('data-capitulo', 'saas');
     await page.locator('#entradas-titulo').evaluate((titulo) => titulo.scrollIntoView({ block: 'center', behavior: 'instant' }));
     await quadro(page);
-    const noCentro = await page.evaluate(() => {
-      const elemento = document.elementFromPoint(innerWidth / 2, innerHeight / 2);
-      return elemento?.closest('.wo-home-folha') ? 'folha' : (elemento?.outerHTML.slice(0, 80) ?? 'nada');
-    });
-    expect(noCentro).toBe('folha');
+    await expect(page.locator('[data-cena][data-ativa]')).toHaveCount(0);
+    await expect(page.locator('[data-frente][data-ativa]')).toHaveCount(0);
+    await expect(page.locator('.wo-fundo')).not.toHaveAttribute('data-capitulo');
+    // A onda aparece inteira: o vídeo, quando toca, ou o pôster.
+    await expect.poll(() => page.evaluate(() => {
+      const video = document.querySelector('[data-fundo-video]');
+      const camada = video?.hasAttribute('data-tocando') ? video : document.querySelector('.wo-fundo__poster');
+      return camada ? getComputedStyle(camada).opacity : 'sem fundo';
+    })).toBe('1');
+    await expect(page.locator('[data-palco] + section')).toHaveCSS('background-color', 'rgba(10, 10, 10, 0.72)');
+    // Subindo de volta ao quinto capítulo, a cena dele volta inteira.
+    await rolarProgresso(page, 'saas', 1);
+    await expect(page.locator('[data-cena="saas"]')).toHaveAttribute('data-ativa');
+    const total = await page.locator('[data-cena="saas"] [data-passo]').evaluateAll((pecas) => Math.max(...pecas.map((peca) => Number((peca as HTMLElement).dataset.passo))));
+    await expect.poll(() => montadas(page, 'saas')).toBe(total);
+  });
+
+  test('o fim do palco é a metade da janela', async ({ page }) => {
+    await page.goto('/');
+    const rolarFim = (deslocamento: number) => page.locator('[data-palco]').evaluate((secao, d) => {
+      scrollTo({ top: Math.ceil(scrollY + secao.getBoundingClientRect().bottom - innerHeight / 2 + d), behavior: 'instant' });
+    }, deslocamento);
+    await rolarFim(-24);
+    await quadro(page);
+    await expect(page.locator('.wo-fundo')).toHaveAttribute('data-capitulo', 'saas');
+    await rolarFim(24);
+    await quadro(page);
+    await expect(page.locator('.wo-fundo')).not.toHaveAttribute('data-capitulo');
+    await expect(page.locator('[data-cena][data-ativa]')).toHaveCount(0);
   });
 
   test('com menos de 560 px de altura o palco desliga', async ({ page }) => {
@@ -152,7 +182,7 @@ test.describe('palco no desktop', () => {
     expect(await pecasApagadas(page)).toBeGreaterThan(0);
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await expect(page.locator('[data-palco]')).not.toHaveAttribute('data-palco-modo');
-    await expect(page.locator('.wo-home-fundo')).not.toHaveAttribute('data-capitulo');
+    await expect(page.locator('.wo-fundo')).not.toHaveAttribute('data-capitulo');
     await expect.poll(() => pecasApagadas(page)).toBe(0);
   });
 

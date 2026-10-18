@@ -7,9 +7,11 @@ test.use({ javaScriptEnabled: false });
 test('Home sem JavaScript mostra o pôster, o vídeo sem fonte e o botão de pausa escondido', async ({ page }, info) => {
   test.skip(info.project.name === 'tablet', 'mesma regra nas outras larguras');
   await page.goto('/');
-  await expect(page.locator('.wo-home-fundo__poster')).toBeVisible();
-  await expect(page.locator('[data-hero-video]')).not.toHaveAttribute('src');
-  await expect(page.locator('[data-video-pausa]')).toBeHidden();
+  await expect(page.locator('.wo-fundo__poster')).toHaveJSProperty('complete', true);
+  await expect(page.locator('.wo-fundo__poster')).toHaveCSS('opacity', '1');
+  await expect(page.locator('[data-fundo-video]')).not.toHaveAttribute('src');
+  await expect(page.locator('[data-fundo-video]')).toHaveCSS('opacity', '0');
+  await expect(page.locator('[data-fundo-pausa]')).toBeHidden();
   for (const id of ['vender', 'atender', 'operar', 'decidir', 'crescer']) {
     await expect(page.locator(`#solucoes a[href="/solucoes/#${id}"]`)).toBeVisible();
   }
@@ -50,7 +52,8 @@ for (const url of ['/', '/solucoes/', '/projetos-sob-medida/', '/404.html']) {
     await page.goto(url);
     await expect(page.locator('html')).not.toHaveAttribute('data-topo');
     const topo = page.locator('.wo-topo');
-    await expect(topo).toHaveAttribute('data-estado', 'escuro');
+    await expect(topo).toHaveCSS('background-color', 'rgb(10, 10, 10)');
+    await expect(topo).toHaveCSS('color', 'rgb(243, 243, 241)');
     expect(await topo.evaluate((el) => getComputedStyle(el).position)).not.toBe('fixed');
     if (info.project.name !== 'celular') return;
     const menu = await page.locator('#menu-movel').boundingBox();

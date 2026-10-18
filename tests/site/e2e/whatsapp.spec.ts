@@ -17,8 +17,13 @@ async function rolarCapitulo(page: Page, frente: string, p: number) {
   );
 }
 
-/** Rola até o título de "Duas formas de começar", o primeiro bloco da folha creme da Home. */
-const rolarAteAFolha = (page: Page) => page.locator('#entradas-titulo').evaluate((titulo) => titulo.scrollIntoView({ block: 'center', behavior: 'instant' }));
+/** Rola até o título de "Duas formas de começar", a primeira seção depois do palco da Home (spec 15.4). */
+const rolarAtePrimeiraSecao = (page: Page) => page.locator('#entradas-titulo').evaluate((titulo) => titulo.scrollIntoView({ block: 'center', behavior: 'instant' }));
+
+/** Rola até o topo da primeira seção depois do palco ficar na altura `y` da janela. */
+const rolarSecaoPara = (page: Page, y: number) => page.locator('[data-palco] + section').evaluate((secao, alvo) => {
+  scrollTo({ top: Math.round(scrollY + secao.getBoundingClientRect().top - alvo), behavior: 'instant' });
+}, y);
 
 /** Duração da transição de uma propriedade do botão, como o navegador a calculou. A lista de
     durações é repetida até cobrir a de propriedades (com menos movimento ela tem um valor só). */
@@ -124,11 +129,11 @@ test.describe('em desktop', () => {
     await page.setViewportSize({ width: 1023, height: 800 });
     await page.goto('/');
     await rolarCapitulo(page, 'atendimento', 0.2);
-    await expect(page.locator('.wo-home-fundo')).toHaveAttribute('data-capitulo', 'atendimento');
+    await expect(page.locator('.wo-fundo')).toHaveAttribute('data-capitulo', 'atendimento');
     await expect(botao).toHaveCSS('opacity', '0');
     await page.setViewportSize({ width: 1024, height: 800 });
     await rolarCapitulo(page, 'atendimento', 0.2);
-    await expect(page.locator('.wo-home-fundo')).toHaveAttribute('data-capitulo', 'atendimento');
+    await expect(page.locator('.wo-fundo')).toHaveAttribute('data-capitulo', 'atendimento');
     await expect(botao).toHaveCSS('opacity', '1');
   });
 });
@@ -138,18 +143,18 @@ test.describe('no celular, com o palco da Home', () => {
     test.skip(info.project.name !== 'celular', 'o painel do palco só fica embaixo da janela no celular');
   });
 
-  test('o botão some com o capítulo 1 ativo e volta quando a folha creme chega', async ({ page }) => {
+  test('o botão some com o capítulo 1 ativo e volta na primeira seção depois do palco', async ({ page }) => {
     await page.goto('/');
     const botao = page.locator('a[data-whatsapp="flutuante"]');
     await expect(botao, 'no alto da Home').toHaveCSS('opacity', '1');
 
     await rolarCapitulo(page, 'atendimento', 0.2);
-    await expect(page.locator('.wo-home-fundo')).toHaveAttribute('data-capitulo', 'atendimento');
+    await expect(page.locator('.wo-fundo')).toHaveAttribute('data-capitulo', 'atendimento');
     await expect(botao, 'com o capítulo 1 ativo').toHaveCSS('opacity', '0');
     await expect(botao).toHaveCSS('pointer-events', 'none');
 
-    await rolarAteAFolha(page);
-    await expect(botao, 'com a folha creme na tela').toHaveCSS('opacity', '1');
+    await rolarAtePrimeiraSecao(page);
+    await expect(botao, 'com a primeira seção depois do palco na tela').toHaveCSS('opacity', '1');
     await expect(botao).toHaveCSS('pointer-events', 'auto');
 
     // Voltando para o palco, ele sai de novo.
@@ -158,7 +163,20 @@ test.describe('no celular, com o palco da Home', () => {
     await expect(botao).toHaveCSS('pointer-events', 'none');
   });
 
-  test('o botão oculto sai da navegação por teclado e volta na folha', async ({ page }) => {
+  // Spec 15.4: ele volta quando a primeira seção depois do palco cobre a caixa dele, nem antes nem depois.
+  test('o botão volta quando a primeira seção depois do palco cobre a caixa dele', async ({ page }) => {
+    await page.goto('/');
+    const botao = page.locator('a[data-whatsapp="flutuante"]');
+    const caixa = (await botao.boundingBox())!;
+    await rolarSecaoPara(page, caixa.y + 8);
+    await expect(page.locator('.wo-fundo')).toHaveAttribute('data-capitulo', 'saas');
+    await expect(botao, 'seção 8 px abaixo do alto do botão').toHaveCSS('opacity', '0');
+    await rolarSecaoPara(page, caixa.y - 8);
+    await expect(botao, 'seção 8 px acima do alto do botão').toHaveCSS('opacity', '1');
+    await expect(botao).toHaveCSS('pointer-events', 'auto');
+  });
+
+  test('o botão oculto sai da navegação por teclado e volta depois do palco', async ({ page }) => {
     await page.goto('/');
     const botao = page.locator('a[data-whatsapp="flutuante"]');
     await page.locator('a[data-whatsapp="cta-final"]').focus();
@@ -166,10 +184,10 @@ test.describe('no celular, com o palco da Home', () => {
     await expect(botao).toHaveCSS('opacity', '0');
     await page.keyboard.press('Tab');
     await expect(botao, 'o Tab ignora o botão invisível').not.toBeFocused();
-    await rolarAteAFolha(page);
+    await rolarAtePrimeiraSecao(page);
     await expect(botao).toHaveCSS('opacity', '1');
     await botao.focus();
-    await expect(botao, 'na folha o link volta a receber foco').toBeFocused();
+    await expect(botao, 'depois do palco o link volta a receber foco').toBeFocused();
   });
 
   test('a troca de opacidade leva 240 ms e some com menos movimento', async ({ page }) => {
@@ -185,7 +203,7 @@ test.describe('no celular, com o palco da Home', () => {
     await expect(page.locator('[data-palco]')).not.toHaveAttribute('data-palco-modo');
     const botao = page.locator('a[data-whatsapp="flutuante"]');
     await page.locator('[data-frente="atendimento"]').evaluate((capitulo) => capitulo.scrollIntoView({ block: 'center', behavior: 'instant' }));
-    await expect(page.locator('.wo-home-fundo')).not.toHaveAttribute('data-capitulo');
+    await expect(page.locator('.wo-fundo')).not.toHaveAttribute('data-capitulo');
     await expect(botao).toHaveCSS('opacity', '1');
   });
 });
@@ -206,19 +224,19 @@ test.describe('sem animation-timeline, no celular e no tablet', () => {
     });
   });
 
-  test('sem animation-timeline o botão sai do palco e do teclado, volta na folha e some ao subir', async ({ page }) => {
+  test('sem animation-timeline o botão sai do palco e do teclado, volta depois do palco e some ao subir', async ({ page }) => {
     await page.goto('/');
     expect(await page.evaluate(() => CSS.supports('animation-timeline: view()'))).toBe(false);
     const botao = page.locator('a[data-whatsapp="flutuante"]');
     await expect(botao).toBeVisible();
     await page.locator('a[data-whatsapp="cta-final"]').focus();
     await rolarCapitulo(page, 'saas', 0.8);
-    await expect(page.locator('.wo-home-fundo')).toHaveAttribute('data-capitulo', 'saas');
+    await expect(page.locator('.wo-fundo')).toHaveAttribute('data-capitulo', 'saas');
     await expect(botao).toHaveCSS('opacity', '0');
     await expect(botao).toBeHidden();
     await page.keyboard.press('Tab');
     await expect(botao).not.toBeFocused();
-    await rolarAteAFolha(page);
+    await rolarAtePrimeiraSecao(page);
     await expect(botao).toHaveCSS('opacity', '1');
     await expect(botao).toBeVisible();
     await botao.focus();

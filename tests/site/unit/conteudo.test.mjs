@@ -149,23 +149,99 @@ test('maquete de interface sempre leva o aviso de ilustração', () => {
   }
 });
 
-// A página sem o miolo dos parciais carimbados (a chamada final e o rodapé também marcam faixa
-// escura, então o atributo deles não prova que a abertura da página marcou a dela).
+// A página sem o miolo dos parciais carimbados.
 const semParciais = (html) => html.replace(/<!--\s*parcial:([a-z0-9-]+)[^>]*-->[\s\S]*?<!--\s*\/parcial:\1\s*-->/g, '');
+// A tag de abertura de cada <section> que a página escreve, pela ordem.
+const secoes = (html) => [...semParciais(html).matchAll(/<section\b[^>]*>/g)].map((m) => m[0]);
 
-test('toda página marca a faixa escura de abertura, que decide o estado do topo', () => {
+test('toda página tem o fundo vivo como primeiro filho do <main> (spec 15.1)', () => {
   for (const p of paginas) {
-    assert.match(semParciais(ler(p.arquivo)), /\sdata-faixa-escura(?=[\s>])/, `${p.arquivo}: a abertura não tem data-faixa-escura`);
+    assert.match(ler(p.arquivo), /<main\b[^>]*>\s*<!-- parcial:fundo -->\s*<div class="wo-fundo" aria-hidden="true">/, `${p.arquivo}: o <main> não começa pelo parcial do fundo`);
   }
 });
 
-test('a chamada final e o rodapé marcam a própria faixa escura', () => {
-  // O topo fica escuro sobre qualquer faixa escura, não só sobre a primeira (iniciarTopoFixo).
+test('o parcial do fundo traz o pôster e o vídeo de 6.3, escondidos do leitor de tela', () => {
+  const parcial = ler('dev/site/parciais/fundo.html');
+  assert.match(parcial, /^<div class="wo-fundo" aria-hidden="true">/);
+  const imagem = /<img\b[^>]*>/.exec(parcial)?.[0] ?? '';
+  assert.match(imagem, /class="wo-fundo__poster"/);
+  assert.match(imagem, /\salt=""/);
+  assert.match(imagem, /\sfetchpriority="high"/);
+  const video = /<video\b[^>]*>/.exec(parcial)?.[0] ?? '';
+  for (const atributo of ['muted', 'playsinline', 'loop', 'preload="none"', 'data-fundo-video']) {
+    assert.ok(video.includes(` ${atributo}`), `o <video> do fundo sem ${atributo}`);
+  }
+  assert.doesNotMatch(video, /\s(src|autoplay)\b/, 'o vídeo nasce sem fonte e sem autoplay: a fonte só entra depois do load');
+});
+
+test('o botão de pausa do fundo mora no topo, com nome fixo, aria-pressed e hidden', () => {
+  const topo = ler('dev/site/parciais/topo.html');
+  const botao = /<button\b[^>]*data-fundo-pausa[^>]*>/.exec(topo)?.[0] ?? '';
+  assert.ok(botao, 'o topo não tem o botão de pausa do fundo');
+  assert.match(botao, /\stype="button"/);
+  assert.match(botao, /\saria-label="Pausar animação do fundo"/);
+  assert.match(botao, /\saria-pressed="false"/);
+  assert.match(botao, /\shidden(?=[\s>])/, 'o botão nasce escondido: só aparece quando o vídeo pode tocar');
+  for (const p of paginas) assert.doesNotMatch(semParciais(ler(p.arquivo)), /data-video-pausa|data-fundo-pausa/, `${p.arquivo}: pausa fora do topo`);
+});
+
+test('o topo fica sempre escuro: a troca por data-faixa-escura saiu (spec 15.2)', () => {
+  for (const nome of ['topo', 'cta-final', 'rodape']) assert.doesNotMatch(ler(`dev/site/parciais/${nome}.html`), /data-faixa-escura|data-estado=/, `parcial ${nome}`);
+  for (const p of paginas) assert.doesNotMatch(ler(p.arquivo), /data-faixa-escura/, p.arquivo);
+});
+
+test('a chamada final e o rodapé ficam sob o véu forte, sobre o fundo vivo', () => {
   for (const [nome, tag] of [['cta-final', 'section'], ['rodape', 'footer']]) {
-    const parcial = ler(`dev/site/parciais/${nome}.html`);
-    const abertura = new RegExp(`^<${tag}\\b[^>]*>`).exec(parcial)?.[0] ?? '';
-    assert.match(abertura, /\sdata-faixa-escura(?=[\s>])/, `${nome}: o elemento de fundo escuro não tem data-faixa-escura`);
-    assert.match(abertura, /\bwo-noite\b/, `${nome}: a faixa marcada tem de ser a escura`);
+    const abertura = new RegExp(`^<${tag}\\b[^>]*>`).exec(ler(`dev/site/parciais/${nome}.html`))?.[0] ?? '';
+    assert.match(abertura, /\bwo-veu-forte\b/, `${nome}: "Noite" vira o véu forte`);
+    assert.doesNotMatch(abertura, /\bwo-noite\b/, `${nome}: o fundo opaco cobriria a onda`);
+  }
+});
+
+test('a folha creme saiu e o escuro não depende de classe (spec 15.2 e 15.4)', () => {
+  for (const p of paginas) {
+    const classes = [...ler(p.arquivo).matchAll(/\sclass="([^"]*)"/g)].flatMap((m) => m[1].split(/\s+/));
+    assert.deepEqual(classes.filter((c) => ['wo-folha', 'wo-home-folha', 'wo-noite'].includes(c)), [], p.arquivo);
+  }
+});
+
+// Mapa da spec 15.2 sobre as tabelas de 7.1 e 7.3: hero transparente; "Papel" vira o véu e
+// "Papel 2" o véu forte.
+const VEUS = {
+  'index.html': [null, null, 'wo-veu', 'wo-veu-forte', 'wo-veu', 'wo-veu-forte'],
+  'projetos-sob-medida/index.html': [null, 'wo-veu-forte', 'wo-veu', 'wo-veu-forte', 'wo-veu'],
+};
+for (const [arquivo, esperados] of Object.entries(VEUS)) {
+  test(`${arquivo}: o hero é transparente e as seções seguem o mapa de véus`, () => {
+    const lidas = secoes(ler(arquivo)).map((tag) => /\bwo-veu-forte\b/.test(tag) ? 'wo-veu-forte' : /\bwo-veu\b/.test(tag) ? 'wo-veu' : null);
+    assert.deepEqual(lidas, esperados);
+  });
+}
+
+// A ordem da cascata é a da lista de 15.3 (etiquetas, selo, título, frase, botões, nota e cartão),
+// não a do HTML: na Home a frase fica no alto à direita e entra depois do título.
+test('toda página entra em cascata: os blocos do hero numerados de 0 em diante, sem buraco', () => {
+  for (const p of paginas) {
+    const html = semParciais(ler(p.arquivo));
+    const inicioHero = html.search(/<section\b/);
+    const fimHero = html.indexOf('</section>', inicioHero);
+    const numeros = [...html.matchAll(/\sdata-entrada="(\d+)"/g)].map((m) => ({ n: Number(m[1]), i: m.index ?? 0 }));
+    assert.ok(numeros.length >= 3, `${p.arquivo}: ${numeros.length} blocos com data-entrada`);
+    assert.ok(numeros.every(({ i }) => i > inicioHero && i < fimHero), `${p.arquivo}: data-entrada fora do hero`);
+    assert.deepEqual(numeros.map(({ n }) => n).sort((a, b) => a - b), numeros.map((_, k) => k), `${p.arquivo}: numeração repetida ou com buraco`);
+  }
+});
+
+test('na Home a cascata segue a lista de 15.3', () => {
+  const html = ler('index.html');
+  // O primeiro elemento da página com cada atributo: todos estão no hero.
+  const ordem = [
+    ['class="wo-home-hero__etiquetas', 0], ['class="wo-etiqueta-hero"', 1], ['id="home-titulo"', 2], ['class="wo-home-hero__frase"', 3],
+    ['class="wo-acoes"', 4], ['class="wo-nota-mono', 5], ['class="wo-home-hero__visual"', 6],
+  ];
+  for (const [gancho, n] of ordem) {
+    const tag = new RegExp(`<[a-z0-9]+\\s[^>]*${gancho}[^>]*>`).exec(html)?.[0] ?? '';
+    assert.match(tag, new RegExp(`\\sdata-entrada="${n}"`), `${gancho} entra na posição ${n}`);
   }
 });
 

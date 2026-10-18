@@ -54,7 +54,8 @@ test.describe('peças compartilhadas na página', () => {
     test.skip(info.project.name === 'tablet', 'mesmas regras no desktop e no celular');
   });
 
-  test('a lista editorial tem a primeira linha em tinta e as demais em linha fina', async ({ page }) => {
+  // Spec 5.4 no contexto escuro (15.2): a linha forte é a cor de texto e as finas, a linha noite.
+  test('a lista editorial tem a primeira linha forte e as demais em linha fina', async ({ page }) => {
     await page.goto(URL);
     const linhas = await page.locator('#frentes .wo-lista-editorial').evaluate((lista) => {
       const estilo = (el: Element) => getComputedStyle(el);
@@ -67,9 +68,9 @@ test.describe('peças compartilhadas na página', () => {
         })),
       };
     });
-    expect(linhas.topo).toEqual({ cor: 'rgb(22, 19, 15)', largura: '2px' });
+    expect(linhas.topo).toEqual({ cor: 'rgb(243, 243, 241)', largura: '2px' });
     expect(linhas.itens).toHaveLength(5);
-    for (const item of linhas.itens) expect(item).toEqual({ bordaTopo: '0px', cor: 'rgba(22, 19, 15, 0.14)', largura: '1px' });
+    for (const item of linhas.itens) expect(item).toEqual({ bordaTopo: '0px', cor: 'rgba(255, 255, 255, 0.15)', largura: '1px' });
   });
 
   test('a maquete Proposta é um cartão claro com sombra, aviso e selo legível', async ({ page }) => {

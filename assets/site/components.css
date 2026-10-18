@@ -45,13 +45,11 @@
   font-weight: 700;
 }
 
-/* ---------- Topo (spec 5.5) ----------
-   66 px de altura, por cima da página. Nasce em position: absolute sobre a faixa escura de
-   abertura, com data-estado="escuro" já no HTML: nada pisca e, se o JavaScript falhar, o topo
-   rola junto com a faixa e nunca fica texto branco sobre o creme. O site.js liga o modo fixo
-   (data-topo="fixo" no <html>) e passa data-estado para "claro" quando a faixa escura acaba. Sem
-   JavaScript, a regra do <noscript> do head põe o topo no fluxo, com fundo escuro. As cores do
-   estado escuro vêm de tokens.css (.wo-topo[data-estado='escuro']). */
+/* ---------- Topo (spec 5.5 e 15.2) ----------
+   66 px de altura, por cima da página, sempre no estado "sobre escuro": fundo transparente com
+   desfoque, texto branco a 85% (tokens.css) e botão de contorno. Nasce em position: absolute; o
+   site.js liga o modo fixo (data-topo="fixo" no <html>). Sem JavaScript, a regra do <noscript> do
+   head põe o topo no fluxo, com fundo escuro. */
 .wo-topo {
   position: absolute;
   top: 0;
@@ -60,21 +58,13 @@
   z-index: var(--wo-z-topo);
   border-bottom: 1px solid var(--wo-borda);
   color: var(--wo-texto);
+  color-scheme: dark;
   -webkit-backdrop-filter: blur(var(--wo-desfoque));
   backdrop-filter: blur(var(--wo-desfoque));
-  transition: background-color var(--wo-transicao), border-color var(--wo-transicao);
 }
 
 html[data-topo='fixo'] .wo-topo {
   position: fixed;
-}
-
-.wo-topo[data-estado='escuro'] {
-  color-scheme: dark;
-}
-
-.wo-topo[data-estado='claro'] {
-  background: var(--wo-topo-claro);
 }
 
 .wo-topo__barra {
@@ -157,16 +147,29 @@ html[data-topo='fixo'] .wo-topo {
   color: var(--wo-acento-texto);
 }
 
-/* Sobre a faixa escura o botão do topo é o de contorno, e depois dela volta a ser o principal
-   (spec 5.5). Especificidade 0,3,0 de propósito: vence .wo-btn--primario e o hover dele. */
-.wo-topo[data-estado='escuro'] .wo-topo__cta {
-  border-color: var(--wo-borda-forte);
+/* Pausa do fundo vivo (spec 15.3): no topo de toda página, com nome fixo e aria-pressed. 40 px no
+   desktop e 44 px abaixo de 768 px, a medida do botão (--wo-btn-altura). Nasce com hidden; o
+   fundo.js mostra quando o vídeo pode tocar. O ícone troca entre pausar e tocar. */
+.wo-topo__pausa {
+  display: grid;
+  place-items: center;
+  width: var(--wo-btn-altura);
+  height: var(--wo-btn-altura);
+  padding: 0;
+  border: 1px solid var(--wo-borda-forte);
+  border-radius: var(--wo-raio-pilula);
   background: var(--wo-contorno-fundo);
+  color: var(--wo-texto);
+  cursor: pointer;
 }
 
-.wo-topo[data-estado='escuro'] .wo-topo__cta:hover {
-  border-color: var(--wo-acento-borda);
-  background: var(--wo-contorno-fundo);
+.wo-topo__icone-tocar,
+.wo-topo__pausa[aria-pressed='true'] .wo-topo__icone-pausa {
+  display: none;
+}
+
+.wo-topo__pausa[aria-pressed='true'] .wo-topo__icone-tocar {
+  display: block;
 }
 
 .wo-topo__menu {
@@ -182,7 +185,8 @@ html[data-topo='fixo'] .wo-topo {
   cursor: pointer;
 }
 
-.wo-topo__menu svg {
+.wo-topo__menu svg,
+.wo-topo__pausa svg {
   width: 18px;
   height: 18px;
 }
@@ -475,52 +479,90 @@ html[data-topo='fixo'] .wo-topo {
   border: 2px solid currentColor;
 }
 
-/* ---------- Chip de contratação (link em pílula com marcador de situação) ---------- */
-.wo-chips {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px 12px;
+/* ---------- Fundo vivo (spec 15) ----------
+   O mesmo fundo em toda página, carimbado do parcial fundo como primeiro filho do <main>: o pôster da
+   onda e o vídeo por cima, com a camada de leitura, fixos atrás de tudo. O vídeo nasce transparente
+   e só aparece quando começa a tocar (data-tocando, escrito pelo fundo.js); com ele tocando, o pôster
+   sai de baixo. O fundo do <body> vai para a tela inteira, embaixo do z-index -1. */
+.wo-fundo {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: var(--wo-noite-hero);
 }
 
-.wo-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: var(--wo-alvo);
-  padding: 0 14px;
-  border: 1px solid var(--wo-borda-forte);
-  border-radius: var(--wo-raio-pilula);
-  color: var(--wo-texto);
-  font-size: 13.5px;
-  font-weight: 500;
-  text-decoration: none;
-  transition: border-color var(--wo-transicao);
+.wo-fundo > * {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  transition: opacity var(--wo-palco-transicao) ease;
 }
 
-.wo-chip:hover {
-  border-color: var(--wo-acento-borda);
-  color: var(--wo-texto);
-}
-
-.wo-chip::before {
+.wo-fundo::after {
   content: '';
-  width: 8px;
-  height: 8px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--wo-sucesso-ponto);
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 45%, transparent 50%, var(--wo-leitura-alto) 100%),
+    linear-gradient(180deg, var(--wo-leitura-alto), var(--wo-leitura-baixo));
 }
 
-/* ---------- Faixas do novo visual: abertura escura, folha e cartão noite (spec 5.4 e 7) ----------
-   Toda página abre com uma faixa escura. O topo flutua sobre ela, então o respiro de cima é a
-   altura do topo mais o ritmo da seção. Depois dela, o conteúdo claro sobe como uma folha. */
+.wo-fundo__video {
+  opacity: 0;
+}
+
+.wo-fundo__video[data-tocando] {
+  opacity: 1;
+}
+
+.wo-fundo:has(> .wo-fundo__video[data-tocando]) > .wo-fundo__poster {
+  opacity: 0;
+}
+
+/* ---------- Entrada em cascata do hero (spec 15.3) ----------
+   Ao abrir a página, cada bloco do hero marcado com data-entrada sai de transparente e 16 px abaixo
+   para o lugar, em 500 ms, com 70 ms entre um bloco e o seguinte (o número diz a vez). Só CSS: não
+   espera o JavaScript e acontece uma vez. O preenchimento backwards segura o bloco invisível só
+   durante o atraso. Com menos movimento, nada anima e tudo nasce no lugar. */
+@keyframes wo-entrada {
+  from {
+    opacity: 0;
+    transform: translateY(var(--wo-entrada-deslocamento));
+  }
+}
+
+[data-entrada] {
+  animation: wo-entrada var(--wo-entrada-duracao) backwards;
+}
+
+[data-entrada='1'] { animation-delay: var(--wo-entrada-passo); }
+[data-entrada='2'] { animation-delay: calc(2 * var(--wo-entrada-passo)); }
+[data-entrada='3'] { animation-delay: calc(3 * var(--wo-entrada-passo)); }
+[data-entrada='4'] { animation-delay: calc(4 * var(--wo-entrada-passo)); }
+[data-entrada='5'] { animation-delay: calc(5 * var(--wo-entrada-passo)); }
+[data-entrada='6'] { animation-delay: calc(6 * var(--wo-entrada-passo)); }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-entrada] {
+    animation: none;
+  }
+}
+
+/* ---------- Abertura e cartão noite (spec 5.4, 7 e 15.2) ----------
+   A abertura é o hero das páginas internas: transparente, com a onda no brilho inteiro por trás. O
+   topo flutua sobre ela, então o respiro de cima é a altura do topo mais o ritmo da seção. O texto
+   secundário e o de acento usam o token de texto sobre o vídeo: o lilás dá menos de 3:1 sobre o
+   brilho da onda (restrição de 4,5:1 sobre o fundo). */
 .wo-abertura {
   position: relative;
   padding: calc(var(--wo-topo-altura) + var(--wo-secao) / 2) 0 var(--wo-secao);
-  background:
-    radial-gradient(ellipse 70% 90% at 80% 0%, var(--wo-abertura-brilho), transparent 70%),
-    var(--wo-fundo);
+  --wo-texto-2: var(--wo-hero-texto-secundario);
+  --wo-texto-3: var(--wo-hero-texto-secundario);
+  --wo-acento-texto: var(--wo-hero-texto-secundario);
 }
 
 /* Abertura de duas colunas (7.2 a 7.4): abaixo de 1024 px o cartão desce para baixo do texto. O selo
@@ -564,14 +606,7 @@ html[data-topo='fixo'] .wo-topo {
   }
 }
 
-.wo-folha {
-  position: relative;
-  z-index: 1;
-  background: var(--wo-fundo);
-  box-shadow: var(--wo-sombra-folha);
-}
-
-/* Cartão escuro (spec 5.4): sempre dentro de uma faixa .wo-noite. */
+/* Cartão escuro (spec 5.4): cartão noite opaco sobre o véu da seção. */
 .wo-cartao-noite {
   padding: 36px;
   border: 1px solid var(--wo-linha-noite);
@@ -640,24 +675,6 @@ html[data-topo='fixo'] .wo-topo {
   margin-top: 22px;
 }
 
-/* ---------- Duas colunas genéricas (texto + painel) ---------- */
-.wo-duas-colunas {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 44px 64px;
-}
-
-.wo-duas-colunas--topo {
-  align-items: flex-start;
-  gap: 48px 72px;
-}
-
-.wo-coluna {
-  flex: 1 1 440px;
-  min-width: 0;
-}
-
 /* ---------- Maquete ilustrativa (painel que imita interface) ---------- */
 .wo-maquete {
   display: flex;
@@ -702,17 +719,6 @@ html[data-topo='fixo'] .wo-topo {
 }
 
 /* ---------- Entradas da Home (cartões-link separados por fio) ---------- */
-.wo-entradas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1px;
-  margin-top: 30px;
-  border: 1px solid var(--wo-borda-forte);
-  border-radius: var(--wo-raio-md);
-  background: var(--wo-borda-forte);
-  overflow: hidden;
-}
-
 .wo-entrada {
   display: flex;
   flex: 1 1 250px;
@@ -731,58 +737,6 @@ html[data-topo='fixo'] .wo-topo {
   color: var(--wo-texto);
 }
 
-.wo-entrada__topo {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  min-height: 26px;
-  color: var(--wo-acento-texto);
-  font-family: var(--wo-mono);
-  font-size: 11.5px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.wo-entrada__topo .wo-selo {
-  font-family: var(--wo-fonte);
-  letter-spacing: normal;
-  text-transform: none;
-}
-
-.wo-entrada__titulo {
-  font-size: 23px;
-  font-weight: 500;
-  line-height: 1.22;
-  letter-spacing: -0.035em;
-  text-wrap: balance;
-}
-
-.wo-entrada__texto {
-  color: var(--wo-texto-3);
-  font-size: 14.5px;
-  line-height: 1.65;
-}
-
-.wo-entrada__acao {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 28px;
-  margin-top: auto;
-  padding-top: 10px;
-  color: var(--wo-acento-texto);
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.wo-entrada__acao svg {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-}
-
 /* ---------- Peças editoriais compartilhadas ----------
    Usadas pela Home e pelas páginas de oferta. A semântica vem do HTML: ol para
    etapas, dl para definições e lista de modelos com os destinos de contratação. */
@@ -795,21 +749,12 @@ html[data-topo='fixo'] .wo-topo {
   text-transform: uppercase;
 }
 
+/* Cartão claro sobre o escuro (spec 5.4): o único lugar do contexto claro (15.2). Os semânticos do
+   claro estão em tokens.css, no bloco .wo-cartao-claro. */
 .wo-cartao-claro {
-  --wo-texto: var(--wo-tinta);
-  --wo-texto-2: var(--wo-tinta-2);
-  --wo-texto-3: var(--wo-tinta-3);
-  --wo-borda: var(--wo-linha);
-  --wo-borda-forte: var(--wo-linha);
-  --wo-superficie: var(--wo-papel);
-  --wo-acento-texto: var(--wo-violeta-forte);
-  --wo-sucesso: var(--wo-sucesso-claro);
-  --wo-alerta: var(--wo-alerta-claro);
-  --wo-erro: var(--wo-erro-claro);
-  --wo-info: var(--wo-info-claro);
   color: var(--wo-texto);
   color-scheme: light;
-  background: var(--wo-papel);
+  background: var(--wo-fundo);
   border: 0;
   border-radius: var(--wo-raio);
   box-shadow: var(--wo-sombra-cartao);
@@ -1065,44 +1010,7 @@ html[data-topo='fixo'] .wo-topo {
   display: none;
 }
 
-/* ---------- Resultado de negócio (painel do seletor e seções de Soluções) ---------- */
-.wo-resultado {
-  display: flex;
-  flex-direction: column;
-  gap: 26px;
-}
-
-.wo-resultado__titulo {
-  font-size: var(--wo-h3-painel);
-  font-weight: 500;
-  line-height: 1.15;
-  letter-spacing: -0.04em;
-}
-
-.wo-resultado__texto {
-  margin-top: 10px;
-  max-width: 620px;
-  color: var(--wo-texto-2);
-  font-size: 16.5px;
-  line-height: 1.7;
-}
-
-.wo-resultado__grade {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
-  gap: 26px 40px;
-}
-
-.wo-resultado__rodape {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px 24px;
-  padding-top: 20px;
-  border-top: 1px solid var(--wo-borda);
-}
-
+/* ---------- Sinais e lista de marcação (seções de Soluções e Home) ---------- */
 .wo-sinais {
   display: flex;
   flex-direction: column;
@@ -1143,86 +1051,6 @@ html[data-topo='fixo'] .wo-topo {
 
 .wo-lista-check--espacada {
   gap: 12px;
-}
-
-/* ---------- Passos verticais (como trabalhamos) ---------- */
-.wo-passos {
-  display: flex;
-  flex-direction: column;
-  margin-top: 22px;
-}
-
-.wo-passo {
-  display: flex;
-  gap: 20px;
-}
-
-.wo-passo__trilho {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.wo-passo__numero {
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  border: 1px solid var(--wo-acento-borda);
-  border-radius: 50%;
-  background: var(--wo-acento-fundo);
-  color: var(--wo-acento-texto);
-  font-family: var(--wo-mono);
-  font-size: 13px;
-}
-
-.wo-passo__trilho::after {
-  content: '';
-  flex: 1;
-  width: 1px;
-  margin: 8px 0;
-  background: var(--wo-borda-forte);
-}
-
-.wo-passo:last-child .wo-passo__trilho::after {
-  display: none;
-}
-
-.wo-passo__corpo {
-  min-width: 0;
-  padding: 5px 0 30px;
-}
-
-.wo-passo:last-child .wo-passo__corpo {
-  padding-bottom: 0;
-}
-
-.wo-passo__titulo {
-  font-size: 20px;
-  font-weight: 600;
-  line-height: 1.3;
-  letter-spacing: -0.03em;
-}
-
-.wo-passo__texto {
-  margin-top: 6px;
-  color: var(--wo-texto-3);
-  font-size: 15px;
-  line-height: 1.7;
-}
-
-.wo-passo__recebe {
-  margin-top: 10px;
-  color: var(--wo-texto-2);
-  font-size: 14.5px;
-  line-height: 1.6;
-}
-
-.wo-passo__recebe .wo-rotulo-mono {
-  display: inline;
-  margin-right: 10px;
-  color: var(--wo-acento-texto);
 }
 
 /* ---------- Modelos de contratação ---------- */
@@ -1278,8 +1106,9 @@ html[data-topo='fixo'] .wo-topo {
 }
 
 /* ---------- Chamada final (spec 8.4 e 14.1) ----------
-   Faixa escura (a classe .wo-noite vai no parcial): o texto à esquerda e, à direita, o cartão
-   escuro com quem responde e as duas formas de começar. Usa a grade editorial de base.css. */
+   Seção sob o véu forte (a classe .wo-veu-forte vai no parcial, spec 15.2): o texto à esquerda e, à
+   direita, o cartão escuro com quem responde e as duas formas de começar. Usa a grade editorial de
+   base.css. */
 .wo-cta {
   padding: var(--wo-secao) 0;
 }
@@ -1425,11 +1254,10 @@ html[data-topo='fixo'] .wo-topo {
 }
 
 /* ---------- Rodapé (spec 7.8 e 8.7) ----------
-   Faixa escura (.wo-noite no parcial). Embaixo, 88 px de respiro para o botão flutuante de
-   WhatsApp nunca cobrir texto. */
+   Sob o véu forte (.wo-veu-forte no parcial, spec 15.2), com a linha de cima dele. Embaixo, 88 px
+   de respiro para o botão flutuante de WhatsApp nunca cobrir texto. */
 .wo-rodape {
   padding: 56px 0 var(--wo-flutuante-respiro);
-  border-top: 1px solid var(--wo-borda);
   font-size: 14.5px;
   line-height: 1.6;
 }

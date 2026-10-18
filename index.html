@@ -10,15 +10,16 @@
     <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png" />
     <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
     <link rel="preload" href="/assets/fonts/geist-variavel-latin.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="stylesheet" href="/assets/site/tokens.css?v=db258b90" />
-    <link rel="stylesheet" href="/assets/site/base.css?v=5d580a8f" />
-    <link rel="stylesheet" href="/assets/site/components.css?v=c2d0d3ba" />
+    <link rel="stylesheet" href="/assets/site/tokens.css?v=e6ac9e57" />
+    <link rel="stylesheet" href="/assets/site/base.css?v=29cedc63" />
+    <link rel="stylesheet" href="/assets/site/components.css?v=0fc73280" />
     <script defer src="/assets/funil.js?v=2842b2e3"></script>
-    <script type="module" src="/assets/site/site.js?v=ac12fd00"></script>
+    <script type="module" src="/assets/site/site.js?v=e5d9e734"></script>
+    <script type="module" src="/assets/site/fundo.js?v=601e2bc9"></script>
     <noscript><style>.wo-topo{position:relative;background:var(--wo-noite)}[data-seletor] [data-painel]{display:block!important}[data-seletor] [data-opcoes],[data-sem-js-oculto]{display:none!important}@media (max-width:1180px){.wo-topo__painel[hidden]{display:flex!important}.wo-topo__menu{display:none!important}}</style></noscript>
     <!-- /parcial:head -->
-    <script type="module" src="/assets/site/paginas/home.js?v=85f66fbd"></script>
-    <link rel="stylesheet" href="/assets/site/paginas/home.css?v=88763e26" />
+    <script type="module" src="/assets/site/paginas/home.js?v=828522eb"></script>
+    <link rel="stylesheet" href="/assets/site/paginas/home.css?v=6dd521e5" />
     <title>WaveOps · Sistemas sob medida para a operação de quem vende</title>
     <meta name="description" content="Software house da operação de quem vende: automação de atendimento, agentes de IA, dashboards, CRMs sob medida e SaaS, do diagnóstico ao que está no ar." />
     <link rel="canonical" href="https://waveops.com.br/" />
@@ -76,7 +77,7 @@
   <body data-pagina="home">
     <a class="wo-pular" href="#conteudo">Pular para o conteúdo</a>
     <!-- parcial:topo ativo="home" -->
-    <header class="wo-topo" data-estado="escuro">
+    <header class="wo-topo">
       <div class="wo-topo__barra">
         <a class="wo-marca" href="/" aria-label="WaveOps, início" aria-current="page">
           <span class="wo-marca__selo">
@@ -91,7 +92,11 @@
         </nav>
         <div class="wo-topo__acoes">
           <a class="wo-topo__cliente" href="https://portal.waveops.com.br/cliente/login">Área do cliente</a>
-          <a class="wo-btn wo-btn--primario wo-topo__cta" href="/contato/">Falar com especialista</a>
+          <a class="wo-btn wo-btn--secundario wo-topo__cta" href="/contato/">Falar com especialista</a>
+          <button class="wo-topo__pausa" type="button" aria-pressed="false" aria-label="Pausar animação do fundo" hidden data-fundo-pausa>
+            <svg width="1em" height="1em" class="wo-topo__icone-pausa" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M6 4h4v16H6zM14 4h4v16h-4z" /></svg>
+            <svg width="1em" height="1em" class="wo-topo__icone-tocar" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="m7 4 13 8-13 8z" /></svg>
+          </button>
           <button class="wo-topo__menu" type="button" aria-controls="menu-movel" aria-expanded="false" aria-label="Abrir menu">
             <svg width="1em" height="1em" class="wo-topo__icone-abrir" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
             <svg width="1em" height="1em" class="wo-topo__icone-fechar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18" /></svg>
@@ -108,360 +113,353 @@
     </header>
     <!-- /parcial:topo -->
     <main id="conteudo" tabindex="-1">
-      <div class="wo-home-fundo" aria-hidden="true">
-        <img class="wo-home-fundo__poster" src="/assets/site/video/onda-poster.webp" alt="" width="1920" height="1080" fetchpriority="high" />
-        <video class="wo-home-fundo__video" muted playsinline loop preload="none" disablepictureinpicture tabindex="-1" data-hero-video></video>
+      <!-- parcial:fundo -->
+      <div class="wo-fundo" aria-hidden="true">
+        <img class="wo-fundo__poster" src="/assets/site/video/onda-poster.webp" alt="" width="1920" height="1080" fetchpriority="high" />
+        <video class="wo-fundo__video" muted playsinline loop preload="none" disablepictureinpicture tabindex="-1" data-fundo-video></video>
       </div>
-      <div class="wo-home-escuro" data-faixa-escura>
-        <section class="wo-home-hero" aria-labelledby="home-titulo" data-hero>
-
-          <div class="wo-conteiner">
-            <div class="wo-home-hero__abertura">
-              <ul class="wo-home-hero__etiquetas wo-etiqueta">
-                <li>/ Automação de atendimento</li>
-                <li>/ Agentes de IA</li>
-                <li>/ Dashboards, CRMs e SaaS</li>
-              </ul>
-              <p class="wo-home-hero__frase">Construímos o sistema da sua operação, integramos ao que você já usa e, com serviços gerenciados, cuidamos do que está no ar.</p>
-            </div>
-            <div class="wo-home-hero__grade">
-              <div class="wo-home-hero__texto">
-                <span class="wo-etiqueta-hero">Software house · para quem vende</span>
-                <h1 class="wo-h1" id="home-titulo"><span class="wo-linha">Do lead à cobrança,</span><span class="wo-linha">menos trabalho manual.</span></h1>
-                <div class="wo-acoes">
-                  <a class="wo-btn wo-btn--primario" href="/contato/">Falar com especialista<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
-                  <a class="wo-btn wo-btn--secundario" href="/solucoes/">Explorar soluções</a>
-                </div>
-                <p class="wo-nota-mono wo-nota-mono--ponto">Primeira conversa sem custo e sem compromisso.</p>
-              </div>
-              <div class="wo-home-hero__visual">
-                <figure class="wo-maquete wo-cartao-claro wo-operacao" aria-labelledby="operacao-legenda">
-                  <figcaption class="wo-maquete__cabeca">
-                    <span class="wo-maquete__titulo" id="operacao-legenda">Operação conectada</span>
-                    <span class="wo-maquete__aviso">Fluxo ilustrativo</span>
-                  </figcaption>
-                  <ul class="wo-operacao__sistemas" aria-label="Sistemas conectados">
-                    <li><span class="wo-operacao__nome">WhatsApp</span><span class="wo-operacao__estado">conectado</span></li>
-                    <li><span class="wo-operacao__nome">CRM</span><span class="wo-operacao__estado">conectado</span></li>
-                    <li><span class="wo-operacao__nome">ERP</span><span class="wo-operacao__estado">conectado</span></li>
-                    <li><span class="wo-operacao__nome">Pagamentos</span><span class="wo-operacao__estado">conectado</span></li>
-                  </ul>
-                  <div class="wo-operacao__fio" aria-hidden="true"></div>
-                  <div class="wo-operacao__camada">
-                    <span class="wo-operacao__simbolo" aria-hidden="true"><svg width="1em" height="1em" viewBox="0 0 100 100" fill="none" focusable="false"><g stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 50 Q 30 33 41 50" /><path d="M59 50 Q 70 67 82 50" /></g><circle cx="50" cy="50" r="9" fill="none" stroke="#fff" stroke-width="5" /><circle cx="18" cy="50" r="7.5" fill="#fff" /><circle cx="82" cy="50" r="7.5" fill="#fff" /></svg></span>
-                    <span class="wo-operacao__camada-texto"><strong>Automação sob medida</strong><span>Conecta sistemas, regras e agentes de IA</span></span>
-                  </div>
-                  <div class="wo-operacao__fio" aria-hidden="true"></div>
-                  <ul class="wo-operacao__eventos" aria-label="Eventos de exemplo">
-                    <li><span class="wo-operacao__hora">09:41</span><span class="wo-operacao__evento">Lead chegou pelo WhatsApp</span><span class="wo-operacao__area">Vendas</span></li>
-                    <li><span class="wo-operacao__hora">09:41</span><span class="wo-operacao__evento">Follow-up agendado no CRM</span><span class="wo-operacao__area">Vendas</span></li>
-                    <li><span class="wo-operacao__hora">09:42</span><span class="wo-operacao__evento">Pedido no ERP e cobrança gerada</span><span class="wo-operacao__area">Financeiro</span></li>
-                    <li><span class="wo-operacao__hora">09:47</span><span class="wo-operacao__evento">Indicadores do dia atualizados no painel</span><span class="wo-operacao__area">Gestão</span></li>
-                  </ul>
-                </figure>
-              </div>
-            </div>
-          </div>
-            <button class="wo-home-hero__pausa" type="button" aria-pressed="false" aria-label="Pausar vídeo" hidden data-video-pausa>
-              <svg class="wo-home-hero__icone-pausa" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z" /></svg>
-              <svg class="wo-home-hero__icone-tocar" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m7 4 13 8-13 8z" /></svg>
-            </button>
-        </section>
-
-        <section class="wo-home-frentes" id="frentes" aria-labelledby="frentes-titulo" data-palco>
-          <div class="wo-home-frentes__abertura">
-            <div class="wo-editorial">
-              <div class="wo-editorial__cabeca">
-                <h2 class="wo-h2 wo-home-frentes__titulo" id="frentes-titulo">Cinco frentes.</h2>
-              </div>
-              <div class="wo-editorial__corpo">
-                <p class="wo-home-frentes__texto">Cada frente pode ser contratada sozinha. Na prática, elas andam juntas, e o diagnóstico indica por onde começar.</p>
-                <a class="wo-link-seta wo-home-frentes__link" href="/projetos-sob-medida/">Ver projetos sob medida<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
-              </div>
-            </div>
-          </div>
-          <div class="wo-home-capitulo" data-frente="atendimento">
-            <div class="wo-home-painel">
-              <span class="wo-home-painel__numero">01</span>
-              <h3 class="wo-home-painel__nome">Automação de atendimento</h3>
-              <p class="wo-home-painel__frase">Resposta, triagem e follow-up no WhatsApp e nos canais que a empresa já usa.</p>
-              <ul class="wo-home-painel__etiquetas">
-                <li>WhatsApp</li>
-                <li>Triagem</li>
-                <li>Follow-up</li>
-              </ul>
-            </div>
-            <figure class="wo-maquete wo-home-cena wo-home-cena--atendimento" data-cena="atendimento">
-              <figcaption class="wo-home-cena__cabeca">
-                <span class="wo-home-cena__titulo">Atendimento no WhatsApp</span>
-                <span class="wo-maquete__aviso">Ilustração</span>
-                <span class="wo-oculto">Um pedido de orçamento chega pelo WhatsApp, passa pela triagem e vira lead no CRM, com resposta enviada e follow-up agendado para amanhã.</span>
-              </figcaption>
-              <div class="wo-home-cena__tela" aria-hidden="true">
-                <div class="wo-home-cena__cartao wo-home-cena__no wo-home-cena__no--whatsapp" data-passo="1">
-                  <div class="wo-home-cena__no-cabeca">
-                    <span class="wo-home-cena__icone wo-home-cena__icone--whatsapp"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 0 0-8.7 15L2 22l5.2-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.2 14.8l-.4-.2-2.6.7.7-2.5-.2-.4A8 8 0 0 1 12 4zm-2.7 4c-.2 0-.5 0-.7.4-.2.4-.8.8-.8 2s.8 2.3 1 2.5c.1.2 1.6 2.6 4 3.5 2 .8 2.4.6 2.8.6.5 0 1.4-.6 1.6-1.1.2-.6.2-1 .1-1.1l-.6-.3c-.3-.2-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1-.3-.1-1-.4-2-1.2-.7-.6-1.2-1.4-1.3-1.6-.1-.2 0-.4.1-.5l.4-.4.2-.4v-.4c0-.1-.5-1.3-.7-1.7-.2-.5-.4-.4-.5-.4z" /></svg></span>
-                    <span class="wo-home-cena__nome">WhatsApp</span>
-                    <span class="wo-home-cena__meta">Cliente</span>
-                  </div>
-                  <p class="wo-home-cena__balao">Olá! Quero um orçamento para o meu pedido.</p>
-                </div>
-                <svg class="wo-home-cena__fio" data-passo="2" width="12" height="18" fill="none" aria-hidden="true" focusable="false"><path class="wo-home-cena__traco wo-home-cena__traco--curto" d="M6 0V18" pathLength="1" /><path class="wo-home-cena__traco wo-home-cena__traco--largo" d="M320 108C470 108 560 128 560 172" pathLength="1" /><path class="wo-home-cena__traco wo-home-cena__traco--estreito" d="M280 86C326 86 300 118 300 160" pathLength="1" /></svg>
-                <div class="wo-home-cena__cartao wo-home-cena__no wo-home-cena__no--triagem" data-passo="3">
-                  <div class="wo-home-cena__no-cabeca">
-                    <span class="wo-home-cena__icone wo-home-cena__icone--triagem"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 5h16l-6 7v6l-4 2v-8L4 5z" /></svg></span>
-                    <span class="wo-home-cena__nome">Triagem</span>
-                  </div>
-                  <ul class="wo-home-cena__etiquetas">
-                    <li class="wo-home-cena__etiqueta">Assunto: orçamento</li>
-                    <li class="wo-home-cena__etiqueta wo-home-cena__etiqueta--alerta">Prioridade: alta</li>
-                  </ul>
-                </div>
-                <svg class="wo-home-cena__fio" data-passo="4" width="12" height="18" fill="none" aria-hidden="true" focusable="false"><path class="wo-home-cena__traco wo-home-cena__traco--curto" d="M6 0V18" pathLength="1" /><path class="wo-home-cena__traco wo-home-cena__traco--largo" d="M400 236C250 236 160 256 160 304" pathLength="1" /><path class="wo-home-cena__traco wo-home-cena__traco--estreito" d="M70 212C24 212 50 244 50 283" pathLength="1" /></svg>
-                <div class="wo-home-cena__cartao wo-home-cena__no wo-home-cena__no--crm" data-passo="5">
-                  <div class="wo-home-cena__no-cabeca">
-                    <span class="wo-home-cena__icone wo-home-cena__icone--crm"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="3.5" /><path d="M5 20c.6-3.6 3.5-6 7-6s6.4 2.4 7 6" /></svg></span>
-                    <span class="wo-home-cena__nome">CRM</span>
-                  </div>
-                  <ul class="wo-home-cena__itens">
-                    <li class="wo-home-cena__ok"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5" /></svg>Lead criado</li>
-                    <li><span class="wo-home-cena__rotulo">Responsável:</span> <span class="wo-home-cena__valor">Vendas</span></li>
-                  </ul>
-                </div>
-                <div class="wo-home-cena__cartao wo-home-cena__registro" data-passo="6">
-                  <span class="wo-home-cena__registro-titulo">Registro</span>
-                  <ul class="wo-home-cena__itens">
-                    <li><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5" /></svg>Resposta enviada no WhatsApp</li>
-                    <li><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5" /></svg>Follow-up agendado para amanhã</li>
-                  </ul>
-                </div>
-              </div>
-            </figure>
-          </div>
-          <div class="wo-home-capitulo" data-frente="agentes">
-            <div class="wo-home-painel">
-              <span class="wo-home-painel__numero">02</span>
-              <h3 class="wo-home-painel__nome">Agentes de IA</h3>
-              <p class="wo-home-painel__frase">Agentes com função clara e fonte de dados definida, com uma pessoa do seu time no controle.</p>
-              <ul class="wo-home-painel__etiquetas">
-                <li>Qualificação</li>
-                <li>Consulta a documentos</li>
-                <li>Revisão humana</li>
-              </ul>
-            </div>
-            <figure class="wo-maquete wo-home-cena wo-home-cena--agentes" data-cena="agentes">
-              <figcaption class="wo-home-cena__cabeca">
-                <span class="wo-home-cena__titulo">Agente de qualificação</span>
-                <span class="wo-maquete__aviso">Ilustração</span>
-                <span class="wo-oculto">Um agente qualifica os leads do site com base no catálogo e nas perguntas frequentes, e a resposta dele passa pela revisão de Vendas antes do envio.</span>
-              </figcaption>
-              <div class="wo-home-cena__tela" aria-hidden="true">
-                <div data-passo="1"></div>
-              </div>
-            </figure>
-          </div>
-          <div class="wo-home-capitulo" data-frente="dashboards">
-            <div class="wo-home-painel">
-              <span class="wo-home-painel__numero">03</span>
-              <h3 class="wo-home-painel__nome">Dashboards</h3>
-              <p class="wo-home-painel__frase">Os números da operação num painel só, com dado confiável no lugar da planilha.</p>
-              <ul class="wo-home-painel__etiquetas">
-                <li>Indicadores</li>
-                <li>Acesso por perfil</li>
-                <li>Relatórios recorrentes</li>
-              </ul>
-            </div>
-            <figure class="wo-maquete wo-home-cena wo-home-cena--dashboards" data-cena="dashboards">
-              <figcaption class="wo-home-cena__cabeca">
-                <span class="wo-home-cena__titulo">Operação hoje</span>
-                <span class="wo-maquete__aviso">Ilustração</span>
-                <span class="wo-oculto">Um painel do comercial mostra os indicadores de hoje, a evolução dos últimos dias e a origem dos leads, com acesso para a Gestão.</span>
-              </figcaption>
-              <div class="wo-home-cena__tela" aria-hidden="true">
-                <div data-passo="1"></div>
-              </div>
-            </figure>
-          </div>
-          <div class="wo-home-capitulo" data-frente="crms">
-            <div class="wo-home-painel">
-              <span class="wo-home-painel__numero">04</span>
-              <h3 class="wo-home-painel__nome">CRMs sob medida</h3>
-              <p class="wo-home-painel__frase">Funil e operação comercial do jeito da sua empresa, sem adaptar o processo a um sistema pronto.</p>
-              <ul class="wo-home-painel__etiquetas">
-                <li>Funil</li>
-                <li>Cadência</li>
-                <li>WhatsApp integrado</li>
-              </ul>
-            </div>
-            <figure class="wo-maquete wo-home-cena wo-home-cena--crms" data-cena="crms">
-              <figcaption class="wo-home-cena__cabeca">
-                <span class="wo-home-cena__titulo">Funil comercial</span>
-                <span class="wo-maquete__aviso">Ilustração</span>
-                <span class="wo-oculto">Um funil leva os leads do site e do WhatsApp de Novo a Fechado, com follow-up na proposta e a origem da venda registrada.</span>
-              </figcaption>
-              <div class="wo-home-cena__tela" aria-hidden="true">
-                <div data-passo="1"></div>
-              </div>
-            </figure>
-          </div>
-          <div class="wo-home-capitulo" data-frente="saas">
-            <div class="wo-home-painel">
-              <span class="wo-home-painel__numero">05</span>
-              <h3 class="wo-home-painel__nome">SaaS</h3>
-              <p class="wo-home-painel__frase">Produto web completo, do zero ao ar: cadastro, acesso por perfil, pagamento e painel.</p>
-              <ul class="wo-home-painel__etiquetas">
-                <li>Do zero ao ar</li>
-                <li>Pagamentos</li>
-                <li>Área do cliente</li>
-              </ul>
-            </div>
-            <figure class="wo-maquete wo-home-cena wo-home-cena--saas" data-cena="saas">
-              <figcaption class="wo-home-cena__cabeca">
-                <span class="wo-home-cena__titulo">Seu produto no ar</span>
-                <span class="wo-maquete__aviso">Ilustração</span>
-                <span class="wo-oculto">Um produto web ganha forma no navegador, da tela de acesso ao painel e ao pagamento aprovado, até ficar no ar com monitoramento ativo.</span>
-              </figcaption>
-              <div class="wo-home-cena__tela" aria-hidden="true">
-                <div data-passo="1"></div>
-              </div>
-            </figure>
-          </div>
-        </section>
-      </div>
-
-      <div class="wo-home-folha">
-        <section class="wo-secao wo-home-entradas" aria-labelledby="entradas-titulo">
-          <div class="wo-conteiner">
-            <span class="wo-sobretitulo">Por onde começar</span>
-            <h2 class="wo-h2 wo-h2--menor" id="entradas-titulo">Duas formas de começar.</h2>
-            <div class="wo-home-entradas__grade">
-              <a class="wo-home-entrada" href="/solucoes/">
-                <h3 class="wo-home-entrada__nome">Soluções</h3>
-                <span class="wo-home-entrada__titulo">Comece pelo resultado que a empresa precisa.</span>
-                <span class="wo-home-entrada__texto">Vender mais, atender melhor, operar com menos retrabalho, decidir com dados ou crescer com segurança.</span>
-                <span class="wo-home-entrada__acao">Ver soluções<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" /></svg></span>
-              </a>
-              <a class="wo-home-entrada" href="/projetos-sob-medida/">
-                <h3 class="wo-home-entrada__nome">Projetos sob medida</h3>
-                <span class="wo-home-entrada__titulo">Sistemas e automações feitos para o seu processo.</span>
-                <span class="wo-home-entrada__texto">Do diagnóstico à entrega, com escopo escrito antes de começar.</span>
-                <span class="wo-home-entrada__acao">Ver projetos sob medida<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" /></svg></span>
-              </a>
-            </div>
-          </div>
-        </section>
-
-        <section class="wo-secao wo-home-processo" aria-labelledby="sobmedida-titulo">
-          <div class="wo-conteiner">
-            <div class="wo-editorial">
-              <div class="wo-editorial__cabeca">
-                <span class="wo-sobretitulo">Projetos sob medida</span>
-                <h2 class="wo-h2" id="sobmedida-titulo">Do diagnóstico à evolução.</h2>
-              </div>
-              <p class="wo-editorial__corpo wo-home-processo__intro">Você explica o problema com as suas palavras. A parte técnica fica com a gente.</p>
-            </div>
-            <ol class="wo-colunas-numeradas" aria-label="Como trabalhamos">
-              <li class="wo-colunas-numeradas__item">
-                <span class="wo-colunas-numeradas__numero">01</span>
-                <h3>Diagnosticar</h3>
-                <p>Uma conversa sobre o negócio, as ferramentas e onde o tempo se perde.</p>
-                <p class="wo-colunas-numeradas__recebe"><span class="wo-etiqueta">Você recebe</span>Os pontos de maior impacto na sua operação.</p>
-              </li>
-              <li class="wo-colunas-numeradas__item">
-                <span class="wo-colunas-numeradas__numero">02</span>
-                <h3>Arquitetar</h3>
-                <p>Desenhamos a solução com você antes de construir.</p>
-                <p class="wo-colunas-numeradas__recebe"><span class="wo-etiqueta">Você recebe</span>Proposta por escrito, com escopo, prazo e condições.</p>
-              </li>
-              <li class="wo-colunas-numeradas__item">
-                <span class="wo-colunas-numeradas__numero">03</span>
-                <h3>Implementar</h3>
-                <p>Construímos, integramos e testamos junto com quem vai usar.</p>
-                <p class="wo-colunas-numeradas__recebe"><span class="wo-etiqueta">Você recebe</span>A solução no ar, validada pela sua equipe.</p>
-              </li>
-              <li class="wo-colunas-numeradas__item">
-                <span class="wo-colunas-numeradas__numero">04</span>
-                <h3>Evoluir</h3>
-                <p>Acompanhamos o que está no ar e melhoramos conforme a operação muda.</p>
-                <p class="wo-colunas-numeradas__recebe"><span class="wo-etiqueta">Você recebe</span>Acompanhamento contínuo, quando contratado.</p>
-              </li>
-            </ol>
-            <ul class="wo-lista-check wo-home-processo__garantias">
-                <li><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5" /></svg><span>Escopo escrito e aprovado por você antes de começar</span></li>
-                <li><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5" /></svg><span>Você acompanha cada etapa e valida as entregas</span></li>
-                <li><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5" /></svg><span>Condições comerciais definidas na proposta, conforme o escopo</span></li>
-              </ul>
-            <a class="wo-btn wo-btn--secundario" href="/projetos-sob-medida/">Ver projetos sob medida</a>
-          </div>
-        </section>
-
-        <section class="wo-secao" id="solucoes" aria-labelledby="solucoes-titulo">
-          <div class="wo-conteiner wo-editorial">
-            <div class="wo-editorial__cabeca">
-              <span class="wo-sobretitulo">Soluções</span>
-              <h2 class="wo-h2" id="solucoes-titulo">Escolha pelo resultado, não pela tecnologia.</h2>
-              <p class="wo-lead">Você diz aonde quer chegar. A gente combina as frentes certas e indica a melhor forma de contratar.</p>
-            </div>
-            <dl class="wo-editorial__corpo wo-definicoes">
-              <div class="wo-definicoes__linha">
-                <dt><a href="/solucoes/#vender">Vender mais<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a></dt>
-                <dd>Mais oportunidades chegando e menos oportunidades esquecidas pelo caminho.</dd>
-              </div>
-              <div class="wo-definicoes__linha">
-                <dt><a href="/solucoes/#atender">Atender melhor<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a></dt>
-                <dd>Respostas mais rápidas e com contexto, sem aumentar a equipe na mesma proporção.</dd>
-              </div>
-              <div class="wo-definicoes__linha">
-                <dt><a href="/solucoes/#operar">Operar com menos retrabalho<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a></dt>
-                <dd>Processos que rodam de ponta a ponta, sem cópia e cola entre as áreas.</dd>
-              </div>
-              <div class="wo-definicoes__linha">
-                <dt><a href="/solucoes/#decidir">Decidir com dados<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a></dt>
-                <dd>Os números da operação em um lugar só, atualizados sem depender de alguém lembrar.</dd>
-              </div>
-              <div class="wo-definicoes__linha">
-                <dt><a href="/solucoes/#crescer">Crescer com segurança<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a></dt>
-                <dd>O que está no ar continua no ar, e a tecnologia acompanha o tamanho da empresa.</dd>
-              </div>
-            </dl>
-          </div>
-        </section>
-
-        <section class="wo-secao wo-home-contratar" id="como-contratar" aria-labelledby="contratar-titulo">
-          <div class="wo-conteiner">
-            <span class="wo-sobretitulo">Como contratar</span>
-            <h2 class="wo-h2" id="contratar-titulo"><span class="wo-linha">O contrato acompanha</span><span class="wo-linha">o que a empresa precisa.</span></h2>
-            <p class="wo-lead">Projeto, implementação ou serviços gerenciados. As condições de cada contrato são definidas na proposta, depois do diagnóstico.</p>
-            <ul class="wo-modelos wo-tabela-modelos">
-              <li class="wo-modelo">
-                <div class="wo-modelo__nome"><h3>Projeto</h3><span class="wo-selo wo-selo--disponivel">Disponível</span></div>
-                <div class="wo-modelo__campo"><span class="wo-etiqueta">Quando faz sentido</span><p>Construção com começo, meio e fim: sistema, integração, automação ou painel.</p></div>
-                <div class="wo-modelo__campo"><span class="wo-etiqueta">O que define a proposta</span><p>Escopo, prazo e entregáveis descritos na proposta.</p></div>
-                <svg class="wo-tabela-modelos__seta" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-              </li>
-              <li class="wo-modelo">
-                <div class="wo-modelo__nome"><h3>Implementação</h3><span class="wo-selo wo-selo--disponivel">Disponível</span></div>
-                <div class="wo-modelo__campo"><span class="wo-etiqueta">Quando faz sentido</span><p>Colocar para funcionar uma ferramenta, automação ou integração no seu ambiente.</p></div>
-                <div class="wo-modelo__campo"><span class="wo-etiqueta">O que define a proposta</span><p>Quantidade de sistemas, complexidade e treinamento da equipe.</p></div>
-                <svg class="wo-tabela-modelos__seta" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-              </li>
-              <li class="wo-modelo">
-                <div class="wo-modelo__nome"><h3>Serviços gerenciados</h3><span class="wo-selo wo-selo--disponivel">Disponível</span></div>
-                <div class="wo-modelo__campo"><span class="wo-etiqueta">Quando faz sentido</span><p>Operação, monitoramento e evolução contínua do que já está no ar.</p></div>
-                <div class="wo-modelo__campo"><span class="wo-etiqueta">O que define a proposta</span><p>Nível de serviço e responsabilidades combinados em contrato.</p></div>
-                <svg class="wo-tabela-modelos__seta" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-              </li>
+      <!-- /parcial:fundo -->
+      <section class="wo-home-hero" aria-labelledby="home-titulo" data-hero>
+        <div class="wo-conteiner">
+          <div class="wo-home-hero__abertura">
+            <ul class="wo-home-hero__etiquetas wo-etiqueta" data-entrada="0">
+              <li>/ Automação de atendimento</li>
+              <li>/ Agentes de IA</li>
+              <li>/ Dashboards, CRMs e SaaS</li>
             </ul>
-            <div class="wo-modelos__rodape">
-              <p>Não sabe qual é o seu caso? <a href="/contato/">O diagnóstico indica o caminho.</a></p>
-              <a class="wo-link-seta" href="/demonstracoes-tecnicas/">Ver demonstrações técnicas<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+            <p class="wo-home-hero__frase" data-entrada="3">Construímos o sistema da sua operação, integramos ao que você já usa e, com serviços gerenciados, cuidamos do que está no ar.</p>
+          </div>
+          <div class="wo-home-hero__grade">
+            <div class="wo-home-hero__texto">
+              <span class="wo-etiqueta-hero" data-entrada="1">Software house · para quem vende</span>
+              <h1 class="wo-h1" id="home-titulo" data-entrada="2"><span class="wo-linha">Do lead à cobrança,</span><span class="wo-linha">menos trabalho manual.</span></h1>
+              <div class="wo-acoes" data-entrada="4">
+                <a class="wo-btn wo-btn--primario" href="/contato/">Falar com especialista<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+                <a class="wo-btn wo-btn--secundario" href="/solucoes/">Explorar soluções</a>
+              </div>
+              <p class="wo-nota-mono wo-nota-mono--ponto" data-entrada="5">Primeira conversa sem custo e sem compromisso.</p>
+            </div>
+            <div class="wo-home-hero__visual" data-entrada="6">
+              <figure class="wo-maquete wo-cartao-claro wo-operacao" aria-labelledby="operacao-legenda">
+                <figcaption class="wo-maquete__cabeca">
+                  <span class="wo-maquete__titulo" id="operacao-legenda">Operação conectada</span>
+                  <span class="wo-maquete__aviso">Fluxo ilustrativo</span>
+                </figcaption>
+                <ul class="wo-operacao__sistemas" aria-label="Sistemas conectados">
+                  <li><span class="wo-operacao__nome">WhatsApp</span><span class="wo-operacao__estado">conectado</span></li>
+                  <li><span class="wo-operacao__nome">CRM</span><span class="wo-operacao__estado">conectado</span></li>
+                  <li><span class="wo-operacao__nome">ERP</span><span class="wo-operacao__estado">conectado</span></li>
+                  <li><span class="wo-operacao__nome">Pagamentos</span><span class="wo-operacao__estado">conectado</span></li>
+                </ul>
+                <div class="wo-operacao__fio" aria-hidden="true"></div>
+                <div class="wo-operacao__camada">
+                  <span class="wo-operacao__simbolo" aria-hidden="true"><svg width="1em" height="1em" viewBox="0 0 100 100" fill="none" focusable="false"><g stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 50 Q 30 33 41 50" /><path d="M59 50 Q 70 67 82 50" /></g><circle cx="50" cy="50" r="9" fill="none" stroke="#fff" stroke-width="5" /><circle cx="18" cy="50" r="7.5" fill="#fff" /><circle cx="82" cy="50" r="7.5" fill="#fff" /></svg></span>
+                  <span class="wo-operacao__camada-texto"><strong>Automação sob medida</strong><span>Conecta sistemas, regras e agentes de IA</span></span>
+                </div>
+                <div class="wo-operacao__fio" aria-hidden="true"></div>
+                <ul class="wo-operacao__eventos" aria-label="Eventos de exemplo">
+                  <li><span class="wo-operacao__hora">09:41</span><span class="wo-operacao__evento">Lead chegou pelo WhatsApp</span><span class="wo-operacao__area">Vendas</span></li>
+                  <li><span class="wo-operacao__hora">09:41</span><span class="wo-operacao__evento">Follow-up agendado no CRM</span><span class="wo-operacao__area">Vendas</span></li>
+                  <li><span class="wo-operacao__hora">09:42</span><span class="wo-operacao__evento">Pedido no ERP e cobrança gerada</span><span class="wo-operacao__area">Financeiro</span></li>
+                  <li><span class="wo-operacao__hora">09:47</span><span class="wo-operacao__evento">Indicadores do dia atualizados no painel</span><span class="wo-operacao__area">Gestão</span></li>
+                </ul>
+              </figure>
             </div>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
+
+      <section class="wo-home-frentes" id="frentes" aria-labelledby="frentes-titulo" data-palco>
+        <div class="wo-home-frentes__abertura">
+          <div class="wo-editorial">
+            <div class="wo-editorial__cabeca">
+              <h2 class="wo-h2 wo-home-frentes__titulo" id="frentes-titulo">Cinco frentes.</h2>
+            </div>
+            <div class="wo-editorial__corpo">
+              <p class="wo-home-frentes__texto">Cada frente pode ser contratada sozinha. Na prática, elas andam juntas, e o diagnóstico indica por onde começar.</p>
+              <a class="wo-link-seta wo-home-frentes__link" href="/projetos-sob-medida/">Ver projetos sob medida<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+            </div>
+          </div>
+        </div>
+        <div class="wo-home-capitulo" data-frente="atendimento">
+          <div class="wo-home-painel">
+            <span class="wo-home-painel__numero">01</span>
+            <h3 class="wo-home-painel__nome">Automação de atendimento</h3>
+            <p class="wo-home-painel__frase">Resposta, triagem e follow-up no WhatsApp e nos canais que a empresa já usa.</p>
+            <ul class="wo-home-painel__etiquetas">
+              <li>WhatsApp</li>
+              <li>Triagem</li>
+              <li>Follow-up</li>
+            </ul>
+          </div>
+          <figure class="wo-maquete wo-home-cena wo-home-cena--atendimento" data-cena="atendimento">
+            <figcaption class="wo-home-cena__cabeca">
+              <span class="wo-home-cena__titulo">Atendimento no WhatsApp</span>
+              <span class="wo-maquete__aviso">Ilustração</span>
+              <span class="wo-oculto">Um pedido de orçamento chega pelo WhatsApp, passa pela triagem e vira lead no CRM, com resposta enviada e follow-up agendado para amanhã.</span>
+            </figcaption>
+            <div class="wo-home-cena__tela" aria-hidden="true">
+              <div class="wo-home-cena__cartao wo-home-cena__no wo-home-cena__no--whatsapp" data-passo="1">
+                <div class="wo-home-cena__no-cabeca">
+                  <span class="wo-home-cena__icone wo-home-cena__icone--whatsapp"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 0 0-8.7 15L2 22l5.2-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.2 14.8l-.4-.2-2.6.7.7-2.5-.2-.4A8 8 0 0 1 12 4zm-2.7 4c-.2 0-.5 0-.7.4-.2.4-.8.8-.8 2s.8 2.3 1 2.5c.1.2 1.6 2.6 4 3.5 2 .8 2.4.6 2.8.6.5 0 1.4-.6 1.6-1.1.2-.6.2-1 .1-1.1l-.6-.3c-.3-.2-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1-.3-.1-1-.4-2-1.2-.7-.6-1.2-1.4-1.3-1.6-.1-.2 0-.4.1-.5l.4-.4.2-.4v-.4c0-.1-.5-1.3-.7-1.7-.2-.5-.4-.4-.5-.4z" /></svg></span>
+                  <span class="wo-home-cena__nome">WhatsApp</span>
+                  <span class="wo-home-cena__meta">Cliente</span>
+                </div>
+                <p class="wo-home-cena__balao">Olá! Quero um orçamento para o meu pedido.</p>
+              </div>
+              <svg class="wo-home-cena__fio" data-passo="2" width="12" height="18" fill="none" aria-hidden="true" focusable="false"><path class="wo-home-cena__traco wo-home-cena__traco--curto" d="M6 0V18" pathLength="1" /><path class="wo-home-cena__traco wo-home-cena__traco--largo" d="M320 108C470 108 560 128 560 172" pathLength="1" /><path class="wo-home-cena__traco wo-home-cena__traco--estreito" d="M280 86C326 86 300 118 300 160" pathLength="1" /></svg>
+              <div class="wo-home-cena__cartao wo-home-cena__no wo-home-cena__no--triagem" data-passo="3">
+                <div class="wo-home-cena__no-cabeca">
+                  <span class="wo-home-cena__icone wo-home-cena__icone--triagem"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 5h16l-6 7v6l-4 2v-8L4 5z" /></svg></span>
+                  <span class="wo-home-cena__nome">Triagem</span>
+                </div>
+                <ul class="wo-home-cena__etiquetas">
+                  <li class="wo-home-cena__etiqueta">Assunto: orçamento</li>
+                  <li class="wo-home-cena__etiqueta wo-home-cena__etiqueta--alerta">Prioridade: alta</li>
+                </ul>
+              </div>
+              <svg class="wo-home-cena__fio" data-passo="4" width="12" height="18" fill="none" aria-hidden="true" focusable="false"><path class="wo-home-cena__traco wo-home-cena__traco--curto" d="M6 0V18" pathLength="1" /><path class="wo-home-cena__traco wo-home-cena__traco--largo" d="M400 236C250 236 160 256 160 304" pathLength="1" /><path class="wo-home-cena__traco wo-home-cena__traco--estreito" d="M70 212C24 212 50 244 50 283" pathLength="1" /></svg>
+              <div class="wo-home-cena__cartao wo-home-cena__no wo-home-cena__no--crm" data-passo="5">
+                <div class="wo-home-cena__no-cabeca">
+                  <span class="wo-home-cena__icone wo-home-cena__icone--crm"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="3.5" /><path d="M5 20c.6-3.6 3.5-6 7-6s6.4 2.4 7 6" /></svg></span>
+                  <span class="wo-home-cena__nome">CRM</span>
+                </div>
+                <ul class="wo-home-cena__itens">
+                  <li class="wo-home-cena__ok"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5" /></svg>Lead criado</li>
+                  <li><span class="wo-home-cena__rotulo">Responsável:</span> <span class="wo-home-cena__valor">Vendas</span></li>
+                </ul>
+              </div>
+              <div class="wo-home-cena__cartao wo-home-cena__registro" data-passo="6">
+                <span class="wo-home-cena__registro-titulo">Registro</span>
+                <ul class="wo-home-cena__itens">
+                  <li><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5" /></svg>Resposta enviada no WhatsApp</li>
+                  <li><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5" /></svg>Follow-up agendado para amanhã</li>
+                </ul>
+              </div>
+            </div>
+          </figure>
+        </div>
+        <div class="wo-home-capitulo" data-frente="agentes">
+          <div class="wo-home-painel">
+            <span class="wo-home-painel__numero">02</span>
+            <h3 class="wo-home-painel__nome">Agentes de IA</h3>
+            <p class="wo-home-painel__frase">Agentes com função clara e fonte de dados definida, com uma pessoa do seu time no controle.</p>
+            <ul class="wo-home-painel__etiquetas">
+              <li>Qualificação</li>
+              <li>Consulta a documentos</li>
+              <li>Revisão humana</li>
+            </ul>
+          </div>
+          <figure class="wo-maquete wo-home-cena wo-home-cena--agentes" data-cena="agentes">
+            <figcaption class="wo-home-cena__cabeca">
+              <span class="wo-home-cena__titulo">Agente de qualificação</span>
+              <span class="wo-maquete__aviso">Ilustração</span>
+              <span class="wo-oculto">Um agente qualifica os leads do site com base no catálogo e nas perguntas frequentes, e a resposta dele passa pela revisão de Vendas antes do envio.</span>
+            </figcaption>
+            <div class="wo-home-cena__tela" aria-hidden="true">
+              <div data-passo="1"></div>
+            </div>
+          </figure>
+        </div>
+        <div class="wo-home-capitulo" data-frente="dashboards">
+          <div class="wo-home-painel">
+            <span class="wo-home-painel__numero">03</span>
+            <h3 class="wo-home-painel__nome">Dashboards</h3>
+            <p class="wo-home-painel__frase">Os números da operação num painel só, com dado confiável no lugar da planilha.</p>
+            <ul class="wo-home-painel__etiquetas">
+              <li>Indicadores</li>
+              <li>Acesso por perfil</li>
+              <li>Relatórios recorrentes</li>
+            </ul>
+          </div>
+          <figure class="wo-maquete wo-home-cena wo-home-cena--dashboards" data-cena="dashboards">
+            <figcaption class="wo-home-cena__cabeca">
+              <span class="wo-home-cena__titulo">Operação hoje</span>
+              <span class="wo-maquete__aviso">Ilustração</span>
+              <span class="wo-oculto">Um painel do comercial mostra os indicadores de hoje, a evolução dos últimos dias e a origem dos leads, com acesso para a Gestão.</span>
+            </figcaption>
+            <div class="wo-home-cena__tela" aria-hidden="true">
+              <div data-passo="1"></div>
+            </div>
+          </figure>
+        </div>
+        <div class="wo-home-capitulo" data-frente="crms">
+          <div class="wo-home-painel">
+            <span class="wo-home-painel__numero">04</span>
+            <h3 class="wo-home-painel__nome">CRMs sob medida</h3>
+            <p class="wo-home-painel__frase">Funil e operação comercial do jeito da sua empresa, sem adaptar o processo a um sistema pronto.</p>
+            <ul class="wo-home-painel__etiquetas">
+              <li>Funil</li>
+              <li>Cadência</li>
+              <li>WhatsApp integrado</li>
+            </ul>
+          </div>
+          <figure class="wo-maquete wo-home-cena wo-home-cena--crms" data-cena="crms">
+            <figcaption class="wo-home-cena__cabeca">
+              <span class="wo-home-cena__titulo">Funil comercial</span>
+              <span class="wo-maquete__aviso">Ilustração</span>
+              <span class="wo-oculto">Um funil leva os leads do site e do WhatsApp de Novo a Fechado, com follow-up na proposta e a origem da venda registrada.</span>
+            </figcaption>
+            <div class="wo-home-cena__tela" aria-hidden="true">
+              <div data-passo="1"></div>
+            </div>
+          </figure>
+        </div>
+        <div class="wo-home-capitulo" data-frente="saas">
+          <div class="wo-home-painel">
+            <span class="wo-home-painel__numero">05</span>
+            <h3 class="wo-home-painel__nome">SaaS</h3>
+            <p class="wo-home-painel__frase">Produto web completo, do zero ao ar: cadastro, acesso por perfil, pagamento e painel.</p>
+            <ul class="wo-home-painel__etiquetas">
+              <li>Do zero ao ar</li>
+              <li>Pagamentos</li>
+              <li>Área do cliente</li>
+            </ul>
+          </div>
+          <figure class="wo-maquete wo-home-cena wo-home-cena--saas" data-cena="saas">
+            <figcaption class="wo-home-cena__cabeca">
+              <span class="wo-home-cena__titulo">Seu produto no ar</span>
+              <span class="wo-maquete__aviso">Ilustração</span>
+              <span class="wo-oculto">Um produto web ganha forma no navegador, da tela de acesso ao painel e ao pagamento aprovado, até ficar no ar com monitoramento ativo.</span>
+            </figcaption>
+            <div class="wo-home-cena__tela" aria-hidden="true">
+              <div data-passo="1"></div>
+            </div>
+          </figure>
+        </div>
+      </section>
+
+      <section class="wo-secao wo-veu wo-home-entradas" aria-labelledby="entradas-titulo">
+        <div class="wo-conteiner">
+          <span class="wo-sobretitulo">Por onde começar</span>
+          <h2 class="wo-h2 wo-h2--menor" id="entradas-titulo">Duas formas de começar.</h2>
+          <div class="wo-home-entradas__grade">
+            <a class="wo-home-entrada" href="/solucoes/">
+              <h3 class="wo-home-entrada__nome">Soluções</h3>
+              <span class="wo-home-entrada__titulo">Comece pelo resultado que a empresa precisa.</span>
+              <span class="wo-home-entrada__texto">Vender mais, atender melhor, operar com menos retrabalho, decidir com dados ou crescer com segurança.</span>
+              <span class="wo-home-entrada__acao">Ver soluções<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" /></svg></span>
+            </a>
+            <a class="wo-home-entrada" href="/projetos-sob-medida/">
+              <h3 class="wo-home-entrada__nome">Projetos sob medida</h3>
+              <span class="wo-home-entrada__titulo">Sistemas e automações feitos para o seu processo.</span>
+              <span class="wo-home-entrada__texto">Do diagnóstico à entrega, com escopo escrito antes de começar.</span>
+              <span class="wo-home-entrada__acao">Ver projetos sob medida<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" /></svg></span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section class="wo-secao wo-veu-forte wo-home-processo" aria-labelledby="sobmedida-titulo">
+        <div class="wo-conteiner">
+          <div class="wo-editorial">
+            <div class="wo-editorial__cabeca">
+              <span class="wo-sobretitulo">Projetos sob medida</span>
+              <h2 class="wo-h2" id="sobmedida-titulo">Do diagnóstico à evolução.</h2>
+            </div>
+            <p class="wo-editorial__corpo wo-home-processo__intro">Você explica o problema com as suas palavras. A parte técnica fica com a gente.</p>
+          </div>
+          <ol class="wo-colunas-numeradas" aria-label="Como trabalhamos">
+            <li class="wo-colunas-numeradas__item">
+              <span class="wo-colunas-numeradas__numero">01</span>
+              <h3>Diagnosticar</h3>
+              <p>Uma conversa sobre o negócio, as ferramentas e onde o tempo se perde.</p>
+              <p class="wo-colunas-numeradas__recebe"><span class="wo-etiqueta">Você recebe</span>Os pontos de maior impacto na sua operação.</p>
+            </li>
+            <li class="wo-colunas-numeradas__item">
+              <span class="wo-colunas-numeradas__numero">02</span>
+              <h3>Arquitetar</h3>
+              <p>Desenhamos a solução com você antes de construir.</p>
+              <p class="wo-colunas-numeradas__recebe"><span class="wo-etiqueta">Você recebe</span>Proposta por escrito, com escopo, prazo e condições.</p>
+            </li>
+            <li class="wo-colunas-numeradas__item">
+              <span class="wo-colunas-numeradas__numero">03</span>
+              <h3>Implementar</h3>
+              <p>Construímos, integramos e testamos junto com quem vai usar.</p>
+              <p class="wo-colunas-numeradas__recebe"><span class="wo-etiqueta">Você recebe</span>A solução no ar, validada pela sua equipe.</p>
+            </li>
+            <li class="wo-colunas-numeradas__item">
+              <span class="wo-colunas-numeradas__numero">04</span>
+              <h3>Evoluir</h3>
+              <p>Acompanhamos o que está no ar e melhoramos conforme a operação muda.</p>
+              <p class="wo-colunas-numeradas__recebe"><span class="wo-etiqueta">Você recebe</span>Acompanhamento contínuo, quando contratado.</p>
+            </li>
+          </ol>
+          <ul class="wo-lista-check wo-home-processo__garantias">
+            <li><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5" /></svg><span>Escopo escrito e aprovado por você antes de começar</span></li>
+            <li><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5" /></svg><span>Você acompanha cada etapa e valida as entregas</span></li>
+            <li><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5" /></svg><span>Condições comerciais definidas na proposta, conforme o escopo</span></li>
+          </ul>
+          <a class="wo-btn wo-btn--secundario" href="/projetos-sob-medida/">Ver projetos sob medida</a>
+        </div>
+      </section>
+
+      <section class="wo-secao wo-veu" id="solucoes" aria-labelledby="solucoes-titulo">
+        <div class="wo-conteiner wo-editorial">
+          <div class="wo-editorial__cabeca">
+            <span class="wo-sobretitulo">Soluções</span>
+            <h2 class="wo-h2" id="solucoes-titulo">Escolha pelo resultado, não pela tecnologia.</h2>
+            <p class="wo-lead">Você diz aonde quer chegar. A gente combina as frentes certas e indica a melhor forma de contratar.</p>
+          </div>
+          <dl class="wo-editorial__corpo wo-definicoes">
+            <div class="wo-definicoes__linha">
+              <dt><a href="/solucoes/#vender">Vender mais<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a></dt>
+              <dd>Mais oportunidades chegando e menos oportunidades esquecidas pelo caminho.</dd>
+            </div>
+            <div class="wo-definicoes__linha">
+              <dt><a href="/solucoes/#atender">Atender melhor<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a></dt>
+              <dd>Respostas mais rápidas e com contexto, sem aumentar a equipe na mesma proporção.</dd>
+            </div>
+            <div class="wo-definicoes__linha">
+              <dt><a href="/solucoes/#operar">Operar com menos retrabalho<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a></dt>
+              <dd>Processos que rodam de ponta a ponta, sem cópia e cola entre as áreas.</dd>
+            </div>
+            <div class="wo-definicoes__linha">
+              <dt><a href="/solucoes/#decidir">Decidir com dados<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a></dt>
+              <dd>Os números da operação em um lugar só, atualizados sem depender de alguém lembrar.</dd>
+            </div>
+            <div class="wo-definicoes__linha">
+              <dt><a href="/solucoes/#crescer">Crescer com segurança<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a></dt>
+              <dd>O que está no ar continua no ar, e a tecnologia acompanha o tamanho da empresa.</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <section class="wo-secao wo-veu-forte wo-home-contratar" id="como-contratar" aria-labelledby="contratar-titulo">
+        <div class="wo-conteiner">
+          <span class="wo-sobretitulo">Como contratar</span>
+          <h2 class="wo-h2" id="contratar-titulo"><span class="wo-linha">O contrato acompanha</span><span class="wo-linha">o que a empresa precisa.</span></h2>
+          <p class="wo-lead">Projeto, implementação ou serviços gerenciados. As condições de cada contrato são definidas na proposta, depois do diagnóstico.</p>
+          <ul class="wo-modelos wo-tabela-modelos">
+            <li class="wo-modelo">
+              <div class="wo-modelo__nome"><h3>Projeto</h3><span class="wo-selo wo-selo--disponivel">Disponível</span></div>
+              <div class="wo-modelo__campo"><span class="wo-etiqueta">Quando faz sentido</span><p>Construção com começo, meio e fim: sistema, integração, automação ou painel.</p></div>
+              <div class="wo-modelo__campo"><span class="wo-etiqueta">O que define a proposta</span><p>Escopo, prazo e entregáveis descritos na proposta.</p></div>
+              <svg class="wo-tabela-modelos__seta" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+            </li>
+            <li class="wo-modelo">
+              <div class="wo-modelo__nome"><h3>Implementação</h3><span class="wo-selo wo-selo--disponivel">Disponível</span></div>
+              <div class="wo-modelo__campo"><span class="wo-etiqueta">Quando faz sentido</span><p>Colocar para funcionar uma ferramenta, automação ou integração no seu ambiente.</p></div>
+              <div class="wo-modelo__campo"><span class="wo-etiqueta">O que define a proposta</span><p>Quantidade de sistemas, complexidade e treinamento da equipe.</p></div>
+              <svg class="wo-tabela-modelos__seta" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+            </li>
+            <li class="wo-modelo">
+              <div class="wo-modelo__nome"><h3>Serviços gerenciados</h3><span class="wo-selo wo-selo--disponivel">Disponível</span></div>
+              <div class="wo-modelo__campo"><span class="wo-etiqueta">Quando faz sentido</span><p>Operação, monitoramento e evolução contínua do que já está no ar.</p></div>
+              <div class="wo-modelo__campo"><span class="wo-etiqueta">O que define a proposta</span><p>Nível de serviço e responsabilidades combinados em contrato.</p></div>
+              <svg class="wo-tabela-modelos__seta" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+            </li>
+          </ul>
+          <div class="wo-modelos__rodape">
+            <p>Não sabe qual é o seu caso? <a href="/contato/">O diagnóstico indica o caminho.</a></p>
+            <a class="wo-link-seta" href="/demonstracoes-tecnicas/">Ver demonstrações técnicas<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+          </div>
+        </div>
+      </section>
 
       <!-- parcial:cta-final -->
-      <section class="wo-cta wo-noite" data-faixa-escura aria-labelledby="cta-final-titulo">
+      <section class="wo-cta wo-veu-forte" aria-labelledby="cta-final-titulo">
         <div class="wo-conteiner">
           <div class="wo-editorial">
             <div class="wo-editorial__cabeca">
@@ -500,7 +498,7 @@
       <!-- /parcial:whatsapp-flutuante -->
     </main>
     <!-- parcial:rodape -->
-    <footer class="wo-rodape wo-noite" data-faixa-escura>
+    <footer class="wo-rodape wo-veu-forte">
       <div class="wo-conteiner">
         <div class="wo-rodape__topo">
           <a class="wo-marca" href="/" aria-label="WaveOps, início">

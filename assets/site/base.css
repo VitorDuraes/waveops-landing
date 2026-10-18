@@ -1,5 +1,5 @@
 /* WaveOps · base do site institucional: fontes, reset, tipografia, foco, contêiner, seção,
-   faixa escura e grade editorial. Depende de tokens.css. */
+   véus sobre o fundo vivo e grade editorial. Depende de tokens.css. */
 
 /* Geist (títulos) e Inter (texto) são fontes VARIÁVEIS (têm fvar e gvar): um arquivo por família
    cobre 400 a 700. Só o recorte latino, que cobre o português inteiro. Licença OFL em
@@ -176,12 +176,21 @@ main:focus {
   border-bottom: 1px solid var(--wo-borda);
 }
 
-/* Faixa escura: dentro dela os semânticos de tokens.css trocam de valor. Hero, aberturas,
-   contato, chamada final e rodapé usam esta classe. */
-.wo-noite {
-  background: var(--wo-fundo);
-  color: var(--wo-texto);
-  color-scheme: dark;
+/* Seções sobre o fundo vivo (spec 15.2). O hero é transparente; as outras seções ficam sob um véu
+   escuro translúcido, que deixa a onda aparecer mais fraca por trás: o véu onde a seção 7 da spec diz
+   "Papel" e o véu forte onde diz "Papel 2" ou "Noite". Seções vizinhas se separam por uma linha de
+   1 px na cor de linha do escuro. */
+.wo-veu,
+.wo-veu-forte {
+  border-top: var(--wo-linha-fina) solid var(--wo-borda);
+}
+
+.wo-veu {
+  background: var(--wo-veu);
+}
+
+.wo-veu-forte {
+  background: var(--wo-veu-forte);
 }
 
 /* Grade editorial (spec 5.3): 12 colunas com vão de 48 px, título nas colunas 1 a 5 e conteúdo
@@ -262,7 +271,8 @@ h2,
   max-width: 560px;
 }
 
-/* Quem pediu menos movimento não vê nem a transição curta de estado. */
+/* Quem pediu menos movimento não vê nem a transição curta de estado. A entrada em cascata do hero
+   (components.css) desliga com animation: none, porque o atraso de cada bloco sobreviveria aqui. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

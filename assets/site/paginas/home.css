@@ -1,5 +1,6 @@
-/* WaveOps · peças que só a Home usa: painel "Operação conectada", fundo fixo da página, palco das
-   cinco frentes, folha creme e a seção sob medida. Depende de tokens.css. */
+/* WaveOps · peças que só a Home usa: painel "Operação conectada", hero, palco das cinco frentes, o
+   fundo vivo escurecido durante os capítulos e as seções depois do palco. Depende de tokens.css e
+   components.css. */
 
 /* ---------- Operação conectada (hero) ---------- */
 .wo-operacao {
@@ -130,74 +131,23 @@
   font-size: 11.5px;
 }
 
-/* ---------- Fundo fixo da página (spec 6.3 e 13.3) ----------
-   O pôster da onda (e, a partir da Tarefa 5, o vídeo) fica parado atrás da página inteira, com
-   a camada de leitura por cima. O hero e o palco são transparentes e deixam o fundo aparecer; da
-   folha creme em diante, tudo tem fundo opaco. Com um capítulo ativo, a onda escurece para 35%.
-   O fundo do body vai para o canvas (o <html> não tem fundo), embaixo do z-index -1. Na Home ele
-   é escuro: o que não tem fundo próprio cai na noite, nunca no creme, e o axe mede o texto claro
-   do palco fora da tela, onde o fundo fixo não chega, contra a noite. */
-body[data-pagina='home'] {
-  background: var(--wo-noite-hero);
-}
-
-.wo-home-fundo {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  overflow: hidden;
-  background: var(--wo-noite-hero);
-}
-
-.wo-home-fundo > * {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  max-width: none;
-  object-fit: cover;
-  transition: opacity var(--wo-palco-transicao) ease;
-}
-
-.wo-home-fundo::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse at 50% 45%, transparent 50%, var(--wo-leitura-alto) 100%),
-    linear-gradient(180deg, var(--wo-leitura-alto), var(--wo-leitura-baixo));
-}
-
-.wo-home-fundo[data-capitulo] > * {
+/* ---------- Fundo vivo durante o palco (spec 13.4 e 15.3) ----------
+   O fundo (components.css) é o de toda página. Com um capítulo ativo, a onda escurece para 35%: o
+   vídeo, que continua tocando, ou o pôster, quando o vídeo está parado. Depois do palco, o módulo da
+   Home tira o data-capitulo e a onda volta ao brilho inteiro. */
+.wo-fundo[data-capitulo] > .wo-fundo__poster,
+.wo-fundo[data-capitulo] > .wo-fundo__video[data-tocando] {
   opacity: 0.35;
 }
 
-.wo-home-fundo__video {
-  opacity: 0;
-}
-
-.wo-home-fundo__video[data-tocando] {
-  opacity: 1;
-}
-
-/* Um vídeo pausado nunca encobre o pôster, mesmo com capítulo ativo. */
-.wo-home-fundo[data-capitulo] > .wo-home-fundo__video:not([data-tocando]) {
-  opacity: 0;
-}
-
-/* Hero transparente: a onda do fundo fixo é visível entre as peças. Os semânticos
-   claros ficam só no texto e controles; a maquete preserva seu contexto de papel. */
+/* Hero transparente: a onda do fundo fixo aparece com o brilho inteiro entre as peças. O texto
+   secundário usa o token de texto sobre o vídeo; o cartão claro guarda o contexto de papel. */
 .wo-home-hero {
   position: relative;
   min-height: 100svh;
   padding: calc(var(--wo-topo-altura) + var(--wo-espaco-5)) 0 var(--wo-espaco-6);
-  color: var(--wo-clara);
-  --wo-texto: var(--wo-clara);
   --wo-texto-2: var(--wo-hero-texto-secundario);
   --wo-texto-3: var(--wo-hero-texto-secundario);
-  --wo-borda-forte: var(--wo-hero-contorno);
-  --wo-acento-texto: var(--wo-marca-claro);
-  --wo-contorno-fundo: var(--wo-hero-controle);
 }
 
 .wo-home-hero__abertura {
@@ -247,28 +197,6 @@ body[data-pagina='home'] {
   line-height: 1.45;
 }
 
-.wo-home-hero__pausa {
-  display: grid;
-  place-items: center;
-  width: var(--wo-hero-pausa-tamanho);
-  height: var(--wo-hero-pausa-tamanho);
-  margin: var(--wo-espaco-4) var(--wo-margem) 0;
-  border: var(--wo-linha-fina) solid var(--wo-hero-contorno);
-  border-radius: var(--wo-raio-pilula);
-  background: var(--wo-hero-controle);
-  cursor: pointer;
-}
-
-.wo-home-hero__pausa[hidden],
-.wo-home-hero__icone-tocar,
-.wo-home-hero__pausa[aria-pressed='true'] .wo-home-hero__icone-pausa {
-  display: none;
-}
-
-.wo-home-hero__pausa[aria-pressed='true'] .wo-home-hero__icone-tocar {
-  display: block;
-}
-
 .wo-home-hero .wo-operacao {
   padding: var(--wo-espaco-3);
 }
@@ -309,46 +237,27 @@ body[data-pagina='home'] {
     grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
     margin-top: var(--wo-espaco-7);
   }
-  .wo-home-hero__pausa {
-    margin-left: max(var(--wo-margem), calc((100% - var(--wo-conteiner)) / 2 + var(--wo-margem)));
-  }
 }
 
+/* A nota reserva o canto do WhatsApp mesmo quando coincide com o fim da janela. */
 @media (max-width: 1023.98px) {
-  /* O controle fica entre o topo e as etiquetas, já na primeira tela. A nota
-     reserva o canto do WhatsApp mesmo quando coincide com o fim da janela. */
-  .wo-home-hero__pausa {
-    position: absolute;
-    top: calc(var(--wo-topo-altura) + var(--wo-espaco-1));
-    right: var(--wo-margem);
-    margin: 0;
-  }
   .wo-home-hero__texto .wo-nota-mono {
     max-width: calc(100% - var(--wo-flutuante-respiro));
   }
 }
 
-/* ---------- Folha creme ----------
-   Depois do quinto capítulo, a parte clara sobe por cima do fundo fixo e das cenas, com a sombra
-   de folha. A chamada final vem logo depois e também cobre o fundo. */
-.wo-home-folha {
-  position: relative;
-  z-index: 1;
-  background: var(--wo-fundo);
-  box-shadow: var(--wo-sombra-folha);
-}
-
 /* ---------- Botão flutuante de WhatsApp sobre o palco (celular e tablet) ----------
    Abaixo de 1024 px o painel de texto do palco fica preso embaixo da janela, no canto do botão
    flutuante, que cobriria o fim das etiquetas. O controlador do palco sinaliza quando esse canto
-   está ocupado e libera o botão quando a folha o cobre. Sem JavaScript, com menos movimento ou
-   com a janela baixa, não há sinal e o botão permanece disponível. */
+   está ocupado e libera o botão quando a primeira seção depois do palco cobre a caixa dele (spec
+   15.4). Sem JavaScript, com menos movimento ou com a janela baixa, não há sinal e o botão
+   permanece disponível. */
 @media (max-width: 1023.98px) {
-  .wo-home-fundo ~ .wo-whatsapp-flutuante {
+  .wo-fundo ~ .wo-whatsapp-flutuante {
     transition: transform var(--wo-transicao), opacity var(--wo-palco-transicao) ease;
   }
 
-  .wo-home-fundo ~ .wo-whatsapp-flutuante[data-palco-oculto] {
+  .wo-fundo ~ .wo-whatsapp-flutuante[data-palco-oculto] {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
@@ -364,12 +273,9 @@ body[data-pagina='home'] {
   max-width: var(--wo-conteiner);
   margin: 0 auto;
   padding: 0 var(--wo-margem);
-  color: var(--wo-clara);
-  color-scheme: dark;
-  /* Os semânticos do escuro que o link da abertura usa, sem o fundo opaco de .wo-noite, que
-     cobriria o fundo fixo. */
-  --wo-texto: var(--wo-clara);
-  --wo-acento-texto: var(--wo-marca-claro);
+  /* A seção é transparente e a abertura fica sobre a onda no brilho inteiro: o link usa o token de
+     texto sobre o vídeo, porque o lilás da marca dá 2:1 sobre o brilho dela. */
+  --wo-acento-texto: var(--wo-hero-texto-secundario);
   /* O mesmo contêiner visto de um elemento fixo, em que 100% é a largura da janela sem a barra
      de rolagem: margem até o conteúdo e largura do conteúdo. */
   --wo-palco-margem: calc((100% - min(100%, var(--wo-conteiner))) / 2 + var(--wo-margem));
@@ -490,8 +396,10 @@ body[data-pagina='home'] {
   min-height: 24px;
 }
 
+/* Título e aviso ficam sobre a onda: sem o palco (menos movimento, sem JavaScript ou janela baixa)
+   ela aparece no brilho inteiro, e o branco a 75% cai a 4:1. Usam o token de texto sobre o vídeo. */
 .wo-home-cena__titulo {
-  color: var(--wo-clara-2);
+  color: var(--wo-hero-texto-secundario);
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.15em;
@@ -501,7 +409,7 @@ body[data-pagina='home'] {
 
 .wo-home-cena__cabeca .wo-maquete__aviso {
   border-color: var(--wo-linha-noite);
-  color: var(--wo-clara-2);
+  color: var(--wo-hero-texto-secundario);
   font-size: 11px;
 }
 
@@ -514,6 +422,7 @@ body[data-pagina='home'] {
 }
 
 /* Cartões: branco para os nós do fluxo e papel para o registro. */
+/* O cartão é claro sobre a página escura (spec 15.2): as cores de situação voltam ao tom do claro. */
 .wo-home-cena__cartao {
   position: relative;
   padding: 11px 13px 12px;
@@ -521,6 +430,8 @@ body[data-pagina='home'] {
   background: var(--wo-branco);
   box-shadow: var(--wo-sombra-palco);
   color: var(--wo-tinta);
+  --wo-sucesso: var(--wo-sucesso-claro);
+  --wo-alerta: var(--wo-alerta-claro);
 }
 
 .wo-home-cena__registro {
@@ -1100,7 +1011,8 @@ body[data-pagina='home'] {
   }
 }
 
-/* ---------- Folha editorial ---------- */
+/* ---------- Seções depois do palco (spec 15.4) ----------
+   Sob o véu da 15.2, sobre o fundo vivo: as cores são as do contexto escuro. */
 .wo-home-entradas__grade {
   display: grid;
   gap: var(--wo-espaco-5);
@@ -1112,8 +1024,8 @@ body[data-pagina='home'] {
   flex-direction: column;
   gap: var(--wo-espaco-3);
   padding-top: var(--wo-espaco-4);
-  border-top: var(--wo-linha-forte) solid var(--wo-tinta);
-  color: var(--wo-tinta);
+  border-top: var(--wo-linha-forte) solid var(--wo-texto);
+  color: var(--wo-texto);
   text-decoration: none;
 }
 
@@ -1131,7 +1043,7 @@ body[data-pagina='home'] {
 }
 
 .wo-home-entrada__texto {
-  color: var(--wo-tinta-2);
+  color: var(--wo-texto-2);
 }
 
 .wo-home-entrada__acao {
@@ -1140,7 +1052,7 @@ body[data-pagina='home'] {
   gap: var(--wo-espaco-2);
   margin-top: auto;
   min-height: var(--wo-alvo);
-  color: var(--wo-violeta-forte);
+  color: var(--wo-acento-texto);
   font-size: var(--wo-texto-pequeno);
   font-weight: 600;
 }
@@ -1151,18 +1063,13 @@ body[data-pagina='home'] {
 }
 
 .wo-home-entrada:hover .wo-home-entrada__nome {
-  color: var(--wo-violeta-forte);
-}
-
-.wo-home-processo,
-.wo-home-contratar {
-  background: var(--wo-papel-2);
+  color: var(--wo-acento-texto);
 }
 
 .wo-home-processo__intro {
   align-self: end;
   font-size: var(--wo-texto-destaque);
-  color: var(--wo-tinta-2);
+  color: var(--wo-texto-2);
 }
 
 .wo-home-processo__garantias {
@@ -1170,7 +1077,7 @@ body[data-pagina='home'] {
   gap: var(--wo-espaco-3);
   margin: var(--wo-espaco-5) 0 var(--wo-espaco-4);
   padding-top: var(--wo-espaco-4);
-  border-top: var(--wo-linha-fina) solid var(--wo-linha);
+  border-top: var(--wo-linha-fina) solid var(--wo-borda);
 }
 
 @media (min-width: 768px) {

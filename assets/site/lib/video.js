@@ -1,5 +1,5 @@
 // @ts-check
-/* Vídeos locais do hero. Sem fonte no HTML: a escolha só é aplicada depois do load. */
+/* Vídeos locais do fundo vivo. Sem fonte no HTML: a escolha só é aplicada depois do load. */
 export const VIDEOS = Object.freeze({
   webm: Object.freeze({ 1280: '/assets/site/video/onda-1280.webm', 1920: '/assets/site/video/onda-1920.webm' }),
   mp4: Object.freeze({ 1280: '/assets/site/video/onda-1280.mp4', 1920: '/assets/site/video/onda-1920.mp4' }),
@@ -18,11 +18,13 @@ export function escolherVideo(larguraCss, podeTocar) {
 }
 
 /**
+ * O vídeo toca em qualquer ponto da página (spec 15.3): só a página ainda carregando, a aba oculta,
+ * o pedido de menos movimento, a economia de dados e a pausa no botão o param.
  * @param {{ movimentoReduzido: boolean, economiaDeDados: boolean, carregada: boolean,
- * naTela: boolean, abaVisivel: boolean, pausadoPeloUsuario: boolean }} estado
+ * abaVisivel: boolean, pausadoPeloUsuario: boolean }} estado
  * @returns {boolean}
  */
 export function deveTocar(estado) {
-  return estado.carregada && estado.naTela && estado.abaVisivel &&
+  return estado.carregada && estado.abaVisivel &&
     !estado.movimentoReduzido && !estado.economiaDeDados && !estado.pausadoPeloUsuario;
 }

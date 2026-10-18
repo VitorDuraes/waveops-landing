@@ -10,11 +10,12 @@
     <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png" />
     <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
     <link rel="preload" href="/assets/fonts/geist-variavel-latin.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="stylesheet" href="/assets/site/tokens.css?v=db258b90" />
-    <link rel="stylesheet" href="/assets/site/base.css?v=5d580a8f" />
-    <link rel="stylesheet" href="/assets/site/components.css?v=c2d0d3ba" />
+    <link rel="stylesheet" href="/assets/site/tokens.css?v=e6ac9e57" />
+    <link rel="stylesheet" href="/assets/site/base.css?v=29cedc63" />
+    <link rel="stylesheet" href="/assets/site/components.css?v=0fc73280" />
     <script defer src="/assets/funil.js?v=2842b2e3"></script>
-    <script type="module" src="/assets/site/site.js?v=ac12fd00"></script>
+    <script type="module" src="/assets/site/site.js?v=e5d9e734"></script>
+    <script type="module" src="/assets/site/fundo.js?v=601e2bc9"></script>
     <noscript><style>.wo-topo{position:relative;background:var(--wo-noite)}[data-seletor] [data-painel]{display:block!important}[data-seletor] [data-opcoes],[data-sem-js-oculto]{display:none!important}@media (max-width:1180px){.wo-topo__painel[hidden]{display:flex!important}.wo-topo__menu{display:none!important}}</style></noscript>
     <!-- /parcial:head -->
     <link rel="stylesheet" href="/assets/site/paginas/contato.css?v=ddabfaf9" />
@@ -51,7 +52,7 @@
   <body data-pagina="contato">
     <a class="wo-pular" href="#conteudo">Pular para o conteúdo</a>
     <!-- parcial:topo ativo="contato" -->
-    <header class="wo-topo" data-estado="escuro">
+    <header class="wo-topo">
       <div class="wo-topo__barra">
         <a class="wo-marca" href="/" aria-label="WaveOps, início">
           <span class="wo-marca__selo">
@@ -66,7 +67,11 @@
         </nav>
         <div class="wo-topo__acoes">
           <a class="wo-topo__cliente" href="https://portal.waveops.com.br/cliente/login">Área do cliente</a>
-          <a class="wo-btn wo-btn--primario wo-topo__cta" href="/contato/">Falar com especialista</a>
+          <a class="wo-btn wo-btn--secundario wo-topo__cta" href="/contato/">Falar com especialista</a>
+          <button class="wo-topo__pausa" type="button" aria-pressed="false" aria-label="Pausar animação do fundo" hidden data-fundo-pausa>
+            <svg width="1em" height="1em" class="wo-topo__icone-pausa" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M6 4h4v16H6zM14 4h4v16h-4z" /></svg>
+            <svg width="1em" height="1em" class="wo-topo__icone-tocar" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="m7 4 13 8-13 8z" /></svg>
+          </button>
           <button class="wo-topo__menu" type="button" aria-controls="menu-movel" aria-expanded="false" aria-label="Abrir menu">
             <svg width="1em" height="1em" class="wo-topo__icone-abrir" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
             <svg width="1em" height="1em" class="wo-topo__icone-fechar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18" /></svg>
@@ -82,20 +87,26 @@
       </nav>
     </header>
     <!-- /parcial:topo -->
-    <main id="conteudo" tabindex="-1" data-faixa-escura>
+    <main id="conteudo" tabindex="-1">
+      <!-- parcial:fundo -->
+      <div class="wo-fundo" aria-hidden="true">
+        <img class="wo-fundo__poster" src="/assets/site/video/onda-poster.webp" alt="" width="1920" height="1080" fetchpriority="high" />
+        <video class="wo-fundo__video" muted playsinline loop preload="none" disablepictureinpicture tabindex="-1" data-fundo-video></video>
+      </div>
+      <!-- /parcial:fundo -->
       <section class="wo-contato-hero" aria-labelledby="contato-titulo">
         <div class="wo-contato-hero__brilho" aria-hidden="true"></div>
         <div class="wo-conteiner wo-contato-hero__grade">
           <div class="wo-contato-hero__texto">
-            <span class="wo-sobretitulo">Falar com especialista</span>
-            <h1 class="wo-h1 wo-contato-titulo" id="contato-titulo"><span class="wo-linha">Conte o problema.</span><span class="wo-linha wo-destaque">A gente mostra por onde começar.</span></h1>
-            <p class="wo-contato-lead">Conte rapidamente sobre a sua operação. A gente responde pelo canal que você escolher, com os pontos de maior impacto e o caminho mais indicado.</p>
-            <ul class="wo-contato-garantias">
+            <span class="wo-sobretitulo" data-entrada="0">Falar com especialista</span>
+            <h1 class="wo-h1 wo-contato-titulo" id="contato-titulo" data-entrada="1"><span class="wo-linha">Conte o problema.</span><span class="wo-linha wo-destaque">A gente mostra por onde começar.</span></h1>
+            <p class="wo-contato-lead" data-entrada="2">Conte rapidamente sobre a sua operação. A gente responde pelo canal que você escolher, com os pontos de maior impacto e o caminho mais indicado.</p>
+            <ul class="wo-contato-garantias" data-entrada="3">
               <li><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5" /></svg>Resposta em até 1 dia útil</li>
               <li><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5" /></svg>Primeira conversa sem custo e sem compromisso</li>
               <li><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5" /></svg>Conversa no seu idioma, sem jargão</li>
             </ul>
-            <ul class="wo-contato-canais" aria-label="Canais de contato">
+            <ul class="wo-contato-canais" aria-label="Canais de contato" data-entrada="4">
               <li>
                 <a class="wo-contato-canal" href="https://wa.me/5534991775784?text=Ol%C3%A1%2C%20WaveOps.%20Quero%20falar%20com%20um%20especialista." data-whatsapp="contato">
                   <span class="wo-contato-canal__icone wo-contato-canal__icone--whatsapp"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 0 0-8.7 15L2 22l5.2-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.2 14.8l-.4-.2-2.6.7.7-2.5-.2-.4A8 8 0 0 1 12 4zm-2.7 4c-.2 0-.5 0-.7.4-.2.4-.8.8-.8 2s.8 2.3 1 2.5c.1.2 1.6 2.6 4 3.5 2 .8 2.4.6 2.8.6.5 0 1.4-.6 1.6-1.1.2-.6.2-1 .1-1.1l-.6-.3c-.3-.2-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1-.3-.1-1-.4-2-1.2-.7-.6-1.2-1.4-1.3-1.6-.1-.2 0-.4.1-.5l.4-.4.2-.4v-.4c0-.1-.5-1.3-.7-1.7-.2-.5-.4-.4-.5-.4z" /></svg></span>
@@ -112,7 +123,7 @@
               </li>
             </ul>
           </div>
-          <div class="wo-contato-cartao">
+          <div class="wo-contato-cartao" data-entrada="5">
             <!-- parcial:form-contato -->
             <div class="wo-form-contato" data-form-contato>
               <form class="wo-form" id="form-contato" method="post" novalidate aria-labelledby="form-contato-titulo" aria-describedby="form-contato-intro" data-sem-js-oculto>
@@ -273,7 +284,7 @@
       </section>
     </main>
     <!-- parcial:rodape -->
-    <footer class="wo-rodape wo-noite" data-faixa-escura>
+    <footer class="wo-rodape wo-veu-forte">
       <div class="wo-conteiner">
         <div class="wo-rodape__topo">
           <a class="wo-marca" href="/" aria-label="WaveOps, início">

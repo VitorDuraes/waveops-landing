@@ -6,23 +6,24 @@
    painel e a cena montada, lado a lado (desktop) ou um embaixo do outro (celular).
 
    Marcação esperada (index.html):
-     .wo-home-fundo             fundo fixo da página: pôster e vídeo
+     .wo-fundo                  fundo vivo da página (parcial fundo): pôster e vídeo
      [data-palco]               a seção das cinco frentes
        [data-frente="..."]      cada capítulo, em ordem, com o .wo-home-painel e a cena
          [data-cena="..."]      a cena do capítulo
            [data-passo="1".."n"]  peças da cena; um passo pode ter mais de uma peça
+     [data-palco] + section     a primeira seção depois do palco
 
    Estado que só este módulo escreve:
      data-palco-modo="fundo"   na seção; sem ele, o palco está desligado
      --wo-palco-escala         na seção: quanto a cena encolhe para caber na área útil
      data-ativa                no capítulo e na cena da vez
      data-visivel              em cada peça já montada
-     data-capitulo             no fundo, com o nome do capítulo da vez
+     data-capitulo             no fundo, com o nome do capítulo da vez: a onda escurece
      data-palco-oculto         no WhatsApp flutuante enquanto o painel ocupa o canto dele
    O CSS (paginas/home.css) só fixa e esconde as cenas quando a seção tem data-palco-modo: se
-   este módulo falhar, nada some. As contas ficam em lib/palco.js. */
+   este módulo falhar, nada some. As contas ficam em lib/palco.js. O vídeo do fundo é de toda
+   página e fica em fundo.js: ele continua tocando durante os capítulos (spec 15.3). */
 import { MIDIA_PALCO, CENA_DESKTOP, CENA_CELULAR, estadoFixo, escalaDaCena } from '../lib/palco.js';
-import { escolherVideo, deveTocar } from '../lib/video.js';
 
 /** A partir desta largura a cena usa o desenho do desktop e o painel fica ao lado dela (home.css). */
 const MIDIA_DESKTOP = '(min-width: 1024px)';
@@ -71,8 +72,8 @@ export function iniciarPalco(doc = document, janela = window) {
   if (!capitulos.length || cenas.some((cena) => !cena) || paineis.some((painel) => !painel)) return;
   const cenasProntas = /** @type {HTMLElement[]} */ (cenas);
   const paineisProntos = /** @type {HTMLElement[]} */ (paineis);
-  const fundo = doc.querySelector('.wo-home-fundo');
-  const folha = doc.querySelector('.wo-home-folha');
+  const fundo = doc.querySelector('.wo-fundo');
+  const depois = secao.nextElementSibling;
   const flutuante = doc.querySelector('.wo-whatsapp-flutuante');
   const pecas = cenasProntas.map((cena) => /** @type {HTMLElement[]} */ ([...cena.querySelectorAll('[data-passo]')]));
   const totais = pecas.map((lista) => Math.max(0, ...lista.map(passoDe)));
@@ -100,6 +101,11 @@ export function iniciarPalco(doc = document, janela = window) {
       return { topo: caixa.top, altura: caixa.height };
     });
     const { ativa, passo } = estadoFixo(caixas, janela.innerHeight, totais);
+    // Depois do palco (spec 15.4): quando o fim da seção passa da metade da janela, a mesma linha que
+    // liga um capítulo, nenhuma cena fica na tela e a onda volta ao brilho inteiro, porque o véu das
+    // seções seguintes é translúcido. A cena do último capítulo continua montada, para voltar inteira
+    // quando a pessoa sobe.
+    const mostrada = secao.getBoundingClientRect().bottom > janela.innerHeight / 2 ? ativa : -1;
     // Área útil: o CSS fixa as cinco cenas no mesmo lugar, e a caixa delas já é a área (desktop:
     // colunas 6 a 12, do topo fixo mais 32 px até 32 px do fim; celular: do topo fixo mais 16 px
     // até 16 px acima do painel do capítulo). Onde não há posicionamento por âncora, a caixa do
@@ -114,11 +120,11 @@ export function iniciarPalco(doc = document, janela = window) {
     const base = midiaDesktop.matches ? CENA_DESKTOP : CENA_CELULAR;
     const escala = escalaDaCena({ largura: area.width, altura: Math.max(0, fimDaArea - area.top) }, base);
     const passos = totais.map((total, i) => (i < ativa ? total : i === ativa ? passo : 0));
-    // O último capítulo continua ativo depois do palco. A folha libera o botão quando cobre
-    // toda a área dele, usando a caixa real para respeitar o tamanho e a área segura do CSS.
+    // A primeira seção depois do palco libera o botão quando cobre a caixa dele (spec 15.4), usando a
+    // caixa real para respeitar o tamanho e a área segura do CSS.
     const ocultarFlutuante = Boolean(
-      ativa >= 0 && !midiaDesktop.matches && folha && flutuante &&
-      folha.getBoundingClientRect().top > flutuante.getBoundingClientRect().top,
+      ativa >= 0 && !midiaDesktop.matches && depois && flutuante &&
+      depois.getBoundingClientRect().top > flutuante.getBoundingClientRect().top,
     );
 
     // Depois as escritas, só do que mudou.
@@ -131,19 +137,19 @@ export function iniciarPalco(doc = document, janela = window) {
       secao.style.setProperty('--wo-palco-escala', escalaTexto);
       escalaEscrita = escalaTexto;
     }
-    if (ativa !== ativaEscrita) {
+    if (mostrada !== ativaEscrita) {
       if (ativaEscrita >= 0) {
         capitulos[ativaEscrita].removeAttribute('data-ativa');
         cenasProntas[ativaEscrita].removeAttribute('data-ativa');
       }
-      if (ativa >= 0) {
-        capitulos[ativa].setAttribute('data-ativa', '');
-        cenasProntas[ativa].setAttribute('data-ativa', '');
-        fundo?.setAttribute('data-capitulo', capitulos[ativa].dataset.frente ?? '');
+      if (mostrada >= 0) {
+        capitulos[mostrada].setAttribute('data-ativa', '');
+        cenasProntas[mostrada].setAttribute('data-ativa', '');
+        fundo?.setAttribute('data-capitulo', capitulos[mostrada].dataset.frente ?? '');
       } else {
         fundo?.removeAttribute('data-capitulo');
       }
-      ativaEscrita = ativa;
+      ativaEscrita = mostrada;
     }
     // A cena que ficou para trás continua montada, para a troca esmaecer a cena inteira. Só as
     // peças cujo passo fica entre o passo escrito e o novo mudam.
@@ -171,18 +177,17 @@ export function iniciarPalco(doc = document, janela = window) {
     if (ligado && !pedido) pedido = janela.requestAnimationFrame(quadro);
   };
 
-  // A rolagem só é ouvida com a seção perto da tela (uma altura de janela acima e abaixo).
+  // A rolagem só é ouvida com a seção perto da tela (uma altura de janela acima e abaixo). Ao
+  // deixar de ouvir, um último quadro grava o estado de fora da seção: depois de um salto para
+  // longe, nenhuma cena fica ativa atrás do véu translúcido das seções.
   let ouvindo = false;
   /** @param {boolean} ligar */
   const ouvirRolagem = (ligar) => {
     if (ligar === ouvindo) return;
     ouvindo = ligar;
-    if (ligar) {
-      janela.addEventListener('scroll', agendar, { passive: true });
-      agendar();
-    } else {
-      janela.removeEventListener('scroll', agendar);
-    }
+    if (ligar) janela.addEventListener('scroll', agendar, { passive: true });
+    else janela.removeEventListener('scroll', agendar);
+    agendar();
   };
   const observador =
     typeof IntersectionObserver === 'function'
@@ -236,102 +241,4 @@ export function iniciarPalco(doc = document, janela = window) {
   avaliar();
 }
 
-/**
- * Melhoria progressiva do pôster. Uma falha de reprodução preserva o pôster e deixa
- * o controle pausado para uma nova tentativa manual, sem tentativas automáticas em laço.
- * @param {Document} doc
- * @param {Window} janela
- */
-export function iniciarVideo(doc = document, janela = window) {
-  const video = doc.querySelector('[data-hero-video]');
-  const botao = doc.querySelector('[data-video-pausa]');
-  const hero = doc.querySelector('[data-hero]');
-  if (!(video instanceof HTMLVideoElement) || !(botao instanceof HTMLButtonElement) || !hero) return;
-  const fonte = escolherVideo(janela.innerWidth, video.canPlayType.bind(video));
-  if (!fonte) return;
-  const preferencia = janela.matchMedia('(prefers-reduced-motion: reduce)');
-  const estado = {
-    movimentoReduzido: preferencia.matches,
-    economiaDeDados: Boolean(janela.navigator.connection?.saveData),
-    carregada: doc.readyState === 'complete',
-    naTela: false,
-    abaVisivel: doc.visibilityState !== 'hidden',
-    pausadoPeloUsuario: false,
-  };
-  let tentativa = 0;
-  let pendente = false;
-  // muted no HTML é o valor padrão. A propriedade também é explícita para o autoplay móvel.
-  video.muted = true;
-
-  const aplicar = () => {
-    botao.hidden = estado.movimentoReduzido || estado.economiaDeDados;
-    botao.setAttribute('aria-pressed', String(estado.pausadoPeloUsuario));
-    if (!deveTocar(estado)) {
-      tentativa += 1;
-      pendente = false;
-      video.pause();
-      video.removeAttribute('data-tocando');
-      return;
-    }
-    if (pendente || !video.paused) return;
-    if (!video.hasAttribute('src')) video.src = fonte.src;
-    video.removeAttribute('data-video-erro');
-    const atual = ++tentativa;
-    pendente = true;
-    video.play().then(() => {
-      if (atual === tentativa) pendente = false;
-    }).catch((erro) => {
-      // pause() pode rejeitar uma tentativa antiga com AbortError. O estado atual já
-      // foi aplicado; uma promessa antiga não pode pausar uma reprodução mais recente.
-      if (atual !== tentativa) return;
-      pendente = false;
-      video.pause();
-      video.removeAttribute('data-tocando');
-      video.setAttribute('data-video-erro', erro instanceof Error ? erro.name : 'FalhaDeReproducao');
-      estado.pausadoPeloUsuario = true;
-      botao.setAttribute('aria-pressed', 'true');
-    });
-  };
-  video.addEventListener('playing', () => {
-    if (deveTocar(estado)) video.setAttribute('data-tocando', '');
-    else aplicar();
-  });
-  botao.addEventListener('click', () => {
-    estado.pausadoPeloUsuario = !estado.pausadoPeloUsuario;
-    aplicar();
-  });
-  preferencia.addEventListener('change', () => {
-    estado.movimentoReduzido = preferencia.matches;
-    aplicar();
-  });
-  doc.addEventListener('visibilitychange', () => {
-    estado.abaVisivel = doc.visibilityState !== 'hidden';
-    aplicar();
-  });
-  janela.addEventListener('load', () => {
-    estado.carregada = true;
-    aplicar();
-  }, { once: true });
-  const medir = () => {
-    const caixa = hero.getBoundingClientRect();
-    estado.naTela = caixa.bottom > 0 && caixa.top < janela.innerHeight;
-    aplicar();
-  };
-  if (typeof IntersectionObserver === 'function') {
-    const observador = new IntersectionObserver((entradas) => {
-      estado.naTela = entradas[entradas.length - 1].isIntersecting;
-      aplicar();
-    });
-    observador.observe(hero);
-  } else {
-    janela.addEventListener('scroll', medir, { passive: true });
-    janela.addEventListener('resize', medir);
-  }
-  janela.addEventListener('pageshow', medir);
-  medir();
-}
-
-if (typeof document !== 'undefined') {
-  iniciarPalco();
-  iniciarVideo();
-}
+if (typeof document !== 'undefined') iniciarPalco();

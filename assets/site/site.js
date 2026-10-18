@@ -4,10 +4,11 @@
    Quatro peças, todas melhoria e nunca requisito: sem este arquivo, a página continua
    inteira (o <noscript> do <head> mostra o menu e todos os painéis, e o topo entra no fluxo).
    1. Menu do topo em telas até 1180 px: abre e fecha, Esc fecha e devolve o foco.
-   2. Topo fixo de dois estados: escuro sobre a faixa escura de abertura e claro depois dela.
+   2. Topo fixo, sempre no estado escuro (o fundo vivo fica atrás da página inteira).
    3. Seletores [data-seletor]: um painel por vez, com aria-pressed nos botões.
    4. Clique em link de WhatsApp marcado com data-whatsapp vira evento de funil.
-   Na Home, também resolve as âncoras da página única antiga (lib/legado.js).
+   Na Home, também resolve as âncoras da página única antiga (lib/legado.js). O vídeo do fundo
+   e o botão de pausa do topo ficam em fundo.js.
 
    O Meta Pixel está desligado no site novo até existir consentimento (decisão de
    09/10/2026), então nada aqui chama fbq. */
@@ -41,55 +42,14 @@ export function iniciarTopo(doc = document) {
   });
 }
 
-/** Altura da linha, em % da janela, em que o topo confere a cor do que passa por baixo dele. */
-const LINHA_DO_TOPO = 4;
-
 /**
- * Liga o topo fixo de dois estados (spec 5.5). O HTML nasce com o topo solto e escuro. Aqui ele
- * passa a fixo (data-topo="fixo" no <html>) e data-estado acompanha as faixas que marcam
- * [data-faixa-escura] (abertura, chamada final e rodapé): "escuro" enquanto alguma passa pela
- * linha do topo, "claro" quando nenhuma passa.
- *
- * A linha fica a 4% da altura da janela, dentro do topo. Olhar a janela abaixo do topo não serve:
- * uma faixa escura que só aparece embaixo deixaria texto branco sobre o creme. A raiz sem altura
- * (o recurso do scrollspy) só avisa quando uma borda cruza a linha, e duas faixas coladas trocam no
- * mesmo quadro. O estado de partida sai de uma medida na hora, para quem recarrega no meio da
- * página. Sem IntersectionObserver ou sem faixa, nada muda: o topo fica solto e escuro.
+ * Liga o topo fixo (spec 5.5 e 15.2). O HTML nasce com o topo solto; aqui ele passa a fixo
+ * (data-topo="fixo" no <html>). O topo fica sempre no estado escuro: a página inteira está no
+ * contexto escuro, sobre o fundo vivo, então não há faixa clara para vigiar.
  * @param {Document} doc
- * @param {Window & typeof globalThis} janela
  */
-export function iniciarTopoFixo(doc = document, janela = window) {
-  const topo = doc.querySelector('.wo-topo');
-  const faixas = [...doc.querySelectorAll('[data-faixa-escura]')];
-  if (!(topo instanceof HTMLElement) || !faixas.length || typeof janela.IntersectionObserver !== 'function') return;
-
-  /** @param {boolean} sobreEscuro */
-  const definir = (sobreEscuro) => {
-    topo.dataset.estado = sobreEscuro ? 'escuro' : 'claro';
-  };
-
-  const linha = (LINHA_DO_TOPO / 100) * janela.innerHeight;
-  definir(
-    faixas.some((faixa) => {
-      const medida = faixa.getBoundingClientRect();
-      return medida.top <= linha && medida.bottom >= linha;
-    }),
-  );
-  doc.documentElement.dataset.topo = 'fixo';
-
-  /** @type {Set<Element>} faixas que passam pela linha agora */
-  const passando = new Set();
-  const observador = new janela.IntersectionObserver(
-    (entradas) => {
-      for (const entrada of entradas) {
-        if (entrada.isIntersecting) passando.add(entrada.target);
-        else passando.delete(entrada.target);
-      }
-      definir(passando.size > 0);
-    },
-    { rootMargin: `-${LINHA_DO_TOPO}% 0px -${100 - LINHA_DO_TOPO}% 0px` },
-  );
-  for (const faixa of faixas) observador.observe(faixa);
+export function iniciarTopoFixo(doc = document) {
+  if (doc.querySelector('.wo-topo')) doc.documentElement.dataset.topo = 'fixo';
 }
 
 /**

@@ -700,9 +700,10 @@
    título e a tela desenhada ficam no tamanho de desenho (--wo-palco-cena-largura e
    --wo-palco-cena-altura, as medidas de CENA_DESKTOP e CENA_CELULAR em lib/palco.js, conferidas
    por teste) e encolhem juntos por --wo-palco-escala, que o módulo da Home calcula, a partir do
-   centro da área. As cenas e o painel fixo do celular ficam atrás do conteúdo (z-index -1):
-   depois do palco, a folha, a chamada final e o rodapé cobrem a última cena. Nenhum ancestral das
-   cenas pode ter transform, filter ou contain, que quebrariam o position: fixed. */
+   centro da área. As cenas e o painel fixo do celular ficam atrás do conteúdo (z-index -1). O véu
+   das seções depois do palco é translúcido e não cobre nada: quando a primeira delas sobe, o módulo
+   da Home recorta a cena e o painel no alto dela (spec 15.4). Nenhum ancestral das cenas pode ter
+   transform, filter ou contain, que quebrariam o position: fixed. */
 [data-palco-modo='fundo'] .wo-home-frentes__abertura {
   min-height: var(--wo-palco-abertura);
 }
@@ -721,6 +722,7 @@
   justify-self: normal;
   width: auto;
   max-width: none;
+  clip-path: inset(0 0 var(--wo-palco-corte-cena, 0px) 0);
 }
 
 [data-palco-modo='fundo'] .wo-home-cena:not([data-ativa]) {
@@ -817,6 +819,7 @@
     left: var(--wo-margem);
     opacity: 0;
     pointer-events: none;
+    clip-path: inset(0 0 var(--wo-palco-corte-painel, 0px) 0);
     transition: opacity var(--wo-palco-transicao) ease;
   }
 

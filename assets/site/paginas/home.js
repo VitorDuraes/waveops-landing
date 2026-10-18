@@ -16,6 +16,8 @@
    Estado que só este módulo escreve:
      data-palco-modo="fundo"   na seção; sem ele, o palco está desligado
      --wo-palco-escala         na seção: quanto a cena encolhe para caber na área útil
+     --wo-palco-corte-cena     na seção: quanto da cena fixa a primeira seção depois do palco cobre
+     --wo-palco-corte-painel   na seção: o mesmo para o painel fixo do celular
      data-ativa                no capítulo e na cena da vez
      data-visivel              em cada peça já montada
      data-capitulo             no fundo, com o nome do capítulo da vez: a onda escurece
@@ -87,6 +89,7 @@ export function iniciarPalco(doc = document, janela = window) {
   let ativaEscrita = -1;
   let passosEscritos = cenasProntas.map(() => 0);
   let escalaEscrita = '';
+  let corteEscrito = '';
   let flutuanteOcultoEscrito = false;
   let acabouDeLigar = false;
   let pedido = 0;
@@ -120,11 +123,16 @@ export function iniciarPalco(doc = document, janela = window) {
     const base = midiaDesktop.matches ? CENA_DESKTOP : CENA_CELULAR;
     const escala = escalaDaCena({ largura: area.width, altura: Math.max(0, fimDaArea - area.top) }, base);
     const passos = totais.map((total, i) => (i < ativa ? total : i === ativa ? passo : 0));
-    // A primeira seção depois do palco libera o botão quando cobre a caixa dele (spec 15.4), usando a
-    // caixa real para respeitar o tamanho e a área segura do CSS.
+    // A primeira seção depois do palco sobe por cima da cena e do painel fixo do celular, e o véu dela
+    // é translúcido: o que fica embaixo do alto dela é recortado (spec 15.4). Arredondado para cima,
+    // para nem uma fração de pixel aparecer através do véu.
+    const altoDepois = depois ? depois.getBoundingClientRect().top : Infinity;
+    const corteCena = Math.max(0, Math.ceil(area.bottom - altoDepois));
+    const cortePainel = Math.max(0, Math.ceil(painel.bottom - altoDepois));
+    // A mesma seção libera o botão quando cobre a caixa dele (spec 15.4), usando a caixa real para
+    // respeitar o tamanho e a área segura do CSS.
     const ocultarFlutuante = Boolean(
-      ativa >= 0 && !midiaDesktop.matches && depois && flutuante &&
-      depois.getBoundingClientRect().top > flutuante.getBoundingClientRect().top,
+      ativa >= 0 && !midiaDesktop.matches && depois && flutuante && altoDepois > flutuante.getBoundingClientRect().top,
     );
 
     // Depois as escritas, só do que mudou.
@@ -136,6 +144,12 @@ export function iniciarPalco(doc = document, janela = window) {
     if (escalaTexto !== escalaEscrita) {
       secao.style.setProperty('--wo-palco-escala', escalaTexto);
       escalaEscrita = escalaTexto;
+    }
+    const corteTexto = `${corteCena} ${cortePainel}`;
+    if (corteTexto !== corteEscrito) {
+      secao.style.setProperty('--wo-palco-corte-cena', `${corteCena}px`);
+      secao.style.setProperty('--wo-palco-corte-painel', `${cortePainel}px`);
+      corteEscrito = corteTexto;
     }
     if (mostrada !== ativaEscrita) {
       if (ativaEscrita >= 0) {
@@ -217,6 +231,8 @@ export function iniciarPalco(doc = document, janela = window) {
     pedido = 0;
     secao.removeAttribute('data-palco-modo');
     secao.style.removeProperty('--wo-palco-escala');
+    secao.style.removeProperty('--wo-palco-corte-cena');
+    secao.style.removeProperty('--wo-palco-corte-painel');
     fundo?.removeAttribute('data-capitulo');
     flutuante?.removeAttribute('data-palco-oculto');
     for (const elemento of [...capitulos, ...cenasProntas]) elemento.removeAttribute('data-ativa');
@@ -224,6 +240,7 @@ export function iniciarPalco(doc = document, janela = window) {
     ativaEscrita = -1;
     passosEscritos = cenasProntas.map(() => 0);
     escalaEscrita = '';
+    corteEscrito = '';
     flutuanteOcultoEscrito = false;
   };
 

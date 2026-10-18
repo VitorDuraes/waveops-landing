@@ -207,6 +207,44 @@ test.describe('palco no desktop', () => {
   });
 });
 
+/* Spec 15.4 e foco 6 do brief: o véu das seções depois do palco é translúcido, então nada do palco pode
+   ficar atrás dele. Com a primeira seção subindo e o quinto capítulo ainda ativo (o alto dela a 75% e
+   a 60% da janela, antes da metade), a captura da faixa abaixo do alto da seção tem de sair igual com
+   e sem o painel e as cenas. O vídeo fica pausado no pôster e as transições desligadas, para as duas
+   capturas verem o mesmo fundo; o texto da seção e o botão flutuante saem das duas. */
+test.describe('o fim do palco não aparece através do véu', () => {
+  test.beforeEach(({}, info) => {
+    test.skip(info.project.name === 'tablet', 'o tablet usa o layout do celular');
+  });
+
+  for (const fracao of [0.75, 0.6]) {
+    test(`com a primeira seção depois do palco a ${Math.round(fracao * 100)}% da janela, nada do palco aparece abaixo dela`, async ({ page }, info) => {
+      await page.goto('/');
+      await page.getByRole('button', { name: 'Pausar animação do fundo', exact: true }).click();
+      await expect(page.locator('[data-fundo-video]')).not.toHaveAttribute('data-tocando');
+      await page.addStyleTag({
+        content: '*, *::before, *::after { transition: none !important; animation: none !important; } [data-palco] + section * { visibility: hidden !important; } .wo-whatsapp-flutuante { visibility: hidden !important; }',
+      });
+      await page.locator('[data-palco] + section').evaluate((secao, f) => {
+        scrollTo({ top: Math.round(scrollY + secao.getBoundingClientRect().top - innerHeight * f), behavior: 'instant' });
+      }, fracao);
+      await quadro(page);
+      await expect(page.locator('[data-palco]')).toHaveAttribute('data-palco-modo', 'fundo');
+      await expect(page.locator('[data-frente="saas"]')).toHaveAttribute('data-ativa');
+      const recorte = await page.locator('[data-palco] + section').evaluate((secao) => {
+        const alto = Math.ceil(secao.getBoundingClientRect().top);
+        return { x: 0, y: alto, width: document.documentElement.clientWidth, height: innerHeight - alto };
+      });
+      const comPalco = await page.screenshot({ clip: recorte, scale: 'css' });
+      await page.addStyleTag({ content: '[data-cena], .wo-home-painel { visibility: hidden !important; }' });
+      const semPalco = await page.screenshot({ clip: recorte, scale: 'css' });
+      await info.attach('com-palco.png', { body: comPalco, contentType: 'image/png' });
+      await info.attach('sem-palco.png', { body: semPalco, contentType: 'image/png' });
+      expect(comPalco.equals(semPalco), `a faixa abaixo de y ${recorte.y} muda quando o palco some: o painel ou a cena aparecem através do véu`).toBe(true);
+    });
+  }
+});
+
 /* A cena ativa cabe inteira na área útil: abaixo do topo fixo, acima do fim da janela, dentro da
    largura e fora do painel. "Corpo da cena" é a tela desenhada; título e aviso ficam no canto dela. */
 const JANELAS = [

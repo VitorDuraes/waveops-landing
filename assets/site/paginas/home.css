@@ -722,7 +722,14 @@
   justify-self: normal;
   width: auto;
   max-width: none;
-  clip-path: inset(0 0 var(--wo-palco-corte-cena, 0px) 0);
+}
+
+/* Recorte da cena (spec 15.4): só existe com a primeira seção depois do palco dentro da janela, quando
+   o módulo da Home liga data-palco-recorte. A borda de baixo fica no alto da seção; o alto e os lados
+   ficam abertos, para o halo da cena passar da caixa e esmaecer sem borda reta. Fora disso, a cena
+   fica sem clip-path, porque ele muda o desenho do halo e do texto mesmo sem cortar nada. */
+[data-palco-modo='fundo'][data-palco-recorte] .wo-home-cena {
+  clip-path: inset(-100vmax -100vmax var(--wo-palco-corte-cena, 0px) -100vmax);
 }
 
 [data-palco-modo='fundo'] .wo-home-cena:not([data-ativa]) {

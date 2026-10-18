@@ -245,6 +245,63 @@ test.describe('o fim do palco não aparece através do véu', () => {
   }
 });
 
+/* O recorte da cena só corta no alto da primeira seção depois do palco. O halo violeta passa da caixa
+   da cena dos lados, no alto e, no celular, embaixo, e precisa esmaecer sem borda reta. Com a seção
+   fora da janela, a janela inteira sai igual com o recorte e com ele anulado, no primeiro e no quinto
+   capítulo. Com a seção dentro da janela, mas abaixo da caixa da cena, tudo acima do alto dela sai
+   igual com o recorte e com um recorte aberto dos quatro lados. O vídeo fica pausado no pôster e as
+   transições desligadas, para as duas capturas verem o mesmo fundo. */
+test.describe('o recorte da cena só corta no alto da seção', () => {
+  test.beforeEach(async ({ page }, info) => {
+    test.skip(info.project.name === 'tablet', 'o tablet usa o layout do celular');
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Pausar animação do fundo', exact: true }).click();
+    await expect(page.locator('[data-fundo-video]')).not.toHaveAttribute('data-tocando');
+    await page.addStyleTag({ content: '*, *::before, *::after { transition: none !important; animation: none !important; } .wo-whatsapp-flutuante { visibility: hidden !important; }' });
+  });
+
+  for (const frente of ['atendimento', 'saas']) {
+    test(`com a seção fora da janela, no capítulo ${frente}, a janela sai igual com e sem o recorte`, async ({ page }, info) => {
+      await rolarProgresso(page, frente, 0.2);
+      await expect(page.locator(`[data-cena="${frente}"]`)).toHaveAttribute('data-ativa');
+      expect(await page.locator('[data-palco] + section').evaluate((secao) => secao.getBoundingClientRect().top > innerHeight), 'a seção depois do palco está fora da janela').toBe(true);
+      const comRecorte = await page.screenshot({ scale: 'css' });
+      await page.addStyleTag({ content: '[data-palco-modo="fundo"] .wo-home-cena { clip-path: none !important; }' });
+      const semRecorte = await page.screenshot({ scale: 'css' });
+      await info.attach('com-recorte.png', { body: comRecorte, contentType: 'image/png' });
+      await info.attach('sem-recorte.png', { body: semRecorte, contentType: 'image/png' });
+      expect(comRecorte.equals(semRecorte), 'o recorte muda a cena com a seção longe: o halo termina numa borda reta').toBe(true);
+    });
+  }
+
+  test('com a seção dentro da janela e abaixo da cena, nada acima do alto dela muda', async ({ page }, info) => {
+    // O alto da seção fica no meio do caminho entre o fim da caixa da cena e o fim da janela.
+    await page.locator('[data-palco] + section').evaluate((secao) => {
+      const cena = document.querySelector('[data-cena="saas"]');
+      if (!cena) throw new Error('cena saas não encontrada');
+      const alvo = (cena.getBoundingClientRect().bottom + innerHeight) / 2;
+      scrollTo({ top: Math.round(scrollY + secao.getBoundingClientRect().top - alvo), behavior: 'instant' });
+    });
+    await quadro(page);
+    await expect(page.locator('[data-cena="saas"]')).toHaveAttribute('data-ativa');
+    const medida = await page.locator('[data-palco] + section').evaluate((secao) => ({
+      alto: secao.getBoundingClientRect().top,
+      fimDaCena: document.querySelector('[data-cena="saas"]')?.getBoundingClientRect().bottom ?? 0,
+      largura: document.documentElement.clientWidth,
+    }));
+    expect(medida.alto, 'o alto da seção fica abaixo da caixa da cena').toBeGreaterThan(medida.fimDaCena);
+    expect(medida.alto, 'o alto da seção fica dentro da janela').toBeLessThan(page.viewportSize()?.height ?? 0);
+    // Uma linha de folga acima do alto da seção, onde o arredondamento do corte pode cair.
+    const acima = { x: 0, y: 0, width: medida.largura, height: Math.floor(medida.alto) - 1 };
+    const comRecorte = await page.screenshot({ clip: acima, scale: 'css' });
+    await page.addStyleTag({ content: '[data-palco-modo="fundo"] .wo-home-cena { clip-path: inset(-100vmax) !important; }' });
+    const aberto = await page.screenshot({ clip: acima, scale: 'css' });
+    await info.attach('com-recorte.png', { body: comRecorte, contentType: 'image/png' });
+    await info.attach('recorte-aberto.png', { body: aberto, contentType: 'image/png' });
+    expect(comRecorte.equals(aberto), `acima de y ${acima.height} o recorte muda a cena: o halo termina numa borda reta`).toBe(true);
+  });
+});
+
 /* A cena ativa cabe inteira na área útil: abaixo do topo fixo, acima do fim da janela, dentro da
    largura e fora do painel. "Corpo da cena" é a tela desenhada; título e aviso ficam no canto dela. */
 const JANELAS = [

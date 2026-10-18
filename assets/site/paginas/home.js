@@ -17,7 +17,10 @@
      data-palco-modo="fundo"   na seção; sem ele, o palco está desligado
      --wo-palco-escala         na seção: quanto a cena encolhe para caber na área útil
      --wo-palco-corte-cena     na seção: quanto da cena fixa a primeira seção depois do palco cobre
+                               (negativo com a seção abaixo da cena: o recorte fica no alto dela)
      --wo-palco-corte-painel   na seção: o mesmo para o painel fixo do celular
+     data-palco-recorte        na seção, enquanto a primeira seção depois do palco está dentro da
+                               janela: só com ele a cena ganha o recorte
      data-ativa                no capítulo e na cena da vez
      data-visivel              em cada peça já montada
      data-capitulo             no fundo, com o nome do capítulo da vez: a onda escurece
@@ -125,9 +128,12 @@ export function iniciarPalco(doc = document, janela = window) {
     const passos = totais.map((total, i) => (i < ativa ? total : i === ativa ? passo : 0));
     // A primeira seção depois do palco sobe por cima da cena e do painel fixo do celular, e o véu dela
     // é translúcido: o que fica embaixo do alto dela é recortado (spec 15.4). Arredondado para cima,
-    // para nem uma fração de pixel aparecer através do véu.
+    // para nem uma fração de pixel aparecer através do véu. A borda do recorte da cena fica sempre no
+    // alto da seção, também abaixo da caixa da cena, onde o halo dela passa: por isso o corte pode ser
+    // negativo. A cena só ganha o recorte com a seção dentro da janela, porque o clip-path, mesmo sem
+    // cortar nada, muda o desenho do halo e do texto dela (null: sem recorte).
     const altoDepois = depois ? depois.getBoundingClientRect().top : Infinity;
-    const corteCena = Math.max(0, Math.ceil(area.bottom - altoDepois));
+    const corteCena = altoDepois < janela.innerHeight ? Math.ceil(area.bottom - altoDepois) : null;
     const cortePainel = Math.max(0, Math.ceil(painel.bottom - altoDepois));
     // A mesma seção libera o botão quando cobre a caixa dele (spec 15.4), usando a caixa real para
     // respeitar o tamanho e a área segura do CSS.
@@ -147,7 +153,9 @@ export function iniciarPalco(doc = document, janela = window) {
     }
     const corteTexto = `${corteCena} ${cortePainel}`;
     if (corteTexto !== corteEscrito) {
-      secao.style.setProperty('--wo-palco-corte-cena', `${corteCena}px`);
+      marcar(secao, 'data-palco-recorte', corteCena !== null);
+      if (corteCena === null) secao.style.removeProperty('--wo-palco-corte-cena');
+      else secao.style.setProperty('--wo-palco-corte-cena', `${corteCena}px`);
       secao.style.setProperty('--wo-palco-corte-painel', `${cortePainel}px`);
       corteEscrito = corteTexto;
     }
@@ -230,6 +238,7 @@ export function iniciarPalco(doc = document, janela = window) {
     if (pedido) janela.cancelAnimationFrame(pedido);
     pedido = 0;
     secao.removeAttribute('data-palco-modo');
+    secao.removeAttribute('data-palco-recorte');
     secao.style.removeProperty('--wo-palco-escala');
     secao.style.removeProperty('--wo-palco-corte-cena');
     secao.style.removeProperty('--wo-palco-corte-painel');

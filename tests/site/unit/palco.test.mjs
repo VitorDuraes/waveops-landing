@@ -122,8 +122,7 @@ test('a Home tem as cinco cenas na ordem das frentes, com passos contínuos e av
   assert.deepEqual(frentes, ['atendimento', 'agentes', 'dashboards', 'crms', 'saas']);
   assert.deepEqual(cenas, frentes);
   for (const cena of cenas) {
-    const passos = passosDe(cena);
-    assert.deepEqual(passos, Array.from({ length: passos.length }, (_, i) => i + 1), cena);
+    assert.deepEqual(passosDe(cena), [1, 2, 3, 4, 5, 6], cena);
     assert.match(figura(cena), /class="wo-maquete__aviso">Ilustração</, cena);
     assert.doesNotMatch(textoDe(figura(cena)), /R\$|\d\s?%/, cena);
   }

@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { varrerContraste } from './helpers/contraste';
 
 /* Palco de fundo da Home (spec 13). Com o palco ligado, as cinco cenas ficam fixas na tela, atrás
    do texto: a do capítulo da vez aparece e se monta conforme a rolagem, e antes do primeiro
@@ -39,7 +40,7 @@ async function montadas(page: Page, cena: string) {
 /** Espera as transições acabarem, para não medir no meio delas. */
 async function semTransicao(page: Page) {
   await page.evaluate(async () => {
-    await Promise.all(document.getAnimations().map((animacao) => animacao.finished.catch(() => undefined)));
+    await Promise.all(document.getAnimations().filter((animacao) => animacao instanceof CSSTransition).map((animacao) => animacao.finished.catch(() => undefined)));
   });
 }
 
@@ -79,11 +80,72 @@ test.describe('palco ligado no desktop e no celular', () => {
     await expect(page.locator('[data-cena="agentes"]')).not.toHaveAttribute('data-ativa');
     await expect(page.locator('.wo-fundo')).toHaveAttribute('data-capitulo', 'atendimento');
   });
+
+  test('os fios do agente se desenham no passo certo e se apagam ao voltar', async ({ page }) => {
+    await page.goto('/');
+    for (const passo of [1, 2, 3, 4, 5, 6, 2]) {
+      await rolarProgresso(page, 'agentes', (passo - 0.5) / 6);
+      await semTransicao(page);
+      const fios = await page.locator('.wo-home-demo__fios path').evaluateAll((lista) => lista
+        .filter((fio) => getComputedStyle(fio).display !== 'none')
+        .map((fio) => ({passo: Number(fio.getAttribute('data-passo')), deslocamento: Number.parseFloat(getComputedStyle(fio).strokeDashoffset), opacidade: getComputedStyle(fio).opacity})));
+      expect(fios).toHaveLength(5);
+      for (const fio of fios) {
+        expect(fio.deslocamento, `fio ${fio.passo}, cena no passo ${passo}`).toBe(fio.passo <= passo ? 0 : 1);
+        expect(fio.opacidade).toBe(fio.passo <= passo ? '1' : '0');
+      }
+    }
+  });
 });
 
 test.describe('palco no desktop', () => {
   test.beforeEach(({}, info) => {
     test.skip(info.project.name !== 'desktop', 'os casos de rolagem e de janela rodam no desktop');
+  });
+
+  test('desktop: as cinco cenas se sucedem na ordem', async ({ page }) => {
+    await page.goto('/');
+    for (const frente of ['atendimento', 'agentes', 'dashboards', 'crms', 'saas']) {
+      await rolarProgresso(page, frente, 1);
+      await expect(page.locator(`[data-cena="${frente}"]`)).toHaveAttribute('data-ativa');
+      await expect(page.locator('[data-cena][data-ativa]')).toHaveCount(1);
+      await expect.poll(() => montadas(page, frente)).toBe(6);
+    }
+  });
+
+  test('o passo 3 move o mesmo lead de Novo para Qualificado e a volta desfaz o movimento', async ({ page }) => {
+    await page.goto('/');
+    const lead = page.locator('.wo-home-demo__lead-movel');
+    const coluna = page.locator('.wo-home-demo__coluna');
+    await rolarProgresso(page, 'crms', 1.5 / 6);
+    await semTransicao(page);
+    const antes = await lead.boundingBox();
+    const novo = await coluna.nth(0).boundingBox();
+    expect(antes!.x).toBeGreaterThan(novo!.x);
+    expect(antes!.x + antes!.width).toBeLessThan(novo!.x + novo!.width);
+    await rolarProgresso(page, 'crms', 2.5 / 6);
+    await semTransicao(page);
+    const depois = await lead.boundingBox();
+    const qualificado = await coluna.nth(1).boundingBox();
+    expect(depois!.x).toBeGreaterThan(qualificado!.x);
+    expect(depois!.x + depois!.width).toBeLessThan(qualificado!.x + qualificado!.width);
+    expect(depois!.x).toBeGreaterThan(antes!.x);
+    await rolarProgresso(page, 'crms', 1.5 / 6);
+    await semTransicao(page);
+    expect((await lead.boundingBox())!.x).toBeCloseTo(antes!.x, 0);
+  });
+
+  test('SaaS desenha a estrutura e retém acesso, painel, checkout e publicação', async ({ page }) => {
+    await page.goto('/');
+    const partes = ['janela', 'estrutura', 'acesso', 'painel-app', 'checkout', 'publicado'];
+    for (let passo = 1; passo <= 6; passo += 1) {
+      await rolarProgresso(page, 'saas', (passo - 0.5) / 6);
+      await semTransicao(page);
+      for (let i = 0; i < partes.length; i += 1) {
+        await expect(page.locator(`.wo-home-demo__${partes[i]}`)).toHaveCSS('opacity', i < passo ? '1' : '0');
+      }
+    }
+    await expect(page.locator('[data-cena="saas"] :is(input, button, a, select, textarea, [tabindex])')).toHaveCount(0);
   });
 
   test('os passos crescem ao descer e diminuem ao subir', async ({ page }) => {
@@ -202,6 +264,12 @@ test.describe('palco no desktop', () => {
       await page.goto('/');
       await page.evaluate(() => document.fonts.ready);
       await expect(page.locator('[data-palco]')).not.toHaveAttribute('data-palco-modo');
+      await expect(page.locator('[data-cena]')).toHaveCount(5);
+      for (const frente of ['atendimento', 'agentes', 'dashboards', 'crms', 'saas']) {
+        await expect(page.locator(`[data-cena="${frente}"]`)).toHaveCSS('opacity', '1');
+        expect(await page.locator(`[data-cena="${frente}"] [data-passo="6"]`).count()).toBeGreaterThan(0);
+      }
+      expect(await pecasApagadas(page)).toBe(0);
       expect(await gravesNoPalco(page)).toEqual([]);
     });
   });
@@ -315,14 +383,15 @@ for (const { projeto, ...janela } of JANELAS) {
   test.describe(`em ${janela.width} x ${janela.height}`, () => {
     test.use({ viewport: janela });
 
-    test('a cena ativa cabe na área útil', async ({ page }, info) => {
+    for (const frente of ['atendimento', 'agentes', 'dashboards', 'crms', 'saas']) {
+    test(`a cena ativa cabe na área útil: ${frente}`, async ({ page }, info) => {
       test.skip(info.project.name !== projeto, `essa janela roda no projeto ${projeto}`);
       await page.goto('/');
       await page.evaluate(() => document.fonts.ready);
-      await rolarProgresso(page, 'atendimento', 1);
-      await expect.poll(() => montadas(page, 'atendimento')).toBe(6);
+      await rolarProgresso(page, frente, 1);
+      await expect.poll(() => montadas(page, frente)).toBe(6);
       await semTransicao(page);
-      const medidas = await page.evaluate(() => {
+      const medidas = await page.evaluate((frente) => {
         const caixa = (seletor: string) => {
           const elemento = document.querySelector(seletor);
           if (!elemento) throw new Error(`${seletor} não encontrado`);
@@ -332,13 +401,23 @@ for (const { projeto, ...janela } of JANELAS) {
         // O topo vira fixo na Tarefa 3; até lá, a área útil já desconta a altura dele.
         const topoFixo = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--wo-topo-altura'));
         return {
-          corpo: caixa('[data-cena="atendimento"][data-ativa] .wo-home-cena__tela'),
-          painel: caixa('[data-frente="atendimento"][data-ativa] .wo-home-painel'),
+          corpo: caixa(`[data-cena="${frente}"][data-ativa] .wo-home-cena__tela`),
+          painel: caixa(`[data-frente="${frente}"][data-ativa] .wo-home-painel`),
+          pecas: [...document.querySelectorAll(`[data-cena="${frente}"] .wo-home-cena__tela *`)]
+            .filter((peca) => !(peca instanceof SVGElement) && getComputedStyle(peca).display !== 'none')
+            .map((peca) => {
+              const {top, bottom, left, right, width, height} = peca.getBoundingClientRect();
+              return {nome: peca.className || peca.tagName, top, bottom, left, right, width, height};
+            }).filter((peca) => peca.width && peca.height),
+          cartoes: [...document.querySelectorAll(`[data-cena="${frente}"] .wo-home-cena__cartao`)].map((cartao) => {
+            const {top, bottom, left, right} = cartao.getBoundingClientRect();
+            return {nome: cartao.textContent, top, bottom, left, right};
+          }),
           fimDoTopo: Math.max(caixa('.wo-topo').bottom, topoFixo),
           largura: document.documentElement.clientWidth,
           altura: innerHeight,
         };
-      });
+      }, frente);
       const { corpo, painel } = medidas;
       expect(corpo.top).toBeGreaterThanOrEqual(medidas.fimDoTopo);
       expect(corpo.bottom).toBeLessThanOrEqual(medidas.altura);
@@ -346,7 +425,20 @@ for (const { projeto, ...janela } of JANELAS) {
       expect(corpo.right).toBeLessThanOrEqual(medidas.largura);
       const cruza = corpo.left < painel.right && corpo.right > painel.left && corpo.top < painel.bottom && corpo.bottom > painel.top;
       expect(cruza, `corpo ${JSON.stringify(corpo)} e painel ${JSON.stringify(painel)}`).toBe(false);
+      for (const peca of medidas.pecas) {
+        expect(peca.left, peca.nome).toBeGreaterThanOrEqual(corpo.left - 1);
+        expect(peca.right, peca.nome).toBeLessThanOrEqual(corpo.right + 1);
+        expect(peca.top, peca.nome).toBeGreaterThanOrEqual(corpo.top - 1);
+        expect(peca.bottom, peca.nome).toBeLessThanOrEqual(corpo.bottom + 1);
+      }
+      for (let i = 0; i < medidas.cartoes.length; i += 1) {
+        for (const b of medidas.cartoes.slice(i + 1)) {
+          const a = medidas.cartoes[i]!;
+          expect(a.left < b.right - 1 && a.right > b.left + 1 && a.top < b.bottom - 1 && a.bottom > b.top + 1, `${a.nome} cruza ${b.nome}`).toBe(false);
+        }
+      }
     });
+    }
   });
 }
 
@@ -392,6 +484,16 @@ for (const janela of [
         lista.map((painel) => `${getComputedStyle(painel).opacity} ${getComputedStyle(painel).pointerEvents}`),
       );
       expect(paineis).toEqual(['1 auto', '0 none', '0 none', '0 none', '0 none']);
+      await rolarProgresso(page, 'agentes', 5.5 / 6);
+      await semTransicao(page);
+      for (const seletor of ['.wo-home-painel__numero', '.wo-home-painel__nome']) {
+        const cabecalho = page.locator(`[data-frente="agentes"] ${seletor}`);
+        await expect(cabecalho).toBeInViewport();
+        await expect(cabecalho).toHaveCSS('opacity', '1');
+        await expect(cabecalho).toHaveCSS('visibility', 'visible');
+        const altura = await cabecalho.evaluate((el) => el.getBoundingClientRect().height);
+        expect(altura).toBeGreaterThan(0);
+      }
     });
   });
 }
@@ -449,7 +551,17 @@ test.describe('com menos movimento', () => {
     await page.goto('/');
     await quadro(page);
     await expect(page.locator('[data-palco]')).not.toHaveAttribute('data-palco-modo');
-    expect(await page.locator('[data-cena] [data-passo]').count()).toBeGreaterThanOrEqual(6);
+    expect(await page.locator('[data-cena] [data-passo]').count()).toBeGreaterThanOrEqual(30);
     expect(await pecasApagadas(page)).toBe(0);
+  });
+
+  test('os textos internos das quatro cenas mantêm contraste AA', async ({ page }, info) => {
+    test.skip(info.project.name === 'tablet', 'desktop e celular cobrem as duas grades');
+    test.setTimeout(240_000);
+    const trechos = ['agentes', 'dashboards', 'crms', 'saas'].map((frente) => `[data-cena="${frente}"]`);
+    const medidos = await varrerContraste(page, '/', trechos);
+    await info.attach('contraste-cenas.json', {body: JSON.stringify(medidos, null, 2), contentType: 'application/json'});
+    for (const trecho of trechos) expect(medidos.filter((alvo) => alvo.trecho === trecho).length, trecho).toBeGreaterThan(5);
+    expect(medidos.filter((alvo) => alvo.passos < 3 || !alvo.pior || alvo.pior.razao < alvo.minimo)).toEqual([]);
   });
 });

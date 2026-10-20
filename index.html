@@ -10,7 +10,7 @@
     <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png" />
     <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
     <link rel="preload" href="/assets/fonts/geist-variavel-latin.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="stylesheet" href="/assets/site/tokens.css?v=994aa5bd" />
+    <link rel="stylesheet" href="/assets/site/tokens.css?v=eddecbac" />
     <link rel="stylesheet" href="/assets/site/base.css?v=d1120775" />
     <link rel="stylesheet" href="/assets/site/components.css?v=90417320" />
     <script defer src="/assets/funil.js?v=2842b2e3"></script>
@@ -19,7 +19,7 @@
     <noscript><style>.wo-topo{position:relative;background:var(--wo-noite)}[data-seletor] [data-painel]{display:block!important}[data-seletor] [data-opcoes],[data-sem-js-oculto]{display:none!important}@media (max-width:1180px){.wo-topo__painel[hidden]{display:flex!important}.wo-topo__menu{display:none!important}}</style></noscript>
     <!-- /parcial:head -->
     <script type="module" src="/assets/site/paginas/home.js?v=37015ffc"></script>
-    <link rel="stylesheet" href="/assets/site/paginas/home.css?v=d4bb16b2" />
+    <link rel="stylesheet" href="/assets/site/paginas/home.css?v=e2b34f4b" />
     <title>WaveOps · Sistemas sob medida para a operação de quem vende</title>
     <meta name="description" content="Software house da operação de quem vende: automação de atendimento, agentes de IA, dashboards, CRMs sob medida e SaaS, do diagnóstico ao que está no ar." />
     <link rel="canonical" href="https://waveops.com.br/" />
@@ -257,7 +257,18 @@
               <span class="wo-oculto">Um agente qualifica os leads do site com base no catálogo e nas perguntas frequentes, e a resposta dele passa pela revisão de Vendas antes do envio.</span>
             </figcaption>
             <div class="wo-home-cena__tela" aria-hidden="true">
-              <div data-passo="1"></div>
+              <svg class="wo-home-cena__fio wo-home-demo__fios" data-passo="1" width="12" height="18" aria-hidden="true">
+                <path class="wo-home-cena__traco wo-home-cena__traco--largo" data-passo="2" pathLength="1" d="M328 60C360 60 360 92 392 92" /><path class="wo-home-cena__traco wo-home-cena__traco--largo" data-passo="3" pathLength="1" d="M556 127C556 144 164 142 164 159" /><path class="wo-home-cena__traco wo-home-cena__traco--largo" data-passo="4" pathLength="1" d="M328 189C360 189 360 226 392 226" /><path class="wo-home-cena__traco wo-home-cena__traco--largo" data-passo="5" pathLength="1" d="M556 262C556 278 164 277 164 294" /><path class="wo-home-cena__traco wo-home-cena__traco--largo" data-passo="6" pathLength="1" d="M328 350C360 350 360 356 392 356" />
+                <path class="wo-home-cena__traco wo-home-cena__traco--estreito" data-passo="2" pathLength="1" d="M280 27C330 27 330 67 300 67" /><path class="wo-home-cena__traco wo-home-cena__traco--estreito" data-passo="3" pathLength="1" d="M70 94C20 94 20 134 50 134" /><path class="wo-home-cena__traco wo-home-cena__traco--estreito" data-passo="4" pathLength="1" d="M280 156C330 156 330 189 300 189" /><path class="wo-home-cena__traco wo-home-cena__traco--estreito" data-passo="5" pathLength="1" d="M70 216C20 216 20 257 50 257" /><path class="wo-home-cena__traco wo-home-cena__traco--estreito" data-passo="6" pathLength="1" d="M280 304C330 304 330 363 300 363" />
+              </svg>
+              <div class="wo-home-demo wo-home-demo--agente">
+                <div class="wo-home-cena__cartao" data-passo="1"><span class="wo-home-demo__rotulo">Função:</span><strong>qualificar os leads do site</strong></div>
+                <div class="wo-home-cena__cartao" data-passo="2"><span class="wo-home-demo__rotulo">Fonte de dados:</span><strong>catálogo e perguntas frequentes</strong></div>
+                <div class="wo-home-cena__cartao" data-passo="3"><span class="wo-home-cena__etiqueta wo-home-demo__sucesso">Revisão humana: ligada</span></div>
+                <div class="wo-home-cena__cartao" data-passo="4"><span class="wo-home-demo__rotulo">Pergunta do lead</span><strong>Vocês atendem empresas pequenas?</strong></div>
+                <div class="wo-home-cena__cartao" data-passo="5"><span class="wo-home-demo__rotulo">Rascunho do agente</span><span class="wo-home-demo__rascunho"><i></i><i></i></span><span class="wo-home-cena__etiqueta wo-home-cena__etiqueta--alerta">Aguardando revisão</span></div>
+                <div class="wo-home-cena__cartao wo-home-demo__aprovado" data-passo="6"><strong class="wo-home-cena__ok">Aprovado por Vendas</strong><span class="wo-home-cena__etiqueta wo-home-demo__sucesso">Enviado</span></div>
+              </div>
             </div>
           </figure>
         </div>
@@ -279,7 +290,18 @@
               <span class="wo-oculto">Um painel do comercial mostra os indicadores de hoje, a evolução dos últimos dias e a origem dos leads, com acesso para a Gestão.</span>
             </figcaption>
             <div class="wo-home-cena__tela" aria-hidden="true">
-              <div data-passo="1"></div>
+              <div class="wo-home-demo wo-home-demo--painel">
+                <div class="wo-home-cena__cartao wo-home-demo__linha" data-passo="1"><span class="wo-home-cena__etiqueta">Período: hoje</span><span class="wo-home-cena__etiqueta">Área: Comercial</span></div>
+                <div class="wo-home-demo__indicadores" data-passo="2">
+                  <div class="wo-home-cena__cartao"><span class="wo-home-demo__rotulo">Leads</span><strong>48</strong></div>
+                  <div class="wo-home-cena__cartao"><span class="wo-home-demo__rotulo">Pedidos</span><strong>17</strong></div>
+                  <div class="wo-home-cena__cartao"><span class="wo-home-demo__rotulo">Chamados abertos</span><strong>5</strong></div>
+                </div>
+                <div class="wo-home-cena__cartao" data-passo="3"><span class="wo-home-demo__rotulo">Últimos 7 dias</span><div class="wo-home-demo__barras"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+                <div class="wo-home-cena__cartao" data-passo="4"><span class="wo-home-demo__rotulo">Tendência</span><svg class="wo-home-demo__grafico" width="140" height="46" viewBox="0 0 280 92" preserveAspectRatio="none" aria-hidden="true"><path class="wo-home-demo__grade" d="M0 22H280M0 52H280M0 82H280" /><path class="wo-home-cena__traco" pathLength="1" d="M2 72C28 72 26 42 48 44S80 74 104 49 130 66 153 39 181 53 207 24 247 30 278 8" /></svg></div>
+                <div class="wo-home-cena__cartao wo-home-demo__origens" data-passo="5"><span class="wo-home-demo__rotulo">Origem dos leads</span><div><span>Anúncio</span><i></i></div><div><span>Site</span><i></i></div><div><span>Indicação</span><i></i></div></div>
+                <div class="wo-home-cena__cartao wo-home-demo__linha wo-home-demo__aprovado" data-passo="6"><span>Atualizado às 09:47</span><span class="wo-home-cena__etiqueta">Acesso: Gestão</span></div>
+              </div>
             </div>
           </figure>
         </div>
@@ -301,7 +323,16 @@
               <span class="wo-oculto">Um funil leva os leads do site e do WhatsApp de Novo a Fechado, com follow-up na proposta e a origem da venda registrada.</span>
             </figcaption>
             <div class="wo-home-cena__tela" aria-hidden="true">
-              <div data-passo="1"></div>
+              <div class="wo-home-demo wo-home-demo--crm">
+                <div class="wo-home-demo__funil" data-passo="1">
+                  <div class="wo-home-demo__coluna"><strong>Novo</strong></div><div class="wo-home-demo__coluna"><strong>Qualificado</strong></div><div class="wo-home-demo__coluna"><strong>Proposta</strong></div><div class="wo-home-demo__coluna"><strong>Fechado</strong></div>
+                </div>
+                <div class="wo-home-demo__leads" data-passo="2"><div class="wo-home-cena__cartao wo-home-demo__lead-movel wo-home-demo__celula"><span class="wo-home-demo__rotulo">Site</span><strong>Lead do site</strong></div><div class="wo-home-cena__cartao wo-home-demo__lead-fixo wo-home-demo__celula"><span class="wo-home-demo__rotulo">WhatsApp</span><strong>Lead do WhatsApp</strong></div></div>
+                <div class="wo-home-demo__qualificado wo-home-demo__celula" data-passo="3"><span class="wo-home-cena__etiqueta">Qualificado</span></div>
+                <div class="wo-home-cena__cartao wo-home-demo__tarefa wo-home-demo__celula" data-passo="4"><span class="wo-home-demo__rotulo">Tarefa</span><strong>Follow-up amanhã</strong></div>
+                <div class="wo-home-cena__cartao wo-home-demo__ganho wo-home-demo__celula" data-passo="5"><span class="wo-home-cena__etiqueta wo-home-demo__sucesso">Ganho</span></div>
+                <div class="wo-home-cena__cartao wo-home-demo__origem" data-passo="6"><span class="wo-home-demo__rotulo">Origem da venda</span><strong>Anúncio</strong></div>
+              </div>
             </div>
           </figure>
         </div>
@@ -323,7 +354,14 @@
               <span class="wo-oculto">Um produto web ganha forma no navegador, da tela de acesso ao painel e ao pagamento aprovado, até ficar no ar com monitoramento ativo.</span>
             </figcaption>
             <div class="wo-home-cena__tela" aria-hidden="true">
-              <div data-passo="1"></div>
+              <div class="wo-home-demo wo-home-demo--saas">
+                <div class="wo-home-demo__janela" data-passo="1"><div class="wo-home-demo__navegador"><i></i><i></i><i></i><span></span></div></div>
+                <div class="wo-home-demo__estrutura" data-passo="2"><div class="wo-home-demo__topo-app"><i></i><i></i></div><div class="wo-home-demo__menu-app"><i></i><i></i><i></i></div><div class="wo-home-demo__blocos"><i></i><i></i><i></i></div></div>
+                <div class="wo-home-cena__cartao wo-home-demo__acesso" data-passo="3"><span class="wo-home-demo__rotulo">Acesso</span><div class="wo-home-demo__campos"><div><span>E-mail</span><i></i></div><div><span>Senha</span><i class="wo-home-demo__senha">••••••••</i></div></div></div>
+                <div class="wo-home-cena__cartao wo-home-demo__painel-app" data-passo="4"><span class="wo-home-demo__rotulo">Painel</span><div class="wo-home-demo__minicartoes"><i></i><i></i><i></i></div><svg class="wo-home-demo__grafico" width="140" height="46" viewBox="0 0 280 92" preserveAspectRatio="none" aria-hidden="true"><path class="wo-home-demo__grade" d="M0 22H280M0 52H280M0 82H280" /><path class="wo-home-cena__traco" pathLength="1" d="M2 74 42 63 75 68 116 40 153 47 192 23 231 29 278 10" /></svg></div>
+                <div class="wo-home-cena__cartao wo-home-demo__checkout" data-passo="5"><span class="wo-home-demo__rotulo">Checkout</span><span class="wo-home-cena__etiqueta wo-home-demo__sucesso">Pagamento aprovado</span></div>
+                <div class="wo-home-cena__cartao wo-home-demo__publicado wo-home-demo__aprovado" data-passo="6"><strong class="wo-home-cena__ok">No ar</strong><span class="wo-home-cena__etiqueta wo-home-demo__sucesso">Monitoramento ativo</span></div>
+              </div>
             </div>
           </figure>
         </div>

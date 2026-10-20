@@ -246,12 +246,7 @@
   }
 }
 
-/* ---------- Botão flutuante de WhatsApp sobre o palco (celular e tablet) ----------
-   Abaixo de 1024 px o painel de texto do palco fica preso embaixo da janela, no canto do botão
-   flutuante, que cobriria o fim das etiquetas. O controlador do palco sinaliza quando esse canto
-   está ocupado e libera o botão quando a primeira seção depois do palco cobre a caixa dele (spec
-   15.4). Sem JavaScript, com menos movimento ou com a janela baixa, não há sinal e o botão
-   permanece disponível. */
+/* No celular, o controlador oculta o WhatsApp enquanto seu canto está ocupado pelo painel. */
 @media (max-width: 1023.98px) {
   .wo-fundo ~ .wo-whatsapp-flutuante {
     transition: transform var(--wo-transicao), opacity var(--wo-palco-transicao) ease;
@@ -626,7 +621,7 @@
   stroke-width: 2.5;
   stroke-linecap: round;
   stroke-dasharray: 1;
-  transition: stroke-dashoffset calc(var(--wo-palco-transicao) * 2) ease;
+  transition: stroke-dashoffset var(--wo-palco-transicao) ease;
 }
 
 .wo-home-cena__traco--largo,
@@ -694,16 +689,9 @@
   }
 }
 
-/* ---------- Palco ligado: data-palco-modo="fundo" ----------
-   Cada capítulo ocupa um trecho de rolagem. As cinco cenas ficam fixas no mesmo lugar da tela,
-   atrás do texto, e só a do capítulo da vez aparece. A caixa da cena é a área útil inteira; o
-   título e a tela desenhada ficam no tamanho de desenho (--wo-palco-cena-largura e
-   --wo-palco-cena-altura, as medidas de CENA_DESKTOP e CENA_CELULAR em lib/palco.js, conferidas
-   por teste) e encolhem juntos por --wo-palco-escala, que o módulo da Home calcula, a partir do
-   centro da área. As cenas e o painel fixo do celular ficam atrás do conteúdo (z-index -1). O véu
-   das seções depois do palco é translúcido e não cobre nada: quando a primeira delas sobe, o módulo
-   da Home recorta a cena e o painel no alto dela (spec 15.4). Nenhum ancestral das cenas pode ter
-   transform, filter ou contain, que quebrariam o position: fixed. */
+/* Palco ligado: cenas fixas na área útil, escaladas pelo controlador. Geometria compartilhada com
+   lib/palco.js. Ancestrais não podem ter transform, filter ou contain (quebram position: fixed).
+   O recorte acompanha a seção seguinte porque seu véu translúcido não cobre o palco (15.4). */
 [data-palco-modo='fundo'] .wo-home-frentes__abertura {
   min-height: var(--wo-palco-abertura);
 }
@@ -724,10 +712,7 @@
   max-width: none;
 }
 
-/* Recorte da cena (spec 15.4): só existe com a primeira seção depois do palco dentro da janela, quando
-   o módulo da Home liga data-palco-recorte. A borda de baixo fica no alto da seção; o alto e os lados
-   ficam abertos, para o halo da cena passar da caixa e esmaecer sem borda reta. Fora disso, a cena
-   fica sem clip-path, porque ele muda o desenho do halo e do texto mesmo sem cortar nada. */
+/* Recorte só com a seção seguinte na janela. Alto e lados abertos preservam o halo. */
 [data-palco-modo='fundo'][data-palco-recorte] .wo-home-cena {
   clip-path: inset(-100vmax -100vmax var(--wo-palco-corte-cena, 0px) -100vmax);
 }
@@ -1019,6 +1004,135 @@
     bottom: auto;
     left: -4px;
   }
+}
+
+/* Cenas 2 a 5: a mesma família de cartões, rótulos, barras e selos. No fluxo normal a
+   grade cresce com o conteúdo. Só o palco fixa o desenho na base de 720 ou 350 px. */
+.wo-home-demo {
+  position: relative;
+  display: grid;
+  gap: var(--wo-cena-respiro);
+  font-size: var(--wo-texto-pequeno);
+  line-height: 1.4;
+  color: var(--wo-tinta);
+}
+.wo-home-demo strong { display: block; font-weight: 600; }
+.wo-home-demo__rotulo { display: block; margin-bottom: var(--wo-espaco-1); color: var(--wo-tinta-2); }
+.wo-home-demo .wo-home-cena__etiqueta { font-size: inherit; }
+.wo-home-demo__linha { display: flex; align-items: center; justify-content: space-between; gap: var(--wo-espaco-1); flex-wrap: wrap; }
+.wo-home-demo__aprovado { background: var(--wo-papel); }
+.wo-home-demo__sucesso { color: var(--wo-sucesso-claro); background: var(--wo-palco-ok); border-color: transparent; }
+.wo-home-demo__sucesso::before { background: var(--wo-sucesso-claro); }
+.wo-home-demo__rascunho { display: grid; gap: var(--wo-espaco-1); margin-bottom: var(--wo-espaco-1); }
+.wo-home-demo__estrutura i { display: block; border-radius: var(--wo-raio); background: var(--wo-papel-2); }
+.wo-home-demo__rascunho i { display: block; border-radius: var(--wo-raio); background: var(--wo-papel-2); height: var(--wo-espaco-1); }
+.wo-home-demo__rascunho i:last-child { width: 70%; }
+.wo-home-demo--agente .wo-home-cena__cartao { width: 80%; }
+.wo-home-demo--agente .wo-home-cena__cartao:nth-child(even) { justify-self: end; }
+.wo-home-demo--agente .wo-home-demo__aprovado { display: flex; align-items: center; justify-content: space-between; gap: var(--wo-espaco-1); }
+.wo-home-demo--agente .wo-home-demo__rotulo { margin-bottom: 0; }
+.wo-home-demo--agente .wo-home-cena__cartao:not(:first-child)::before {
+  content: ''; position: absolute; bottom: 100%; left: 50%; height: var(--wo-cena-respiro);
+  border-left: var(--wo-linha-forte) solid var(--wo-marca-claro);
+  filter: drop-shadow(0 0 var(--wo-espaco-1) var(--wo-violeta));
+}
+.wo-home-demo--painel { grid-template-columns: repeat(2, minmax(0, 1fr)); --wo-cena-grafico: var(--wo-espaco-6); }
+.wo-home-demo--painel .wo-home-cena__cartao { padding: var(--wo-espaco-1); }
+.wo-home-demo--painel .wo-home-cena__etiqueta { padding-inline: var(--wo-espaco-1); }
+.wo-home-demo--painel > .wo-home-demo__linha,
+.wo-home-demo--painel > .wo-home-demo__indicadores,
+.wo-home-demo--painel > .wo-home-demo__origens { grid-column: 1 / -1; }
+.wo-home-demo__indicadores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--wo-cena-respiro); }
+.wo-home-demo__indicadores strong { font: 500 var(--wo-cena-metrica)/1 var(--wo-fonte-titulo); }
+.wo-home-demo__indicadores .wo-home-demo__rotulo { min-height: calc(2em * 1.4); }
+.wo-home-demo__barras { display: flex; align-items: end; gap: var(--wo-espaco-1); height: var(--wo-cena-grafico); border-bottom: var(--wo-linha-fina) solid var(--wo-linha); }
+.wo-home-demo__barras i { flex: 1; height: 45%; border-radius: var(--wo-raio) var(--wo-raio) 0 0; background: var(--wo-violeta); transform-origin: bottom; transition: transform var(--wo-palco-transicao) ease; }
+.wo-home-demo__barras i:nth-child(2n) { height: 70%; }
+.wo-home-demo__barras i:nth-child(3n) { height: 58%; }
+.wo-home-demo__barras i:last-child { height: 90%; }
+.wo-home-demo__grafico { display: block; width: 100%; height: var(--wo-cena-grafico); overflow: visible; }
+.wo-home-demo__grafico .wo-home-cena__traco { stroke: var(--wo-violeta); }
+.wo-home-demo__grade { stroke: var(--wo-linha); fill: none; }
+.wo-home-demo__origens > div { display: grid; grid-template-columns: 1fr 2fr; align-items: center; gap: var(--wo-espaco-1); margin-top: var(--wo-espaco-1); }
+.wo-home-demo__origens i { height: var(--wo-espaco-1); width: 90%; background: var(--wo-violeta); border-radius: var(--wo-raio); transform-origin: left; transition: transform var(--wo-palco-transicao) ease; }
+.wo-home-demo__origens > div:nth-child(3) i { width: 65%; }
+.wo-home-demo__origens > div:nth-child(4) i { width: 40%; }
+[data-palco-modo] [data-passo]:not([data-visivel]) .wo-home-demo__barras i { transform: scaleY(0); }
+[data-palco-modo] [data-passo]:not([data-visivel]) .wo-home-demo__origens i { transform: scaleX(0); }
+[data-palco-modo] [data-passo]:not([data-visivel]) .wo-home-demo__grafico .wo-home-cena__traco { stroke-dashoffset: 1; }
+
+/* Funil: as colunas nunca mudam de ordem; o mesmo cartão atravessa de Novo a Qualificado. */
+.wo-home-demo--crm { --wo-colunas: 2; --wo-coluna-altura: var(--wo-cena-coluna-celular); --wo-cena-lead-alto: var(--wo-espaco-5); --wo-cena-lead-segundo: calc(var(--wo-espaco-5) * 2 + var(--wo-cena-respiro)); }
+.wo-home-demo__funil { display: grid; grid-template-columns: repeat(var(--wo-colunas), minmax(0, 1fr)); gap: var(--wo-cena-respiro); }
+.wo-home-demo__coluna { height: var(--wo-coluna-altura); padding: var(--wo-cena-respiro); background: var(--wo-papel-2); border-radius: var(--wo-raio); }
+.wo-home-demo__coluna > strong { padding-bottom: var(--wo-cena-respiro); border-bottom: var(--wo-linha-fina) solid var(--wo-linha); }
+.wo-home-demo__leads { position: absolute; inset: 0; pointer-events: none; }
+.wo-home-demo__celula {
+  position: absolute; width: calc((100% - (var(--wo-colunas) - 1) * var(--wo-cena-respiro)) / var(--wo-colunas) - var(--wo-cena-respiro) * 2);
+  left: var(--wo-cena-respiro); top: var(--wo-cena-lead-alto);
+}
+.wo-home-demo__lead-movel { z-index: 1; transform: translateX(calc(100% + var(--wo-cena-respiro) * 3)); transition: transform var(--wo-palco-transicao) ease; }
+.wo-home-demo__lead-fixo { top: var(--wo-cena-lead-segundo); }
+.wo-home-demo__qualificado { left: calc(50% + var(--wo-cena-respiro) / 2 + var(--wo-cena-respiro)); top: var(--wo-cena-lead-segundo); }
+.wo-home-demo__tarefa { top: calc(var(--wo-coluna-altura) + var(--wo-cena-respiro) + var(--wo-cena-lead-alto)); }
+.wo-home-demo__ganho { left: calc(50% + var(--wo-cena-respiro) / 2 + var(--wo-cena-respiro)); top: calc(var(--wo-coluna-altura) + var(--wo-cena-respiro) + var(--wo-cena-lead-alto)); }
+.wo-home-demo__origem { justify-self: end; width: 80%; }
+.wo-home-demo--crm .wo-home-demo__rotulo { margin-bottom: 0; }
+.wo-home-demo--crm .wo-home-cena__cartao { padding: var(--wo-espaco-1); }
+[data-palco-modo] .wo-home-demo--crm:not(:has([data-passo='3'][data-visivel])) .wo-home-demo__lead-movel { transform: none; }
+
+/* Produto web: janela e estrutura por baixo; acesso, painel e checkout ficam retidos no final. */
+.wo-home-demo--saas { padding: var(--wo-cena-lead-alto) var(--wo-cena-respiro) var(--wo-cena-respiro) calc(var(--wo-cena-menu) + var(--wo-cena-respiro)); }
+.wo-home-demo__janela { position: absolute; inset: 0; border-radius: var(--wo-raio); background: var(--wo-papel-2); border: var(--wo-linha-fina) solid var(--wo-linha); }
+.wo-home-demo__navegador { display: flex; align-items: center; gap: var(--wo-espaco-1); height: var(--wo-cena-inicio-celular); padding: 0 var(--wo-cena-respiro); border-bottom: var(--wo-linha-fina) solid var(--wo-linha); }
+.wo-home-demo__navegador > i { width: var(--wo-espaco-1); height: var(--wo-espaco-1); background: var(--wo-tinta-3); border-radius: var(--wo-raio-pilula); }
+.wo-home-demo__navegador > span { width: 50%; height: var(--wo-espaco-2); margin-left: auto; margin-right: auto; background: var(--wo-branco); border-radius: var(--wo-raio); }
+.wo-home-demo__estrutura { position: absolute; inset: var(--wo-cena-inicio-celular) 0 0; background: var(--wo-papel); border-radius: 0 0 var(--wo-raio) var(--wo-raio); }
+.wo-home-demo__topo-app { display: flex; justify-content: space-between; padding: var(--wo-espaco-1) var(--wo-cena-respiro); border-bottom: var(--wo-linha-fina) solid var(--wo-linha); }
+.wo-home-demo__topo-app i { width: 25%; height: var(--wo-espaco-2); }
+.wo-home-demo__menu-app { position: absolute; top: var(--wo-cena-inicio-celular); bottom: 0; width: var(--wo-cena-menu); display: flex; flex-direction: column; gap: var(--wo-cena-respiro); padding: var(--wo-cena-respiro); border-right: var(--wo-linha-fina) solid var(--wo-linha); }
+.wo-home-demo__menu-app i { height: var(--wo-espaco-2); }
+.wo-home-demo__blocos { display: grid; gap: var(--wo-cena-respiro); position: absolute; inset: var(--wo-cena-inicio) var(--wo-cena-respiro) var(--wo-cena-respiro) calc(var(--wo-cena-menu) + var(--wo-cena-respiro)); }
+.wo-home-demo--saas > .wo-home-cena__cartao { border: var(--wo-linha-fina) solid var(--wo-linha); box-shadow: none; }
+.wo-home-demo__campos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--wo-cena-respiro); }
+.wo-home-demo__campos i { display: block; height: var(--wo-espaco-3); margin-top: var(--wo-espaco-1); border: var(--wo-linha-fina) solid var(--wo-linha); border-radius: var(--wo-raio); background: var(--wo-papel); }
+.wo-home-demo__senha { padding-left: var(--wo-espaco-1); font-style: normal; color: var(--wo-tinta-2); }
+.wo-home-demo__minicartoes { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--wo-espaco-1); margin-bottom: var(--wo-espaco-1); }
+.wo-home-demo__minicartoes i { display: block; border-radius: var(--wo-raio); background: var(--wo-papel-2); height: var(--wo-espaco-3); border-left: var(--wo-linha-forte) solid var(--wo-violeta); }
+.wo-home-demo__painel-app .wo-home-demo__grafico { height: var(--wo-espaco-5); }
+.wo-home-demo__publicado { display: flex; align-items: center; justify-content: space-between; gap: var(--wo-espaco-1); }
+.wo-home-demo__publicado .wo-home-cena__etiqueta { padding-inline: var(--wo-espaco-1); }
+
+[data-palco-modo] .wo-home-demo { margin-top: var(--wo-cena-inicio-celular); }
+[data-palco-modo] .wo-home-demo--agente { gap: var(--wo-cena-respiro); }
+[data-palco-modo] .wo-home-demo--agente .wo-home-cena__cartao { padding-block: var(--wo-espaco-1); }
+.wo-home-demo__fios { display: none; }
+[data-palco-modo] .wo-home-demo__fios { display: block; position: absolute; top: var(--wo-cena-inicio-celular); left: 0; width: 100%; height: calc(100% - var(--wo-cena-inicio-celular)); }
+[data-palco-modo] .wo-home-demo__fios [data-passo] { transform: none; }
+[data-palco-modo] .wo-home-demo__fios [data-passo]:not([data-visivel]) { stroke-dashoffset: 1; }
+[data-palco-modo] .wo-home-demo--agente .wo-home-cena__cartao::before { display: none; }
+[data-palco-modo] .wo-home-demo--saas .wo-home-cena__cartao { padding: var(--wo-espaco-1); }
+[data-palco-modo] .wo-home-demo--saas .wo-home-demo__rotulo { margin-bottom: var(--wo-espaco-1); }
+@media (min-width: 1024px) {
+  [data-palco-modo] .wo-home-demo__fios { top: var(--wo-cena-inicio); }
+  [data-palco-modo] .wo-home-demo { margin-top: var(--wo-cena-inicio); }
+  [data-palco-modo] .wo-home-demo--agente { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--wo-espaco-4) var(--wo-espaco-6); align-items: start; padding-top: var(--wo-espaco-3); }
+  [data-palco-modo] .wo-home-demo--agente .wo-home-cena__cartao { width: 100%; padding: var(--wo-espaco-2); }
+  [data-palco-modo] .wo-home-demo--agente .wo-home-cena__cartao:nth-child(even) { margin-top: var(--wo-espaco-4); }
+  [data-palco-modo] .wo-home-demo--agente .wo-home-cena__cartao::before { display: none; }
+  [data-palco-modo] .wo-home-demo__indicadores .wo-home-demo__rotulo { min-height: 0; }
+  [data-palco-modo] .wo-home-demo--crm { --wo-colunas: 4; --wo-coluna-altura: var(--wo-cena-coluna); --wo-cena-lead-alto: 68px; --wo-cena-lead-segundo: 136px; padding-top: var(--wo-espaco-4); }
+  [data-palco-modo] .wo-home-demo--crm .wo-home-demo__leads { top: var(--wo-espaco-4); }
+  [data-palco-modo] .wo-home-demo__qualificado { left: calc(25% + var(--wo-cena-respiro) * 1.25); top: calc(var(--wo-cena-lead-segundo) + var(--wo-espaco-4)); }
+  [data-palco-modo] .wo-home-demo__tarefa { left: calc(50% + var(--wo-cena-respiro) * 1.5); top: calc(var(--wo-cena-lead-alto) + var(--wo-espaco-4)); }
+  [data-palco-modo] .wo-home-demo__ganho { left: calc(75% + var(--wo-cena-respiro) * 1.75); top: calc(var(--wo-cena-lead-alto) + var(--wo-espaco-4)); }
+  [data-palco-modo] .wo-home-demo__origem { width: 50%; }
+  [data-palco-modo] .wo-home-demo--saas { grid-template-columns: 1fr 1.3fr; padding-top: calc(var(--wo-cena-lead-alto) + var(--wo-espaco-2)); gap: var(--wo-espaco-2); min-height: var(--wo-cena-janela); }
+  [data-palco-modo] .wo-home-demo__acesso { grid-row: span 2; align-self: start; }
+  [data-palco-modo] .wo-home-demo__campos { grid-template-columns: 1fr; gap: var(--wo-espaco-3); }
+  [data-palco-modo] .wo-home-demo__campos i { height: var(--wo-espaco-4); }
+  [data-palco-modo] .wo-home-demo__painel-app .wo-home-demo__grafico { height: var(--wo-cena-grafico); }
+  [data-palco-modo] .wo-home-demo__publicado { grid-column: 1 / -1; }
 }
 
 /* ---------- Seções depois do palco (spec 15.4) ----------

@@ -22,9 +22,12 @@ test('Home sem JavaScript mostra as cenas montadas', async ({ page }, info) => {
   await page.goto('/');
   await expect(page.locator('[data-palco]')).not.toHaveAttribute('data-palco-modo');
   const opacidades = await page
-    .locator('[data-cena="atendimento"] [data-passo]')
+    .locator('[data-cena] [data-passo]')
     .evaluateAll((pecas) => pecas.map((peca) => getComputedStyle(peca).opacity));
-  expect(opacidades.length).toBeGreaterThanOrEqual(6);
+  expect(opacidades.length).toBeGreaterThanOrEqual(30);
+  for (const frente of ['atendimento', 'agentes', 'dashboards', 'crms', 'saas']) {
+    await expect(page.locator(`[data-cena="${frente}"] [data-passo="6"]`).first()).toHaveCSS('opacity', '1');
+  }
   expect(opacidades.filter((opacidade) => opacidade !== '1')).toEqual([]);
 });
 

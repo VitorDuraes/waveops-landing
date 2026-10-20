@@ -145,6 +145,18 @@
   --wo-palco-painel: rgb(10 10 10 / 0.72);
   /* Fundo do selo de sucesso nos cartões das cenas: o verde de --wo-sucesso a 10%. */
   --wo-palco-ok: rgb(22 101 52 / 0.1);
+  /* Geometria das cenas 2 a 5. Cartões claros e gráficos compartilham a mesma escala. */
+  --wo-cena-respiro: 12px;
+  --wo-cena-inicio: 44px;
+  --wo-cena-inicio-celular: 34px;
+  --wo-cena-grafico: 92px;
+  --wo-cena-coluna: 280px;
+  --wo-cena-coluna-celular: 162px;
+  --wo-cena-lead-alto: 68px;
+  --wo-cena-lead-segundo: 136px;
+  --wo-cena-janela: 414px;
+  --wo-cena-menu: 44px;
+  --wo-cena-metrica: 30px;
   /* Camada de leitura sobre o pôster e o vídeo da onda (spec 6.3): preto de 55% no alto a 70%
      embaixo, mais a vinheta nas bordas. */
   --wo-leitura-alto: rgb(0 0 0 / 0.55);

@@ -36,7 +36,7 @@ const JANELAS = [
 async function assentar(aba) {
   await aba.evaluate(async () => {
     await new Promise((pronto) => requestAnimationFrame(() => requestAnimationFrame(pronto)));
-    await Promise.all(document.getAnimations().map((animacao) => animacao.finished.catch(() => undefined)));
+    await Promise.all(document.getAnimations().filter((animacao) => animacao instanceof CSSTransition).map((animacao) => animacao.finished.catch(() => undefined)));
   });
 }
 

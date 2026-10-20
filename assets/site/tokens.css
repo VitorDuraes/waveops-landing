@@ -173,6 +173,8 @@
   --wo-linha-fina: 1px;
   --wo-linha-forte: 2px;
   --wo-hero-frase-largura: 430px;
+  /* Nota de cenário simulado na abertura de Demonstrações técnicas. */
+  --wo-demonstracoes-aviso-largura: 760px;
   /* Fundo do selo do hero da Home: o preto a 30% do botão de contorno. */
   --wo-hero-controle: rgb(0 0 0 / 0.3);
   /* Texto secundário sobre o vídeo, no hero de toda página (spec 15.2). O fundo é fixo e o texto

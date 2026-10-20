@@ -1,17 +1,26 @@
 import { test, expect, type Locator, type Page } from '@playwright/test';
+import { varrerContraste } from './helpers/contraste';
 
 /* Página Demonstrações técnicas: filtro por frente, aviso de cenário simulado e a versão
    sem JavaScript. Roda nos três projetos (desktop, tablet e celular). */
 const ROTA = '/demonstracoes-tecnicas/';
 
-/* As quatro frentes da base WaveOps (decisão de 14/10/2026). Integração tem dois fluxos. */
+/* As cinco frentes da base WaveOps (decisão de 15/10/2026). A triagem com IA conta em duas frentes. */
 const FRENTES = [
-  { botao: 'Automação', titulos: ['Cobrança e relatório recorrentes, sem clique manual.'] },
-  { botao: 'Integração', titulos: ['Um cadastro, vários sistemas atualizados.', 'Pedido, pagamento e estoque no mesmo fluxo.'] },
-  { botao: 'Sistemas e painéis', titulos: ['Da planilha ao painel com acesso por perfil.'] },
+  { botao: 'Atendimento', titulos: ['Triagem com IA e revisão humana.'] },
   { botao: 'Agentes de IA', titulos: ['Triagem com IA e revisão humana.'] },
+  { botao: 'Dashboards', titulos: ['Da planilha ao painel com acesso por perfil.'] },
+  { botao: 'CRMs', titulos: ['Cobrança e relatório recorrentes, sem clique manual.', 'Um cadastro, vários sistemas atualizados.'] },
+  { botao: 'SaaS', titulos: ['Pedido, pagamento e estoque no mesmo fluxo.'] },
 ] as const;
 const TOTAL = 5;
+const FICHAS = [
+  ['CRMs sob medida', 'O pedido entra, a cobrança não sai e o relatório fica para depois.'],
+  ['CRMs sob medida', 'Site, CRM, ERP e pagamento trabalham cada um por conta.'],
+  ['Dashboards', 'A planilha virou o sistema da empresa e parou de dar conta.'],
+  ['Automação de atendimento e Agentes de IA', 'Atender, fazer triagem e ler documento o dia todo trava o time.'],
+  ['SaaS', 'A loja vende, mas o financeiro e o estoque só ficam sabendo depois.'],
+] as const;
 
 /** Abre a página e espera o filtro ligar: o script marca data-pronto no grupo de botões. */
 async function abrir(page: Page): Promise<Locator> {
@@ -58,7 +67,7 @@ test.describe('Demonstrações técnicas: filtro por frente', () => {
 
   test('deve trocar de frente sem acumular fluxos quando duas frentes são escolhidas em seguida', async ({ page }) => {
     const filtro = await abrir(page);
-    await filtro.getByRole('button', { name: 'Integração', exact: true }).click();
+    await filtro.getByRole('button', { name: 'CRMs', exact: true }).click();
     await filtro.getByRole('button', { name: 'Agentes de IA', exact: true }).click();
 
     await expect(page.getByRole('article')).toHaveCount(1);
@@ -72,8 +81,8 @@ test.describe('Demonstrações técnicas: filtro por frente', () => {
     await expect(regiao).toHaveAttribute('aria-live', 'polite');
     await expect(regiao).toBeEmpty();
 
-    await filtro.getByRole('button', { name: 'Automação', exact: true }).click();
-    await expect(regiao).toHaveText('Mostrando 1 de 5 demonstrações. Frente: Automação.');
+    await filtro.getByRole('button', { name: 'Atendimento', exact: true }).click();
+    await expect(regiao).toHaveText('Mostrando 1 de 5 demonstrações. Frente: Atendimento.');
 
     await filtro.getByRole('button', { name: 'Todas', exact: true }).click();
     await expect(regiao).toHaveText('Mostrando 5 de 5 demonstrações.');
@@ -81,16 +90,31 @@ test.describe('Demonstrações técnicas: filtro por frente', () => {
 
   test('deve filtrar pelo teclado quando o botão tem foco', async ({ page }) => {
     const filtro = await abrir(page);
-    await filtro.getByRole('button', { name: 'Sistemas e painéis', exact: true }).focus();
+    await filtro.getByRole('button', { name: 'Dashboards', exact: true }).focus();
     await page.keyboard.press('Enter');
 
     await expect(page.getByRole('article')).toHaveCount(1);
-    await expect(filtro.getByRole('button', { name: 'Sistemas e painéis', exact: true, pressed: true })).toBeFocused();
+    await expect(filtro.getByRole('button', { name: 'Dashboards', exact: true, pressed: true })).toBeFocused();
     await expect(page.locator('[data-filtro-status]')).toContainText('1 de 5');
   });
 });
 
 test.describe('Demonstrações técnicas: aviso de cenário simulado', () => {
+  test('deve abrir cada demonstração com a ficha de case', async ({ page }) => {
+    await page.goto(ROTA);
+    const fluxos = page.getByRole('article');
+    await expect(fluxos).toHaveCount(TOTAL);
+    for (const [indice, fluxo] of (await fluxos.all()).entries()) {
+      const ficha = fluxo.locator('dl');
+      await expect(ficha).toHaveCount(1);
+      await expect(ficha.locator('dt')).toHaveText(['Frente', 'Cenário', 'Situação de partida']);
+      await expect(ficha.locator('dd')).toHaveText([FICHAS[indice]![0], 'Simulado, sem dados de clientes', FICHAS[indice]![1]]);
+      await expect(fluxo.getByText(FICHAS[indice]![1], { exact: true })).toHaveCount(1);
+      const colunas = await ficha.locator('dd').evaluateAll(elementos => elementos.map(el => el.getBoundingClientRect().x));
+      expect(new Set(colunas).size).toBe(page.viewportSize()!.width >= 768 ? 3 : 1);
+    }
+  });
+
   test('deve manter o aviso e a pílula de cenário simulado nos 5 fluxos quando a página abre', async ({ page }) => {
     await page.goto(ROTA);
     const aviso = page.getByRole('note');
@@ -124,5 +148,34 @@ test.describe('Demonstrações técnicas sem JavaScript', () => {
     await expect(page.getByRole('group', { name: 'Filtrar por frente' })).toBeHidden();
     await expect(page.getByRole('note')).toContainText('Cenários simulados.');
     await expect(page.getByText('Demonstração · cenário simulado', { exact: true })).toHaveCount(TOTAL);
+    await expect(page.locator('article dl dd')).toHaveCount(TOTAL * 3);
+  });
+});
+
+test.describe('Demonstrações técnicas: novo visual', () => {
+  test.use({ reducedMotion: 'reduce' });
+
+  test('hero transparente e cinco fluxos preservam a cascata e alternam os véus', async ({ page }) => {
+    await abrir(page);
+    await expect(page.locator('.wo-abertura')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+    await expect(page.locator('.wo-abertura [data-entrada]')).toHaveCount(7);
+    expect(await page.locator('.wo-abertura [data-entrada]').evaluateAll(elementos => elementos.map(el => el.getAttribute('data-entrada')))).toEqual(['0', '1', '2', '3', '4', '5', '6']);
+    for (const [indice, fluxo] of (await page.locator('article').all()).entries()) {
+      await expect(fluxo).toHaveClass(new RegExp(indice % 2 === 0 ? 'wo-veu(?: |$)' : 'wo-veu-forte'));
+    }
+  });
+
+  test('hero e cinco fluxos mantêm contraste AA durante a rolagem', async ({ page }, info) => {
+    test.skip(info.project.name === 'tablet', '1440 × 900 e 390 × 844 cobrem as duas grades');
+    test.setTimeout(240_000);
+    const trechos = ['.wo-abertura', ...Array.from({ length: TOTAL }, (_, i) => `article:nth-child(${i + 1})`)];
+    const medidos = await varrerContraste(page, ROTA, trechos);
+    await info.attach('contraste-demonstracoes.json', { body: JSON.stringify(medidos, null, 2), contentType: 'application/json' });
+    for (const trecho of trechos) expect(medidos.filter(alvo => alvo.trecho === trecho).length, trecho).toBeGreaterThan(0);
+    expect(medidos.filter(alvo => alvo.passos < 3).map(alvo => `${alvo.texto}: ${alvo.passos} passos`)).toEqual([]);
+    expect(medidos.filter(alvo => alvo.pior && alvo.pior.razao < alvo.minimo).map(alvo => ({
+      texto: alvo.texto, trecho: alvo.trecho, cor: alvo.cor, tamanho: alvo.tamanho, peso: alvo.peso,
+      minimo: alvo.minimo, ...alvo.pior,
+    }))).toEqual([]);
   });
 });

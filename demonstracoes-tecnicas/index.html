@@ -10,7 +10,7 @@
     <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png" />
     <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
     <link rel="preload" href="/assets/fonts/geist-variavel-latin.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="stylesheet" href="/assets/site/tokens.css?v=100e8697" />
+    <link rel="stylesheet" href="/assets/site/tokens.css?v=994aa5bd" />
     <link rel="stylesheet" href="/assets/site/base.css?v=d1120775" />
     <link rel="stylesheet" href="/assets/site/components.css?v=90417320" />
     <script defer src="/assets/funil.js?v=2842b2e3"></script>
@@ -18,7 +18,7 @@
     <script type="module" src="/assets/site/fundo.js?v=601e2bc9"></script>
     <noscript><style>.wo-topo{position:relative;background:var(--wo-noite)}[data-seletor] [data-painel]{display:block!important}[data-seletor] [data-opcoes],[data-sem-js-oculto]{display:none!important}@media (max-width:1180px){.wo-topo__painel[hidden]{display:flex!important}.wo-topo__menu{display:none!important}}</style></noscript>
     <!-- /parcial:head -->
-    <link rel="stylesheet" href="/assets/site/paginas/demonstracoes.css?v=b12fd276" />
+    <link rel="stylesheet" href="/assets/site/paginas/demonstracoes.css?v=a7a36e45" />
     <script type="module" src="/assets/site/paginas/demonstracoes.js?v=b87ab529"></script>
     <title>Demonstrações técnicas: cenários simulados · WaveOps</title>
     <meta name="description" content="Cinco fluxos que mostram como a WaveOps liga entrada, regra e saída. Cenários simulados, com situações e dados fictícios. Não são casos de clientes." />
@@ -94,109 +94,203 @@
         <video class="wo-fundo__video" muted playsinline loop preload="none" disablepictureinpicture tabindex="-1" data-fundo-video></video>
       </div>
       <!-- /parcial:fundo -->
-      <section class="wo-demonstracoes__hero" aria-labelledby="demonstracoes-titulo">
-        <div class="wo-demonstracoes__brilho" aria-hidden="true"></div>
-        <div class="wo-conteiner wo-demonstracoes__corpo">
-          <span class="wo-sobretitulo" data-entrada="0">Demonstrações técnicas</span>
-          <h1 class="wo-h1 wo-demonstracoes__h1" id="demonstracoes-titulo" data-entrada="1"><span class="wo-linha">Do repetitivo</span><span class="wo-linha wo-destaque">ao resolvido.</span></h1>
-          <p class="wo-lead wo-demonstracoes__lead" data-entrada="2">Cinco fluxos que mostram como a WaveOps liga entrada, regra e saída nas quatro frentes. Servem para você reconhecer a sua operação.</p>
-          <div class="wo-demonstracoes__aviso" role="note" data-entrada="3">
-            <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" /><path d="M12 11v6M12 7.5v.5" /></svg>
-            <p><strong>Cenários simulados.</strong> As situações e os dados desta página são fictícios e servem para explicar o funcionamento. Não são casos de clientes.</p>
+      <section class="wo-abertura wo-demonstracoes-abertura" aria-labelledby="demonstracoes-titulo">
+        <div class="wo-conteiner wo-abertura__texto">
+          <div class="wo-demonstracoes-abertura__rotulos">
+            <p class="wo-sobretitulo" data-entrada="0">Demonstrações técnicas</p>
+            <span class="wo-etiqueta-hero" data-entrada="1">Cenários simulados</span>
           </div>
-          <div class="wo-demonstracoes__filtro" data-entrada="4" role="group" aria-label="Filtrar por frente" data-filtro data-sem-js-oculto>
-            <button class="wo-demonstracoes__opcao" type="button" data-categoria="todas" aria-pressed="true" aria-controls="demonstracoes-lista">Todas</button>
-            <button class="wo-demonstracoes__opcao" type="button" data-categoria="automacao" aria-pressed="false" aria-controls="demonstracoes-lista">Automação</button>
-            <button class="wo-demonstracoes__opcao" type="button" data-categoria="integracao" aria-pressed="false" aria-controls="demonstracoes-lista">Integração</button>
-            <button class="wo-demonstracoes__opcao" type="button" data-categoria="sistemas" aria-pressed="false" aria-controls="demonstracoes-lista">Sistemas e painéis</button>
-            <button class="wo-demonstracoes__opcao" type="button" data-categoria="agentes" aria-pressed="false" aria-controls="demonstracoes-lista">Agentes de IA</button>
+          <h1 class="wo-h1" id="demonstracoes-titulo" data-entrada="2"><span class="wo-linha">Do repetitivo</span><span class="wo-linha wo-destaque">ao resolvido.</span></h1>
+          <p class="wo-abertura__lead" data-entrada="3">Cinco fluxos que mostram como a WaveOps liga entrada, regra e saída. Servem para você reconhecer a sua operação.</p>
+          <div class="wo-acoes" data-entrada="4"><a class="wo-btn wo-btn--primario" href="/contato/">Falar com especialista<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a></div>
+          <p class="wo-demonstracoes-aviso" role="note" data-entrada="5"><strong>Cenários simulados.</strong> As situações e os dados desta página são fictícios e servem para explicar o funcionamento. Não são casos de clientes.</p>
+          <div class="wo-demonstracoes-filtro" data-entrada="6" role="group" aria-label="Filtrar por frente" data-filtro data-sem-js-oculto>
+            <button class="wo-btn wo-btn--secundario wo-demonstracoes-opcao" type="button" data-categoria="todas" aria-pressed="true" aria-controls="demonstracoes-lista">Todas</button>
+            <button class="wo-btn wo-btn--secundario wo-demonstracoes-opcao" type="button" data-categoria="atendimento" aria-pressed="false" aria-controls="demonstracoes-lista">Atendimento</button>
+            <button class="wo-btn wo-btn--secundario wo-demonstracoes-opcao" type="button" data-categoria="agentes" aria-pressed="false" aria-controls="demonstracoes-lista">Agentes de IA</button>
+            <button class="wo-btn wo-btn--secundario wo-demonstracoes-opcao" type="button" data-categoria="dashboards" aria-pressed="false" aria-controls="demonstracoes-lista">Dashboards</button>
+            <button class="wo-btn wo-btn--secundario wo-demonstracoes-opcao" type="button" data-categoria="crms" aria-pressed="false" aria-controls="demonstracoes-lista">CRMs</button>
+            <button class="wo-btn wo-btn--secundario wo-demonstracoes-opcao" type="button" data-categoria="saas" aria-pressed="false" aria-controls="demonstracoes-lista">SaaS</button>
           </div>
           <p class="wo-oculto" role="status" aria-live="polite" aria-atomic="true" data-filtro-status></p>
         </div>
       </section>
 
-      <section class="wo-demonstracoes__secao" aria-label="Demonstrações">
-        <div class="wo-conteiner">
-          <div class="wo-demonstracoes__lista" id="demonstracoes-lista">
-            <article class="wo-demonstracoes__fluxo" data-categorias="automacao" aria-labelledby="demonstracao-automacao-titulo">
-              <div class="wo-demonstracoes__texto">
-                <div class="wo-demonstracoes__rotulos">
-                  <span class="wo-demonstracoes__categoria">Automação de processos</span>
-                  <span class="wo-demonstracoes__selo">Demonstração · cenário simulado</span>
-                </div>
-                <h2 class="wo-demonstracoes__h2" id="demonstracao-automacao-titulo">Cobrança e relatório recorrentes, sem clique manual.</h2>
-                <p class="wo-demonstracoes__partida"><span class="wo-rotulo-mono">Situação de partida</span>O pedido entra, a cobrança não sai e o relatório fica para depois.</p>
+      <section id="demonstracoes-lista" aria-label="Demonstrações">
+        <article class="wo-secao wo-veu wo-demonstracoes-fluxo" data-categorias="crms" aria-labelledby="demonstracao-automacao-titulo">
+          <div class="wo-conteiner">
+            <dl class="wo-definicoes wo-demonstracoes-ficha">
+              <div class="wo-definicoes__linha"><dt>Frente</dt><dd>CRMs sob medida</dd></div>
+              <div class="wo-definicoes__linha"><dt>Cenário</dt><dd>Simulado, sem dados de clientes</dd></div>
+              <div class="wo-definicoes__linha"><dt>Situação de partida</dt><dd>O pedido entra, a cobrança não sai e o relatório fica para depois.</dd></div>
+            </dl>
+            <div class="wo-editorial wo-demonstracoes-grade">
+              <div class="wo-editorial__cabeca">
+                <span class="wo-demonstracoes-selo">Demonstração · cenário simulado</span>
+                <h2 class="wo-h2 wo-demonstracoes-titulo" id="demonstracao-automacao-titulo">Cobrança e relatório recorrentes, sem clique manual.</h2>
               </div>
-              <ol class="wo-demonstracoes__passos" aria-label="Fluxo da demonstração">
-                <li class="wo-demonstracoes__passo"><span class="wo-rotulo-mono">1 · Entrada</span><span class="wo-demonstracoes__passo-texto">Pedido aprovado no sistema de vendas</span></li>
-                <li class="wo-demonstracoes__passo"><span class="wo-rotulo-mono">2 · Regra</span><span class="wo-demonstracoes__passo-texto">Gera a cobrança, agenda o lembrete e registra a execução</span></li>
-                <li class="wo-demonstracoes__passo wo-demonstracoes__passo--saida"><span class="wo-rotulo-mono wo-rotulo-mono--acento">3 · Saída</span><span class="wo-demonstracoes__passo-texto">Cobrança enviada e relatório semanal na caixa da diretoria</span></li>
-              </ol>
-            </article>
-            <article class="wo-demonstracoes__fluxo" data-categorias="integracao" aria-labelledby="demonstracao-integracao-titulo">
-              <div class="wo-demonstracoes__texto">
-                <div class="wo-demonstracoes__rotulos">
-                  <span class="wo-demonstracoes__categoria">Integração de sistemas</span>
-                  <span class="wo-demonstracoes__selo">Demonstração · cenário simulado</span>
-                </div>
-                <h2 class="wo-demonstracoes__h2" id="demonstracao-integracao-titulo">Um cadastro, vários sistemas atualizados.</h2>
-                <p class="wo-demonstracoes__partida"><span class="wo-rotulo-mono">Situação de partida</span>Site, CRM, ERP e pagamento trabalham cada um por conta.</p>
+              <div class="wo-editorial__corpo">
+                <ol class="wo-colunas-numeradas wo-demonstracoes-passos" aria-label="Fluxo da demonstração">
+                  <li class="wo-colunas-numeradas__item">
+                    <span class="wo-colunas-numeradas__numero" aria-hidden="true">01</span>
+                    <h3><span class="wo-oculto">1 · </span>Entrada</h3>
+                    <p>Pedido aprovado no sistema de vendas</p>
+                  </li>
+                  <li class="wo-colunas-numeradas__item">
+                    <span class="wo-colunas-numeradas__numero" aria-hidden="true">02</span>
+                    <h3><span class="wo-oculto">2 · </span>Regra</h3>
+                    <p>Gera a cobrança, agenda o lembrete e registra a execução</p>
+                  </li>
+                  <li class="wo-colunas-numeradas__item">
+                    <span class="wo-colunas-numeradas__numero" aria-hidden="true">03</span>
+                    <h3><span class="wo-oculto">3 · </span>Saída</h3>
+                    <p>Cobrança enviada e relatório semanal na caixa da diretoria</p>
+                  </li>
+                </ol>
               </div>
-              <ol class="wo-demonstracoes__passos" aria-label="Fluxo da demonstração">
-                <li class="wo-demonstracoes__passo"><span class="wo-rotulo-mono">1 · Entrada</span><span class="wo-demonstracoes__passo-texto">Novo cliente cadastrado no site</span></li>
-                <li class="wo-demonstracoes__passo"><span class="wo-rotulo-mono">2 · Regra</span><span class="wo-demonstracoes__passo-texto">Valida os dados e sincroniza com CRM e ERP</span></li>
-                <li class="wo-demonstracoes__passo wo-demonstracoes__passo--saida"><span class="wo-rotulo-mono wo-rotulo-mono--acento">3 · Saída</span><span class="wo-demonstracoes__passo-texto">O mesmo registro em todos os sistemas, com log de cada envio</span></li>
-              </ol>
-            </article>
-            <article class="wo-demonstracoes__fluxo" data-categorias="sistemas" aria-labelledby="demonstracao-sistemas-titulo">
-              <div class="wo-demonstracoes__texto">
-                <div class="wo-demonstracoes__rotulos">
-                  <span class="wo-demonstracoes__categoria">Sistemas e painéis sob medida</span>
-                  <span class="wo-demonstracoes__selo">Demonstração · cenário simulado</span>
-                </div>
-                <h2 class="wo-demonstracoes__h2" id="demonstracao-sistemas-titulo">Da planilha ao painel com acesso por perfil.</h2>
-                <p class="wo-demonstracoes__partida"><span class="wo-rotulo-mono">Situação de partida</span>A planilha virou o sistema da empresa e parou de dar conta.</p>
-              </div>
-              <ol class="wo-demonstracoes__passos" aria-label="Fluxo da demonstração">
-                <li class="wo-demonstracoes__passo"><span class="wo-rotulo-mono">1 · Entrada</span><span class="wo-demonstracoes__passo-texto">Dados lançados em formulário, não em célula</span></li>
-                <li class="wo-demonstracoes__passo"><span class="wo-rotulo-mono">2 · Regra</span><span class="wo-demonstracoes__passo-texto">Valida, guarda o histórico e aplica a permissão de cada perfil</span></li>
-                <li class="wo-demonstracoes__passo wo-demonstracoes__passo--saida"><span class="wo-rotulo-mono wo-rotulo-mono--acento">3 · Saída</span><span class="wo-demonstracoes__passo-texto">Painel com indicadores e trilha de alterações</span></li>
-              </ol>
-            </article>
-            <article class="wo-demonstracoes__fluxo" data-categorias="agentes" aria-labelledby="demonstracao-agentes-titulo">
-              <div class="wo-demonstracoes__texto">
-                <div class="wo-demonstracoes__rotulos">
-                  <span class="wo-demonstracoes__categoria">Agentes de IA supervisionados</span>
-                  <span class="wo-demonstracoes__selo">Demonstração · cenário simulado</span>
-                </div>
-                <h2 class="wo-demonstracoes__h2" id="demonstracao-agentes-titulo">Triagem com IA e revisão humana.</h2>
-                <p class="wo-demonstracoes__partida"><span class="wo-rotulo-mono">Situação de partida</span>Atender, fazer triagem e ler documento o dia todo trava o time.</p>
-              </div>
-              <ol class="wo-demonstracoes__passos" aria-label="Fluxo da demonstração">
-                <li class="wo-demonstracoes__passo"><span class="wo-rotulo-mono">1 · Entrada</span><span class="wo-demonstracoes__passo-texto">Mensagem ou documento recebido</span></li>
-                <li class="wo-demonstracoes__passo"><span class="wo-rotulo-mono">2 · Regra</span><span class="wo-demonstracoes__passo-texto">O agente classifica, consulta a base e propõe uma resposta</span></li>
-                <li class="wo-demonstracoes__passo wo-demonstracoes__passo--saida"><span class="wo-rotulo-mono wo-rotulo-mono--acento">3 · Saída</span><span class="wo-demonstracoes__passo-texto">Uma pessoa revisa e aprova antes do envio</span></li>
-              </ol>
-            </article>
-            <article class="wo-demonstracoes__fluxo" data-categorias="integracao" aria-labelledby="demonstracao-ecommerce-titulo">
-              <div class="wo-demonstracoes__texto">
-                <div class="wo-demonstracoes__rotulos">
-                  <span class="wo-demonstracoes__categoria">Integração de sistemas</span>
-                  <span class="wo-demonstracoes__selo">Demonstração · cenário simulado</span>
-                </div>
-                <h2 class="wo-demonstracoes__h2" id="demonstracao-ecommerce-titulo">Pedido, pagamento e estoque no mesmo fluxo.</h2>
-                <p class="wo-demonstracoes__partida"><span class="wo-rotulo-mono">Situação de partida</span>A loja vende, mas o financeiro e o estoque só ficam sabendo depois.</p>
-              </div>
-              <ol class="wo-demonstracoes__passos" aria-label="Fluxo da demonstração">
-                <li class="wo-demonstracoes__passo"><span class="wo-rotulo-mono">1 · Entrada</span><span class="wo-demonstracoes__passo-texto">Pagamento confirmado na loja</span></li>
-                <li class="wo-demonstracoes__passo"><span class="wo-rotulo-mono">2 · Regra</span><span class="wo-demonstracoes__passo-texto">Emite a nota, baixa o estoque e concilia o recebimento</span></li>
-                <li class="wo-demonstracoes__passo wo-demonstracoes__passo--saida"><span class="wo-rotulo-mono wo-rotulo-mono--acento">3 · Saída</span><span class="wo-demonstracoes__passo-texto">Pedido, nota e financeiro com o mesmo status</span></li>
-              </ol>
-            </article>
+            </div>
           </div>
-          <p class="wo-demonstracoes__fecho">Quer ver um destes fluxos com os sistemas da sua empresa? <a href="/contato/">Peça uma demonstração guiada.</a></p>
-        </div>
+        </article>
+        <article class="wo-secao wo-veu-forte wo-demonstracoes-fluxo" data-categorias="crms" aria-labelledby="demonstracao-integracao-titulo">
+          <div class="wo-conteiner">
+            <dl class="wo-definicoes wo-demonstracoes-ficha">
+              <div class="wo-definicoes__linha"><dt>Frente</dt><dd>CRMs sob medida</dd></div>
+              <div class="wo-definicoes__linha"><dt>Cenário</dt><dd>Simulado, sem dados de clientes</dd></div>
+              <div class="wo-definicoes__linha"><dt>Situação de partida</dt><dd>Site, CRM, ERP e pagamento trabalham cada um por conta.</dd></div>
+            </dl>
+            <div class="wo-editorial wo-demonstracoes-grade">
+              <div class="wo-editorial__cabeca">
+                <span class="wo-demonstracoes-selo">Demonstração · cenário simulado</span>
+                <h2 class="wo-h2 wo-demonstracoes-titulo" id="demonstracao-integracao-titulo">Um cadastro, vários sistemas atualizados.</h2>
+              </div>
+              <div class="wo-editorial__corpo">
+                <ol class="wo-colunas-numeradas wo-demonstracoes-passos" aria-label="Fluxo da demonstração">
+                  <li class="wo-colunas-numeradas__item">
+                    <span class="wo-colunas-numeradas__numero" aria-hidden="true">01</span>
+                    <h3><span class="wo-oculto">1 · </span>Entrada</h3>
+                    <p>Novo cliente cadastrado no site</p>
+                  </li>
+                  <li class="wo-colunas-numeradas__item">
+                    <span class="wo-colunas-numeradas__numero" aria-hidden="true">02</span>
+                    <h3><span class="wo-oculto">2 · </span>Regra</h3>
+                    <p>Valida os dados e sincroniza com CRM e ERP</p>
+                  </li>
+                  <li class="wo-colunas-numeradas__item">
+                    <span class="wo-colunas-numeradas__numero" aria-hidden="true">03</span>
+                    <h3><span class="wo-oculto">3 · </span>Saída</h3>
+                    <p>O mesmo registro em todos os sistemas, com log de cada envio</p>
+                  </li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </article>
+        <article class="wo-secao wo-veu wo-demonstracoes-fluxo" data-categorias="dashboards" aria-labelledby="demonstracao-sistemas-titulo">
+          <div class="wo-conteiner">
+            <dl class="wo-definicoes wo-demonstracoes-ficha">
+              <div class="wo-definicoes__linha"><dt>Frente</dt><dd>Dashboards</dd></div>
+              <div class="wo-definicoes__linha"><dt>Cenário</dt><dd>Simulado, sem dados de clientes</dd></div>
+              <div class="wo-definicoes__linha"><dt>Situação de partida</dt><dd>A planilha virou o sistema da empresa e parou de dar conta.</dd></div>
+            </dl>
+            <div class="wo-editorial wo-demonstracoes-grade">
+              <div class="wo-editorial__cabeca">
+                <span class="wo-demonstracoes-selo">Demonstração · cenário simulado</span>
+                <h2 class="wo-h2 wo-demonstracoes-titulo" id="demonstracao-sistemas-titulo">Da planilha ao painel com acesso por perfil.</h2>
+              </div>
+              <div class="wo-editorial__corpo">
+                <ol class="wo-colunas-numeradas wo-demonstracoes-passos" aria-label="Fluxo da demonstração">
+                  <li class="wo-colunas-numeradas__item">
+                    <span class="wo-colunas-numeradas__numero" aria-hidden="true">01</span>
+                    <h3><span class="wo-oculto">1 · </span>Entrada</h3>
+                    <p>Dados lançados em formulário, não em célula</p>
+                  </li>
+                  <li class="wo-colunas-numeradas__item">
+                    <span class="wo-colunas-numeradas__numero" aria-hidden="true">02</span>
+                    <h3><span class="wo-oculto">2 · </span>Regra</h3>
+                    <p>Valida, guarda o histórico e aplica a permissão de cada perfil</p>
+                  </li>
+                  <li class="wo-colunas-numeradas__item">
+                    <span class="wo-colunas-numeradas__numero" aria-hidden="true">03</span>
+                    <h3><span class="wo-oculto">3 · </span>Saída</h3>
+                    <p>Painel com indicadores e trilha de alterações</p>
+                  </li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </article>
+        <article class="wo-secao wo-veu-forte wo-demonstracoes-fluxo" data-categorias="atendimento agentes" aria-labelledby="demonstracao-agentes-titulo">
+          <div class="wo-conteiner">
+            <dl class="wo-definicoes wo-demonstracoes-ficha">
+              <div class="wo-definicoes__linha"><dt>Frente</dt><dd>Automação de atendimento e Agentes de IA</dd></div>
+              <div class="wo-definicoes__linha"><dt>Cenário</dt><dd>Simulado, sem dados de clientes</dd></div>
+              <div class="wo-definicoes__linha"><dt>Situação de partida</dt><dd>Atender, fazer triagem e ler documento o dia todo trava o time.</dd></div>
+            </dl>
+            <div class="wo-editorial wo-demonstracoes-grade">
+              <div class="wo-editorial__cabeca">
+                <span class="wo-demonstracoes-selo">Demonstração · cenário simulado</span>
+                <h2 class="wo-h2 wo-demonstracoes-titulo" id="demonstracao-agentes-titulo">Triagem com IA e revisão humana.</h2>
+              </div>
+              <div class="wo-editorial__corpo">
+                <ol class="wo-colunas-numeradas wo-demonstracoes-passos" aria-label="Fluxo da demonstração">
+                  <li class="wo-colunas-numeradas__item">
+                    <span class="wo-colunas-numeradas__numero" aria-hidden="true">01</span>
+                    <h3><span class="wo-oculto">1 · </span>Entrada</h3>
+                    <p>Mensagem ou documento recebido</p>
+                  </li>
+                  <li class="wo-colunas-numeradas__item">
+                    <span class="wo-colunas-numeradas__numero" aria-hidden="true">02</span>
+                    <h3><span class="wo-oculto">2 · </span>Regra</h3>
+                    <p>O agente classifica, consulta a base e propõe uma resposta</p>
+                  </li>
+                  <li class="wo-colunas-numeradas__item">
+                    <span class="wo-colunas-numeradas__numero" aria-hidden="true">03</span>
+                    <h3><span class="wo-oculto">3 · </span>Saída</h3>
+                    <p>Uma pessoa revisa e aprova antes do envio</p>
+                  </li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </article>
+        <article class="wo-secao wo-veu wo-demonstracoes-fluxo" data-categorias="saas" aria-labelledby="demonstracao-ecommerce-titulo">
+          <div class="wo-conteiner">
+            <dl class="wo-definicoes wo-demonstracoes-ficha">
+              <div class="wo-definicoes__linha"><dt>Frente</dt><dd>SaaS</dd></div>
+              <div class="wo-definicoes__linha"><dt>Cenário</dt><dd>Simulado, sem dados de clientes</dd></div>
+              <div class="wo-definicoes__linha"><dt>Situação de partida</dt><dd>A loja vende, mas o financeiro e o estoque só ficam sabendo depois.</dd></div>
+            </dl>
+            <div class="wo-editorial wo-demonstracoes-grade">
+              <div class="wo-editorial__cabeca">
+                <span class="wo-demonstracoes-selo">Demonstração · cenário simulado</span>
+                <h2 class="wo-h2 wo-demonstracoes-titulo" id="demonstracao-ecommerce-titulo">Pedido, pagamento e estoque no mesmo fluxo.</h2>
+              </div>
+              <div class="wo-editorial__corpo">
+                <ol class="wo-colunas-numeradas wo-demonstracoes-passos" aria-label="Fluxo da demonstração">
+                  <li class="wo-colunas-numeradas__item">
+                    <span class="wo-colunas-numeradas__numero" aria-hidden="true">01</span>
+                    <h3><span class="wo-oculto">1 · </span>Entrada</h3>
+                    <p>Pagamento confirmado na loja</p>
+                  </li>
+                  <li class="wo-colunas-numeradas__item">
+                    <span class="wo-colunas-numeradas__numero" aria-hidden="true">02</span>
+                    <h3><span class="wo-oculto">2 · </span>Regra</h3>
+                    <p>Emite a nota, baixa o estoque e concilia o recebimento</p>
+                  </li>
+                  <li class="wo-colunas-numeradas__item">
+                    <span class="wo-colunas-numeradas__numero" aria-hidden="true">03</span>
+                    <h3><span class="wo-oculto">3 · </span>Saída</h3>
+                    <p>Pedido, nota e financeiro com o mesmo status</p>
+                  </li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </article>
       </section>
+      <div class="wo-veu wo-demonstracoes-fecho">
+        <div class="wo-conteiner"><p>Quer ver um destes fluxos com os sistemas da sua empresa? <a class="wo-link-seta" href="/contato/">Peça uma demonstração guiada.</a></p></div>
+      </div>
 
       <!-- parcial:cta-final -->
       <section class="wo-cta wo-veu-forte" aria-labelledby="cta-final-titulo">

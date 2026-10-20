@@ -126,6 +126,25 @@ const PAPEIS_CONTATO: readonly Papel[] = [
   { nome: 'Botão e canal com seta', seletor: '.wo-abertura .wo-btn, .wo-contato-canal__titulo, .wo-confirmacao .wo-link-seta', minimo: 6, familia: 'Inter', tamanho: [14, 14], peso: 500, entreletra: 0, altura: 1.43 },
 ];
 
+/* Demonstrações (Tarefa 10): a ficha D19 reutiliza definições, os fluxos usam títulos
+   de seção e as etapas Entrada, Regra e Saída reutilizam colunas numeradas. */
+const PAPEIS_DEMONSTRACOES: readonly Papel[] = [
+  { nome: 'Título do hero', seletor: '#demonstracoes-titulo', minimo: 1, familia: 'Geist', tamanho: [44, 72], peso: 600, entreletra: -0.035, altura: 1.05 },
+  { nome: 'Título de seção', seletor: '.wo-demonstracoes-titulo', minimo: 5, familia: 'Geist', tamanho: [34, 48], peso: 600, entreletra: -0.035, altura: 1.05 },
+  { nome: 'Termo da ficha (título de etapa)', seletor: '.wo-demonstracoes-ficha dt', minimo: 15, familia: 'Geist', tamanho: [22, 24], peso: 500, entreletra: -0.02, altura: 1.33 },
+  { nome: 'Título de etapa', seletor: '.wo-colunas-numeradas__item h3', minimo: 15, familia: 'Geist', tamanho: [22, 24], peso: 500, entreletra: -0.02, altura: 1.33 },
+  { nome: 'Número de etapa', seletor: '.wo-colunas-numeradas__numero', minimo: 15, familia: 'Geist', tamanho: [24, 24], peso: 500, entreletra: 0, altura: 1.33, cor: 'rgb(194, 178, 255)' },
+  { nome: 'Texto', seletor: '.wo-demonstracoes-ficha dd, .wo-colunas-numeradas__item p, .wo-demonstracoes-fecho p', minimo: 31, familia: 'Inter', tamanho: [16, 16], peso: 400, entreletra: 0, altura: 1.625 },
+  { nome: 'Texto de apoio do hero', seletor: '.wo-abertura__lead', minimo: 1, familia: 'Inter', tamanho: [18, 20], peso: 400, entreletra: 0, altura: 1.6 },
+  { nome: 'Nota e selo de cenário', seletor: '.wo-demonstracoes-aviso, .wo-demonstracoes-selo', minimo: 6, familia: 'Inter', tamanho: [14, 14], peso: 400, entreletra: 0, altura: 1.45 },
+  { nome: 'Etiqueta em caixa alta', seletor: '.wo-sobretitulo', minimo: 1, familia: 'Inter', tamanho: [12, 12], peso: 500, entreletra: 0.15, altura: 1.35, caixaAlta: true },
+  { nome: 'Selo do hero', seletor: '.wo-abertura .wo-etiqueta-hero', minimo: 1, familia: 'Inter', tamanho: [11, 11], peso: 500, entreletra: 0.15, altura: 1.5, caixaAlta: true, bordaEsquerda: '2px solid' },
+  { nome: 'Botão e filtro', seletor: '.wo-abertura .wo-btn', minimo: 7, familia: 'Inter', tamanho: [14, 14], peso: 500, entreletra: 0, altura: 1.43 },
+  { nome: 'Link com seta', seletor: '.wo-demonstracoes-fecho .wo-link-seta', minimo: 1, familia: 'Inter', tamanho: [14, 14], peso: 500, entreletra: 0, altura: 1.43 },
+];
+
+medirPapeis('tipografia de Demonstrações (spec 5.2)', '/demonstracoes-tecnicas/', PAPEIS_DEMONSTRACOES);
+
 type Medida = {
   texto: string;
   familia: string;

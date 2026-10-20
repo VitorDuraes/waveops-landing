@@ -71,6 +71,21 @@ const PAPEIS_SOBMEDIDA: readonly Papel[] = [
   { nome: 'Link com seta (botão e menu, peso 500)', seletor: '.wo-link-seta', minimo: 1, familia: 'Inter', tamanho: [14, 14], peso: 500, entreletra: 0, altura: 1.43 },
 ];
 
+const PAPEIS_SOLUCOES: readonly Papel[] = [
+  { nome: 'Título do hero', seletor: '#solucoes-titulo', minimo: 1, familia: 'Geist', tamanho: [44, 72], peso: 600, entreletra: -0.035, altura: 1.05 },
+  { nome: 'Título de seção', seletor: 'main h2', minimo: 7, familia: 'Geist', tamanho: [34, 48], peso: 600, entreletra: -0.035, altura: 1.05 },
+  { nome: 'Título de linha (públicos)', seletor: '.wo-lista-editorial__item h3', minimo: 3, familia: 'Geist', tamanho: [24, 30], peso: 500, entreletra: -0.02, altura: 1.2 },
+  { nome: 'Termo das definições (título de etapa)', seletor: '.wo-definicoes dt', minimo: 15, familia: 'Geist', tamanho: [22, 24], peso: 500, entreletra: -0.02, altura: 1.33 },
+  { nome: 'Título de cartão (índice)', seletor: '.wo-solucoes-indice__titulo', minimo: 5, familia: 'Geist', tamanho: [18, 18], peso: 500, entreletra: -0.02, altura: 1.55 },
+  { nome: 'Texto', seletor: '.wo-lead, .wo-solucoes-resultado__muda, .wo-solucoes-itens li, .wo-solucoes-publicos__garantias li', minimo: 48, familia: 'Inter', tamanho: [16, 16], peso: 400, entreletra: 0, altura: 1.625 },
+  { nome: 'Texto de apoio do hero', seletor: '.wo-abertura__lead', minimo: 1, familia: 'Inter', tamanho: [18, 20], peso: 400, entreletra: 0, altura: 1.6 },
+  { nome: 'Nota e etiqueta de tecnologia', seletor: '.wo-solucoes-contratar__modulo, .wo-lista-editorial__etiquetas, .wo-solucoes-indice__numero', minimo: 13, familia: 'Inter', tamanho: [14, 14], peso: 400, entreletra: 0, altura: 1.45 },
+  { nome: 'Etiqueta em caixa alta', seletor: '.wo-etiqueta, .wo-sobretitulo', minimo: 13, familia: 'Inter', tamanho: [12, 12], peso: 500, entreletra: 0.15, altura: 1.35, caixaAlta: true },
+  { nome: 'Selo do hero', seletor: '.wo-abertura .wo-etiqueta-hero', minimo: 1, familia: 'Inter', tamanho: [11, 11], peso: 500, entreletra: 0.15, altura: 1.5, caixaAlta: true, bordaEsquerda: '2px solid' },
+  { nome: 'Botão e link de contratação', seletor: '.wo-abertura .wo-btn, .wo-solucoes-resultado__acoes .wo-btn, .wo-solucoes-frentes a, .wo-solucoes-contratar__link', minimo: 29, familia: 'Inter', tamanho: [14, 14], peso: 500, entreletra: 0, altura: 1.43 },
+  { nome: 'Link com seta', seletor: '.wo-link-seta', minimo: 5, familia: 'Inter', tamanho: [14, 14], peso: 500, entreletra: 0, altura: 1.43 },
+];
+
 type Medida = {
   texto: string;
   familia: string;
@@ -140,6 +155,26 @@ function medirPapeis(titulo: string, url: string, papeis: readonly Papel[]): voi
 
 medirPapeis('tipografia da Home (spec 5.2)', '/', PAPEIS_HOME);
 medirPapeis('tipografia de Projetos sob medida (spec 5.2)', '/projetos-sob-medida/', PAPEIS_SOBMEDIDA);
+medirPapeis('tipografia de Soluções (spec 5.2)', '/solucoes/', PAPEIS_SOLUCOES);
+
+test.describe('destaque dos títulos sobre a onda', () => {
+  test.use({ reducedMotion: 'reduce' });
+  for (const url of ['/solucoes/', '/projetos-sob-medida/', '/404.html']) {
+    test(`${url}: só o título grande usa o lilás de 3:1`, async ({ page }) => {
+      await page.goto(url);
+      const destaque = page.locator('.wo-abertura h1 .wo-destaque');
+      await expect(destaque).toHaveCount(1);
+      const medida = await destaque.evaluate((el) => {
+        const estilo = getComputedStyle(el);
+        return { cor: estilo.color, tamanho: Number.parseFloat(estilo.fontSize) };
+      });
+      expect(medida.cor).toBe('rgb(203, 191, 255)');
+      expect(medida.tamanho).toBeGreaterThanOrEqual(24);
+      // O token próprio não chega ao selo nem ao texto de apoio, que continuam a 4,5:1.
+      await expect(page.locator('.wo-abertura .wo-etiqueta-hero, .wo-abertura .wo-sobretitulo').first()).toHaveCSS('color', 'rgb(243, 243, 241)');
+    });
+  }
+});
 
 /* Spec 5.4, tabela de modelos: nome com subtítulo, descrição, três pontos e seta. A seta é só
    desenho. Link para /contato/ com nome acessível inventado não está na spec nem no plano, e

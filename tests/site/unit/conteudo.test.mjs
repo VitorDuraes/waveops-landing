@@ -300,6 +300,23 @@ test('a chamada final oferece formulário e WhatsApp no cartão escuro', () => {
   assert.ok(parcial.includes('href="https://wa.me/5534991775784?text=Ol%C3%A1%2C%20WaveOps.%20Quero%20conversar%20sobre%20a%20minha%20opera%C3%A7%C3%A3o."'));
 });
 
+test('Soluções indica as cinco frentes em Como contratar (spec 8.5)', () => {
+  const html = ler('solucoes/index.html');
+  const esperado = {
+    vender: [['atendimento', 'Automação de atendimento'], ['crms', 'CRMs sob medida'], ['dashboards', 'Dashboards']],
+    atender: [['atendimento', 'Automação de atendimento'], ['agentes', 'Agentes de IA']],
+    operar: [['crms', 'CRMs sob medida'], ['saas', 'SaaS'], ['agentes', 'Agentes de IA']],
+    decidir: [['dashboards', 'Dashboards'], ['crms', 'CRMs sob medida']],
+    crescer: [['saas', 'SaaS'], ['dashboards', 'Dashboards']],
+  };
+  for (const [id, frentes] of Object.entries(esperado)) {
+    const bloco = new RegExp(`<dd\\b[^>]*id="${id}-contratar"[^>]*>([\\s\\S]*?)</dd>`).exec(html)?.[1];
+    assert.ok(bloco, `dd#${id}-contratar não encontrado`);
+    const links = [...bloco.matchAll(/href="\/projetos-sob-medida\/#(atendimento|agentes|dashboards|crms|saas)"[^>]*>([^<]+)</g)];
+    assert.deepEqual(links.map((m) => [m[1], m[2]]), frentes, id);
+  }
+});
+
 test('o rodapé traz a cidade', () => {
   assert.ok(ler('dev/site/parciais/rodape.html').includes('Uberlândia, MG'));
 });

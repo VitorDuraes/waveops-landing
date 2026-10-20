@@ -204,9 +204,16 @@ test('a página inteira fica no contexto escuro e o cartão claro volta ao papel
 // O fundo vivo (spec 15) fica atrás de toda página. O fundo é fixo e o texto sobe por cima dele
 // quando a página rola, então passa pelo brilho da onda. O pixel mais claro atrás do texto do hero,
 // depois da camada de leitura, foi medido numa varredura de rolagem em 16/10/2026 (pôster e 24
-// quadros do laço, em 1440 x 900 e 390 x 844): rgb(107, 107, 107). O branco a 75% (--wo-clara-2) dá
-// 3,81:1 nesse pixel, abaixo dos 4,5:1; o --wo-clara sólido dá 4,80:1.
-const PIXEL_MAIS_CLARO_DA_ONDA = 'rgb(107, 107, 107)';
+// quadros do laço, em 1440 x 900 e 390 x 844): rgb(107, 107, 107). A amostra posterior em 1920 px
+// chegou a 108. Usamos esse limite maior aqui; o texto secundário continua sólido, com 4,5:1.
+const PIXEL_MAIS_CLARO_DA_ONDA = 'rgb(108, 108, 108)';
+
+test('destaque de título grande passa 3:1 na onda, com margem para variação de pixels', () => {
+  // 108 foi observado em 1920 px. A margem até 110 cobre arredondamento e redimensionamento.
+  const razao = contraste(cor(':root', '--wo-titulo-destaque'), { css: 'rgb(110, 110, 110)' });
+  assert.ok(razao >= 3, `${razao.toFixed(2)}:1`);
+  assert.notEqual(resolver(':root', '--wo-titulo-destaque'), resolver(':root', '--wo-hero-texto-secundario'));
+});
 test('hero: o texto secundário sobre o vídeo passa 4.5:1 no pixel mais claro do fundo', () => {
   const razao = contraste(cor(':root', '--wo-hero-texto-secundario'), { css: PIXEL_MAIS_CLARO_DA_ONDA });
   assert.ok(razao >= 4.5, `${razao.toFixed(2)}:1`);

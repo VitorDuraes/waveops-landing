@@ -179,6 +179,9 @@
      atrás dele chega a rgb(107, 107, 107). O branco a 75% (--wo-clara-2) dá 3,81:1 nesse pixel, e
      o --wo-clara sólido dá 4,80:1 (cores.test.mjs confere o par). */
   --wo-hero-texto-secundario: var(--wo-clara);
+  /* Só títulos grandes (15.2): máximo croma sRGB na faixa de matiz da marca, com 3:1 até
+     rgb(110, 110, 110). O pior pixel observado foi 108, em 1920 px. */
+  --wo-titulo-destaque: #cbbfff;
 
   /* Movimento: transição curta de estado. O que se move sozinho é a onda do fundo vivo e a entrada do
      hero; o palco das cinco frentes só muda com a rolagem. Os três desligam com

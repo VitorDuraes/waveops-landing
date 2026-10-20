@@ -555,14 +555,18 @@ html[data-topo='fixo'] .wo-topo {
 /* ---------- Abertura e cartão noite (spec 5.4, 7 e 15.2) ----------
    A abertura é o hero das páginas internas: transparente, com a onda no brilho inteiro por trás. O
    topo flutua sobre ela, então o respiro de cima é a altura do topo mais o ritmo da seção. O texto
-   secundário e o de acento usam o token de texto sobre o vídeo: o lilás dá menos de 3:1 sobre o
-   brilho da onda (restrição de 4,5:1 sobre o fundo). */
+   secundário e o de acento pequeno usam o token de texto sobre o vídeo (4,5:1). O destaque dos
+   títulos grandes usa um lilás próprio, com 3:1 sobre o brilho da onda (15.2). */
 .wo-abertura {
   position: relative;
   padding: calc(var(--wo-topo-altura) + var(--wo-secao) / 2) 0 var(--wo-secao);
   --wo-texto-2: var(--wo-hero-texto-secundario);
   --wo-texto-3: var(--wo-hero-texto-secundario);
   --wo-acento-texto: var(--wo-hero-texto-secundario);
+}
+
+.wo-abertura :is(.wo-h1, .wo-h2) .wo-destaque {
+  color: var(--wo-titulo-destaque);
 }
 
 /* Abertura de duas colunas (7.2 a 7.4): abaixo de 1024 px o cartão desce para baixo do texto. O selo
@@ -926,6 +930,8 @@ html[data-topo='fixo'] .wo-topo {
 @media (min-width: 640px) {
   .wo-colunas-numeradas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .wo-definicoes__linha { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--wo-espaco-4); }
+  /* Definições com listas longas: mais espaço para a descrição, mantendo o termo à esquerda. */
+  .wo-definicoes--descritivas .wo-definicoes__linha { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); }
 }
 
 @media (min-width: 1024px) {

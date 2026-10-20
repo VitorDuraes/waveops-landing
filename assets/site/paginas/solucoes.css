@@ -1,194 +1,102 @@
-/* WaveOps · peças que só a página Soluções usa: lista de resultados do hero, os blocos de
-   cada resultado (sinais, o que constrói, como contratar) e os segmentos de "Para quem é".
-   Depende de tokens.css, base.css e components.css. */
+/* WaveOps · Soluções por resultado. Abertura, grade editorial, definições e lista editorial
+   vêm das peças compartilhadas. Aqui ficam o índice e o ritmo interno de cada resultado. */
 
-/* ---------- Hero ---------- */
-/* Mesmo esqueleto do hero compartilhado, com o ritmo próprio do design de Soluções:
-   mais respiro, colunas 1,3 e 1, texto e lista alinhados pela base. */
-.wo-solucoes-hero {
-  padding: clamp(48px, 6vw, 88px) 0 clamp(56px, 6.4vw, 96px);
-}
-
-.wo-solucoes-hero .wo-hero__brilho {
-  top: -620px;
-  opacity: 0.4;
-}
-
-.wo-solucoes-hero .wo-hero__grade {
-  align-items: flex-end;
-  gap: 44px 72px;
-}
-
-.wo-solucoes-hero .wo-hero__texto {
-  flex: 1.3 1 520px;
-}
-
-/* O design de Soluções não balanceia as linhas do título: no celular a 2ª linha quebra
-   em "A tecnologia vem / depois.". text-wrap: wrap mantém a captura aprovada. */
-.wo-solucoes-hero .wo-h1 {
-  margin-top: 20px;
-  font-size: clamp(38px, 4.7vw, 68px);
-  line-height: 1.055;
-  letter-spacing: -0.06em;
-  text-wrap: wrap;
-}
-
-.wo-solucoes-hero .wo-hero__lead {
-  max-width: 600px;
-  color: var(--wo-texto-3);
-  font-size: 17px;
-  line-height: 1.8;
-}
-
-.wo-solucoes-hero .wo-acoes .wo-btn {
-  min-height: 52px;
-}
-
-/* ---------- Lista de resultados (âncoras do hero) ---------- */
 .wo-solucoes-indice {
-  flex: 1 1 380px;
   min-width: 0;
+  padding: var(--wo-espaco-4);
+}
+
+.wo-solucoes-indice > .wo-etiqueta {
+  color: var(--wo-texto-3);
 }
 
 .wo-solucoes-indice__lista {
-  margin-top: 12px;
-  border-top: 1px solid var(--wo-borda-forte);
+  margin-top: var(--wo-espaco-3);
+  border-top: var(--wo-linha-forte) solid var(--wo-texto);
 }
 
 .wo-solucoes-indice__lista li {
-  border-bottom: 1px solid var(--wo-borda);
+  border-bottom: var(--wo-linha-fina) solid var(--wo-borda);
 }
 
 .wo-solucoes-indice__link {
   display: flex;
   align-items: center;
-  gap: 16px;
-  min-height: 58px;
+  gap: var(--wo-espaco-2);
+  min-height: var(--wo-espaco-6);
+  padding: var(--wo-espaco-2) 0;
   color: var(--wo-texto);
   text-decoration: none;
+  transition: color var(--wo-transicao);
 }
 
 .wo-solucoes-indice__link:hover {
-  color: var(--wo-texto);
+  color: var(--wo-acento-texto);
 }
 
 .wo-solucoes-indice__numero {
+  flex-shrink: 0;
   color: var(--wo-acento-texto);
-  font-family: var(--wo-mono);
-  font-size: 12px;
+  font-size: var(--wo-texto-pequeno);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.45;
 }
 
 .wo-solucoes-indice__titulo {
   flex: 1;
   min-width: 0;
-  font-size: 18px;
+  font-family: var(--wo-fonte-titulo);
+  font-size: var(--wo-h3-cartao);
   font-weight: 500;
   letter-spacing: -0.02em;
+  line-height: 1.55;
 }
 
-.wo-solucoes-indice__seta {
-  display: inline-flex;
-  color: var(--wo-texto-3);
-  transition: color var(--wo-transicao);
-}
-
+.wo-solucoes-indice__seta,
 .wo-solucoes-indice__seta svg {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  transition: transform var(--wo-transicao);
-}
-
-.wo-solucoes-indice__link:hover .wo-solucoes-indice__seta {
-  color: var(--wo-acento-texto);
-}
-
-.wo-solucoes-indice__link:hover .wo-solucoes-indice__seta svg {
-  transform: translateX(2px);
-}
-
-/* ---------- Resultado (seções 01 a 05): texto à esquerda, três blocos à direita ---------- */
-.wo-solucoes-resultado {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 40px 72px;
+  flex-shrink: 0;
+  width: var(--wo-espaco-2);
+  height: var(--wo-espaco-2);
 }
 
-.wo-solucoes-resultado__texto {
-  flex: 1 1 400px;
-  min-width: 0;
-}
-
-/* Inline de propósito: a linha herda o entrelinha do corpo, como no design. */
 .wo-solucoes-resultado__contador {
   color: var(--wo-acento-texto);
-  font-family: var(--wo-mono);
-  font-size: 12px;
-  letter-spacing: 0.1em;
-}
-
-.wo-solucoes-resultado__titulo {
-  font-size: clamp(30px, 3.6vw, 52px);
-}
-
-.wo-solucoes-resultado__lead {
-  max-width: 520px;
+  font-variant-numeric: tabular-nums;
 }
 
 .wo-solucoes-resultado__muda {
-  max-width: 520px;
-  margin-top: 22px;
-  color: var(--wo-texto);
-  font-size: 15.5px;
-  line-height: 1.65;
+  margin-top: var(--wo-espaco-4);
 }
 
-.wo-solucoes-resultado__muda .wo-rotulo-mono {
-  margin-bottom: 6px;
+.wo-solucoes-resultado__muda .wo-etiqueta {
+  display: block;
+  margin-bottom: var(--wo-espaco-1);
+  color: var(--wo-acento-texto);
 }
 
 .wo-solucoes-resultado__acoes {
-  gap: 10px 22px;
-  margin-top: 28px;
-}
-
-.wo-solucoes-resultado__detalhe {
-  flex: 1.25 1 480px;
-  min-width: 0;
-  border-bottom: 1px solid var(--wo-borda);
-}
-
-.wo-solucoes-bloco {
-  padding: 24px 0;
-  border-top: 1px solid var(--wo-borda);
-}
-
-/* Em Soluções os sinais são 16 px. No seletor da Home são 15,5 px. */
-.wo-solucoes-bloco .wo-sinais {
-  font-size: 16px;
-}
-
-.wo-solucoes-constroi {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
-  gap: 10px 28px;
-  margin-top: 14px;
-}
-
-/* Como contratar: uma linha por forma de contratação */
-.wo-solucoes-contratar {
-  display: flex;
+  align-items: flex-start;
   flex-direction: column;
-  gap: 14px;
-  margin-top: 14px;
+  gap: var(--wo-espaco-2);
+  margin-top: var(--wo-espaco-4);
+}
+
+.wo-solucoes-itens {
+  display: grid;
+  gap: var(--wo-espaco-2);
+}
+
+.wo-solucoes-contratar {
+  display: grid;
+  gap: var(--wo-espaco-3);
 }
 
 .wo-solucoes-contratar__linha {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 8px 14px;
+  flex-wrap: wrap;
+  gap: var(--wo-espaco-1);
 }
 
 .wo-solucoes-contratar__link {
@@ -196,96 +104,57 @@
   align-items: center;
   min-height: var(--wo-alvo);
   color: var(--wo-texto);
-  font-size: 15.5px;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.wo-solucoes-contratar__link:hover {
-  color: var(--wo-acento-texto);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  font-size: var(--wo-texto-pequeno);
+  font-weight: 500;
+  line-height: 1.43;
+  text-underline-offset: var(--wo-linha-forte);
 }
 
 .wo-solucoes-contratar__modulo {
+  width: 100%;
   color: var(--wo-texto-3);
-  font-size: 14px;
+  font-size: var(--wo-texto-pequeno);
+  line-height: 1.45;
 }
 
 .wo-solucoes-frentes {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--wo-espaco-1);
+  width: 100%;
 }
 
-.wo-solucoes-frentes li {
-  padding: 5px 11px;
-  border: 1px solid var(--wo-borda-forte);
-  border-radius: var(--wo-raio-pilula);
-  color: var(--wo-texto-2);
-  font-size: 13px;
-  white-space: nowrap;
-}
-
-/* ---------- Para quem é ---------- */
-.wo-solucoes-publicos {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 40px 72px;
-}
-
-.wo-solucoes-publicos__texto {
-  flex: 1 1 420px;
-  min-width: 0;
-}
-
-.wo-solucoes-publicos__lista {
-  margin-top: 26px;
-  font-size: 15.5px;
-}
-
-.wo-solucoes-publicos__grupos {
-  display: flex;
-  flex: 1.2 1 480px;
-  flex-direction: column;
-  gap: 30px;
-  min-width: 0;
-}
-
-.wo-solucoes-grupo__titulo {
-  margin-bottom: 14px;
-  color: var(--wo-texto-3);
-  font-family: var(--wo-mono);
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.wo-solucoes-segmentos {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.wo-solucoes-segmentos li {
+.wo-solucoes-frentes a {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  padding: 10px 13px;
-  border: 1px solid var(--wo-borda);
-  border-radius: var(--wo-raio-xs);
-  background: var(--wo-superficie);
-  font-size: 13.5px;
+  min-height: var(--wo-alvo);
+  padding: var(--wo-espaco-1) var(--wo-espaco-2);
+  border: var(--wo-linha-fina) solid var(--wo-borda-forte);
+  border-radius: var(--wo-raio-pilula);
+  color: var(--wo-acento-texto);
+  font-size: var(--wo-texto-pequeno);
   font-weight: 500;
+  line-height: 1.43;
+  text-decoration: none;
+  transition: border-color var(--wo-transicao), background-color var(--wo-transicao);
 }
 
-.wo-solucoes-segmentos li::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--wo-acento-texto);
+.wo-solucoes-frentes a:hover {
+  border-color: var(--wo-acento-texto);
+  background: var(--wo-superficie);
+}
+
+ul.wo-solucoes-publicos__garantias {
+  display: grid;
+  gap: var(--wo-espaco-2);
+  padding-top: var(--wo-espaco-3);
+  margin-bottom: var(--wo-espaco-5);
+  border-top: var(--wo-linha-forte) solid var(--wo-texto);
+  color: var(--wo-texto-2);
+}
+
+@media (max-width: 639px) {
+  .wo-solucoes-indice {
+    padding: var(--wo-espaco-3);
+  }
 }

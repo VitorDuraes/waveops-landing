@@ -5,12 +5,12 @@ import paginasJson from '../../../dev/site/paginas.json' with { type: 'json' };
 /* Fundo vivo no site inteiro (spec 15, D20). Toda página tem o fundo fixo da Home: o pôster e o
    vídeo da onda num bloco escondido do leitor de tela, primeiro filho do <main>. O vídeo toca em
    qualquer ponto da página enquanto a aba está visível, também com um capítulo do palco da Home
-   ativo. O botão do topo pausa, e a pausa vale para as outras páginas da mesma visita. Menos
+   ativo. O botão do rodapé pausa, e a pausa vale para as outras páginas da mesma visita. Menos
    movimento, economia de dados e falta de JavaScript deixam só o pôster. O topo fica escuro do
    início ao fim, e o hero de toda página entra em cascata ao abrir. */
 
 const PAGINAS = paginasJson.paginas;
-const PAUSA = 'Pausar animação do fundo';
+const PAUSA = 'Pausar animação';
 /** Chave em que o fundo.js guarda o estado do botão na visita (sessionStorage). */
 const CHAVE_PAUSA = 'waveops:fundo-pausado';
 
@@ -32,7 +32,7 @@ async function esperarAvancar(page: Page) {
   await expect.poll(() => video(page).evaluate((elemento: HTMLVideoElement) => elemento.currentTime)).not.toBe(antes);
 }
 
-/** Só o pôster: o vídeo nunca recebeu fonte, fica transparente e o botão do topo some. */
+/** Só o pôster: o vídeo nunca recebeu fonte, fica transparente e o botão do rodapé some. */
 async function soOPoster(page: Page, contexto: string) {
   await page.waitForLoadState('load');
   await expect(video(page), contexto).toHaveJSProperty('currentSrc', '');
@@ -111,7 +111,7 @@ test.describe('com movimento liberado', () => {
     });
   }
 
-  test('o botão do topo pausa e devolve o pôster, e a página seguinte da visita já nasce pausada', async ({ page }) => {
+  test('o botão do rodapé pausa e devolve o pôster, e a página seguinte da visita já nasce pausada', async ({ page }) => {
     const erros = vigiarErros(page);
     await page.goto('/');
     await expect(video(page)).toHaveAttribute('data-tocando', '');

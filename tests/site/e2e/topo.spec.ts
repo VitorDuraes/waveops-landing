@@ -215,22 +215,22 @@ test('sem IntersectionObserver o topo fica fixo e escuro', async ({ page }, info
   expect(await corDoTopo(page)).toEqual(TOPO_ESCURO);
 });
 
-/* Pausa do fundo vivo no topo (spec 15.3): nome fixo, 40 px no desktop e 44 px abaixo de 768 px, ao
-   lado do menu. Ela só aparece quando o vídeo pode tocar, então o teste libera o movimento. */
-test('o botão de pausa do fundo fica no topo, com 40 px no desktop e 44 px abaixo de 768 px', async ({ page }, info) => {
+/* Pausa das animações (spec 15.3, adendo 2 da 13A): saiu do topo e virou texto discreto no rodapé,
+   com nome fixo e alvo de 44 px abaixo de 768 px. Ela só aparece quando há animação, então o teste
+   libera o movimento. No topo do celular, o menu volta a ser o único botão depois da marca. */
+test('o topo não tem botão de pausa e a pausa fica no rodapé, com alvo de 44 px abaixo de 768 px', async ({ page }, info) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto('/solucoes/');
-  const botao = page.getByRole('button', { name: 'Pausar animação do fundo', exact: true });
+  const botao = page.getByRole('button', { name: 'Pausar animação', exact: true });
+  await expect(botao).toBeAttached();
+  await expect(page.locator('.wo-topo button[aria-pressed]')).toHaveCount(0);
+  await expect(page.locator('.wo-rodape__base [data-fundo-pausa]')).toHaveCount(1);
+  await botao.scrollIntoViewIfNeeded();
   await expect(botao).toBeVisible();
-  const lado = (page.viewportSize()?.width ?? 0) < 768 ? 44 : 40;
   const caixa = (await botao.boundingBox())!;
-  expect([Math.round(caixa.width), Math.round(caixa.height)], info.project.name).toEqual([lado, lado]);
-  const barra = (await page.locator('.wo-topo__barra').boundingBox())!;
-  expect(caixa.y).toBeGreaterThanOrEqual(barra.y);
-  expect(caixa.y + caixa.height).toBeLessThanOrEqual(barra.y + barra.height);
-  // A ordem de tabulação continua: o botão do menu do celular vem depois da pausa e antes do painel.
+  expect(Math.round(caixa.height), info.project.name).toBeGreaterThanOrEqual((page.viewportSize()?.width ?? 0) < 768 ? 44 : 36);
   if (info.project.name === 'celular') {
-    await botao.focus();
+    await page.locator('.wo-topo .wo-marca').focus();
     await page.keyboard.press('Tab');
     await expect(page.getByRole('button', { name: 'Abrir menu' })).toBeFocused();
   }

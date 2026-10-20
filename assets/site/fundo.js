@@ -1,7 +1,8 @@
 // @ts-check
 /* WaveOps · fundo vivo de toda página (spec 15). Melhoria progressiva: sem este módulo, com menos
-   movimento, economia de dados ou sem codec, fica o pôster. Marcação (parciais fundo e topo):
-   [data-fundo-video], o <video> sem src, e [data-fundo-pausa], o botão do topo, nascido com hidden.
+   movimento, economia de dados ou sem codec, fica o pôster. Marcação (parciais fundo e rodapé):
+   [data-fundo-video], o <video> sem src, e [data-fundo-pausa], o botão "Pausar animação" do rodapé,
+   nascido com hidden. O mesmo estado pausa a vitrine do hero da Home (paginas/vitrine.js e home.css).
    O vídeo toca em qualquer ponto da página com a aba visível, também nos capítulos do palco da Home.
    A pausa do botão vale para a visita: o sessionStorage guarda só o estado do botão. */
 import { escolherVideo, deveTocar } from './lib/video.js';
@@ -30,7 +31,7 @@ function gravarPausa(janela, pausado) {
 }
 
 /**
- * Liga o vídeo do fundo e o botão de pausa do topo.
+ * Liga o vídeo do fundo e o botão de pausa do rodapé.
  * @param {Document} doc
  * @param {Window} janela
  */

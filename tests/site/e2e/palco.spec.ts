@@ -135,15 +135,20 @@ test.describe('palco no desktop', () => {
     expect((await lead.boundingBox())!.x).toBeCloseTo(antes!.x, 0);
   });
 
-  test('SaaS desenha a estrutura e retém acesso, painel, checkout e publicação', async ({ page }) => {
+  test('o pedido do app chega ao sistema, volta atualizado e reverte ao subir', async ({ page }) => {
     await page.goto('/');
-    const partes = ['janela', 'estrutura', 'acesso', 'painel-app', 'checkout', 'publicado'];
-    for (let passo = 1; passo <= 6; passo += 1) {
+    const app = page.locator('.wo-apps__app');
+    const sistema = page.locator('.wo-apps__sistema');
+    for (const passo of [1, 2, 3, 4, 5, 6, 4, 2, 6]) {
       await rolarProgresso(page, 'saas', (passo - 0.5) / 6);
       await semTransicao(page);
-      for (let i = 0; i < partes.length; i += 1) {
-        await expect(page.locator(`.wo-home-demo__${partes[i]}`)).toHaveCSS('opacity', i < passo ? '1' : '0');
-      }
+      await expect(app).toHaveCSS('opacity', '1');
+      await expect(sistema).toHaveCSS('opacity', '1');
+      await expect(app.locator('[data-pedido]')).toHaveAttribute('data-pedido', '1042');
+      await expect(sistema.locator('[data-pedido]')).toHaveAttribute('data-pedido', '1042');
+      await expect(app.locator('.wo-apps__estado :visible')).toHaveText(passo < 3 ? 'Pronto para enviar' : passo < 6 ? 'Enviado à equipe' : 'Em andamento');
+      await expect(sistema.locator('[data-pedido]')).toHaveCSS('opacity', passo < 4 ? '0' : '1');
+      if (passo >= 4) await expect(sistema.locator('.wo-apps__estado :visible')).toHaveText(passo < 5 ? 'Recebido' : 'Em andamento');
     }
     await expect(page.locator('[data-cena="saas"] :is(input, button, a, select, textarea, [tabindex])')).toHaveCount(0);
   });
@@ -288,7 +293,7 @@ test.describe('o fim do palco não aparece através do véu', () => {
   for (const fracao of [0.75, 0.6]) {
     test(`com a primeira seção depois do palco a ${Math.round(fracao * 100)}% da janela, nada do palco aparece abaixo dela`, async ({ page }, info) => {
       await page.goto('/');
-      await page.getByRole('button', { name: 'Pausar animação do fundo', exact: true }).click();
+      await page.getByRole('button', { name: 'Pausar animação', exact: true }).click();
       await expect(page.locator('[data-fundo-video]')).not.toHaveAttribute('data-tocando');
       await page.addStyleTag({
         content: '*, *::before, *::after { transition: none !important; animation: none !important; } [data-palco] + section * { visibility: hidden !important; } .wo-whatsapp-flutuante { visibility: hidden !important; }',
@@ -323,7 +328,7 @@ test.describe('o recorte da cena só corta no alto da seção', () => {
   test.beforeEach(async ({ page }, info) => {
     test.skip(info.project.name === 'tablet', 'o tablet usa o layout do celular');
     await page.goto('/');
-    await page.getByRole('button', { name: 'Pausar animação do fundo', exact: true }).click();
+    await page.getByRole('button', { name: 'Pausar animação', exact: true }).click();
     await expect(page.locator('[data-fundo-video]')).not.toHaveAttribute('data-tocando');
     await page.addStyleTag({ content: '*, *::before, *::after { transition: none !important; animation: none !important; } .wo-whatsapp-flutuante { visibility: hidden !important; }' });
   });
@@ -377,6 +382,8 @@ const JANELAS = [
   { width: 1280, height: 650, projeto: 'desktop' },
   { width: 390, height: 844, projeto: 'celular' },
   { width: 360, height: 640, projeto: 'celular' },
+  // Piso do palco (MIDIA_PALCO, 560 px): Android de 360 x 640 com a barra do navegador aberta (13A, I1).
+  { width: 360, height: 568, projeto: 'celular' },
 ];
 
 for (const { projeto, ...janela } of JANELAS) {
@@ -439,6 +446,42 @@ for (const { projeto, ...janela } of JANELAS) {
       }
     });
     }
+  });
+}
+
+/* Cena 5 legível (13A): todo texto visível da cena de apps e sistemas fica com 12 px ou mais na tela,
+   já descontada a escala do palco, nas quatro janelas do encaixe. O celular baixo encolhe a cena
+   para 0,68; a letra da cena compensa a escala, e não o contrário. */
+for (const { projeto, ...janela } of JANELAS) {
+  test.describe(`legibilidade em ${janela.width} x ${janela.height}`, () => {
+    test.use({ viewport: janela });
+
+    test('o texto da cena de apps e sistemas fica com 12 px ou mais na tela', async ({ page }, info) => {
+      test.skip(info.project.name !== projeto, `essa janela roda no projeto ${projeto}`);
+      await page.goto('/');
+      await page.evaluate(() => document.fonts.ready);
+      await rolarProgresso(page, 'saas', 1);
+      await expect.poll(() => montadas(page, 'saas')).toBe(6);
+      await semTransicao(page);
+      const medida = await page.evaluate(() => {
+        const escala = Number(getComputedStyle(document.querySelector('[data-palco]')!).getPropertyValue('--wo-palco-escala')) || 1;
+        const tela = document.querySelector('[data-cena="saas"] .wo-home-cena__tela')!;
+        const pequenos: string[] = [];
+        let total = 0;
+        const andar = document.createTreeWalker(tela, NodeFilter.SHOW_TEXT);
+        while (andar.nextNode()) {
+          const texto = (andar.currentNode.textContent ?? '').trim();
+          const elemento = andar.currentNode.parentElement!;
+          if (!texto || !elemento.getClientRects().length || getComputedStyle(elemento).visibility !== 'visible') continue;
+          total += 1;
+          const naTela = parseFloat(getComputedStyle(elemento).fontSize) * escala;
+          if (naTela < 12) pequenos.push(`${texto}: ${naTela.toFixed(1)} px`);
+        }
+        return { escala, total, pequenos };
+      });
+      expect(medida.total, 'textos medidos').toBeGreaterThan(6);
+      expect(medida.pequenos, `escala ${medida.escala}`).toEqual([]);
+    });
   });
 }
 

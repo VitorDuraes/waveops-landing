@@ -148,31 +148,6 @@ html[data-topo='fixo'] .wo-topo {
   color: var(--wo-acento-texto);
 }
 
-/* Pausa do fundo vivo (spec 15.3): no topo de toda página, com nome fixo e aria-pressed. 40 px no
-   desktop e 44 px abaixo de 768 px, a medida do botão (--wo-btn-altura). Nasce com hidden; o
-   fundo.js mostra quando o vídeo pode tocar. O ícone troca entre pausar e tocar. */
-.wo-topo__pausa {
-  display: grid;
-  place-items: center;
-  width: var(--wo-btn-altura);
-  height: var(--wo-btn-altura);
-  padding: 0;
-  border: 1px solid var(--wo-borda-forte);
-  border-radius: var(--wo-raio-pilula);
-  background: var(--wo-contorno-fundo);
-  color: var(--wo-texto);
-  cursor: pointer;
-}
-
-.wo-topo__icone-tocar,
-.wo-topo__pausa[aria-pressed='true'] .wo-topo__icone-pausa {
-  display: none;
-}
-
-.wo-topo__pausa[aria-pressed='true'] .wo-topo__icone-tocar {
-  display: block;
-}
-
 .wo-topo__menu {
   display: none;
   place-items: center;
@@ -186,8 +161,7 @@ html[data-topo='fixo'] .wo-topo {
   cursor: pointer;
 }
 
-.wo-topo__menu svg,
-.wo-topo__pausa svg {
+.wo-topo__menu svg {
   width: 18px;
   height: 18px;
 }
@@ -1273,6 +1247,31 @@ html[data-topo='fixo'] .wo-topo {
   border-top: 1px solid var(--wo-borda);
   color: var(--wo-texto-3);
   font-size: 13px;
+}
+
+/* Pausa das animações (15.3, adendo 2 da 13A): texto no rodapé, nome fixo e aria-pressed. Para o
+   fundo e a vitrine da Home; o fundo.js mostra quando há animação. */
+.wo-rodape__pausa {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--wo-espaco-1);
+  min-height: var(--wo-alvo);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.wo-rodape__pausa:hover,
+.wo-rodape__pausa[aria-pressed='true'] {
+  color: var(--wo-texto);
+}
+
+.wo-rodape__pausa[aria-pressed='true'] .wo-rodape__icone-pausa,
+.wo-rodape__pausa:not([aria-pressed='true']) .wo-rodape__icone-tocar {
+  display: none;
 }
 
 /* ---------- Botão flutuante de WhatsApp (spec 5.4) ----------

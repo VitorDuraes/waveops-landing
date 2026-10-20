@@ -1,135 +1,37 @@
-/* WaveOps · peças que só a Home usa: painel "Operação conectada", hero, palco das cinco frentes, o
-   fundo vivo escurecido durante os capítulos e as seções depois do palco. Depende de tokens.css e
+/* WaveOps · peças que só a Home usa: a vitrine do hero, o hero, o palco das cinco frentes, o fundo
+   vivo escurecido durante os capítulos e as seções depois do palco. Depende de tokens.css e
    components.css. */
 
-/* ---------- Operação conectada (hero) ---------- */
-.wo-operacao {
-  margin: 0;
-}
-
-.wo-operacao__sistemas {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.wo-operacao__sistemas li {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 11px 12px;
-  border: 1px solid var(--wo-borda);
-  border-radius: var(--wo-raio);
-  background: var(--wo-superficie);
-}
-
-.wo-operacao__nome {
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.2;
-}
-
-.wo-operacao__estado {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--wo-texto-3);
-  font-family: var(--wo-fonte);
-  font-size: 10.5px;
-}
-
-.wo-operacao__estado::before {
-  content: '';
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--wo-sucesso-ponto);
-}
-
-.wo-operacao__fio {
-  width: 1px;
-  height: 16px;
-  margin: 0 auto;
-  background: var(--wo-borda-forte);
-}
-
-.wo-operacao__camada {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 16px;
-  border: 1px solid var(--wo-acento-borda);
-  border-radius: 14px;
-  background: var(--wo-acento-fundo);
-}
-
-.wo-operacao__simbolo {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  flex-shrink: 0;
-  border-radius: 10px;
-  background: var(--wo-violeta);
-}
-
-.wo-operacao__simbolo svg {
-  width: 26px;
-  height: 26px;
-}
-
-.wo-operacao__camada-texto {
-  min-width: 0;
-}
-
-.wo-operacao__camada-texto strong {
-  display: block;
-  font-size: 14.5px;
-  font-weight: 600;
-  line-height: 1.3;
-}
-
-.wo-operacao__camada-texto span {
-  display: block;
-  color: var(--wo-texto-2);
-  font-size: 12.5px;
-}
-
-.wo-operacao__eventos {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.wo-operacao__eventos li {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-  border: 1px solid var(--wo-borda);
-  border-radius: 10px;
-  background: var(--wo-superficie);
-  font-size: 13.5px;
-}
-
-.wo-operacao__hora {
-  color: var(--wo-texto-3);
-  font-family: var(--wo-fonte);
-  font-size: 11.5px;
-}
-
-.wo-operacao__evento {
-  flex: 1;
-  min-width: 0;
-}
-
-.wo-operacao__area {
-  padding: 2px 8px;
-  border-radius: var(--wo-raio);
-  background: var(--wo-superficie-3);
-  color: var(--wo-texto-2);
-  font-size: 11.5px;
-}
+/* ---------- Vitrine do hero (adendo 1 da 13A) ----------
+   Cinco mini interfaces empilhadas na mesma célula, com as peças das cenas do palco: o cartão tem a
+   altura da maior. A barra da aba da vez anima e, no fim, vitrine.js passa à próxima. Só corre com
+   a pausa do rodapé à mostra; para com ela apertada, ponteiro ou foco no cartão e aba oculta. */
+.wo-vitrine { padding: var(--wo-espaco-3); --wo-cena-grafico: var(--wo-espaco-6); }
+.wo-vitrine__abas { display: flex; gap: var(--wo-espaco-1); margin-bottom: var(--wo-espaco-1); }
+.wo-vitrine__aba { display: grid; flex: 1; align-content: center; gap: var(--wo-espaco-1); min-height: var(--wo-alvo); padding: 0; border: 0; background: none; color: var(--wo-tinta-3); font: 500 12px/1 var(--wo-fonte); font-variant-numeric: tabular-nums; text-align: left; cursor: pointer; }
+.wo-vitrine__aba:hover, .wo-vitrine__aba[aria-pressed='true'] { color: var(--wo-violeta-forte); }
+.wo-vitrine__aba i { height: 3px; overflow: hidden; border-radius: var(--wo-raio-pilula); background: var(--wo-linha); }
+.wo-vitrine__aba i::after { content: ''; display: block; height: 100%; background: var(--wo-violeta); transform: scaleX(0); transform-origin: left; }
+.wo-vitrine__aba:is([aria-pressed='true'], :has(~ [aria-pressed='true'])) i::after { transform: none; }
+:root:has([data-fundo-pausa]:not([hidden])) .wo-vitrine[data-pronto]:not([data-escolhida]) [aria-pressed='true'] i::after { animation: wo-vitrine-avanco var(--wo-vitrine-tempo) linear; animation-play-state: var(--wo-vitrine-estado, running); }
+:root:has([data-fundo-pausa][aria-pressed='true']) .wo-vitrine, .wo-vitrine:is(:hover, :focus-within, [data-oculta]) { --wo-vitrine-estado: paused; }
+@keyframes wo-vitrine-avanco { from { transform: scaleX(0); } }
+.wo-vitrine__paineis { display: grid; }
+.wo-vitrine__painel { display: flex; flex-direction: column; gap: var(--wo-espaco-2); grid-area: 1 / 1; transition: opacity var(--wo-vitrine-troca), transform var(--wo-vitrine-troca), visibility var(--wo-vitrine-troca); }
+.wo-vitrine__painel:not([data-ativo]) { visibility: hidden; opacity: 0; transform: translateY(var(--wo-espaco-1)); }
+.wo-vitrine__nome { font: 500 var(--wo-h3-cartao)/1.3 var(--wo-fonte-titulo); letter-spacing: -0.02em; }
+.wo-vitrine__tela { display: grid; flex: 1; align-content: start; gap: var(--wo-cena-respiro); padding: var(--wo-cena-respiro); border-radius: var(--wo-raio); background: var(--wo-papel-2); font-size: 13px; }
+.wo-vitrine__tela .wo-home-cena__no-cabeca { flex-wrap: wrap; }
+.wo-vitrine__tela .wo-home-cena__no-cabeca + * { margin-top: var(--wo-espaco-1); }
+.wo-vitrine__tela > .wo-home-cena__cartao + .wo-home-cena__cartao::before { content: ''; position: absolute; bottom: 100%; left: 24px; height: var(--wo-cena-respiro); border-left: var(--wo-linha-forte) solid var(--wo-marca-claro); }
+.wo-vitrine__funil { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--wo-espaco-1); }
+.wo-vitrine__funil > div { display: grid; align-content: start; gap: var(--wo-espaco-1); min-height: 9em; padding: var(--wo-espaco-1); border-radius: var(--wo-raio); background: var(--wo-papel); }
+.wo-vitrine__funil .wo-home-cena__cartao { padding: var(--wo-espaco-1); }
+.wo-vitrine__funil .wo-home-demo__rotulo { margin: 0; }
+@media (max-width: 479.98px) { .wo-vitrine__funil { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* Celular: as abas deixam livre a coluna do botão de WhatsApp. */
+@media (max-width: 767.98px) { .wo-vitrine__abas { gap: var(--wo-espaco-miudo); margin-right: var(--wo-espaco-4); } }
+@media (prefers-reduced-motion: reduce) { .wo-vitrine i::after { animation: none !important; } }
 
 /* ---------- Fundo vivo durante o palco (spec 13.4 e 15.3) ----------
    O fundo (components.css) é o de toda página. Com um capítulo ativo, a onda escurece para 35%: o
@@ -150,17 +52,6 @@
   --wo-texto-3: var(--wo-hero-texto-secundario);
 }
 
-.wo-home-hero__abertura {
-  display: grid;
-  gap: var(--wo-espaco-5);
-}
-
-.wo-home-hero__etiquetas {
-  display: grid;
-  align-content: start;
-  gap: var(--wo-espaco-1);
-}
-
 .wo-home-hero__frase {
   max-width: var(--wo-hero-frase-largura);
   font-size: var(--wo-lead-hero);
@@ -171,13 +62,17 @@
 .wo-home-hero__grade {
   display: grid;
   gap: var(--wo-espaco-5);
-  margin-top: var(--wo-espaco-5);
-  align-items: end;
+  min-height: calc(100svh - var(--wo-topo-altura) - var(--wo-espaco-5) - var(--wo-espaco-6));
+  align-items: center;
 }
 
 .wo-home-hero__texto h1 {
-  margin: var(--wo-espaco-3) 0 var(--wo-espaco-4);
+  margin: var(--wo-espaco-3) 0 var(--wo-espaco-3);
   text-wrap: pretty;
+}
+
+.wo-home-hero__texto .wo-acoes {
+  margin-top: var(--wo-espaco-4);
 }
 
 .wo-home-hero__texto .wo-etiqueta-hero {
@@ -197,45 +92,10 @@
   line-height: 1.45;
 }
 
-.wo-home-hero .wo-operacao {
-  padding: var(--wo-espaco-3);
-}
-
-.wo-home-hero .wo-operacao__sistemas {
-  padding-bottom: var(--wo-espaco-2);
-  border-bottom: var(--wo-linha-fina) solid var(--wo-linha);
-}
-
-.wo-home-hero .wo-operacao__sistemas li {
-  padding: 0;
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-}
-
-.wo-home-hero .wo-operacao__eventos li {
-  padding: var(--wo-espaco-1) 0;
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  border-bottom: var(--wo-linha-fina) solid var(--wo-linha);
-}
-
-.wo-home-hero .wo-operacao__eventos li:last-child {
-  border: 0;
-}
-
 @media (min-width: 1024px) {
-  .wo-home-hero__abertura {
-    grid-template-columns: 1fr 1fr;
-  }
-  .wo-home-hero__frase {
-    justify-self: end;
-    text-align: right;
-  }
   .wo-home-hero__grade {
     grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-    margin-top: var(--wo-espaco-7);
+    gap: var(--wo-espaco-4);
   }
 }
 
@@ -295,6 +155,10 @@
 
 .wo-home-frentes__link {
   margin-top: 8px;
+}
+
+.wo-home-frentes__atalhos {
+  margin-top: var(--wo-espaco-4);
 }
 
 .wo-home-capitulo {
@@ -1024,7 +888,6 @@
 .wo-home-demo__sucesso { color: var(--wo-sucesso-claro); background: var(--wo-palco-ok); border-color: transparent; }
 .wo-home-demo__sucesso::before { background: var(--wo-sucesso-claro); }
 .wo-home-demo__rascunho { display: grid; gap: var(--wo-espaco-1); margin-bottom: var(--wo-espaco-1); }
-.wo-home-demo__estrutura i { display: block; border-radius: var(--wo-raio); background: var(--wo-papel-2); }
 .wo-home-demo__rascunho i { display: block; border-radius: var(--wo-raio); background: var(--wo-papel-2); height: var(--wo-espaco-1); }
 .wo-home-demo__rascunho i:last-child { width: 70%; }
 .wo-home-demo--agente .wo-home-cena__cartao { width: 80%; }
@@ -1081,27 +944,65 @@
 .wo-home-demo--crm .wo-home-cena__cartao { padding: var(--wo-espaco-1); }
 [data-palco-modo] .wo-home-demo--crm:not(:has([data-passo='3'][data-visivel])) .wo-home-demo__lead-movel { transform: none; }
 
-/* Produto web: janela e estrutura por baixo; acesso, painel e checkout ficam retidos no final. */
-.wo-home-demo--saas { padding: var(--wo-cena-lead-alto) var(--wo-cena-respiro) var(--wo-cena-respiro) calc(var(--wo-cena-menu) + var(--wo-cena-respiro)); }
-.wo-home-demo__janela { position: absolute; inset: 0; border-radius: var(--wo-raio); background: var(--wo-papel-2); border: var(--wo-linha-fina) solid var(--wo-linha); }
-.wo-home-demo__navegador { display: flex; align-items: center; gap: var(--wo-espaco-1); height: var(--wo-cena-inicio-celular); padding: 0 var(--wo-cena-respiro); border-bottom: var(--wo-linha-fina) solid var(--wo-linha); }
-.wo-home-demo__navegador > i { width: var(--wo-espaco-1); height: var(--wo-espaco-1); background: var(--wo-tinta-3); border-radius: var(--wo-raio-pilula); }
-.wo-home-demo__navegador > span { width: 50%; height: var(--wo-espaco-2); margin-left: auto; margin-right: auto; background: var(--wo-branco); border-radius: var(--wo-raio); }
-.wo-home-demo__estrutura { position: absolute; inset: var(--wo-cena-inicio-celular) 0 0; background: var(--wo-papel); border-radius: 0 0 var(--wo-raio) var(--wo-raio); }
-.wo-home-demo__topo-app { display: flex; justify-content: space-between; padding: var(--wo-espaco-1) var(--wo-cena-respiro); border-bottom: var(--wo-linha-fina) solid var(--wo-linha); }
-.wo-home-demo__topo-app i { width: 25%; height: var(--wo-espaco-2); }
-.wo-home-demo__menu-app { position: absolute; top: var(--wo-cena-inicio-celular); bottom: 0; width: var(--wo-cena-menu); display: flex; flex-direction: column; gap: var(--wo-cena-respiro); padding: var(--wo-cena-respiro); border-right: var(--wo-linha-fina) solid var(--wo-linha); }
-.wo-home-demo__menu-app i { height: var(--wo-espaco-2); }
-.wo-home-demo__blocos { display: grid; gap: var(--wo-cena-respiro); position: absolute; inset: var(--wo-cena-inicio) var(--wo-cena-respiro) var(--wo-cena-respiro) calc(var(--wo-cena-menu) + var(--wo-cena-respiro)); }
-.wo-home-demo--saas > .wo-home-cena__cartao { border: var(--wo-linha-fina) solid var(--wo-linha); box-shadow: none; }
-.wo-home-demo__campos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--wo-cena-respiro); }
-.wo-home-demo__campos i { display: block; height: var(--wo-espaco-3); margin-top: var(--wo-espaco-1); border: var(--wo-linha-fina) solid var(--wo-linha); border-radius: var(--wo-raio); background: var(--wo-papel); }
-.wo-home-demo__senha { padding-left: var(--wo-espaco-1); font-style: normal; color: var(--wo-tinta-2); }
-.wo-home-demo__minicartoes { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--wo-espaco-1); margin-bottom: var(--wo-espaco-1); }
-.wo-home-demo__minicartoes i { display: block; border-radius: var(--wo-raio); background: var(--wo-papel-2); height: var(--wo-espaco-3); border-left: var(--wo-linha-forte) solid var(--wo-violeta); }
-.wo-home-demo__painel-app .wo-home-demo__grafico { height: var(--wo-espaco-5); }
-.wo-home-demo__publicado { display: flex; align-items: center; justify-content: space-between; gap: var(--wo-espaco-1); }
-.wo-home-demo__publicado .wo-home-cena__etiqueta { padding-inline: var(--wo-espaco-1); }
+/* Cena 5: um pedido, duas interfaces; sem o palco, o estado final. A letra compensa a escala do
+   palco (--wo-palco-escala, de home.js) para ficar com 12 px ou mais na tela. Celular baixo: o app
+   e o sistema numa faixa. */
+.wo-apps { --wo-apps-letra: max(13px, calc(12.2px / var(--wo-palco-escala, 1))); position: relative; display: grid; gap: var(--wo-cena-respiro); margin-top: var(--wo-cena-inicio-celular); color: var(--wo-tinta); font-size: var(--wo-apps-letra); line-height: 1.3; }
+:where(.wo-apps) small { display: block; color: var(--wo-tinta-2); font-size: inherit; }
+:where(.wo-apps) strong { display: block; font-size: 1.1em; font-weight: 600; }
+.wo-apps__app, .wo-apps__sistema { min-width: 0; padding: var(--wo-cena-respiro); border: var(--wo-linha-fina) solid var(--wo-linha); border-radius: var(--wo-raio); background: var(--wo-branco); box-shadow: var(--wo-sombra-palco); }
+.wo-apps > .wo-apps__app { border-radius: calc(var(--wo-raio) * 2.4); }
+.wo-apps__marca { display: flex; align-items: center; gap: var(--wo-espaco-1); }
+.wo-apps__icone { display: grid; place-items: center; width: 2.4em; height: 2.4em; flex: none; border-radius: var(--wo-espaco-1); background: var(--wo-violeta-forte); color: var(--wo-branco); }
+.wo-apps__icone svg { width: 1.3em; height: 1.3em; }
+.wo-apps__abertura { margin-top: var(--wo-espaco-2); }
+.wo-apps__abertura strong { font: 600 1.35em/1.2 var(--wo-fonte-titulo); letter-spacing: -0.02em; }
+.wo-apps__pedido { position: relative; display: grid; justify-items: start; gap: var(--wo-espaco-miudo); margin-top: var(--wo-espaco-1); padding: var(--wo-cena-respiro); border: var(--wo-linha-fina) solid var(--wo-linha); border-radius: var(--wo-raio); background: var(--wo-papel); }
+.wo-apps__estado { padding: 0.15em 0.6em; border-radius: var(--wo-raio-pilula); background: var(--wo-papel-2); color: var(--wo-violeta-forte); font-weight: 600; white-space: nowrap; }
+.wo-apps__acao { display: block; margin-top: var(--wo-espaco-1); padding: 0.55em 0.8em; border-radius: var(--wo-raio); background: var(--wo-violeta-forte); color: var(--wo-branco); font-weight: 600; }
+.wo-apps__abas { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--wo-espaco-miudo) var(--wo-espaco-1); margin-top: var(--wo-cena-respiro); padding-top: var(--wo-espaco-1); border-top: var(--wo-linha-fina) solid var(--wo-linha); color: var(--wo-tinta-2); }
+.wo-apps__abas > :first-child { color: var(--wo-violeta-forte); font-weight: 600; }
+.wo-apps__sistema .wo-apps__abas { justify-content: start; gap: var(--wo-espaco-3); padding-bottom: var(--wo-espaco-1); border-bottom: var(--wo-linha-fina) solid var(--wo-linha); }
+.wo-apps__linha { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--wo-espaco-miudo) var(--wo-espaco-1); padding: var(--wo-espaco-1) 0; border-bottom: var(--wo-linha-fina) solid var(--wo-linha); }
+.wo-apps__lista { margin-top: var(--wo-espaco-1); }
+.wo-apps__recebido { padding-inline: var(--wo-espaco-1); border: var(--wo-linha-fina) solid var(--wo-marca-claro); border-radius: var(--wo-raio); background: var(--wo-papel); }
+.wo-apps__detalhe { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--wo-espaco-miudo) var(--wo-espaco-1); width: 100%; }
+.wo-apps__mudanca { color: var(--wo-sucesso-claro); white-space: nowrap; }
+.wo-apps__conexao { display: grid; place-items: center; justify-self: center; width: var(--wo-espaco-4); height: var(--wo-espaco-4); border-radius: var(--wo-raio-pilula); background: var(--wo-violeta-forte); color: var(--wo-branco); box-shadow: 0 0 0 var(--wo-espaco-miudo) var(--wo-abertura-brilho); }
+.wo-apps__conexao svg { transform: rotate(-90deg); transition: transform var(--wo-palco-transicao) ease; }
+.wo-apps__confirmacao { color: var(--wo-hero-texto-secundario); text-align: center; }
+.wo-apps__foco { position: absolute; inset: -3px; border: var(--wo-linha-forte) solid var(--wo-violeta); border-radius: var(--wo-raio); visibility: hidden; }
+.wo-apps__espera, .wo-apps :is(.wo-apps__inicial, .wo-apps__enviado) { display: none; }
+[data-palco-modo] .wo-apps:not(:has([data-passo='6'][data-visivel])) .wo-apps__app .wo-apps__final,
+[data-palco-modo] .wo-apps:not(:has([data-passo='5'][data-visivel])) .wo-apps__sistema .wo-apps__final { display: none; }
+[data-palco-modo] .wo-apps:not(:has([data-passo='3'][data-visivel])) .wo-apps__app .wo-apps__inicial,
+[data-palco-modo] .wo-apps:not(:has([data-passo='5'][data-visivel])) .wo-apps__sistema .wo-apps__inicial,
+[data-palco-modo] .wo-apps:has([data-passo='3'][data-visivel]):not(:has([data-passo='6'][data-visivel])) .wo-apps__enviado,
+[data-palco-modo] .wo-apps:not(:has([data-passo='4'][data-visivel])) .wo-apps__espera { display: block; }
+[data-palco-modo] .wo-apps:has([data-passo='2'][data-visivel]):not(:has([data-passo='3'][data-visivel])) .wo-apps__foco { visibility: visible; }
+[data-palco-modo] .wo-apps:not(:has([data-passo='4'][data-visivel])) .wo-apps__recebido { height: 0; padding-block: 0; border-width: 0; overflow: hidden; }
+[data-palco-modo] .wo-apps:not(:has([data-passo='6'][data-visivel])) .wo-apps__conexao svg { transform: rotate(90deg); }
+@media (max-width: 1023.98px) {
+  .wo-apps__extra, .wo-apps__confirmacao { display: none; }
+  .wo-apps__app { width: 86%; justify-self: center; }
+  .wo-apps__conexao { margin-block: calc(var(--wo-espaco-1) * -1); }
+}
+@media (max-width: 1023.98px) and (max-height: 760px) {
+  .wo-apps__marca strong, .wo-apps__abertura, .wo-apps__recebido strong, .wo-apps__detalhe { display: none; }
+  .wo-apps__app { width: 100%; }
+}
+@media (max-width: 1023.98px) and (max-height: 620px) {
+  .wo-apps__pedido > small:first-of-type, .wo-apps__cliente { display: none; }
+  .wo-apps__icone { width: 1.8em; height: 1.8em; }
+}
+@media (min-width: 1024px) {
+  .wo-home-cena--saas { max-width: none; }
+  .wo-apps { --wo-apps-letra: 13px; grid-template-columns: 236px auto minmax(0, 1fr); align-items: center; margin-top: var(--wo-cena-inicio); }
+  .wo-apps__app { padding: var(--wo-espaco-2); }
+  .wo-apps__conexao svg { transform: rotate(180deg); }
+  [data-palco-modo] .wo-apps:not(:has([data-passo='6'][data-visivel])) .wo-apps__conexao svg { transform: none; }
+  .wo-apps__confirmacao { grid-column: 1 / -1; }
+}
 
 [data-palco-modo] .wo-home-demo { margin-top: var(--wo-cena-inicio-celular); }
 [data-palco-modo] .wo-home-demo--agente { gap: var(--wo-cena-respiro); }
@@ -1111,8 +1012,6 @@
 [data-palco-modo] .wo-home-demo__fios [data-passo] { transform: none; }
 [data-palco-modo] .wo-home-demo__fios [data-passo]:not([data-visivel]) { stroke-dashoffset: 1; }
 [data-palco-modo] .wo-home-demo--agente .wo-home-cena__cartao::before { display: none; }
-[data-palco-modo] .wo-home-demo--saas .wo-home-cena__cartao { padding: var(--wo-espaco-1); }
-[data-palco-modo] .wo-home-demo--saas .wo-home-demo__rotulo { margin-bottom: var(--wo-espaco-1); }
 @media (min-width: 1024px) {
   [data-palco-modo] .wo-home-demo__fios { top: var(--wo-cena-inicio); }
   [data-palco-modo] .wo-home-demo { margin-top: var(--wo-cena-inicio); }
@@ -1127,12 +1026,6 @@
   [data-palco-modo] .wo-home-demo__tarefa { left: calc(50% + var(--wo-cena-respiro) * 1.5); top: calc(var(--wo-cena-lead-alto) + var(--wo-espaco-4)); }
   [data-palco-modo] .wo-home-demo__ganho { left: calc(75% + var(--wo-cena-respiro) * 1.75); top: calc(var(--wo-cena-lead-alto) + var(--wo-espaco-4)); }
   [data-palco-modo] .wo-home-demo__origem { width: 50%; }
-  [data-palco-modo] .wo-home-demo--saas { grid-template-columns: 1fr 1.3fr; padding-top: calc(var(--wo-cena-lead-alto) + var(--wo-espaco-2)); gap: var(--wo-espaco-2); min-height: var(--wo-cena-janela); }
-  [data-palco-modo] .wo-home-demo__acesso { grid-row: span 2; align-self: start; }
-  [data-palco-modo] .wo-home-demo__campos { grid-template-columns: 1fr; gap: var(--wo-espaco-3); }
-  [data-palco-modo] .wo-home-demo__campos i { height: var(--wo-espaco-4); }
-  [data-palco-modo] .wo-home-demo__painel-app .wo-home-demo__grafico { height: var(--wo-cena-grafico); }
-  [data-palco-modo] .wo-home-demo__publicado { grid-column: 1 / -1; }
 }
 
 /* ---------- Seções depois do palco (spec 15.4) ----------
@@ -1207,10 +1100,4 @@
 @media (min-width: 768px) {
   .wo-home-entradas__grade { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .wo-home-processo__garantias { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-}
-
-@media (max-width: 560px) {
-  .wo-operacao__sistemas {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }

@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
    não pausa mais (15.6). As regras de toda página (o bloco do fundo, a pausa que vale para a visita,
    menos movimento, economia de dados e sem JavaScript) estão em fundo.spec.ts, e a varredura de
    contraste do hero também. */
-const PAUSA = 'Pausar animação do fundo';
+const PAUSA = 'Pausar animação';
 
 test.describe('vídeo do fundo', () => {
   test.use({ reducedMotion: 'no-preference' });
@@ -27,7 +27,7 @@ test.describe('vídeo do fundo', () => {
     await expect(video).toHaveAttribute('data-tocando');
   });
 
-  test('o botão do topo pausa e retoma com nome fixo', async ({ page }) => {
+  test('o botão do rodapé pausa e retoma com nome fixo', async ({ page }) => {
     await page.goto('/');
     const botao = page.getByRole('button', { name: PAUSA, exact: true });
     await expect(page.locator('[data-fundo-video]')).toHaveJSProperty('paused', false);
@@ -40,26 +40,26 @@ test.describe('vídeo do fundo', () => {
     await expect(page.locator('[data-fundo-video]')).toHaveJSProperty('paused', false);
   });
 
-  /* WCAG 2.2.2: o controle de pausa fica ao alcance em qualquer ponto da página. Ele mora no topo
-     fixo, com 40 px no desktop e 44 px abaixo de 768 px, e nada o cobre. */
-  test('a pausa fica no topo, visível e clicável em qualquer ponto da rolagem', async ({ page }, info) => {
+  /* WCAG 2.2.2: o controle de pausa fica ao alcance. Desde o adendo 2 da 13A ele mora no rodapé de
+     toda página, como texto, com alvo de 44 px abaixo de 768 px; no fim da página nada o cobre, nem o
+     botão flutuante de WhatsApp, e o teclado chega nele logo depois do último link do rodapé. */
+  test('a pausa fica no rodapé, visível, clicável e alcançável pelo teclado', async ({ page }, info) => {
     await page.goto('/');
     await expect(page.locator('[data-fundo-video]')).toHaveAttribute('data-tocando');
-    const botao = page.getByRole('button', { name: PAUSA });
-    for (const fracao of [0, 0.4, 1]) {
-      await page.evaluate((f) => scrollTo({ top: f * (document.documentElement.scrollHeight - innerHeight), behavior: 'instant' }), fracao);
-      const caixa = (await botao.boundingBox())!;
-      const topo = (await page.locator('.wo-topo').boundingBox())!;
-      expect(caixa.y, `rolada a ${fracao * 100}%`).toBeGreaterThanOrEqual(topo.y);
-      expect(caixa.y + caixa.height, `rolada a ${fracao * 100}%`).toBeLessThanOrEqual(topo.y + topo.height);
-      const lado = info.project.name === 'desktop' ? 40 : 44;
-      expect(Math.round(caixa.width)).toBe(lado);
-      expect(Math.round(caixa.height)).toBe(lado);
-      expect(await botao.evaluate((el) => {
-        const r = el.getBoundingClientRect();
-        return el.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2));
-      }), `rolada a ${fracao * 100}%`).toBe(true);
-    }
+    const botao = page.getByRole('button', { name: PAUSA, exact: true });
+    await expect(page.locator('.wo-rodape [data-fundo-pausa]')).toHaveCount(1);
+    await page.evaluate(() => scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }));
+    await expect(botao).toBeInViewport();
+    const caixa = (await botao.boundingBox())!;
+    expect(caixa.height, info.project.name).toBeGreaterThanOrEqual(info.project.name === 'desktop' ? 36 : 44);
+    expect(await botao.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return el.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2));
+    }), 'nada cobre o centro do botão no fim da página').toBe(true);
+    await page.locator('.wo-rodape__coluna--empresa a').last().focus();
+    await page.keyboard.press('Tab');
+    await expect(botao).toBeFocused();
+    await expect(botao).toHaveCSS('outline-style', 'solid');
   });
 
   test('continua tocando fora do hero, até o fim da página', async ({ page }) => {

@@ -80,12 +80,10 @@
   --wo-info: #7dd3fc;
   /* Fundos de situação, inclusive a pílula Em desenvolvimento. */
   --wo-alerta-fundo: rgb(245 158 11 / 0.12);
-  --wo-info-fundo: rgb(56 189 248 / 0.12);
   --wo-neutro-fundo: rgb(148 163 184 / 0.14);
   /* Nomes que os formulários já usam, com os valores escuros de hoje: o formulário continua igual
      sobre o fundo escuro. */
   --wo-superficie-2: #17181e;
-  --wo-superficie-3: #1d1e26;
   /* Borda de campo e de caixa de marcar: 0,45 dá 3,2:1 sobre #17181e. O design usava 0,19 (1,6:1),
      abaixo dos 3:1 que a WCAG 1.4.11 pede para o contorno de um controle. */
   --wo-borda-campo: rgba(208, 200, 237, 0.45);
@@ -94,9 +92,7 @@
   --wo-acento-borda: rgba(162, 139, 249, 0.5);
   --wo-acento-borda-forte: rgba(162, 139, 249, 0.6);
   --wo-sucesso-fundo: rgba(34, 197, 94, 0.12);
-  --wo-sucesso-ponto: #22c55e;
   --wo-erro-fundo: rgba(239, 68, 68, 0.08);
-  --wo-erro-fundo-forte: rgba(239, 68, 68, 0.12);
   --wo-erro-borda: rgba(239, 68, 68, 0.4);
 
   /* Tipografia: Geist nos títulos e Inter no texto (spec 5.2) */
@@ -160,9 +156,10 @@
   --wo-cena-coluna-celular: 162px;
   --wo-cena-lead-alto: 68px;
   --wo-cena-lead-segundo: 136px;
-  --wo-cena-janela: 414px;
-  --wo-cena-menu: 44px;
   --wo-cena-metrica: 30px;
+  /* Vitrine do hero da Home: tempo de cada frente e troca. */
+  --wo-vitrine-tempo: 4.5s;
+  --wo-vitrine-troca: 480ms ease;
   /* Camada de leitura sobre o pôster e o vídeo da onda (spec 6.3): preto de 55% no alto a 70%
      embaixo, mais a vinheta nas bordas. */
   --wo-leitura-alto: rgb(0 0 0 / 0.55);
@@ -262,12 +259,9 @@
   --wo-alerta: var(--wo-alerta-claro);
   --wo-erro: var(--wo-erro-claro);
   --wo-info: var(--wo-info-claro);
-  /* Nomes que as peças de dentro do cartão usam: as áreas dos eventos, a camada da automação e o
-     ponto de "conectado", no hero da Home. */
-  --wo-superficie-3: var(--wo-papel-2);
+  /* Destaque violeta das peças de dentro do cartão. */
   --wo-acento-fundo: rgb(124 58 237 / 0.1);
   --wo-acento-borda: rgb(124 58 237 / 0.5);
-  --wo-sucesso-ponto: var(--wo-sucesso-claro);
 }
 
 /* Texto do menu do topo: branco a 85% (spec 5.5), um pouco acima dos 75% do texto secundário. */

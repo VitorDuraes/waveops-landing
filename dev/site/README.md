@@ -13,8 +13,9 @@ O site é estático, sem framework e sem dependência em produção. Cada págin
 | `assets/site/components.css` | Peças compartilhadas do design system |
 | `assets/site/paginas/<id>.css` | O que só uma página usa |
 | `assets/site/site.js` | Menu e topo fixo, flutuante, seletores, clique de WhatsApp e âncoras antigas |
-| `assets/site/fundo.js` | Onda contínua e pausa no topo, com preferência durante a visita |
+| `assets/site/fundo.js` | Onda contínua e o botão "Pausar animação" do rodapé, com preferência durante a visita |
 | `assets/site/paginas/home.js` | Cinco cenas montadas e desmontadas com a rolagem |
+| `assets/site/paginas/vitrine.js` | Vitrine do hero da Home: abas e troca automática das cinco frentes |
 | `assets/funil.js` | Medição de funil (SPEC-18) |
 
 ## Esqueleto de uma página

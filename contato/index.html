@@ -10,12 +10,12 @@
     <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png" />
     <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
     <link rel="preload" href="/assets/fonts/geist-variavel-latin.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="stylesheet" href="/assets/site/tokens.css?v=9e3460ca" />
+    <link rel="stylesheet" href="/assets/site/tokens.css?v=798ff057" />
     <link rel="stylesheet" href="/assets/site/base.css?v=801aee0a" />
-    <link rel="stylesheet" href="/assets/site/components.css?v=9871a8a1" />
+    <link rel="stylesheet" href="/assets/site/components.css?v=ddabd7d0" />
     <script defer src="/assets/funil.js?v=2842b2e3"></script>
     <script type="module" src="/assets/site/site.js?v=455a9806"></script>
-    <script type="module" src="/assets/site/fundo.js?v=601e2bc9"></script>
+    <script type="module" src="/assets/site/fundo.js?v=8e1f9d53"></script>
     <noscript><style>.wo-topo{position:relative;background:var(--wo-noite)}[data-seletor] [data-painel]{display:block!important}[data-seletor] [data-opcoes],[data-sem-js-oculto]{display:none!important}@media (max-width:1180px){.wo-topo__painel[hidden]{display:flex!important}.wo-topo__menu{display:none!important}}</style></noscript>
     <!-- /parcial:head -->
     <link rel="stylesheet" href="/assets/site/paginas/contato.css?v=35fcdd16" />
@@ -68,10 +68,6 @@
         <div class="wo-topo__acoes">
           <a class="wo-topo__cliente" href="https://portal.waveops.com.br/cliente/login">Área do cliente</a>
           <a class="wo-btn wo-btn--secundario wo-topo__cta" href="/contato/">Falar com especialista</a>
-          <button class="wo-topo__pausa" type="button" aria-pressed="false" aria-label="Pausar animação do fundo" hidden data-fundo-pausa>
-            <svg width="1em" height="1em" class="wo-topo__icone-pausa" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M6 4h4v16H6zM14 4h4v16h-4z" /></svg>
-            <svg width="1em" height="1em" class="wo-topo__icone-tocar" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="m7 4 13 8-13 8z" /></svg>
-          </button>
           <button class="wo-topo__menu" type="button" aria-controls="menu-movel" aria-expanded="false" aria-label="Abrir menu">
             <svg width="1em" height="1em" class="wo-topo__icone-abrir" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
             <svg width="1em" height="1em" class="wo-topo__icone-fechar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18" /></svg>
@@ -335,6 +331,7 @@
         <div class="wo-rodape__base">
           <p>WaveOps · CNPJ 64.572.784/0001-05 · Uberlândia, MG</p>
           <p>© 2026 WaveOps. Todos os direitos reservados.</p>
+          <button class="wo-rodape__pausa" type="button" aria-pressed="false" hidden data-fundo-pausa><svg width="1em" height="1em" class="wo-rodape__icone-pausa" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M6 4h4v16H6zM14 4h4v16h-4z" /></svg><svg width="1em" height="1em" class="wo-rodape__icone-tocar" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="m7 4 13 8-13 8z" /></svg>Pausar animação</button>
         </div>
       </div>
     </footer>

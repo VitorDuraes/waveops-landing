@@ -181,15 +181,18 @@ test('o parcial do fundo traz o pôster e o vídeo de 6.3, escondidos do leitor 
   assert.doesNotMatch(video, /\s(src|autoplay)\b/, 'o vídeo nasce sem fonte e sem autoplay: a fonte só entra depois do load');
 });
 
-test('o botão de pausa do fundo mora no topo, com nome fixo, aria-pressed e hidden', () => {
-  const topo = ler('dev/site/parciais/topo.html');
-  const botao = /<button\b[^>]*data-fundo-pausa[^>]*>/.exec(topo)?.[0] ?? '';
-  assert.ok(botao, 'o topo não tem o botão de pausa do fundo');
-  assert.match(botao, /\stype="button"/);
-  assert.match(botao, /\saria-label="Pausar animação do fundo"/);
-  assert.match(botao, /\saria-pressed="false"/);
-  assert.match(botao, /\shidden(?=[\s>])/, 'o botão nasce escondido: só aparece quando o vídeo pode tocar');
-  for (const p of paginas) assert.doesNotMatch(semParciais(ler(p.arquivo)), /data-video-pausa|data-fundo-pausa/, `${p.arquivo}: pausa fora do topo`);
+// Adendo 2 da 13A (20/10): a pausa sai do topo e vira texto discreto no rodapé, com o mesmo estado.
+test('o botão de pausa mora no rodapé, com o texto fixo "Pausar animação", aria-pressed e hidden', () => {
+  assert.doesNotMatch(ler('dev/site/parciais/topo.html'), /data-fundo-pausa|wo-topo__pausa/, 'o topo não tem mais botão de pausa');
+  const rodape = ler('dev/site/parciais/rodape.html');
+  const botao = /<button\b[^>]*data-fundo-pausa[^>]*>([\s\S]*?)<\/button>/.exec(rodape);
+  assert.ok(botao, 'o rodapé não tem o botão de pausa');
+  assert.match(botao[0], /\stype="button"/);
+  assert.match(botao[0], /\saria-pressed="false"/);
+  assert.match(botao[0], /\shidden(?=[\s>])/, 'o botão nasce escondido: só aparece quando há animação');
+  assert.doesNotMatch(botao[0], /\saria-label=/, 'o nome acessível é o próprio texto visível');
+  assert.equal(botao[1].replace(/<[^>]+>/g, '').trim(), 'Pausar animação');
+  for (const p of paginas) assert.doesNotMatch(semParciais(ler(p.arquivo)), /data-video-pausa|data-fundo-pausa/, `${p.arquivo}: pausa fora do rodapé`);
 });
 
 test('o topo fica sempre escuro: a troca por data-faixa-escura saiu (spec 15.2)', () => {
@@ -227,8 +230,7 @@ for (const [arquivo, esperados] of Object.entries(VEUS)) {
   });
 }
 
-// A ordem da cascata é a da lista de 15.3 (etiquetas, selo, título, frase, botões, nota e cartão),
-// não a do HTML: na Home a frase fica no alto à direita e entra depois do título.
+// A cascata acompanha a leitura do hero, sem buracos na numeração.
 test('toda página entra em cascata: os blocos do hero numerados de 0 em diante, sem buraco', () => {
   for (const p of paginas) {
     const html = semParciais(ler(p.arquivo));
@@ -241,12 +243,31 @@ test('toda página entra em cascata: os blocos do hero numerados de 0 em diante,
   }
 });
 
-test('na Home a cascata segue a lista de 15.3', () => {
+// Adendo 1 da 13A: o cartão do hero passa pelas cinco frentes. Tudo está no HTML; o JavaScript só troca
+// qual aparece. Sem aria-live: a troca automática não interrompe o leitor de tela.
+test('a vitrine do hero tem as cinco frentes no HTML, na ordem, com abas e o aviso', () => {
+  const html = ler('index.html');
+  const inicio = html.indexOf(' data-vitrine>');
+  const cartao = html.slice(inicio, html.indexOf('</figure>', inicio));
+  assert.ok(inicio > 0, 'a Home não tem a vitrine');
+  assert.match(cartao, /class="wo-maquete__aviso">Fluxo ilustrativo</);
+  const nomes = [...cartao.matchAll(/class="wo-vitrine__nome">([^<]+)</g)].map((m) => m[1]);
+  assert.deepEqual(nomes, ['Automação de atendimento', 'Agentes de IA', 'Painéis de gestão', 'CRMs sob medida', 'Apps e sistemas']);
+  const abas = [...cartao.matchAll(/<button\b[^>]*aria-controls="([^"]+)"[^>]*>/g)];
+  assert.equal(abas.length, 5);
+  for (const [, id] of abas) assert.match(cartao, new RegExp(`id="${id}"`), `painel ${id}`);
+  assert.deepEqual(abas.map(([tag]) => /aria-pressed="true"/.test(tag)), [true, false, false, false, false]);
+  assert.equal((cartao.match(/\sdata-ativo\b/g) ?? []).length, 1, 'só o primeiro painel nasce ativo');
+  assert.match(cartao, /role="group"[^>]*data-sem-js-oculto/, 'as abas somem sem JavaScript');
+  assert.doesNotMatch(cartao, /aria-live/);
+});
+
+test('na Home a cascata reúne selo, título, explicação e ações antes do visual', () => {
   const html = ler('index.html');
   // O primeiro elemento da página com cada atributo: todos estão no hero.
   const ordem = [
-    ['class="wo-home-hero__etiquetas', 0], ['class="wo-etiqueta-hero"', 1], ['id="home-titulo"', 2], ['class="wo-home-hero__frase"', 3],
-    ['class="wo-acoes"', 4], ['class="wo-nota-mono', 5], ['class="wo-home-hero__visual"', 6],
+    ['class="wo-etiqueta-hero"', 0], ['id="home-titulo"', 1], ['class="wo-home-hero__frase"', 2],
+    ['class="wo-acoes"', 3], ['class="wo-nota-mono', 4], ['class="wo-home-hero__visual"', 5],
   ];
   for (const [gancho, n] of ordem) {
     const tag = new RegExp(`<[a-z0-9]+\\s[^>]*${gancho}[^>]*>`).exec(html)?.[0] ?? '';

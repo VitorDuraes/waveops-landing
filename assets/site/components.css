@@ -514,6 +514,43 @@ html[data-topo='fixo'] .wo-topo {
   }
 }
 
+/* ---------- Entrada do site (Tarefa 13B) ----------
+   Camada do parcial chegada, nascida com hidden. Só aparece com <html data-chegada>, escrito por
+   chegada.js antes da primeira pintura: noite até o desenho começar, depois o canvas pinta tudo. A
+   trava tira a camada no tempo do token mesmo se o script parar; com menos movimento ela vale 0. */
+@keyframes wo-chegada-trava {
+  to {
+    visibility: hidden;
+  }
+}
+
+.wo-chegada {
+  position: fixed;
+  inset: 0;
+  z-index: var(--wo-z-chegada);
+}
+
+:root[data-chegada]:not([data-chegada='feita']) .wo-chegada {
+  display: block !important;
+  animation: wo-chegada-trava var(--wo-chegada-trava) step-end forwards;
+}
+
+:root[data-chegada='ligada'] .wo-chegada {
+  background: var(--wo-noite-hero);
+}
+
+/* Pulada, a camada some mas ainda recebe o ponteiro: o clique do toque que pulou cai nela. */
+:root[data-chegada='saindo'] .wo-chegada {
+  opacity: 0;
+  transition: opacity var(--wo-transicao);
+}
+
+.wo-chegada__tela {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 /* ---------- Abertura e cartão noite (spec 5.4, 7 e 15.2) ----------
    A abertura é o hero das páginas internas: transparente, com a onda no brilho inteiro por trás. O
    topo flutua sobre ela, então o respiro de cima é a altura do topo mais o ritmo da seção. O texto

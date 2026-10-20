@@ -135,7 +135,10 @@
      vence o botão flutuante. O fundo vivo fica atrás de tudo, em z-index -1. */
   --wo-z-flutuante: 20;
   --wo-z-topo: 30;
+  --wo-z-chegada: 35;
   --wo-z-pular: 40;
+  /* Entrada do site (Tarefa 13B): passado este tempo, o CSS tira a camada mesmo sem o script. */
+  --wo-chegada-trava: 2s;
 
   /* Palco de fundo da Home (spec 13): altura de rolagem da abertura e de cada capítulo, troca de
      cena e de peça, sombra dos cartões das cenas e fundo do painel de texto, que garante a

@@ -7,13 +7,15 @@ O site é estático, sem framework e sem dependência em produção. Cada págin
 | Caminho | O que é |
 |---|---|
 | `dev/site/paginas.json` | Lista das páginas (id, arquivo, URL). Fonte do build, do lint e dos testes |
-| `dev/site/parciais/` | `head`, `topo`, `fundo`, `whatsapp-flutuante`, `cta-final`, `rodape`, `form-contato`, `form-interesse` |
+| `dev/site/parciais/` | `head`, `chegada`, `topo`, `fundo`, `whatsapp-flutuante`, `cta-final`, `rodape`, `form-contato`, `form-interesse` |
 | `assets/site/tokens.css` | Cores, tipografia, raios, sombras, contêiner. Valor novo entra aqui primeiro |
 | `assets/site/base.css` | Fontes, reset, foco, contêiner, seção, títulos |
 | `assets/site/components.css` | Peças compartilhadas do design system |
 | `assets/site/paginas/<id>.css` | O que só uma página usa |
 | `assets/site/site.js` | Menu e topo fixo, flutuante, seletores, clique de WhatsApp e âncoras antigas |
 | `assets/site/fundo.js` | Onda contínua e o botão "Pausar animação" do rodapé, com preferência durante a visita |
+| `assets/site/chegada.js` | Entrada do site, a decisão: script clássico no `head`, antes do CSS (ver "Entrada do site") |
+| `assets/site/chegada-cena.js` | Entrada do site, o desenho em canvas, pedido só quando a entrada roda |
 | `assets/site/paginas/home.js` | Cinco cenas montadas e desmontadas com a rolagem |
 | `assets/site/paginas/vitrine.js` | Vitrine do hero da Home: abas e troca automática das cinco frentes |
 | `assets/funil.js` | Medição de funil (SPEC-18) |
@@ -36,6 +38,8 @@ O site é estático, sem framework e sem dependência em produção. Cada págin
   </head>
   <body data-pagina="<id>">
     <a class="wo-pular" href="#conteudo">Pular para o conteúdo</a>
+    <!-- parcial:chegada -->
+    <!-- /parcial:chegada -->
     <!-- parcial:topo ativo="<id>" -->
     <!-- /parcial:topo -->
     <main id="conteudo" tabindex="-1">
@@ -90,6 +94,59 @@ Seletor de painel único (o `site.js` liga sozinho):
 ```
 
 Todos os painéis saem no HTML. Sem JavaScript, o `<noscript>` do `head` mostra todos e esconde os botões.
+
+## Entrada do site (Tarefa 13B)
+
+Na primeira página da visita, a tela abre escura, o hub do Sine Nodes se fecha no centro, os dois nós
+acendem e a onda passa da esquerda para a direita pelo hub. Então fios de luz em feixes, no desenho
+das linhas da onda do fundo, saem do anel, e o próprio anel cresce como um portal circular que revela
+a página por dentro, levando a crista e o nó de cada lado. A cascata do hero recomeça quando o portal
+abre. São 1,45 s no relógio da camada.
+
+Peças:
+
+| Peça | Papel |
+|---|---|
+| Parcial `chegada` | `div.wo-chegada[hidden][aria-hidden="true"][data-chegada-camada]` com um `canvas`, logo depois do "Pular para o conteúdo". Nada focável |
+| `assets/site/chegada.js` | Script clássico no `head`, antes do CSS, para rodar antes da primeira pintura. `deveRodarChegada(window)` decide: primeira página da visita (`sessionStorage["waveops:chegada"]`), página anterior fora do site (aba nova aberta de um link do site não herda a sessão no Chromium, mas traz o `referrer` da mesma origem), movimento liberado, sem economia de dados, aba à vista, com sessão disponível. Se roda, grava a chave, escreve `data-chegada="ligada"` no `<html>` e pede o desenho com `import()`. Falhou o pedido, escreve `feita` |
+| `assets/site/chegada-cena.js` | O desenho em canvas, com as cores dos tokens e a geometria canônica da marca (viewBox 100: hub de raio 9 e traço 5, nós de raio 7,5, as duas cristas quadráticas) |
+| `components.css` | A camada só aparece com `<html data-chegada>` diferente de `feita`. Em `ligada` a camada é noite; depois o canvas pinta tudo. A animação `wo-chegada-trava` esconde a camada em `--wo-chegada-trava` (2 s) mesmo se o script parar; com menos movimento ela acaba na hora |
+
+Estados em `<html data-chegada>`: `ligada` (antes da pintura), `desenhando` (primeiro quadro do
+canvas), `abrindo` (o portal cresce e a cascata recomeça), `saindo` (pulada: some em 160 ms) e
+`feita`. Sem atributo, a entrada não rodou nesta página.
+
+Relógio: o `currentTime` da animação `wo-chegada-trava` da camada. Desenho e trava contam o mesmo
+tempo, e o desenho que chega depois de 600 ms não desenha: a camada só sai.
+
+| ms | O que acontece |
+|---|---|
+| 0 a 80 | Noite |
+| 80 a 320 | O hub se fecha. O centro continua escuro: só abre com o portal, em 600 ms |
+| 180 e 230 | O nó da esquerda e o da direita acendem |
+| 300 a 560 | A onda se desenha do nó da esquerda, pelo hub, até o nó da direita; o anel brilha |
+| 600 | Os fios saem do anel; o anel cresce em escala exponencial até passar dos cantos; a cascata do hero recomeça |
+| 810 a 1200 | A crista e o nó de cada lado, levados pelo anel, somem |
+| 1450 | O portal saiu da tela: `feita` |
+
+Detalhes que são fáceis de quebrar:
+
+1. **A cascata do hero começa por baixo da camada** (é CSS e não espera o JavaScript). O desenho guarda
+   as animações dos blocos `[data-entrada]` no primeiro quadro e as recomeça (`cancel()` e `play()`)
+   na abertura ou na pulada. Quem espera o fim da cascata precisa pegar as animações depois disso.
+2. **Clique, toque, rolagem, tecla e aba oculta pulam.** A tecla não é cancelada: o primeiro Tab pula
+   e já leva ao "Pular para o conteúdo". Clique ou toque não chegam à página: no pulo pelo ponteiro, a
+   camada some (`saindo`) mas continua recebendo o ponteiro até o dedo ou o botão soltar, e só sai
+   200 ms depois. O clique sintetizado do toque sai depois do `touchend` e cai na camada, não no link
+   de baixo (`chegada.spec.ts` toca o botão do hero e o WhatsApp flutuante no celular).
+3. **Os fios usam semente fixa a cada quadro**: a entrada é sempre a mesma, quadro a quadro.
+4. **Peso:** a entrada cabe em 3,3 KB gzip de JavaScript e 2 KB de CSS por página (decisão do
+   controlador da Tarefa 13B, cota de JS subida na rodada de correção 1). Hoje são 3137 B e 389 B, e
+   `peso.test.mjs` sobe os tetos exatamente isso; o CSS é medido com e sem o bloco da entrada. O
+   desenho tem poucos comentários por isso; a explicação mora aqui.
+5. **Ouvintes:** os quatro de pular saem no fim (`AbortController`), e os de soltar o ponteiro também.
+6. **Testes e capturas de página** que não são da entrada abrem a página como a segunda da visita:
+   `sessionStorage.setItem('waveops:chegada', '1')` num `addInitScript`.
 
 ## Regras
 

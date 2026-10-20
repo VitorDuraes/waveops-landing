@@ -1,87 +1,270 @@
-/* WaveOps · tokens do site institucional.
-   Valores copiados do design aprovado (canvas "WaveOps · Site institucional", 09/10/2026).
-   Só variáveis: nenhuma regra de componente mora aqui. Cor nova entra aqui antes de ser usada. */
+/* WaveOps · tokens do site institucional (novo visual).
+   Duas camadas. Primitivos: a paleta da spec 5.1, um valor por nome, igual em qualquer contexto.
+   Semânticos: o papel que a cor cumpre (fundo, texto, borda, acento). Desde a D20 (spec 15) a página
+   inteira fica no contexto escuro, sobre o fundo vivo da onda: os semânticos de :root são os do
+   escuro, e o cartão claro (.wo-cartao-claro) os redefine para o papel e a tinta dentro dele.
+   Só variáveis: nenhuma regra de componente mora aqui. Valor novo entra aqui antes de ser usado.
+   tests/site/unit/cores.test.mjs confere o contraste dos pares: mexeu em cor, rode o teste. */
 :root {
+  /* Controles nativos e barra de rolagem acompanham o escuro. O cartão claro declara light. */
   color-scheme: dark;
 
-  /* Fundos, do mais fundo ao mais elevado */
-  --wo-fundo: #0a0b0e;
-  --wo-faixa: #101115;
-  --wo-superficie: #121317;
+  /* Primitivos: papel e tinta, para o cartão claro */
+  --wo-papel: #faf8f4;
+  --wo-papel-2: #f1ede6;
+  --wo-tinta: #16130f;
+  --wo-tinta-2: #48433c;
+  --wo-tinta-3: #6b655c;
+  --wo-linha: rgb(22 19 15 / 0.14);
+  --wo-branco: #ffffff;
+
+  /* Primitivos: noite */
+  --wo-noite: #0a0a0a;
+  --wo-noite-hero: #05010e;
+  --wo-cartao-noite: #171717;
+  --wo-clara: #f3f3f1;
+  --wo-clara-2: rgb(255 255 255 / 0.75);
+  --wo-clara-3: #a3a3af;
+  --wo-linha-noite: rgb(255 255 255 / 0.15);
+  /* Véus das seções sobre o fundo vivo (spec 15.2): preto noite a 72% onde a seção 7 da spec diz
+     "Papel" e a 84% onde diz "Papel 2" ou "Noite". A onda continua visível por trás, mais fraca. */
+  --wo-veu: rgb(10 10 10 / 0.72);
+  --wo-veu-forte: rgb(10 10 10 / 0.84);
+
+  /* Primitivos: situação no claro, 4,5:1 sobre o papel, o papel 2 e o branco. O cartão claro volta a
+     eles. */
+  --wo-sucesso-claro: #166534;
+  --wo-alerta-claro: #92400e;
+  --wo-erro-claro: #b91c1c;
+  --wo-info-claro: #0369a1;
+
+  /* Primitivos: marca */
+  --wo-violeta: #7c3aed;
+  --wo-violeta-forte: #6d28d9;
+  /* Verde do WhatsApp escurecido: 4,1:1 com o ícone branco e 3,9:1 com o papel. */
+  --wo-whatsapp: #128c7e;
+  /* A cor mais clara do degradê violeta: o halo atrás das cenas do palco. */
+  --wo-abertura-brilho: rgb(124 58 237 / 0.35);
+  /* As duas pontas do degradê do quadrado da logo (spec D14) e o brilho violeta em volta dele:
+     sombra a 70% e anel interno a 30%. */
+  --wo-marca-claro: #a78bfa;
+  --wo-marca-escuro: #8b5cf6;
+  --wo-sombra-marca: 0 6px 18px -6px rgb(139 92 246 / 0.7), inset 0 0 0 1px rgb(139 92 246 / 0.3);
+
+  /* Primitivo: texto do menu do topo, branco a 85% (spec 5.5), sobre desfoque, então o contraste vale
+     contra o que passa por baixo dele (cores.test.mjs confere o pior caso). */
+  --wo-topo-texto-noite: rgb(255 255 255 / 0.85);
+
+  /* Semânticos: o contexto escuro, que vale para a página inteira (spec 15.2) */
+  --wo-fundo: var(--wo-noite);
+  --wo-fundo-2: var(--wo-cartao-noite);
+  --wo-superficie: var(--wo-cartao-noite);
+  --wo-texto: var(--wo-clara);
+  --wo-texto-2: var(--wo-clara-2);
+  --wo-texto-3: var(--wo-clara-3);
+  --wo-borda: var(--wo-linha-noite);
+  --wo-borda-forte: rgb(255 255 255 / 0.25);
+  --wo-acento: var(--wo-violeta);
+  --wo-acento-hover: var(--wo-violeta-forte);
+  --wo-violeta-texto: #c2b2ff;
+  --wo-acento-texto: var(--wo-violeta-texto);
+  --wo-sobre-acento: var(--wo-branco);
+  /* Anel de foco (WCAG 1.4.11, 3:1): branco no escuro, porque o violeta cai a 1,07:1 no brilho da
+     onda; o cartão claro volta ao violeta. */
+  --wo-foco: var(--wo-branco);
+  /* Fundo do botão de contorno: preto a 30% no escuro, nenhum no claro (spec 5.4). */
+  --wo-contorno-fundo: rgb(0 0 0 / 0.3);
+  --wo-sucesso: #4ade80;
+  --wo-alerta: #fbbf24;
+  --wo-erro: #f87171;
+  --wo-info: #7dd3fc;
+  /* Fundos de situação, inclusive a pílula Em desenvolvimento. */
+  --wo-alerta-fundo: rgb(245 158 11 / 0.12);
+  --wo-neutro-fundo: rgb(148 163 184 / 0.14);
+  /* Nomes que os formulários já usam, com os valores escuros de hoje: o formulário continua igual
+     sobre o fundo escuro. */
   --wo-superficie-2: #17181e;
-  --wo-superficie-3: #1d1e26;
-
-  /* Bordas */
-  --wo-borda: rgba(208, 200, 237, 0.1);
-  --wo-borda-forte: rgba(208, 200, 237, 0.19);
-  /* Borda de campo e de caixa de marcar: 0,45 dá 3,2:1 sobre #17181e. O design usava 0,19
-     (1,6:1), abaixo dos 3:1 que a WCAG 1.4.11 pede para o contorno de um controle. */
+  /* Borda de campo e de caixa de marcar: 0,45 dá 3,2:1 sobre #17181e. O design usava 0,19 (1,6:1),
+     abaixo dos 3:1 que a WCAG 1.4.11 pede para o contorno de um controle. */
   --wo-borda-campo: rgba(208, 200, 237, 0.45);
-
-  /* Texto */
-  --wo-texto: #f3f1f7;
-  --wo-texto-2: #b9b4c9;
-  --wo-texto-3: #a3a3af;
-  --wo-texto-4: #8c8d9d;
-
-  /* Acento violeta */
-  --wo-acento: #a28bf9;
-  --wo-acento-texto: #c2b2ff;
-  --wo-acento-hover: #e0d7ff;
-  --wo-sobre-acento: #181026;
   --wo-acento-fundo: rgba(162, 139, 249, 0.14);
   --wo-acento-fundo-forte: rgba(162, 139, 249, 0.16);
   --wo-acento-borda: rgba(162, 139, 249, 0.5);
   --wo-acento-borda-forte: rgba(162, 139, 249, 0.6);
-  --wo-acento-marca: #7c3aed;
-
-  /* Situação: disponível, em desenvolvimento, planejado, erro, informação */
-  --wo-sucesso: #4ade80;
-  --wo-sucesso-ponto: #22c55e;
   --wo-sucesso-fundo: rgba(34, 197, 94, 0.12);
-  --wo-alerta: #fbbf24;
-  --wo-alerta-ponto: #f59e0b;
-  --wo-alerta-fundo: rgba(245, 158, 11, 0.12);
-  --wo-erro: #f87171;
   --wo-erro-fundo: rgba(239, 68, 68, 0.08);
-  --wo-erro-fundo-forte: rgba(239, 68, 68, 0.12);
   --wo-erro-borda: rgba(239, 68, 68, 0.4);
-  --wo-info: #7dd3fc;
-  --wo-info-fundo: rgba(56, 189, 248, 0.12);
-  --wo-neutro-fundo: rgba(148, 163, 184, 0.14);
 
-  /* Tipografia */
-  --wo-fonte: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --wo-mono: 'Space Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
-  --wo-h1: clamp(38px, 4.6vw, 66px);
-  --wo-h2: clamp(30px, 3.9vw, 56px);
-  --wo-h2-medio: clamp(28px, 3.2vw, 46px);
-  --wo-h2-menor: clamp(26px, 2.9vw, 40px);
-  --wo-h3-painel: clamp(24px, 2.4vw, 32px);
+  /* Tipografia: Geist nos títulos e Inter no texto (spec 5.2) */
+  --wo-fonte-titulo: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --wo-fonte: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --wo-h1: clamp(44px, 33.6px + 2.667vw, 72px);
+  --wo-h2: clamp(34px, 28.8px + 1.333vw, 48px);
+  --wo-h3-linha: clamp(24px, 21.77px + 0.571vw, 30px);
+  --wo-h3-etapa: clamp(22px, 21.26px + 0.19vw, 24px);
+  --wo-h3-cartao: 18px;
+  --wo-lead-hero: clamp(18px, 17.26px + 0.19vw, 20px);
+  /* Número de etapa: Geist de 24 px fixos, peso 500, altura de linha 1,33 (5.2). */
+  --wo-numero-etapa: 24px;
 
-  /* Raios */
-  --wo-raio-xs: 6px;
-  --wo-raio-campo: 8px;
-  --wo-raio-btn: 9px;
-  --wo-raio-sm: 12px;
-  --wo-raio-md: 18px;
-  --wo-raio-painel: 20px;
-  --wo-raio-lg: 22px;
-  --wo-raio-xl: 24px;
+  /* Layout e efeitos (spec 5.3). Margem e respiro de seção crescem nos @media abaixo. */
+  --wo-conteiner: 1280px;
+  --wo-margem: 20px;
+  --wo-secao: 96px;
+  --wo-secao-compacta: calc(var(--wo-secao) / 2);
+  --wo-topo-altura: 66px;
+  --wo-raio: 10px;
   --wo-raio-pilula: 999px;
-
-  /* Sombras */
-  --wo-sombra-btn: 0 1px 0 rgba(255, 255, 255, 0.3) inset, 0 4px 20px -12px rgba(162, 139, 249, 0.35);
-  --wo-sombra-card: 0 24px 60px -20px rgba(0, 0, 0, 0.7);
-
-  /* Layout */
-  --wo-conteiner: 1328px;
-  --wo-margem: clamp(22px, 3.4vw, 48px);
-  --wo-secao: clamp(65px, 7.8vw, 112px);
-  --wo-secao-menor: clamp(48px, 5.6vw, 80px);
-  --wo-topo-altura: clamp(70px, 6.25vw, 90px);
+  --wo-sombra-cartao: 0 25px 50px -12px rgb(0 0 0 / 0.3);
   --wo-alvo: 44px;
+  /* Botão (spec 5.4): 40 px de altura no desktop. Abaixo de 768 px vale o alvo de toque de
+     44 px, e o @media abaixo troca o valor. A pausa do fundo, no topo, usa a mesma medida (15.3). */
+  --wo-btn-altura: var(--wo-alvo);
+  /* Desfoque do fundo do topo (spec 5.5), o mesmo valor do painel de texto do palco. */
+  --wo-desfoque: 12px;
 
-  /* Movimento: só transição curta de estado. O site não tem animação contínua. */
+  /* Botão flutuante de WhatsApp (spec 5.4): círculo de 56 px a 16 px do canto. O respiro de 88 px
+     é o círculo, a margem e mais 16 px de ar: o rodapé guarda esse espaço embaixo e o
+     scroll-padding-bottom da página também, para o botão nunca cobrir texto, foco ou âncora. */
+  --wo-flutuante-tamanho: 56px;
+  --wo-flutuante-margem: 16px;
+  --wo-flutuante-respiro: 88px;
+  --wo-sombra-flutuante: 0 8px 24px -6px rgb(0 0 0 / 0.4);
+
+  /* Pilha das peças que flutuam sobre a página. "Pular para o conteúdo" vence o topo, e o topo
+     vence o botão flutuante. O fundo vivo fica atrás de tudo, em z-index -1. */
+  --wo-z-flutuante: 20;
+  --wo-z-topo: 30;
+  --wo-z-pular: 40;
+
+  /* Palco de fundo da Home (spec 13): altura de rolagem da abertura e de cada capítulo, troca de
+     cena e de peça, sombra dos cartões das cenas e fundo do painel de texto, que garante a
+     leitura sobre a onda. */
+  --wo-palco-abertura: 70vh;
+  --wo-palco-trecho: 130vh;
+  --wo-palco-transicao: 240ms;
+  --wo-sombra-palco: 0 24px 48px -24px rgb(22 19 15 / 0.25);
+  --wo-palco-painel: rgb(10 10 10 / 0.72);
+  /* Fundo do selo de sucesso nos cartões das cenas: o verde de --wo-sucesso a 10%. */
+  --wo-palco-ok: rgb(22 101 52 / 0.1);
+  /* Geometria das cenas 2 a 5. Cartões claros e gráficos compartilham a mesma escala. */
+  --wo-cena-respiro: 12px;
+  --wo-cena-inicio: 44px;
+  --wo-cena-inicio-celular: 34px;
+  --wo-cena-grafico: 92px;
+  --wo-cena-coluna: 280px;
+  --wo-cena-coluna-celular: 162px;
+  --wo-cena-lead-alto: 68px;
+  --wo-cena-lead-segundo: 136px;
+  --wo-cena-metrica: 30px;
+  /* Vitrine do hero da Home: tempo de cada frente e troca. */
+  --wo-vitrine-tempo: 4.5s;
+  --wo-vitrine-troca: 480ms ease;
+  /* Camada de leitura sobre o pôster e o vídeo da onda (spec 6.3): preto de 55% no alto a 70%
+     embaixo, mais a vinheta nas bordas. */
+  --wo-leitura-alto: rgb(0 0 0 / 0.55);
+  --wo-leitura-baixo: rgb(0 0 0 / 0.7);
+
+  /* Entrada em cascata do hero (spec 15.3): cada bloco sai de transparente e 16 px abaixo, em
+     500 ms, com 70 ms entre um bloco e o seguinte. */
+  --wo-entrada-duracao: 500ms;
+  --wo-entrada-passo: 70ms;
+  --wo-entrada-deslocamento: 16px;
+
+  /* Ritmo das peças editoriais compartilhadas e do hero da Home. */
+  --wo-espaco-miudo: 4px;
+  --wo-espaco-1: 8px;
+  --wo-espaco-2: 16px;
+  --wo-espaco-3: 24px;
+  --wo-espaco-4: 32px;
+  --wo-espaco-5: 48px;
+  --wo-espaco-6: 64px;
+  --wo-espaco-7: 128px;
+  --wo-etiqueta-tamanho: 12px;
+  /* Etiqueta em caixa alta e selo do hero (5.2): 0,15em nos dois. */
+  --wo-etiqueta-entreletra: 0.15em;
+  --wo-texto-pequeno: 14px;
+  --wo-texto-corpo: 16px;
+  --wo-texto-destaque: 20px;
+  --wo-linha-fina: 1px;
+  --wo-linha-forte: 2px;
+  --wo-hero-frase-largura: 430px;
+  /* Plataforma: dimensões de interface, independentes de espaçamento e espessura. */
+  --wo-situacao-ponto: 6px;
+  --wo-plataforma-menu-largura: 192px;
+  --wo-plataforma-opcoes-largura: 256px;
+  --wo-plataforma-tela-largura: 512px;
+  --wo-plataforma-aviso-largura: 384px;
+  --wo-plataforma-marca-tamanho: 32px;
+  --wo-plataforma-simbolo-tamanho: 24px;
+  --wo-palco-aviso-tamanho: 11px;
+  /* Imagem de compartilhamento, 1200 x 630. Só dev/site/og.css usa estas medidas. */
+  --wo-og-largura: 1200px;
+  --wo-og-altura: 630px;
+  --wo-og-respiro-vertical: 56px;
+  --wo-og-respiro-horizontal: 64px;
+  --wo-og-titulo: 76px;
+  --wo-og-marca: 34px;
+  --wo-og-selo: 56px;
+  --wo-og-simbolo: 38px;
+  --wo-og-url: 18px;
+  /* Nota de cenário simulado na abertura de Demonstrações técnicas. */
+  --wo-demonstracoes-aviso-largura: 760px;
+  /* Fundo do selo do hero da Home: o preto a 30% do botão de contorno. */
+  --wo-hero-controle: rgb(0 0 0 / 0.3);
+  /* Texto secundário sobre o vídeo, no hero de toda página (spec 15.2). O fundo é fixo e o texto
+     sobe por cima dele quando a página rola, então passa pelo brilho da onda: o pixel mais claro
+     atrás dele chega a rgb(107, 107, 107). O branco a 75% (--wo-clara-2) dá 3,81:1 nesse pixel, e
+     o --wo-clara sólido dá 4,80:1 (cores.test.mjs confere o par). */
+  --wo-hero-texto-secundario: var(--wo-clara);
+  /* Só títulos grandes (15.2): máximo croma sRGB na faixa de matiz da marca, com 3:1 até
+     rgb(110, 110, 110). O pior pixel observado foi 108, em 1920 px. */
+  --wo-titulo-destaque: #cbbfff;
+
+  /* Movimento: transição curta de estado. O que se move sozinho é a onda do fundo vivo e a entrada do
+     hero; o palco das cinco frentes só muda com a rolagem. Os três desligam com
+     prefers-reduced-motion. */
   --wo-transicao: 160ms ease;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --wo-margem: 32px;
+    --wo-secao: 128px;
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --wo-margem: 48px;
+    --wo-btn-altura: 40px;
+  }
+}
+
+/* Contexto claro: só dentro do cartão claro (spec 15.2), como o cartão "Operação conectada" do hero
+   da Home. Papel, raio e sombra do cartão estão em components.css. */
+.wo-cartao-claro {
+  --wo-fundo: var(--wo-papel);
+  --wo-fundo-2: var(--wo-papel-2);
+  --wo-superficie: var(--wo-papel);
+  --wo-texto: var(--wo-tinta);
+  --wo-texto-2: var(--wo-tinta-2);
+  --wo-texto-3: var(--wo-tinta-3);
+  --wo-borda: var(--wo-linha);
+  --wo-borda-forte: var(--wo-linha);
+  --wo-acento-texto: var(--wo-violeta-forte);
+  --wo-foco: var(--wo-violeta);
+  --wo-contorno-fundo: transparent;
+  --wo-sucesso: var(--wo-sucesso-claro);
+  --wo-alerta: var(--wo-alerta-claro);
+  --wo-erro: var(--wo-erro-claro);
+  --wo-info: var(--wo-info-claro);
+  /* Destaque violeta das peças de dentro do cartão. */
+  --wo-acento-fundo: rgb(124 58 237 / 0.1);
+  --wo-acento-borda: rgb(124 58 237 / 0.5);
+}
+
+/* Texto do menu do topo: branco a 85% (spec 5.5), um pouco acima dos 75% do texto secundário. */
+.wo-topo {
+  --wo-texto-2: var(--wo-topo-texto-noite);
 }

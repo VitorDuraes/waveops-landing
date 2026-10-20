@@ -1,5 +1,6 @@
 // Testes do servidor local: URLs com barra final, 404, travessia de pasta, proteções
-// (Host local, dotfile, só o que o Netlify publica) e endpoints simulados.
+// (Host local, dotfile, só o que o Netlify publica), vídeo com Range (spec 9.5) e
+// endpoints simulados.
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -12,6 +13,8 @@ let servidor;
 let base;
 let raiz;
 let pastaSegredo;
+// Fixture de vídeo: 1000 bytes, cada um com o próprio índice módulo 256.
+const BYTES_VIDEO = Buffer.from(Array.from({ length: 1000 }, (_, i) => i % 256));
 
 before(async () => {
   raiz = fs.mkdtempSync(path.join(os.tmpdir(), 'wo-serve-'));
@@ -21,6 +24,8 @@ before(async () => {
   fs.writeFileSync(path.join(raiz, 'solucoes', 'index.html'), '<h1>solucoes</h1>');
   fs.mkdirSync(path.join(raiz, 'assets'));
   fs.writeFileSync(path.join(raiz, 'assets', 'a.css'), 'body{}');
+  fs.writeFileSync(path.join(raiz, 'assets', 'v.webm'), BYTES_VIDEO);
+  fs.writeFileSync(path.join(raiz, 'assets', 'v.mp4'), BYTES_VIDEO);
   fs.mkdirSync(path.join(raiz, '.git'));
   fs.writeFileSync(path.join(raiz, '.git', 'config'), 'segredo do git');
   pastaSegredo = fs.mkdtempSync(path.join(os.tmpdir(), 'wo-serve-fora-'));
@@ -119,6 +124,80 @@ test('CSS sai com o tipo certo', async () => {
   const r = await fetch(`${base}/assets/a.css`);
   assert.equal(r.status, 200);
   assert.match(r.headers.get('content-type'), /text\/css/);
+});
+
+/** GET com cabeçalho Range. @param {string} intervalo */
+const pedirIntervalo = (intervalo) => fetch(`${base}/assets/v.webm`, { headers: { Range: intervalo } });
+
+test('vídeo sai com o tipo certo e anuncia Accept-Ranges', async () => {
+  const r = await fetch(`${base}/assets/v.webm`);
+  assert.equal(r.status, 200);
+  assert.equal(r.headers.get('content-type'), 'video/webm');
+  assert.equal(r.headers.get('accept-ranges'), 'bytes');
+  assert.deepEqual(Buffer.from(await r.arrayBuffer()), BYTES_VIDEO);
+  const mp4 = await fetch(`${base}/assets/v.mp4`);
+  assert.equal(mp4.status, 200);
+  assert.equal(mp4.headers.get('content-type'), 'video/mp4');
+  await mp4.arrayBuffer();
+});
+
+test('Range de um intervalo responde 206 com o trecho e Content-Range', async () => {
+  const r = await pedirIntervalo('bytes=0-99');
+  assert.equal(r.status, 206);
+  assert.equal(r.headers.get('content-range'), 'bytes 0-99/1000');
+  assert.equal(r.headers.get('content-length'), '100');
+  assert.deepEqual(Buffer.from(await r.arrayBuffer()), BYTES_VIDEO.subarray(0, 100));
+
+  // Sem o fim, vai até o último byte: é o pedido que o navegador faz ao tocar o vídeo.
+  const aberto = await pedirIntervalo('bytes=900-');
+  assert.equal(aberto.status, 206);
+  assert.equal(aberto.headers.get('content-range'), 'bytes 900-999/1000');
+  assert.deepEqual(Buffer.from(await aberto.arrayBuffer()), BYTES_VIDEO.subarray(900));
+
+  // Sufixo: os últimos 100 bytes.
+  const sufixo = await pedirIntervalo('bytes=-100');
+  assert.equal(sufixo.status, 206);
+  assert.equal(sufixo.headers.get('content-range'), 'bytes 900-999/1000');
+  assert.deepEqual(Buffer.from(await sufixo.arrayBuffer()), BYTES_VIDEO.subarray(900));
+});
+
+test('Range fora do arquivo responde 416 com o tamanho total', async () => {
+  const r = await pedirIntervalo('bytes=1000-');
+  assert.equal(r.status, 416);
+  assert.equal(r.headers.get('content-range'), 'bytes */1000');
+  await r.arrayBuffer();
+});
+
+test('pedido abortado no meio destrói o stream do arquivo e solta o descritor', async (t) => {
+  // Bem maior que os buffers do socket: o servidor ainda está lendo quando o cliente desiste,
+  // como o navegador faz com vídeo ao trocar de intervalo.
+  fs.writeFileSync(path.join(raiz, 'assets', 'grande.webm'), Buffer.alloc(32 * 1024 * 1024));
+  const espiao = t.mock.method(fs, 'createReadStream');
+  await new Promise((resolver, rejeitar) => {
+    const req = http.request(`${base}/assets/grande.webm`, { headers: { Range: 'bytes=0-' } }, (res) => {
+      res.on('error', () => {});
+      if (res.statusCode !== 206) return rejeitar(new Error(`status ${res.statusCode}`));
+      res.once('data', () => {
+        req.destroy();
+        resolver(undefined);
+      });
+    });
+    req.on('error', () => {}); // o socket fechado por nós mesmos
+    req.end();
+  });
+  const stream = espiao.mock.calls.find((c) => String(c.arguments[0]).endsWith('grande.webm'))?.result;
+  assert.ok(stream, 'o servidor não abriu o arquivo');
+  for (let i = 0; i < 100 && !stream.closed; i++) await new Promise((ok) => setTimeout(ok, 20));
+  assert.equal(stream.destroyed, true, 'o stream do arquivo ficou vivo depois do aborto');
+  assert.equal(stream.closed, true, 'o descritor do arquivo ficou aberto depois do aborto');
+});
+
+test('Range inválido ou com vários intervalos é ignorado: 200 com o arquivo inteiro', async () => {
+  for (const intervalo of ['bytes=50-10', 'bytes=0-9,20-29', 'linhas=0-9']) {
+    const r = await pedirIntervalo(intervalo);
+    assert.equal(r.status, 200, intervalo);
+    assert.deepEqual(Buffer.from(await r.arrayBuffer()), BYTES_VIDEO, intervalo);
+  }
 });
 
 test('endpoint simulado de lead responde 200 com protocolo', async () => {

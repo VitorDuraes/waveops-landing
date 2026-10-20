@@ -102,6 +102,16 @@ try {
         continue;
       }
       await aba.evaluate(() => document.fonts.ready);
+      // Só a entrada finita do hero. Vídeo e fundo contínuo não participam desta espera.
+      await aba.evaluate(async () => {
+        const entradas = document.getAnimations().filter((animacao) =>
+          animacao instanceof CSSAnimation && animacao.animationName === 'wo-entrada'
+          && Number.isFinite(animacao.effect?.getTiming().iterations));
+        await Promise.all(entradas.map((animacao) => animacao.finished));
+        for (const bloco of document.querySelectorAll('[data-entrada]')) {
+          if (getComputedStyle(bloco).opacity !== '1') throw new Error('captura incompleta: bloco do hero ainda transparente');
+        }
+      });
       const captura = path.join(saidaCapturas, `${nome}-${largura}.png`);
       await aba.screenshot({ path: captura, fullPage: true });
       await contexto.close();

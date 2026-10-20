@@ -1,12 +1,14 @@
 // @ts-check
 /* WaveOps · comportamento compartilhado das páginas do site institucional.
 
-   Três peças, todas melhoria e nunca requisito: sem este arquivo, a página continua
-   inteira (o <noscript> do <head> mostra o menu e todos os painéis).
+   Quatro peças, todas melhoria e nunca requisito: sem este arquivo, a página continua
+   inteira (o <noscript> do <head> mostra o menu e todos os painéis, e o topo entra no fluxo).
    1. Menu do topo em telas até 1180 px: abre e fecha, Esc fecha e devolve o foco.
-   2. Seletores [data-seletor]: um painel por vez, com aria-pressed nos botões.
-   3. Clique em link de WhatsApp marcado com data-whatsapp vira evento de funil.
-   Na Home, também resolve as âncoras da página única antiga (lib/legado.js).
+   2. Topo fixo, sempre no estado escuro (o fundo vivo fica atrás da página inteira).
+   3. Seletores [data-seletor]: um painel por vez, com aria-pressed nos botões.
+   4. Clique em link de WhatsApp marcado com data-whatsapp vira evento de funil.
+   Na Home, também resolve as âncoras da página única antiga (lib/legado.js). O vídeo do fundo
+   e o botão de pausa do topo ficam em fundo.js.
 
    O Meta Pixel está desligado no site novo até existir consentimento (decisão de
    09/10/2026), então nada aqui chama fbq. */
@@ -38,6 +40,22 @@ export function iniciarTopo(doc = document) {
   painel.addEventListener('click', (evento) => {
     if (evento.target instanceof Element && evento.target.closest('a')) definir(false);
   });
+  doc.addEventListener('focusin', (evento) => {
+    const alvo = evento.target;
+    if (botao.getAttribute('aria-expanded') === 'true' && alvo instanceof Element && !alvo.closest('.wo-topo')) {
+      definir(false);
+    }
+  });
+}
+
+/**
+ * Liga o topo fixo (spec 5.5 e 15.2). O HTML nasce com o topo solto; aqui ele passa a fixo
+ * (data-topo="fixo" no <html>). O topo fica sempre no estado escuro: a página inteira está no
+ * contexto escuro, sobre o fundo vivo, então não há faixa clara para vigiar.
+ * @param {Document} doc
+ */
+export function iniciarTopoFixo(doc = document) {
+  if (doc.querySelector('.wo-topo')) doc.documentElement.dataset.topo = 'fixo';
 }
 
 /**
@@ -97,6 +115,7 @@ if (typeof document !== 'undefined') {
   const naHome = document.body?.dataset.pagina === 'home';
   if (!(naHome && redirecionarAncoraLegada())) {
     iniciarTopo();
+    iniciarTopoFixo();
     iniciarSeletores();
     iniciarWhatsApp();
   }

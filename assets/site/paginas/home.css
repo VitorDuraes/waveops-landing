@@ -1,184 +1,1103 @@
-/* WaveOps · peças que só a Home usa: painel "Operação conectada", faixa das quatro frentes e
-   a seção sob medida. Depende de tokens.css. */
+/* WaveOps · peças que só a Home usa: a vitrine do hero, o hero, o palco das cinco frentes, o fundo
+   vivo escurecido durante os capítulos e as seções depois do palco. Depende de tokens.css e
+   components.css. */
 
-/* ---------- Operação conectada (hero) ---------- */
-.wo-operacao {
-  margin: 0;
+/* ---------- Vitrine do hero (adendo 1 da 13A) ----------
+   Cinco mini interfaces empilhadas na mesma célula, com as peças das cenas do palco: o cartão tem a
+   altura da maior. A barra da aba da vez anima e, no fim, vitrine.js passa à próxima. Só corre com
+   a pausa do rodapé à mostra; para com ela apertada, ponteiro ou foco no cartão e aba oculta. */
+.wo-vitrine { padding: var(--wo-espaco-3); --wo-cena-grafico: var(--wo-espaco-6); }
+.wo-vitrine__abas { display: flex; gap: var(--wo-espaco-1); margin-bottom: var(--wo-espaco-1); }
+.wo-vitrine__aba { display: grid; flex: 1; align-content: center; gap: var(--wo-espaco-1); min-height: var(--wo-alvo); padding: 0; border: 0; background: none; color: var(--wo-tinta-3); font: 500 12px/1 var(--wo-fonte); font-variant-numeric: tabular-nums; text-align: left; cursor: pointer; }
+.wo-vitrine__aba:hover, .wo-vitrine__aba[aria-pressed='true'] { color: var(--wo-violeta-forte); }
+.wo-vitrine__aba i { height: 3px; overflow: hidden; border-radius: var(--wo-raio-pilula); background: var(--wo-linha); }
+.wo-vitrine__aba i::after { content: ''; display: block; height: 100%; background: var(--wo-violeta); transform: scaleX(0); transform-origin: left; }
+.wo-vitrine__aba:is([aria-pressed='true'], :has(~ [aria-pressed='true'])) i::after { transform: none; }
+:root:has([data-fundo-pausa]:not([hidden])) .wo-vitrine[data-pronto]:not([data-escolhida]) [aria-pressed='true'] i::after { animation: wo-vitrine-avanco var(--wo-vitrine-tempo) linear; animation-play-state: var(--wo-vitrine-estado, running); }
+:root:has([data-fundo-pausa][aria-pressed='true']) .wo-vitrine, .wo-vitrine:is(:hover, :focus-within, [data-oculta]) { --wo-vitrine-estado: paused; }
+@keyframes wo-vitrine-avanco { from { transform: scaleX(0); } }
+.wo-vitrine__paineis { display: grid; }
+.wo-vitrine__painel { display: flex; flex-direction: column; gap: var(--wo-espaco-2); grid-area: 1 / 1; transition: opacity var(--wo-vitrine-troca), transform var(--wo-vitrine-troca), visibility var(--wo-vitrine-troca); }
+.wo-vitrine__painel:not([data-ativo]) { visibility: hidden; opacity: 0; transform: translateY(var(--wo-espaco-1)); }
+.wo-vitrine__nome { font: 500 var(--wo-h3-cartao)/1.3 var(--wo-fonte-titulo); letter-spacing: -0.02em; }
+.wo-vitrine__tela { display: grid; flex: 1; align-content: start; gap: var(--wo-cena-respiro); padding: var(--wo-cena-respiro); border-radius: var(--wo-raio); background: var(--wo-papel-2); font-size: 13px; }
+.wo-vitrine__tela .wo-home-cena__no-cabeca { flex-wrap: wrap; }
+.wo-vitrine__tela .wo-home-cena__no-cabeca + * { margin-top: var(--wo-espaco-1); }
+.wo-vitrine__tela > .wo-home-cena__cartao + .wo-home-cena__cartao::before { content: ''; position: absolute; bottom: 100%; left: 24px; height: var(--wo-cena-respiro); border-left: var(--wo-linha-forte) solid var(--wo-marca-claro); }
+.wo-vitrine__funil { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--wo-espaco-1); }
+.wo-vitrine__funil > div { display: grid; align-content: start; gap: var(--wo-espaco-1); min-height: 9em; padding: var(--wo-espaco-1); border-radius: var(--wo-raio); background: var(--wo-papel); }
+.wo-vitrine__funil .wo-home-cena__cartao { padding: var(--wo-espaco-1); }
+.wo-vitrine__funil .wo-home-demo__rotulo { margin: 0; }
+@media (max-width: 479.98px) { .wo-vitrine__funil { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* Celular: as abas deixam livre a coluna do botão de WhatsApp. */
+@media (max-width: 767.98px) { .wo-vitrine__abas { gap: var(--wo-espaco-miudo); margin-right: var(--wo-espaco-4); } }
+@media (prefers-reduced-motion: reduce) { .wo-vitrine i::after { animation: none !important; } }
+
+/* ---------- Fundo vivo durante o palco (spec 13.4 e 15.3) ----------
+   O fundo (components.css) é o de toda página. Com um capítulo ativo, a onda escurece para 35%: o
+   vídeo, que continua tocando, ou o pôster, quando o vídeo está parado. Depois do palco, o módulo da
+   Home tira o data-capitulo e a onda volta ao brilho inteiro. */
+.wo-fundo[data-capitulo] > .wo-fundo__poster,
+.wo-fundo[data-capitulo] > .wo-fundo__video[data-tocando] {
+  opacity: 0.35;
 }
 
-.wo-operacao__sistemas {
+/* Hero transparente: a onda do fundo fixo aparece com o brilho inteiro entre as peças. O texto
+   secundário usa o token de texto sobre o vídeo; o cartão claro guarda o contexto de papel. */
+.wo-home-hero {
+  position: relative;
+  min-height: 100svh;
+  padding: calc(var(--wo-topo-altura) + var(--wo-espaco-5)) 0 var(--wo-espaco-6);
+  --wo-texto-2: var(--wo-hero-texto-secundario);
+  --wo-texto-3: var(--wo-hero-texto-secundario);
+}
+
+.wo-home-hero__frase {
+  max-width: var(--wo-hero-frase-largura);
+  font-size: var(--wo-lead-hero);
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.wo-home-hero__grade {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
+  gap: var(--wo-espaco-5);
+  min-height: calc(100svh - var(--wo-topo-altura) - var(--wo-espaco-5) - var(--wo-espaco-6));
+  align-items: center;
 }
 
-.wo-operacao__sistemas li {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 11px 12px;
-  border: 1px solid var(--wo-borda);
-  border-radius: var(--wo-raio-sm);
-  background: var(--wo-superficie);
+.wo-home-hero__texto h1 {
+  margin: var(--wo-espaco-3) 0 var(--wo-espaco-3);
+  text-wrap: pretty;
 }
 
-.wo-operacao__nome {
-  font-size: 13px;
-  font-weight: 600;
+.wo-home-hero__texto .wo-acoes {
+  margin-top: var(--wo-espaco-4);
+}
+
+.wo-home-hero__texto .wo-etiqueta-hero {
+  border-radius: 0;
+  border: 0;
+  border-left: var(--wo-linha-forte) solid var(--wo-clara);
+  background: var(--wo-hero-controle);
+}
+
+.wo-home-hero__texto .wo-etiqueta-hero::before {
+  display: none;
+}
+
+.wo-home-hero__texto .wo-nota-mono {
+  margin-top: var(--wo-espaco-2);
+  font-size: var(--wo-texto-pequeno);
+  line-height: 1.45;
+}
+
+@media (min-width: 1024px) {
+  .wo-home-hero__grade {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: var(--wo-espaco-4);
+  }
+}
+
+/* A nota reserva o canto do WhatsApp mesmo quando coincide com o fim da janela. */
+@media (max-width: 1023.98px) {
+  .wo-home-hero__texto .wo-nota-mono {
+    max-width: calc(100% - var(--wo-flutuante-respiro));
+  }
+}
+
+/* No celular, o controlador oculta o WhatsApp enquanto seu canto está ocupado pelo painel. */
+@media (max-width: 1023.98px) {
+  .wo-fundo ~ .wo-whatsapp-flutuante {
+    transition: transform var(--wo-transicao), opacity var(--wo-palco-transicao) ease;
+  }
+
+  .wo-fundo ~ .wo-whatsapp-flutuante[data-palco-oculto] {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+/* ---------- Cinco frentes: abertura, capítulos e painel (spec 13) ----------
+   Uma abertura e cinco capítulos, cada um com o painel de texto e a cena da frente. Sem
+   data-palco-modo (sem JavaScript, com menos movimento ou com a janela baixa), cada capítulo é
+   uma faixa escura com o painel e a cena montada, lado a lado a partir de 1024 px. */
+.wo-home-frentes {
+  /* O contêiner da página (spec 5.3) é a própria seção: o painel e a cena usam as colunas dele. */
+  max-width: var(--wo-conteiner);
+  margin: 0 auto;
+  padding: 0 var(--wo-margem);
+  /* A seção é transparente e a abertura fica sobre a onda no brilho inteiro: o link usa o token de
+     texto sobre o vídeo, porque o lilás da marca dá 2:1 sobre o brilho dela. */
+  --wo-acento-texto: var(--wo-hero-texto-secundario);
+  /* O mesmo contêiner visto de um elemento fixo, em que 100% é a largura da janela sem a barra
+     de rolagem: margem até o conteúdo e largura do conteúdo. */
+  --wo-palco-margem: calc((100% - min(100%, var(--wo-conteiner))) / 2 + var(--wo-margem));
+  --wo-palco-conteudo: calc(min(100%, var(--wo-conteiner)) - 2 * var(--wo-margem));
+}
+
+.wo-home-frentes__abertura {
+  padding: var(--wo-secao) 0 calc(var(--wo-secao) / 2);
+}
+
+.wo-home-frentes__abertura .wo-editorial {
+  row-gap: 20px;
+}
+
+.wo-home-frentes__titulo {
+  margin-top: 0;
+}
+
+.wo-home-frentes__texto {
+  max-width: 560px;
+}
+
+.wo-home-frentes__link {
+  margin-top: 8px;
+}
+
+.wo-home-frentes__atalhos {
+  margin-top: var(--wo-espaco-4);
+}
+
+.wo-home-capitulo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 20px;
+  padding: 32px 0;
+}
+
+/* Painel de texto do capítulo: número, nome da frente, frase curta e etiquetas (spec 8.1). No
+   celular, o número fica na linha do nome, para o painel ocupar pouco da tela. */
+.wo-home-painel {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 12px;
+  align-items: baseline;
+  padding: 18px 20px 20px;
+  border: 1px solid var(--wo-linha-noite);
+  border-radius: var(--wo-raio);
+  background: var(--wo-palco-painel);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.wo-home-painel__numero {
+  color: var(--wo-marca-claro);
+  font-family: var(--wo-fonte-titulo);
+  font-size: 20px;
+  font-weight: 500;
   line-height: 1.2;
 }
 
-.wo-operacao__estado {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--wo-texto-3);
-  font-family: var(--wo-mono);
-  font-size: 10.5px;
+.wo-home-painel__nome {
+  font-family: var(--wo-fonte-titulo);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
-.wo-operacao__estado::before {
-  content: '';
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--wo-sucesso-ponto);
+.wo-home-painel__frase {
+  grid-column: 1 / -1;
+  margin-top: 8px;
+  color: var(--wo-clara-2);
+  font-size: 15px;
+  line-height: 1.55;
 }
 
-.wo-operacao__fio {
-  width: 1px;
-  height: 16px;
-  margin: 0 auto;
-  background: var(--wo-borda-forte);
-}
-
-.wo-operacao__camada {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 16px;
-  border: 1px solid var(--wo-acento-borda);
-  border-radius: 14px;
-  background: var(--wo-acento-fundo);
-}
-
-.wo-operacao__simbolo {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  flex-shrink: 0;
-  border-radius: 10px;
-  background: var(--wo-acento-marca);
-}
-
-.wo-operacao__simbolo svg {
-  width: 26px;
-  height: 26px;
-}
-
-.wo-operacao__camada-texto {
-  min-width: 0;
-}
-
-.wo-operacao__camada-texto strong {
-  display: block;
-  font-size: 14.5px;
-  font-weight: 600;
-  line-height: 1.3;
-}
-
-.wo-operacao__camada-texto span {
-  display: block;
-  color: var(--wo-texto-2);
-  font-size: 12.5px;
-}
-
-.wo-operacao__eventos {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.wo-operacao__eventos li {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-  border: 1px solid var(--wo-borda);
-  border-radius: 10px;
-  background: var(--wo-superficie);
-  font-size: 13.5px;
-}
-
-.wo-operacao__hora {
-  color: var(--wo-texto-3);
-  font-family: var(--wo-mono);
-  font-size: 11.5px;
-}
-
-.wo-operacao__evento {
-  flex: 1;
-  min-width: 0;
-}
-
-.wo-operacao__area {
-  padding: 2px 8px;
-  border-radius: var(--wo-raio-xs);
-  background: var(--wo-superficie-3);
-  color: var(--wo-texto-2);
-  font-size: 11.5px;
-}
-
-/* ---------- Frentes de engenharia ---------- */
-.wo-frentes {
+.wo-home-painel__etiquetas {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
-  gap: 10px 22px;
-  margin-top: 26px;
+  grid-column: 1 / -1;
+  margin-top: 10px;
+  color: var(--wo-clara-2);
+  font-size: 13px;
+  line-height: 1.45;
 }
 
-.wo-frentes__rotulo {
-  color: var(--wo-texto-3);
-  font-family: var(--wo-mono);
-  font-size: 11.5px;
-  letter-spacing: 0.08em;
+/* Ponto médio entre as etiquetas, fora do que o leitor de tela lê. Fica no fim da etiqueta,
+   para a linha que quebra no celular não começar com o ponto. */
+.wo-home-painel__etiquetas li:not(:last-child)::after {
+  content: '·';
+  content: '·' / '';
+  margin: 0 8px;
+}
+
+/* ---------- Cena ----------
+   Um figure com o título e o aviso de ilustração no canto, em texto claro, e a tela desenhada:
+   cartões claros ligados por fios de luz violeta, no desenho das linhas da onda. Sem o palco, as
+   peças ficam em coluna, embaixo do título. */
+.wo-home-cena {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-self: center;
+  width: 100%;
+  max-width: 440px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  transition: opacity var(--wo-palco-transicao) ease;
+}
+
+/* Faixa de 24 px no alto do desenho: com o palco ligado, ela fica sobre a tela, que deixa esse
+   espaço livre. */
+.wo-home-cena__cabeca {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 24px;
+}
+
+/* Título e aviso ficam sobre a onda: sem o palco (menos movimento, sem JavaScript ou janela baixa)
+   ela aparece no brilho inteiro, e o branco a 75% cai a 4:1. Usam o token de texto sobre o vídeo. */
+.wo-home-cena__titulo {
+  color: var(--wo-hero-texto-secundario);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  line-height: 1.35;
   text-transform: uppercase;
 }
 
-.wo-frentes__lista {
+.wo-home-cena__cabeca .wo-maquete__aviso {
+  border-color: var(--wo-linha-noite);
+  color: var(--wo-hero-texto-secundario);
+  font-size: var(--wo-palco-aviso-tamanho);
+}
+
+/* Com o palco ligado, a tela tem a altura de desenho (a variável só existe nesse modo); sem ele,
+   a altura da coluna de peças. */
+.wo-home-cena__tela {
   display: flex;
-  flex: 1 1 520px;
+  flex-direction: column;
+  height: var(--wo-palco-cena-altura, auto);
+}
+
+/* Cartões: branco para os nós do fluxo e papel para o registro. */
+/* O cartão é claro sobre a página escura (spec 15.2): as cores de situação voltam ao tom do claro. */
+.wo-home-cena__cartao {
+  position: relative;
+  padding: 11px 13px 12px;
+  border-radius: var(--wo-raio);
+  background: var(--wo-branco);
+  box-shadow: var(--wo-sombra-palco);
+  color: var(--wo-tinta);
+  --wo-sucesso: var(--wo-sucesso-claro);
+  --wo-alerta: var(--wo-alerta-claro);
+}
+
+.wo-home-cena__registro {
+  margin-top: 8px;
+  background: var(--wo-papel);
+}
+
+.wo-home-cena__no-cabeca {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wo-home-cena__icone {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: var(--wo-raio-pilula);
+  color: var(--wo-branco);
+}
+
+.wo-home-cena__icone svg {
+  width: 14px;
+  height: 14px;
+}
+
+.wo-home-cena__icone--whatsapp {
+  background: var(--wo-whatsapp);
+}
+
+.wo-home-cena__icone--triagem {
+  background: var(--wo-violeta);
+}
+
+.wo-home-cena__icone--crm {
+  background: var(--wo-tinta);
+}
+
+.wo-home-cena__nome {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.wo-home-cena__meta {
+  margin-left: auto;
+  color: var(--wo-tinta-3);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.wo-home-cena__balao {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 0 var(--wo-raio) var(--wo-raio) var(--wo-raio);
+  background: var(--wo-papel-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.wo-home-cena__etiquetas {
+  display: flex;
   flex-wrap: wrap;
-  gap: 4px 0;
-  min-width: 0;
-  color: var(--wo-texto-2);
-  font-size: 14.5px;
-  line-height: 1.7;
+  gap: 6px;
+  margin-top: 8px;
 }
 
-.wo-frentes__lista li {
-  white-space: nowrap;
+.wo-home-cena__etiqueta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border: 1px solid var(--wo-linha);
+  border-radius: var(--wo-raio-pilula);
+  color: var(--wo-tinta-2);
+  font-size: 12px;
+  line-height: 1.5;
 }
 
-.wo-frentes__lista li:not(:last-child)::after {
-  content: '/';
-  margin: 0 12px;
-  color: var(--wo-texto-4);
+.wo-home-cena__etiqueta::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: var(--wo-raio-pilula);
+  background: var(--wo-violeta);
 }
 
-/* ---------- Sob medida na Home ---------- */
-.wo-sobmedida__garantias {
-  margin-top: 26px;
+.wo-home-cena__etiqueta--alerta::before {
+  background: var(--wo-alerta);
 }
 
-.wo-sobmedida__acao {
-  margin-top: 30px;
+.wo-home-cena__itens {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  margin-top: 8px;
+  color: var(--wo-tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
 }
 
-@media (max-width: 560px) {
-  .wo-operacao__sistemas {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+.wo-home-cena__itens li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wo-home-cena__itens svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--wo-sucesso);
+}
+
+.wo-home-cena__ok {
+  color: var(--wo-sucesso);
+  font-weight: 500;
+}
+
+.wo-home-cena__no--crm .wo-home-cena__ok {
+  padding: 0 8px 0 6px;
+  border-radius: var(--wo-raio-pilula);
+  background: var(--wo-palco-ok);
+}
+
+.wo-home-cena__rotulo {
+  color: var(--wo-tinta-3);
+}
+
+.wo-home-cena__valor {
+  color: var(--wo-tinta);
+  font-weight: 500;
+}
+
+.wo-home-cena__registro-titulo {
+  display: block;
+  color: var(--wo-tinta-3);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.wo-home-cena__registro .wo-home-cena__itens {
+  flex-direction: column;
+  margin-top: 6px;
+}
+
+/* Portas onde o fio encosta: entrada no alto do cartão; saída embaixo no desenho em coluna e na
+   lateral no desenho largo. */
+.wo-home-cena__no::before,
+.wo-home-cena__no::after {
+  content: '';
+  position: absolute;
+  left: calc(50% - 4px);
+  display: none;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--wo-raio-pilula);
+  background: var(--wo-marca-claro);
+  box-shadow: 0 0 0 2px var(--wo-branco), 0 0 12px 2px var(--wo-marca-escuro);
+}
+
+.wo-home-cena__no--triagem::before,
+.wo-home-cena__no--crm::before {
+  top: -4px;
+  display: block;
+}
+
+.wo-home-cena__no--whatsapp::after,
+.wo-home-cena__no--triagem::after {
+  bottom: -4px;
+  display: block;
+}
+
+/* Fio de luz: traço claro com o brilho violeta da onda. Cada fio tem dois traços, o curto da
+   coluna e o largo do desenho do desktop; só um aparece. pathLength="1" no path: o traço inteiro
+   mede 1, e o stroke-dashoffset vai de 1 a 0 quando ele se desenha. */
+.wo-home-cena__fio {
+  flex: none;
+  align-self: center;
+  overflow: visible;
+  filter: drop-shadow(0 0 3px var(--wo-marca-claro)) drop-shadow(0 0 12px var(--wo-violeta));
+}
+
+.wo-home-cena__traco {
+  fill: none;
+  stroke: var(--wo-marca-claro);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  transition: stroke-dashoffset var(--wo-palco-transicao) ease;
+}
+
+.wo-home-cena__traco--largo,
+.wo-home-cena__traco--estreito {
+  display: none;
+}
+
+/* Montagem: a peça sem data-visivel some só com o palco ligado. Ela entra com opacidade e 8 px
+   de deslocamento; o fio se desenha pelo stroke-dashoffset, sem deslocamento. */
+.wo-home-cena [data-passo] {
+  transition: opacity var(--wo-palco-transicao) ease, transform var(--wo-palco-transicao) ease;
+}
+
+[data-palco-modo] [data-passo]:not([data-visivel]) {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+[data-palco-modo] .wo-home-cena__fio:not([data-visivel]) {
+  transform: none;
+}
+
+[data-palco-modo] .wo-home-cena__fio:not([data-visivel]) .wo-home-cena__traco {
+  stroke-dashoffset: 1;
+}
+
+@media (min-width: 1024px) {
+  .wo-home-capitulo {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 48px;
+    align-items: center;
+    padding: 56px 0;
   }
+
+  .wo-home-painel {
+    display: block;
+    grid-column: 1 / span 5;
+    padding: 30px 32px 32px;
+  }
+
+  .wo-home-painel__numero {
+    display: block;
+    font-size: 24px;
+    line-height: 1.33;
+  }
+
+  .wo-home-painel__nome {
+    margin-top: 12px;
+    font-size: var(--wo-h3-linha);
+  }
+
+  .wo-home-painel__frase {
+    margin-top: 12px;
+    font-size: 16px;
+    line-height: 1.625;
+  }
+
+  .wo-home-painel__etiquetas {
+    margin-top: 16px;
+    font-size: 14px;
+  }
+
+  .wo-home-cena {
+    grid-column: 6 / span 7;
+  }
+}
+
+/* Palco ligado: cenas fixas na área útil, escaladas pelo controlador. Geometria compartilhada com
+   lib/palco.js. Ancestrais não podem ter transform, filter ou contain (quebram position: fixed).
+   O recorte acompanha a seção seguinte porque seu véu translúcido não cobre o palco (15.4). */
+[data-palco-modo='fundo'] .wo-home-frentes__abertura {
+  min-height: var(--wo-palco-abertura);
+}
+
+[data-palco-modo='fundo'] .wo-home-capitulo {
+  align-items: start;
+  min-height: var(--wo-palco-trecho);
+  padding: 0;
+}
+
+/* justify-self volta a normal: centrada, a caixa fixa encolheria até a largura do conteúdo. */
+[data-palco-modo='fundo'] .wo-home-cena {
+  position: fixed;
+  z-index: -1;
+  display: block;
+  justify-self: normal;
+  width: auto;
+  max-width: none;
+}
+
+/* Recorte só com a seção seguinte na janela. Alto e lados abertos preservam o halo. */
+[data-palco-modo='fundo'][data-palco-recorte] .wo-home-cena {
+  clip-path: inset(-100vmax -100vmax var(--wo-palco-corte-cena, 0px) -100vmax);
+}
+
+[data-palco-modo='fundo'] .wo-home-cena:not([data-ativa]) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+[data-palco-modo='fundo'] .wo-home-cena__cabeca,
+[data-palco-modo='fundo'] .wo-home-cena__tela {
+  position: absolute;
+  top: calc(50% - var(--wo-palco-cena-altura) / 2);
+  left: calc(50% - var(--wo-palco-cena-largura) / 2);
+  width: var(--wo-palco-cena-largura);
+  transform: scale(var(--wo-palco-escala, 1));
+  transform-origin: calc(var(--wo-palco-cena-largura) / 2) calc(var(--wo-palco-cena-altura) / 2);
+  transition: transform var(--wo-palco-transicao) ease;
+}
+
+/* Luz de palco: um halo violeta atrás do desenho, que acende junto com a cena. A tela tem
+   transform, então o halo fica atrás das peças dentro dela. */
+[data-palco-modo='fundo'] .wo-home-cena__tela::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: -12% -8%;
+  background: radial-gradient(closest-side, var(--wo-abertura-brilho), transparent);
+  opacity: 0.6;
+}
+
+/* Desenho da cena 1 com o palco ligado: cartões em posição fixa no desenho e fios curvos sobre a
+   tela inteira. As posições ficam em cada tamanho, abaixo; os fios (em index.html) saem delas:
+   mudou um cartão de lugar, mude o fio junto. */
+[data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__cartao {
+  position: absolute;
+  margin: 0;
+}
+
+[data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__balao {
+  font-size: 14px;
+}
+
+[data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__etiquetas,
+[data-palco-modo='fundo'] .wo-home-cena__no--crm .wo-home-cena__itens {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+[data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__fio {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--wo-palco-cena-largura);
+  height: var(--wo-palco-cena-altura);
+}
+
+[data-palco-modo='fundo'] .wo-home-cena__traco--curto {
+  display: none;
+}
+
+/* Celular e tablet: cena centrada na área livre entre o topo e o painel, que fica preso embaixo
+   (só o do capítulo da vez aparece e recebe ponteiro). */
+@media (max-width: 1023.98px) {
+  [data-palco-modo='fundo'] .wo-home-frentes__abertura {
+    padding-top: calc(var(--wo-secao) / 2);
+    /* Quando o capítulo 1 liga (topo dele na metade da janela), o texto da abertura já passou
+       do alto da área da cena: em tela baixa, a abertura cresce o necessário. */
+    padding-bottom: calc(50vh - var(--wo-topo-altura) - 16px);
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena {
+    /* Tamanho de desenho da cena no celular: CENA_CELULAR em lib/palco.js. */
+    --wo-palco-cena-largura: 350px;
+    --wo-palco-cena-altura: 492px;
+    top: calc(var(--wo-topo-altura) + 16px);
+    right: var(--wo-margem);
+    bottom: 16px;
+    left: var(--wo-margem);
+  }
+
+  /* Sem posicionamento por âncora, a caixa da cena vai até o fim da janela, atrás do painel: o
+     desenho fica no alto dela e encolhe a partir do alto, e o módulo da Home para a área 16 px
+     acima do painel. */
+  [data-palco-modo='fundo'] .wo-home-cena__cabeca,
+  [data-palco-modo='fundo'] .wo-home-cena__tela {
+    top: 0;
+    transform-origin: calc(var(--wo-palco-cena-largura) / 2) 0;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-painel {
+    position: fixed;
+    z-index: -1;
+    right: var(--wo-margem);
+    bottom: 16px;
+    left: var(--wo-margem);
+    opacity: 0;
+    pointer-events: none;
+    clip-path: inset(0 0 var(--wo-palco-corte-painel, 0px) 0);
+    transition: opacity var(--wo-palco-transicao) ease;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-capitulo[data-ativa] .wo-home-painel {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Com âncora, a caixa de cada cena termina 16 px acima do painel do próprio capítulo (o último
+     painel antes dela no documento), e o desenho fica centrado na área livre. */
+  @supports (anchor-name: --wo-a) {
+    [data-palco-modo='fundo'] .wo-home-painel {
+      anchor-name: --wo-painel-celular;
+    }
+
+    [data-palco-modo='fundo'] .wo-home-cena {
+      bottom: calc(anchor(--wo-painel-celular top) + 16px);
+    }
+
+    [data-palco-modo='fundo'] .wo-home-cena__cabeca,
+    [data-palco-modo='fundo'] .wo-home-cena__tela {
+      top: calc(50% - var(--wo-palco-cena-altura) / 2);
+      transform-origin: calc(var(--wo-palco-cena-largura) / 2) calc(var(--wo-palco-cena-altura) / 2);
+    }
+  }
+
+  /* Zigue-zague da cena 1: cartões com 80% da largura, alternando esquerda e direita, ligados
+     por fios que saem pela lateral e descem até o próximo cartão; o registro fecha o fluxo. */
+  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__cartao {
+    width: 280px;
+    padding: 11px 13px 12px;
+  }
+
+  /* No celular o cartão é mais baixo que no desktop: sem a linha do cabeçalho e com menos respiro. */
+  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__balao,
+  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__etiquetas,
+  [data-palco-modo='fundo'] .wo-home-cena__no--crm .wo-home-cena__itens {
+    margin-top: 8px;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena__no--whatsapp {
+    top: 34px;
+    left: 0;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena__no--triagem {
+    top: 160px;
+    left: 70px;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena__no--crm {
+    top: 283px;
+    left: 0;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__registro {
+    top: 393px;
+    left: 70px;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__nome {
+    font-size: 15px;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__itens {
+    font-size: 14px;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__registro-titulo {
+    color: var(--wo-tinta);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: normal;
+    line-height: 1.4;
+    text-transform: none;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena__traco--estreito {
+    display: inline;
+  }
+
+  /* Portas: a saída do WhatsApp na lateral direita e a da triagem na esquerda, a 52 px do alto;
+     as entradas no alto do cartão, do lado de onde o fio vem. */
+  [data-palco-modo='fundo'] .wo-home-cena__no--whatsapp::after {
+    top: 48px;
+    right: -4px;
+    bottom: auto;
+    left: auto;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena__no--triagem::before {
+    left: 226px;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena__no--triagem::after {
+    top: 48px;
+    bottom: auto;
+    left: -4px;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena__no--crm::before {
+    left: 46px;
+  }
+}
+
+/* Desktop: painel nas colunas 1 a 5, preso perto do topo; cena nas colunas 6 a 12, centrada na
+   altura útil abaixo do topo fixo. */
+@media (min-width: 1024px) {
+  [data-palco-modo='fundo'] .wo-home-painel {
+    position: sticky;
+    top: calc(var(--wo-topo-altura) + 32px);
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena {
+    /* Tamanho de desenho da cena no desktop: CENA_DESKTOP em lib/palco.js. */
+    --wo-palco-cena-largura: 720px;
+    --wo-palco-cena-altura: 480px;
+    top: calc(var(--wo-topo-altura) + 32px);
+    right: var(--wo-palco-margem);
+    bottom: 32px;
+    left: calc(var(--wo-palco-margem) + (var(--wo-palco-conteudo) + 48px) * 5 / 12);
+  }
+
+  /* Desenho largo da cena 1: WhatsApp no alto à esquerda, triagem no meio à direita, CRM embaixo
+     à esquerda e registro embaixo à direita. */
+  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__cartao {
+    width: 320px;
+    padding: 14px 16px 15px;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena__no--whatsapp {
+    top: 44px;
+    left: 0;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena__no--triagem {
+    top: 172px;
+    left: 400px;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena__no--crm {
+    top: 304px;
+    left: 0;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__registro {
+    top: 352px;
+    left: 400px;
+  }
+
+  /* No desktop há espaço: cabeçalho com linha, como num editor de fluxo, e mais respiro. */
+  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__no-cabeca {
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--wo-linha);
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__balao,
+  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__etiquetas,
+  [data-palco-modo='fundo'] .wo-home-cena__no--crm .wo-home-cena__itens {
+    margin-top: 12px;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__nome {
+    font-size: 14px;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__etiqueta {
+    font-size: 12.5px;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena--atendimento .wo-home-cena__itens {
+    font-size: 13.5px;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena__traco--largo {
+    display: inline;
+  }
+
+  /* Saídas na lateral, a 64 px do alto do cartão: a do WhatsApp à direita e a da triagem à
+     esquerda. */
+  [data-palco-modo='fundo'] .wo-home-cena__no--whatsapp::after {
+    top: 60px;
+    right: -4px;
+    bottom: auto;
+    left: auto;
+  }
+
+  [data-palco-modo='fundo'] .wo-home-cena__no--triagem::after {
+    top: 60px;
+    bottom: auto;
+    left: -4px;
+  }
+}
+
+/* Cenas 2 a 5: a mesma família de cartões, rótulos, barras e selos. No fluxo normal a
+   grade cresce com o conteúdo. Só o palco fixa o desenho na base de 720 ou 350 px. */
+.wo-home-demo {
+  position: relative;
+  display: grid;
+  gap: var(--wo-cena-respiro);
+  font-size: var(--wo-texto-pequeno);
+  line-height: 1.4;
+  color: var(--wo-tinta);
+}
+.wo-home-demo strong { display: block; font-weight: 600; }
+.wo-home-demo__rotulo { display: block; margin-bottom: var(--wo-espaco-1); color: var(--wo-tinta-2); }
+.wo-home-demo .wo-home-cena__etiqueta { font-size: inherit; }
+.wo-home-demo__linha { display: flex; align-items: center; justify-content: space-between; gap: var(--wo-espaco-1); flex-wrap: wrap; }
+.wo-home-demo__aprovado { background: var(--wo-papel); }
+.wo-home-demo__sucesso { color: var(--wo-sucesso-claro); background: var(--wo-palco-ok); border-color: transparent; }
+.wo-home-demo__sucesso::before { background: var(--wo-sucesso-claro); }
+.wo-home-demo__rascunho { display: grid; gap: var(--wo-espaco-1); margin-bottom: var(--wo-espaco-1); }
+.wo-home-demo__rascunho i { display: block; border-radius: var(--wo-raio); background: var(--wo-papel-2); height: var(--wo-espaco-1); }
+.wo-home-demo__rascunho i:last-child { width: 70%; }
+.wo-home-demo--agente .wo-home-cena__cartao { width: 80%; }
+.wo-home-demo--agente .wo-home-cena__cartao:nth-child(even) { justify-self: end; }
+.wo-home-demo--agente .wo-home-demo__aprovado { display: flex; align-items: center; justify-content: space-between; gap: var(--wo-espaco-1); }
+.wo-home-demo--agente .wo-home-demo__rotulo { margin-bottom: 0; }
+.wo-home-demo--agente .wo-home-cena__cartao:not(:first-child)::before {
+  content: ''; position: absolute; bottom: 100%; left: 50%; height: var(--wo-cena-respiro);
+  border-left: var(--wo-linha-forte) solid var(--wo-marca-claro);
+  filter: drop-shadow(0 0 var(--wo-espaco-1) var(--wo-violeta));
+}
+.wo-home-demo--painel { grid-template-columns: repeat(2, minmax(0, 1fr)); --wo-cena-grafico: var(--wo-espaco-6); }
+.wo-home-demo--painel .wo-home-cena__cartao { padding: var(--wo-espaco-1); }
+.wo-home-demo--painel .wo-home-cena__etiqueta { padding-inline: var(--wo-espaco-1); }
+.wo-home-demo--painel > .wo-home-demo__linha,
+.wo-home-demo--painel > .wo-home-demo__indicadores,
+.wo-home-demo--painel > .wo-home-demo__origens { grid-column: 1 / -1; }
+.wo-home-demo__indicadores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--wo-cena-respiro); }
+.wo-home-demo__indicadores strong { font: 500 var(--wo-cena-metrica)/1 var(--wo-fonte-titulo); }
+.wo-home-demo__indicadores .wo-home-demo__rotulo { min-height: calc(2em * 1.4); }
+.wo-home-demo__barras { display: flex; align-items: end; gap: var(--wo-espaco-1); height: var(--wo-cena-grafico); border-bottom: var(--wo-linha-fina) solid var(--wo-linha); }
+.wo-home-demo__barras i { flex: 1; height: 45%; border-radius: var(--wo-raio) var(--wo-raio) 0 0; background: var(--wo-violeta); transform-origin: bottom; transition: transform var(--wo-palco-transicao) ease; }
+.wo-home-demo__barras i:nth-child(2n) { height: 70%; }
+.wo-home-demo__barras i:nth-child(3n) { height: 58%; }
+.wo-home-demo__barras i:last-child { height: 90%; }
+.wo-home-demo__grafico { display: block; width: 100%; height: var(--wo-cena-grafico); overflow: visible; }
+.wo-home-demo__grafico .wo-home-cena__traco { stroke: var(--wo-violeta); }
+.wo-home-demo__grade { stroke: var(--wo-linha); fill: none; }
+.wo-home-demo__origens > div { display: grid; grid-template-columns: 1fr 2fr; align-items: center; gap: var(--wo-espaco-1); margin-top: var(--wo-espaco-1); }
+.wo-home-demo__origens i { height: var(--wo-espaco-1); width: 90%; background: var(--wo-violeta); border-radius: var(--wo-raio); transform-origin: left; transition: transform var(--wo-palco-transicao) ease; }
+.wo-home-demo__origens > div:nth-child(3) i { width: 65%; }
+.wo-home-demo__origens > div:nth-child(4) i { width: 40%; }
+[data-palco-modo] [data-passo]:not([data-visivel]) .wo-home-demo__barras i { transform: scaleY(0); }
+[data-palco-modo] [data-passo]:not([data-visivel]) .wo-home-demo__origens i { transform: scaleX(0); }
+[data-palco-modo] [data-passo]:not([data-visivel]) .wo-home-demo__grafico .wo-home-cena__traco { stroke-dashoffset: 1; }
+
+/* Funil: as colunas nunca mudam de ordem; o mesmo cartão atravessa de Novo a Qualificado. */
+.wo-home-demo--crm { --wo-colunas: 2; --wo-coluna-altura: var(--wo-cena-coluna-celular); --wo-cena-lead-alto: var(--wo-espaco-5); --wo-cena-lead-segundo: calc(var(--wo-espaco-5) * 2 + var(--wo-cena-respiro)); }
+.wo-home-demo__funil { display: grid; grid-template-columns: repeat(var(--wo-colunas), minmax(0, 1fr)); gap: var(--wo-cena-respiro); }
+.wo-home-demo__coluna { height: var(--wo-coluna-altura); padding: var(--wo-cena-respiro); background: var(--wo-papel-2); border-radius: var(--wo-raio); }
+.wo-home-demo__coluna > strong { padding-bottom: var(--wo-cena-respiro); border-bottom: var(--wo-linha-fina) solid var(--wo-linha); }
+.wo-home-demo__leads { position: absolute; inset: 0; pointer-events: none; }
+.wo-home-demo__celula {
+  position: absolute; width: calc((100% - (var(--wo-colunas) - 1) * var(--wo-cena-respiro)) / var(--wo-colunas) - var(--wo-cena-respiro) * 2);
+  left: var(--wo-cena-respiro); top: var(--wo-cena-lead-alto);
+}
+.wo-home-demo__lead-movel { z-index: 1; transform: translateX(calc(100% + var(--wo-cena-respiro) * 3)); transition: transform var(--wo-palco-transicao) ease; }
+.wo-home-demo__lead-fixo { top: var(--wo-cena-lead-segundo); }
+.wo-home-demo__qualificado { left: calc(50% + var(--wo-cena-respiro) / 2 + var(--wo-cena-respiro)); top: var(--wo-cena-lead-segundo); }
+.wo-home-demo__tarefa { top: calc(var(--wo-coluna-altura) + var(--wo-cena-respiro) + var(--wo-cena-lead-alto)); }
+.wo-home-demo__ganho { left: calc(50% + var(--wo-cena-respiro) / 2 + var(--wo-cena-respiro)); top: calc(var(--wo-coluna-altura) + var(--wo-cena-respiro) + var(--wo-cena-lead-alto)); }
+.wo-home-demo__origem { justify-self: end; width: 80%; }
+.wo-home-demo--crm .wo-home-demo__rotulo { margin-bottom: 0; }
+.wo-home-demo--crm .wo-home-cena__cartao { padding: var(--wo-espaco-1); }
+[data-palco-modo] .wo-home-demo--crm:not(:has([data-passo='3'][data-visivel])) .wo-home-demo__lead-movel { transform: none; }
+
+/* Cena 5: um pedido, duas interfaces; sem o palco, o estado final. A letra compensa a escala do
+   palco (--wo-palco-escala, de home.js) para ficar com 12 px ou mais na tela. Celular baixo: o app
+   e o sistema numa faixa. */
+.wo-apps { --wo-apps-letra: max(13px, calc(12.2px / var(--wo-palco-escala, 1))); position: relative; display: grid; gap: var(--wo-cena-respiro); margin-top: var(--wo-cena-inicio-celular); color: var(--wo-tinta); font-size: var(--wo-apps-letra); line-height: 1.3; }
+:where(.wo-apps) small { display: block; color: var(--wo-tinta-2); font-size: inherit; }
+:where(.wo-apps) strong { display: block; font-size: 1.1em; font-weight: 600; }
+.wo-apps__app, .wo-apps__sistema { min-width: 0; padding: var(--wo-cena-respiro); border: var(--wo-linha-fina) solid var(--wo-linha); border-radius: var(--wo-raio); background: var(--wo-branco); box-shadow: var(--wo-sombra-palco); }
+.wo-apps > .wo-apps__app { border-radius: calc(var(--wo-raio) * 2.4); }
+.wo-apps__marca { display: flex; align-items: center; gap: var(--wo-espaco-1); }
+.wo-apps__icone { display: grid; place-items: center; width: 2.4em; height: 2.4em; flex: none; border-radius: var(--wo-espaco-1); background: var(--wo-violeta-forte); color: var(--wo-branco); }
+.wo-apps__icone svg { width: 1.3em; height: 1.3em; }
+.wo-apps__abertura { margin-top: var(--wo-espaco-2); }
+.wo-apps__abertura strong { font: 600 1.35em/1.2 var(--wo-fonte-titulo); letter-spacing: -0.02em; }
+.wo-apps__pedido { position: relative; display: grid; justify-items: start; gap: var(--wo-espaco-miudo); margin-top: var(--wo-espaco-1); padding: var(--wo-cena-respiro); border: var(--wo-linha-fina) solid var(--wo-linha); border-radius: var(--wo-raio); background: var(--wo-papel); }
+.wo-apps__estado { padding: 0.15em 0.6em; border-radius: var(--wo-raio-pilula); background: var(--wo-papel-2); color: var(--wo-violeta-forte); font-weight: 600; white-space: nowrap; }
+.wo-apps__acao { display: block; margin-top: var(--wo-espaco-1); padding: 0.55em 0.8em; border-radius: var(--wo-raio); background: var(--wo-violeta-forte); color: var(--wo-branco); font-weight: 600; }
+.wo-apps__abas { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--wo-espaco-miudo) var(--wo-espaco-1); margin-top: var(--wo-cena-respiro); padding-top: var(--wo-espaco-1); border-top: var(--wo-linha-fina) solid var(--wo-linha); color: var(--wo-tinta-2); }
+.wo-apps__abas > :first-child { color: var(--wo-violeta-forte); font-weight: 600; }
+.wo-apps__sistema .wo-apps__abas { justify-content: start; gap: var(--wo-espaco-3); padding-bottom: var(--wo-espaco-1); border-bottom: var(--wo-linha-fina) solid var(--wo-linha); }
+.wo-apps__linha { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--wo-espaco-miudo) var(--wo-espaco-1); padding: var(--wo-espaco-1) 0; border-bottom: var(--wo-linha-fina) solid var(--wo-linha); }
+.wo-apps__lista { margin-top: var(--wo-espaco-1); }
+.wo-apps__recebido { padding-inline: var(--wo-espaco-1); border: var(--wo-linha-fina) solid var(--wo-marca-claro); border-radius: var(--wo-raio); background: var(--wo-papel); }
+.wo-apps__detalhe { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--wo-espaco-miudo) var(--wo-espaco-1); width: 100%; }
+.wo-apps__mudanca { color: var(--wo-sucesso-claro); white-space: nowrap; }
+.wo-apps__conexao { display: grid; place-items: center; justify-self: center; width: var(--wo-espaco-4); height: var(--wo-espaco-4); border-radius: var(--wo-raio-pilula); background: var(--wo-violeta-forte); color: var(--wo-branco); box-shadow: 0 0 0 var(--wo-espaco-miudo) var(--wo-abertura-brilho); }
+.wo-apps__conexao svg { transform: rotate(-90deg); transition: transform var(--wo-palco-transicao) ease; }
+.wo-apps__confirmacao { color: var(--wo-hero-texto-secundario); text-align: center; }
+.wo-apps__foco { position: absolute; inset: -3px; border: var(--wo-linha-forte) solid var(--wo-violeta); border-radius: var(--wo-raio); visibility: hidden; }
+.wo-apps__espera, .wo-apps :is(.wo-apps__inicial, .wo-apps__enviado) { display: none; }
+[data-palco-modo] .wo-apps:not(:has([data-passo='6'][data-visivel])) .wo-apps__app .wo-apps__final,
+[data-palco-modo] .wo-apps:not(:has([data-passo='5'][data-visivel])) .wo-apps__sistema .wo-apps__final { display: none; }
+[data-palco-modo] .wo-apps:not(:has([data-passo='3'][data-visivel])) .wo-apps__app .wo-apps__inicial,
+[data-palco-modo] .wo-apps:not(:has([data-passo='5'][data-visivel])) .wo-apps__sistema .wo-apps__inicial,
+[data-palco-modo] .wo-apps:has([data-passo='3'][data-visivel]):not(:has([data-passo='6'][data-visivel])) .wo-apps__enviado,
+[data-palco-modo] .wo-apps:not(:has([data-passo='4'][data-visivel])) .wo-apps__espera { display: block; }
+[data-palco-modo] .wo-apps:has([data-passo='2'][data-visivel]):not(:has([data-passo='3'][data-visivel])) .wo-apps__foco { visibility: visible; }
+[data-palco-modo] .wo-apps:not(:has([data-passo='4'][data-visivel])) .wo-apps__recebido { height: 0; padding-block: 0; border-width: 0; overflow: hidden; }
+[data-palco-modo] .wo-apps:not(:has([data-passo='6'][data-visivel])) .wo-apps__conexao svg { transform: rotate(90deg); }
+@media (max-width: 1023.98px) {
+  .wo-apps__extra, .wo-apps__confirmacao { display: none; }
+  .wo-apps__app { width: 86%; justify-self: center; }
+  .wo-apps__conexao { margin-block: calc(var(--wo-espaco-1) * -1); }
+}
+@media (max-width: 1023.98px) and (max-height: 760px) {
+  .wo-apps__marca strong, .wo-apps__abertura, .wo-apps__recebido strong, .wo-apps__detalhe { display: none; }
+  .wo-apps__app { width: 100%; }
+}
+@media (max-width: 1023.98px) and (max-height: 620px) {
+  .wo-apps__pedido > small:first-of-type, .wo-apps__cliente { display: none; }
+  .wo-apps__icone { width: 1.8em; height: 1.8em; }
+}
+@media (min-width: 1024px) {
+  .wo-home-cena--saas { max-width: none; }
+  .wo-apps { --wo-apps-letra: 13px; grid-template-columns: 236px auto minmax(0, 1fr); align-items: center; margin-top: var(--wo-cena-inicio); }
+  .wo-apps__app { padding: var(--wo-espaco-2); }
+  .wo-apps__conexao svg { transform: rotate(180deg); }
+  [data-palco-modo] .wo-apps:not(:has([data-passo='6'][data-visivel])) .wo-apps__conexao svg { transform: none; }
+  .wo-apps__confirmacao { grid-column: 1 / -1; }
+}
+
+[data-palco-modo] .wo-home-demo { margin-top: var(--wo-cena-inicio-celular); }
+[data-palco-modo] .wo-home-demo--agente { gap: var(--wo-cena-respiro); }
+[data-palco-modo] .wo-home-demo--agente .wo-home-cena__cartao { padding-block: var(--wo-espaco-1); }
+.wo-home-demo__fios { display: none; }
+[data-palco-modo] .wo-home-demo__fios { display: block; position: absolute; top: var(--wo-cena-inicio-celular); left: 0; width: 100%; height: calc(100% - var(--wo-cena-inicio-celular)); }
+[data-palco-modo] .wo-home-demo__fios [data-passo] { transform: none; }
+[data-palco-modo] .wo-home-demo__fios [data-passo]:not([data-visivel]) { stroke-dashoffset: 1; }
+[data-palco-modo] .wo-home-demo--agente .wo-home-cena__cartao::before { display: none; }
+@media (min-width: 1024px) {
+  [data-palco-modo] .wo-home-demo__fios { top: var(--wo-cena-inicio); }
+  [data-palco-modo] .wo-home-demo { margin-top: var(--wo-cena-inicio); }
+  [data-palco-modo] .wo-home-demo--agente { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--wo-espaco-4) var(--wo-espaco-6); align-items: start; padding-top: var(--wo-espaco-3); }
+  [data-palco-modo] .wo-home-demo--agente .wo-home-cena__cartao { width: 100%; padding: var(--wo-espaco-2); }
+  [data-palco-modo] .wo-home-demo--agente .wo-home-cena__cartao:nth-child(even) { margin-top: var(--wo-espaco-4); }
+  [data-palco-modo] .wo-home-demo--agente .wo-home-cena__cartao::before { display: none; }
+  [data-palco-modo] .wo-home-demo__indicadores .wo-home-demo__rotulo { min-height: 0; }
+  [data-palco-modo] .wo-home-demo--crm { --wo-colunas: 4; --wo-coluna-altura: var(--wo-cena-coluna); --wo-cena-lead-alto: 68px; --wo-cena-lead-segundo: 136px; padding-top: var(--wo-espaco-4); }
+  [data-palco-modo] .wo-home-demo--crm .wo-home-demo__leads { top: var(--wo-espaco-4); }
+  [data-palco-modo] .wo-home-demo__qualificado { left: calc(25% + var(--wo-cena-respiro) * 1.25); top: calc(var(--wo-cena-lead-segundo) + var(--wo-espaco-4)); }
+  [data-palco-modo] .wo-home-demo__tarefa { left: calc(50% + var(--wo-cena-respiro) * 1.5); top: calc(var(--wo-cena-lead-alto) + var(--wo-espaco-4)); }
+  [data-palco-modo] .wo-home-demo__ganho { left: calc(75% + var(--wo-cena-respiro) * 1.75); top: calc(var(--wo-cena-lead-alto) + var(--wo-espaco-4)); }
+  [data-palco-modo] .wo-home-demo__origem { width: 50%; }
+}
+
+/* ---------- Seções depois do palco (spec 15.4) ----------
+   Sob o véu da 15.2, sobre o fundo vivo: as cores são as do contexto escuro. */
+.wo-home-entradas__grade {
+  display: grid;
+  gap: var(--wo-espaco-5);
+  margin-top: var(--wo-espaco-5);
+}
+
+.wo-home-entrada {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wo-espaco-3);
+  padding-top: var(--wo-espaco-4);
+  border-top: var(--wo-linha-forte) solid var(--wo-texto);
+  color: var(--wo-texto);
+  text-decoration: none;
+}
+
+.wo-home-entrada__nome {
+  font-family: var(--wo-fonte-titulo);
+  font-size: var(--wo-h2);
+  line-height: 1.05;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+
+.wo-home-entrada__titulo {
+  font-size: var(--wo-texto-destaque);
+  line-height: 1.4;
+}
+
+.wo-home-entrada__texto {
+  color: var(--wo-texto-2);
+}
+
+.wo-home-entrada__acao {
+  display: flex;
+  align-items: center;
+  gap: var(--wo-espaco-2);
+  margin-top: auto;
+  min-height: var(--wo-alvo);
+  color: var(--wo-acento-texto);
+  font-size: var(--wo-texto-pequeno);
+  font-weight: 600;
+}
+
+.wo-home-entrada__acao svg {
+  width: var(--wo-espaco-2);
+  height: var(--wo-espaco-2);
+}
+
+.wo-home-entrada:hover .wo-home-entrada__nome {
+  color: var(--wo-acento-texto);
+}
+
+.wo-home-processo__intro {
+  align-self: end;
+  font-size: var(--wo-texto-destaque);
+  color: var(--wo-texto-2);
+}
+
+.wo-home-processo__garantias {
+  display: grid;
+  gap: var(--wo-espaco-3);
+  margin: var(--wo-espaco-5) 0 var(--wo-espaco-4);
+  padding-top: var(--wo-espaco-4);
+  border-top: var(--wo-linha-fina) solid var(--wo-borda);
+}
+
+@media (min-width: 768px) {
+  .wo-home-entradas__grade { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .wo-home-processo__garantias { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }

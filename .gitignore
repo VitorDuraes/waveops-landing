@@ -29,7 +29,7 @@ docs/research/
 # Saidas locais do ferramental do site (build simulado, QA visual, Playwright)
 .tmp-site/
 .tmp-qa/
-tests/site/test-results/
+tests/site/test-results*/
 tests/site/playwright-report/
 
 # Dependencias e config local de ferramentas (nao publicar)

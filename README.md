@@ -1,6 +1,6 @@
 # WaveOps · site institucional
 
-Site institucional da WaveOps em PT-BR, só tema escuro, com seis páginas: Início, Soluções,
+Site institucional da WaveOps em PT-BR, no contexto escuro do novo visual, com seis páginas: Início, Soluções,
 Projetos sob medida, Contato, Demonstrações técnicas e Plataforma (as duas últimas fora do menu,
 com acesso pelo rodapé). O mesmo
 repositório guarda o WaveOps Portal, app Next em `portal/`, publicado à parte em
@@ -17,7 +17,7 @@ node dev/site/serve.mjs            # http://127.0.0.1:4321/
 ```
 
 O servidor local imita o Netlify (barra final, 404) e responde os formulários com endpoints
-simulados, então nada vai para o n8n de produção. Para ver os estados de falha:
+simulados, então nenhum lead vai para produção. Para ver os estados de falha:
 `/contato/?simular=falha` ou `?simular=lento`.
 
 ## Verificar
@@ -29,7 +29,7 @@ npm ci --prefix tests/site         # Playwright, axe e TypeScript, só para test
 npm --prefix tests/site run typecheck
 npm --prefix tests/site run test:unit
 cd tests/site && PW_CHANNEL=chrome npx playwright test
-PW_CHANNEL=chrome node qa/visual.mjs     # folhas lado a lado com o design em .tmp-qa/comparacao/
+DESIGN_CAPTURAS=<pasta> PW_CHANNEL=chrome node qa/visual.mjs     # folhas lado a lado com o design em .tmp-qa/comparacao/
 ```
 
 O CI roda tudo isso no job `site` de `.github/workflows/ci.yml`, com os testes de navegador sobre
@@ -42,12 +42,30 @@ index.html, solucoes/, plataforma/, projetos-sob-medida/, contato/, demonstracoe
 assets/site/      tokens.css, base.css, components.css, paginas/*.css, site.js, contato.js,
                   interesse.js, config.js, lib/ (validação, contrato de envio, atribuição, envio)
 assets/funil.js   medição própria de funil (SPEC-18), com atribuição por sessão
-assets/brand/     marca Sine Nodes e o selo 3D do topo e do rodapé
+assets/brand/     marca Sine Nodes; selos 3D aposentados preservados
 dev/site/         build, lint, servidor local, parciais, páginas.json e o guia de montagem
 tests/site/       testes unitários, Playwright, axe e QA visual
 ```
 
 Como montar ou mudar uma página: `dev/site/README.md`.
+
+## Novo visual
+
+Geist nos títulos, Inter no texto e Sine Nodes no quadrado violeta plano. A onda fixa fica atrás de toda página; seções alternam véu escuro de 72% e 84%, e os cartões claros guardam o contexto de papel. A Home apresenta cinco frentes: automação de atendimento, agentes de IA, painéis de gestão, CRMs sob medida e apps e sistemas. Apps são web, acessados pelo navegador. IDs e chaves internas dashboards e saas permanecem para preservar links antigos. Plataforma continua em desenvolvimento e fora do menu e da Home.
+
+| Classe | Papel |
+|---|---|
+| `wo-abertura`, `wo-abertura__grade` | Hero transparente com entrada finita em `data-entrada` |
+| `wo-secao`, `wo-veu`, `wo-veu-forte` | Ritmo de seção e camada de leitura sobre a onda |
+| `wo-cartao-claro`, `wo-cartao-noite` | Cartão com contexto próprio |
+| `wo-titulo-cartao` | Título de cartão compartilhado, Geist 18 px |
+| `wo-btn--primario`, `wo-btn--secundario` | Botão violeta e botão de contorno |
+| `wo-maquete__aviso` | Nota obrigatória de interface ilustrativa |
+| `wo-colunas-numeradas`, `wo-lista-editorial`, `wo-tabela-modelos` | Etapas, frentes e contratação |
+
+Quem edita página deve pôr valores novos em `tokens.css`, peças compartilhadas em `components.css` e regras exclusivas em `paginas/<id>.css`, com prefixo da página. Preserve contratos dos formulários e âncoras. Rode o build após a edição, contraste, geometria e testes pertinentes. Sem JS e com menos movimento, a página mostra tudo montado e o pôster. Fontes, imagens e vídeo ficam fora do teto por página de 15 KB JS (20 KB com formulário) e 25 KB CSS gzip.
+
+O guia de montagem documenta `qa/video.mjs`, `qa/palco.mjs`, `qa/og.mjs` e a comparação visual. O OG é editado em `dev/site/og.html` e `og.css`, com saída de 1200 x 630 em `assets/og-waveops.png`.
 
 ## Formulários
 

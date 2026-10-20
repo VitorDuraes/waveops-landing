@@ -50,7 +50,7 @@ test.describe('Soluções sem JavaScript', () => {
     await page.goto('/solucoes/');
     await page.getByRole('navigation', { name: 'Resultados', exact: true }).getByRole('link', { name: 'Decidir com dados' }).click();
     await expect(page.locator('#decidir-titulo')).toBeInViewport();
-    await expect(page.locator('#decidir-contratar').getByRole('link', { name: 'Dashboards', exact: true })).toHaveAttribute('href', '/projetos-sob-medida/#dashboards');
+    await expect(page.locator('#decidir-contratar').getByRole('link', { name: 'Painéis de gestão', exact: true })).toHaveAttribute('href', '/projetos-sob-medida/#dashboards');
     await expect(page.locator('main > section')).toHaveCount(8);
     await expect(page.locator('[data-fundo-video]')).not.toHaveAttribute('src');
   });

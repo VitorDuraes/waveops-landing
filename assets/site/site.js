@@ -40,6 +40,12 @@ export function iniciarTopo(doc = document) {
   painel.addEventListener('click', (evento) => {
     if (evento.target instanceof Element && evento.target.closest('a')) definir(false);
   });
+  doc.addEventListener('focusin', (evento) => {
+    const alvo = evento.target;
+    if (botao.getAttribute('aria-expanded') === 'true' && alvo instanceof Element && !alvo.closest('.wo-topo')) {
+      definir(false);
+    }
+  });
 }
 
 /**

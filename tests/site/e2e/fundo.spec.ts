@@ -223,7 +223,7 @@ test.describe('o topo', () => {
     };
   });
   const ESCURO = {
-    fundo: 'rgba(0, 0, 0, 0)',
+    fundo: 'rgba(10, 10, 10, 0.84)',
     cor: 'rgb(243, 243, 241)',
     linha: 'rgba(255, 255, 255, 0.15)',
     esquema: 'dark',

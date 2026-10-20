@@ -17,11 +17,6 @@
 /* "Título de cartão" de 5.2. */
 .wo-sobmedida-proposta__texto {
   margin-top: var(--wo-espaco-2);
-  font-family: var(--wo-fonte-titulo);
-  font-size: var(--wo-h3-cartao);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  line-height: 1.55;
 }
 
 .wo-sobmedida-proposta__itens {
@@ -114,11 +109,6 @@
   gap: var(--wo-espaco-3);
   min-height: var(--wo-alvo);
   padding: var(--wo-espaco-3) 0;
-  font-family: var(--wo-fonte-titulo);
-  font-size: var(--wo-h3-cartao);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  line-height: 1.55;
   list-style: none;
   cursor: pointer;
   transition: color var(--wo-transicao);

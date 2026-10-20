@@ -1,21 +1,21 @@
 # WaveOps
 
-> Software house especializada na operação de quem vende. A WaveOps automatiza processos, integra
-> sistemas, constrói sistemas e painéis sob medida e usa agentes de IA com revisão humana. Projeto,
+> Software house especializada na operação de quem vende. Cinco frentes: automação de atendimento, agentes de IA, painéis de gestão, CRMs sob medida e apps e sistemas. Projeto,
 > implementação e serviços gerenciados estão disponíveis. A Plataforma WaveOps está em
 > desenvolvimento e ainda não está disponível para contratação.
+
+Apps e sistemas são aplicativos web acessados pelo navegador. As âncoras e chaves internas dashboards e saas continuam válidas.
 
 O site tem seis páginas em português do Brasil. Contato: WhatsApp +55 34 99177 5784.
 
 ## Páginas
 
 - [Início](https://waveops.com.br/): o que a WaveOps faz, duas formas de começar (soluções e projetos
-  sob medida), as quatro frentes e os modelos de contratação.
+  sob medida), as cinco frentes e os modelos de contratação.
 - [Soluções](https://waveops.com.br/solucoes/): cinco resultados de negócio. Vender mais, atender
   melhor, operar com menos retrabalho, decidir com dados e crescer com segurança, cada um com os
   sinais de que é o seu caso, o que a WaveOps constrói e como contratar.
-- [Projetos sob medida](https://waveops.com.br/projetos-sob-medida/): quatro frentes (automação de
-  processos, integração de sistemas, sistemas e painéis sob medida e agentes de IA supervisionados),
+- [Projetos sob medida](https://waveops.com.br/projetos-sob-medida/): cinco frentes (automação de atendimento, agentes de IA, painéis de gestão, CRMs sob medida e apps e sistemas),
   como a WaveOps trabalha, modelos de contratação e perguntas frequentes.
 - [Contato](https://waveops.com.br/contato/): formulário com retorno por WhatsApp, e-mail ou ligação.
 - [Demonstrações técnicas](https://waveops.com.br/demonstracoes-tecnicas/): cenários simulados de

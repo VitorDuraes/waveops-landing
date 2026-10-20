@@ -1,4 +1,58 @@
 import { test, expect, type Page } from '@playwright/test';
+import { lerPng } from './helpers/contraste';
+
+test('o topo mantém contraste AA sobre o cartão claro da Plataforma', async ({ page }, info) => {
+  test.skip(info.project.name !== 'desktop', 'reprodução do cartão sob os links da barra');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/plataforma/');
+  await page.evaluate(() => document.fonts.ready);
+  await page.evaluate(() => scrollTo({ top: 819, behavior: 'instant' }));
+  const link = page.locator('.wo-topo__links a').first();
+  const caixa = (await link.boundingBox())!;
+  const cor = await link.evaluate((el) => getComputedStyle(el).color);
+  await page.screenshot({ path: info.outputPath('topo-sobre-cartao.png') });
+  // Retira só a tinta do link para medir os pixels reais atrás dos glifos, preservando o topo.
+  await link.evaluate((el) => { el.style.color = 'transparent'; });
+  const png = lerPng(await page.screenshot({ clip: caixa, scale: 'css' }));
+  const [r, g, b, a = 1] = cor.match(/[\d.]+/g)!.map(Number);
+  const linear = (c: number) => { const s = c / 255; return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4; };
+  const lum = (c: number[]) => 0.2126 * linear(c[0]) + 0.7152 * linear(c[1]) + 0.0722 * linear(c[2]);
+  let minimo = Infinity;
+  let fundo: number[] = [];
+  for (let i = 0; i < png.rgba.length; i += 4) {
+    const pixel = [...png.rgba.slice(i, i + 3)];
+    const tinta = [r, g, b].map((c, n) => c * a + pixel[n] * (1 - a));
+    const l1 = lum(tinta); const l2 = lum(pixel);
+    const razao = (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+    if (razao < minimo) { minimo = razao; fundo = pixel; }
+  }
+  await info.attach('contraste-real', { body: JSON.stringify({ cor, fundo, minimo, scrollY: await page.evaluate(() => scrollY) }), contentType: 'application/json' });
+  console.log(JSON.stringify({ contrasteTopo: minimo, cor, fundo }));
+  expect(minimo, `${cor} sobre rgb(${fundo.join(', ')}): ${minimo.toFixed(3)}:1`).toBeGreaterThanOrEqual(4.5);
+});
+
+test('Tab fora do menu fecha o painel e deixa o primeiro link do main descoberto', async ({ page }, info) => {
+  test.skip(info.project.name !== 'celular', 'reprodução do painel em tela baixa');
+  await page.setViewportSize({ width: 390, height: 600 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/contato/');
+  await page.locator('footer').scrollIntoViewIfNeeded();
+  await page.getByRole('button', { name: 'Abrir menu' }).click();
+  const painel = page.locator('#menu-movel');
+  await painel.getByRole('link').last().focus();
+  await page.keyboard.press('Tab');
+  const alvo = page.locator('main a[href]').first();
+  await expect(alvo).toBeFocused();
+  const descoberto = await alvo.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    const frente = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    return frente === el || el.contains(frente);
+  });
+  await page.screenshot({ path: info.outputPath('foco-apos-menu.png') });
+  expect(descoberto, 'o painel não pode cobrir o link focado no main').toBe(true);
+  await expect(painel).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Abrir menu' })).toHaveAttribute('aria-expanded', 'false');
+});
 
 /* Menu do topo e seletores, só com teclado. */
 
@@ -57,9 +111,9 @@ test('seletor da Plataforma troca o painel por teclado e marca aria-pressed', as
    (fundo.spec.ts confere o estado do início ao fim de toda página). */
 const rolarPara = (page: Page, y: number) => page.evaluate((alvo) => window.scrollTo({ top: alvo, behavior: 'instant' }), y);
 
-/** Fundo e cor do topo como o navegador calculou: transparente e com o texto claro do escuro. */
+/** Fundo e cor do topo como o navegador calculou, com proteção escura sobre cartões claros. */
 const corDoTopo = (page: Page) => page.locator('.wo-topo').evaluate((topo) => [getComputedStyle(topo).backgroundColor, getComputedStyle(topo).color]);
-const TOPO_ESCURO = ['rgba(0, 0, 0, 0)', 'rgb(243, 243, 241)'];
+const TOPO_ESCURO = ['rgba(10, 10, 10, 0.84)', 'rgb(243, 243, 241)'];
 
 test.describe('topo fixo', () => {
   test.beforeEach(({}, info) => {

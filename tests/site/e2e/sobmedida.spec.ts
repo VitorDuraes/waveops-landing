@@ -42,7 +42,7 @@ test.describe('âncoras de Projetos sob medida', () => {
   test('o atalho das frentes leva às cinco âncoras novas', async ({ page }) => {
     await page.goto(URL);
     const links = page.getByRole('navigation', { name: 'Frentes' }).getByRole('link');
-    await expect(links).toHaveText(['Automação de atendimento', 'Agentes de IA', 'Dashboards', 'CRMs sob medida', 'SaaS']);
+    await expect(links).toHaveText(['Automação de atendimento', 'Agentes de IA', 'Painéis de gestão', 'CRMs sob medida', 'Apps e sistemas']);
     expect(await links.evaluateAll((els) => els.map((el) => el.getAttribute('href')))).toEqual(FRENTES.map((id) => `#${id}`));
   });
 });

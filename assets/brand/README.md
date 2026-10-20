@@ -1,8 +1,8 @@
-# WaveOps — Logo
+# WaveOps · Logo
 
 Marca **Sine Nodes**: uma onda contínua que atravessa o **hub central** (anel),
 com nós de entrada e saída. A onda é o fluxo; o hub é a operação; os nós são os
-pontos conectados. Cor da marca **#7C3AED**. Tipografia **Space Grotesk**.
+pontos conectados. Cor da marca **#7C3AED**. O site usa **Geist** no nome e nos títulos e **Inter** no texto desde 15/10/2026. O lockup vetorial do kit permanece preservado.
 
 Abra `preview.html` para ver tudo renderizado.
 
@@ -10,35 +10,32 @@ Abra `preview.html` para ver tudo renderizado.
 
 | Arquivo | Uso |
 |---|---|
-| `waveops-icon.svg` | App icon / favicon — squircle roxo com a marca branca. |
+| `waveops-icon.svg` | App icon / favicon · squircle roxo com a marca branca. |
 | `waveops-symbol.svg` | Símbolo roxo, fundo transparente. Para fundo claro. |
 | `waveops-symbol-mono.svg` | Uma cor via `currentColor` (herda o `color` do CSS). |
 | `waveops-lockup.svg` | Símbolo + nome "WaveOps". |
-| `waveops-badge-3d.webp` | Base 3D violeta frontal, transparente, sem pinos metálicos ou soquetes. |
+| `waveops-badge-3d.webp` | Variante 3D aposentada, preservada sem consumidor nas páginas atuais. |
 | `png/waveops-icon.png` | 1000×1000, fundo transparente fora do squircle. |
-| `png/waveops-icon-512.png` | 512×512 — ideal para app icon / redes. |
+| `png/waveops-icon-512.png` | 512×512 · ideal para app icon / redes. |
 | `png/waveops-symbol.png` | Símbolo roxo, transparente, 1000×1000. |
-| `png/waveops-symbol-white.png` | Símbolo branco, transparente — para fundo escuro. |
+| `png/waveops-symbol-white.png` | Símbolo branco, transparente · para fundo escuro. |
 
 ## Favicon no site
 ```html
 <link rel="icon" type="image/svg+xml" href="logo/waveops-icon.svg" />
 ```
 
-## Apresentação 3D no site
+## Apresentação no site (D14, 15/10/2026)
 
-O cabeçalho e o rodapé usam `assets/brand/waveops-badge-3d.webp`. O símbolo Sine
-Nodes é aplicado por cima da imagem como SVG no HTML, com a geometria canônica
-exata, centralizado. A base renderizada é frontal, tem bordas lisas e não tem
-pinos metálicos nem soquetes laterais.
+Topo, rodapé e imagem de compartilhamento usam o quadrado violeta plano com o símbolo Sine Nodes canônico. No site, o nome vem em Geist, com Ops no peso 700. O símbolo mantém as duas ondas, o núcleo vazado e os dois nós sólidos, sem alteração de geometria.
 
-Esta é uma variante de apresentação da marca. A geometria canônica e os arquivos
-vetoriais do kit continuam sendo a referência. Este badge é o único elemento 3D
-da página.
+Os arquivos `waveops-badge-3d.webp` e `waveops-badge-3d-128.webp` são variantes aposentadas de apresentação e permanecem neste kit. Nenhuma página atual nem o OG os carrega. Não os apague ao atualizar a apresentação plana.
+
+O OG é editado em `dev/site/og.html` e `dev/site/og.css`, com saída em `assets/og-waveops.png` (1200 x 630). Para gerar: de `tests/site`, `PW_CHANNEL=chrome node qa/og.mjs`.
 
 ## Símbolo vetorial (exemplo inline, sem dependência de fonte)
 ```html
-<a href="#top" style="display:inline-flex;align-items:center;gap:11px;font-family:'Space Grotesk',sans-serif;font-size:22px;letter-spacing:-.02em;text-decoration:none">
+<a href="#top" style="display:inline-flex;align-items:center;gap:11px;font-family:'Geist',sans-serif;font-size:22px;letter-spacing:-.02em;text-decoration:none">
   <svg width="34" height="34" viewBox="0 0 100 100" fill="none">
     <rect x="2" y="2" width="96" height="96" rx="24" fill="#7c3aed"/>
     <g stroke="#fff" stroke-width="5" stroke-linecap="round">

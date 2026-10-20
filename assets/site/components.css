@@ -57,6 +57,7 @@
   left: 0;
   z-index: var(--wo-z-topo);
   border-bottom: 1px solid var(--wo-borda);
+  background: var(--wo-veu-forte);
   color: var(--wo-texto);
   color-scheme: dark;
   -webkit-backdrop-filter: blur(var(--wo-desfoque));
@@ -374,9 +375,9 @@ html[data-topo='fixo'] .wo-topo {
   gap: 9px;
   padding: 8px 12px;
   border: 1px solid var(--wo-borda-forte);
-  border-radius: var(--wo-raio-xs);
+  border-radius: var(--wo-raio);
   color: var(--wo-texto-2);
-  font-family: var(--wo-mono);
+  font-family: var(--wo-fonte);
   font-size: 11px;
   font-weight: 500;
   letter-spacing: var(--wo-etiqueta-entreletra);
@@ -393,25 +394,12 @@ html[data-topo='fixo'] .wo-topo {
   background: var(--wo-acento);
 }
 
-.wo-rotulo-mono {
-  display: block;
-  color: var(--wo-texto-3);
-  font-family: var(--wo-mono);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.wo-rotulo-mono--acento {
-  color: var(--wo-acento-texto);
-}
-
 .wo-nota-mono {
   display: flex;
   align-items: center;
   gap: 8px;
   color: var(--wo-texto-3);
-  font-family: var(--wo-mono);
+  font-family: var(--wo-fonte);
   font-size: 11.5px;
 }
 
@@ -619,78 +607,14 @@ html[data-topo='fixo'] .wo-topo {
   color: var(--wo-clara);
 }
 
-/* ---------- Hero de duas colunas ---------- */
-/* overflow: hidden prende o brilho de 1000 px dentro do hero. Sem isso ele vaza
-   340 px para a direita e a página rola na horizontal em qualquer largura. */
-.wo-hero {
-  position: relative;
-  overflow: hidden;
-  padding: clamp(40px, 5vw, 76px) 0 clamp(52px, 6vw, 92px);
-}
-
-.wo-hero__brilho {
-  position: absolute;
-  top: -560px;
-  right: -340px;
-  width: 1000px;
-  height: 1000px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(162, 139, 249, 0.22), transparent 62%);
-  opacity: 0.45;
-  pointer-events: none;
-}
-
-.wo-hero__grade {
-  position: relative;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 48px 56px;
-}
-
-.wo-hero__texto {
-  flex: 1.15 1 520px;
-  min-width: 0;
-}
-
-.wo-hero__visual {
-  flex: 1 1 480px;
-  min-width: 0;
-}
-
-.wo-hero .wo-h1 {
-  margin-top: 26px;
-}
-
-.wo-hero__lead {
-  margin-top: 24px;
-  max-width: 560px;
-  color: var(--wo-texto-2);
-  font-size: 17.5px;
-  line-height: 1.75;
-  text-wrap: pretty;
-}
-
-.wo-hero .wo-acoes {
-  margin-top: 30px;
-}
-
-.wo-hero .wo-nota-mono {
-  margin-top: 22px;
-}
-
 /* ---------- Maquete ilustrativa (painel que imita interface) ---------- */
 .wo-maquete {
   display: flex;
   flex-direction: column;
   padding: clamp(16px, 1.6vw, 22px);
   border: 1px solid var(--wo-borda-forte);
-  border-radius: var(--wo-raio-xl);
+  border-radius: var(--wo-raio);
   background: linear-gradient(180deg, var(--wo-superficie-2), var(--wo-superficie));
-}
-
-.wo-maquete--sombra {
-  box-shadow: var(--wo-sombra-card);
 }
 
 .wo-maquete__cabeca {
@@ -718,27 +642,19 @@ html[data-topo='fixo'] .wo-topo {
   border: 1px solid var(--wo-borda-forte);
   border-radius: var(--wo-raio-pilula);
   color: var(--wo-texto-3);
-  font-family: var(--wo-mono);
-  font-size: 10.5px;
+  font-family: var(--wo-fonte);
+  font-size: var(--wo-texto-pequeno);
+  line-height: 1.45;
+  text-wrap: balance;
 }
 
-/* ---------- Entradas da Home (cartões-link separados por fio) ---------- */
-.wo-entrada {
-  display: flex;
-  flex: 1 1 250px;
-  flex-direction: column;
-  gap: 12px;
-  min-width: 0;
-  padding: clamp(24px, 2.6vw, 34px);
-  background: var(--wo-faixa);
-  color: var(--wo-texto);
-  text-decoration: none;
-  transition: background-color var(--wo-transicao);
-}
-
-.wo-entrada:hover {
-  background: var(--wo-superficie);
-  color: var(--wo-texto);
+/* Título de cartão de 5.2. A classe de contexto continua responsável por layout e margens. */
+.wo-titulo-cartao {
+  font-family: var(--wo-fonte-titulo);
+  font-size: var(--wo-h3-cartao);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.55;
 }
 
 /* ---------- Peças editoriais compartilhadas ----------
@@ -967,7 +883,7 @@ html[data-topo='fixo'] .wo-topo {
   min-height: 56px;
   padding: 0 18px;
   border: 1px solid var(--wo-borda);
-  border-radius: var(--wo-raio-sm);
+  border-radius: var(--wo-raio);
   background: transparent;
   color: var(--wo-texto-2);
   font-family: inherit;
@@ -1007,7 +923,7 @@ html[data-topo='fixo'] .wo-topo {
   min-width: 0;
   padding: clamp(24px, 2.8vw, 38px);
   border: 1px solid var(--wo-borda-forte);
-  border-radius: var(--wo-raio-painel);
+  border-radius: var(--wo-raio);
   background: var(--wo-superficie);
 }
 
@@ -1016,22 +932,7 @@ html[data-topo='fixo'] .wo-topo {
   display: none;
 }
 
-/* ---------- Sinais e lista de marcação (seções de Soluções e Home) ---------- */
-.wo-sinais {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 14px;
-  color: var(--wo-texto);
-  font-size: 15.5px;
-  line-height: 1.55;
-}
-
-.wo-sinais li {
-  padding-left: 14px;
-  border-left: 2px solid var(--wo-acento-borda);
-}
-
+/* ---------- Lista de marcação ---------- */
 .wo-lista-check {
   display: flex;
   flex-direction: column;
@@ -1452,7 +1353,7 @@ html[data-topo='fixo'] .wo-topo {
   min-height: 48px;
   padding: 12px 14px;
   border: 1px solid var(--wo-borda-campo);
-  border-radius: var(--wo-raio-campo);
+  border-radius: var(--wo-raio);
   background: var(--wo-superficie-2);
   color: var(--wo-texto);
   font-family: var(--wo-fonte);
@@ -1535,7 +1436,7 @@ textarea.wo-controle {
   min-height: 48px;
   padding: 0 8px;
   border: 1px solid var(--wo-borda-campo);
-  border-radius: var(--wo-raio-campo);
+  border-radius: var(--wo-raio);
   background: var(--wo-superficie-2);
   color: var(--wo-texto-2);
   font-size: 14.5px;
@@ -1595,7 +1496,7 @@ textarea.wo-controle {
   margin: 0;
   flex-shrink: 0;
   border: 1.5px solid var(--wo-borda-campo);
-  border-radius: var(--wo-raio-xs);
+  border-radius: var(--wo-raio);
   background: var(--wo-superficie-2);
   cursor: pointer;
 }
@@ -1647,7 +1548,7 @@ textarea.wo-controle {
   margin-bottom: 20px;
   padding: 14px 16px;
   border: 1px solid var(--wo-erro-borda);
-  border-radius: var(--wo-raio-sm);
+  border-radius: var(--wo-raio);
   background: var(--wo-erro-fundo);
   font-size: 14.5px;
   line-height: 1.55;
@@ -1795,7 +1696,7 @@ textarea.wo-controle {
 }
 
 .wo-confirmacao__dados .wo-confirmacao__contato {
-  font-family: var(--wo-mono);
+  font-family: var(--wo-fonte);
   font-size: 13px;
   font-weight: 400;
 }
@@ -1830,7 +1731,7 @@ textarea.wo-controle {
   flex: 1 1 240px;
   min-width: 0;
   min-height: 52px;
-  border-radius: var(--wo-raio-btn);
+  border-radius: var(--wo-raio);
   background: var(--wo-superficie);
 }
 
@@ -1838,7 +1739,7 @@ textarea.wo-controle {
   margin: 16px 0 0;
 }
 
-/* 0,2,0 para vencer .wo-hero .wo-nota-mono quando o formulário fica dentro de um hero. */
+/* A nota fica depois dos aceites, com o mesmo respiro em qualquer contexto. */
 .wo-form-interesse .wo-form-interesse__nota {
   margin-top: 12px;
 }
@@ -1892,7 +1793,7 @@ textarea.wo-controle {
 .wo-form__semjs {
   padding: 16px 18px;
   border: 1px solid var(--wo-borda-forte);
-  border-radius: var(--wo-raio-sm);
+  border-radius: var(--wo-raio);
   background: var(--wo-superficie);
   color: var(--wo-texto-2);
   font-size: 15px;

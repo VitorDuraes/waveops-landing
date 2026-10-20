@@ -45,11 +45,6 @@
 .wo-solucoes-indice__titulo {
   flex: 1;
   min-width: 0;
-  font-family: var(--wo-fonte-titulo);
-  font-size: var(--wo-h3-cartao);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  line-height: 1.55;
 }
 
 .wo-solucoes-indice__seta,

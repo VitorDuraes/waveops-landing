@@ -3,6 +3,39 @@
    abertura, as duas maquetes, o diagrama, os módulos por situação, a tabela e o aviso final. */
 
 /* ---------- Abertura ---------- */
+/* O cartão opaco recupera a hierarquia do contexto escuro, que o texto sobre a onda não usa. */
+.wo-plataforma-interesse {
+  min-width: 0;
+  --wo-texto-2: var(--wo-clara-2);
+  --wo-texto-3: var(--wo-clara-3);
+  --wo-acento-texto: var(--wo-violeta-texto);
+}
+
+.wo-plataforma-interesse .wo-rotulo {
+  color: var(--wo-texto-2);
+}
+
+/* O erro continua no parcial, logo após a linha. A grade o apresenta junto ao campo e antes do envio. */
+.wo-plataforma-interesse .wo-campo:has(.wo-form-interesse__linha) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+.wo-plataforma-interesse .wo-form-interesse__linha {
+  display: contents;
+}
+
+.wo-plataforma-interesse .wo-form-interesse__linha .wo-btn {
+  grid-row: 4;
+  justify-self: start;
+  margin-top: var(--wo-espaco-2);
+}
+
+.wo-plataforma-interesse .wo-erro-campo {
+  grid-row: 3;
+}
+
 /* O selo é translúcido e, sobre a onda, o âmbar ficaria abaixo de 4,5:1: a pílula põe o cartão noite
    por baixo. */
 .wo-plataforma-abertura__situacao {
@@ -11,13 +44,12 @@
   background: var(--wo-cartao-noite);
 }
 
-.wo-plataforma-abertura__workspace,
-.wo-plataforma-interesse {
+.wo-plataforma-abertura__workspace {
   min-width: 0;
 }
 
-/* No cartão, o formulário ocupa a largura toda. O botão segue a linha flexível do formulário: no cartão
-   estreito ele desce, do tamanho do texto, e em 360 px fica fora da faixa do WhatsApp flutuante. */
+/* No cartão, o formulário ocupa a largura toda. A grade mantém campo, erro e envio nessa ordem;
+   o botão tem a largura do texto e em 360 px fica fora da faixa do WhatsApp flutuante. */
 .wo-plataforma-interesse .wo-form-interesse {
   max-width: none;
   margin-top: 0;
@@ -40,7 +72,7 @@
 }
 
 /* ---------- Maquetes (workspace e telas) ----------
-   Cartões claros com o aviso de ilustração em "Nota" de 5.2, sem palavra sozinha na última linha. */
+   Cartões de interface com o aviso de ilustração em "Nota" de 5.2, sem palavra sozinha na última linha. */
 .wo-plataforma-workspace {
   gap: var(--wo-espaco-3);
   padding: var(--wo-espaco-3);
@@ -54,19 +86,7 @@
 
 .wo-plataforma-workspace .wo-maquete__aviso,
 .wo-plataforma-tela .wo-maquete__aviso {
-  font-family: var(--wo-fonte);
-  font-size: var(--wo-texto-pequeno);
-  line-height: 1.45;
   text-wrap: balance;
-}
-
-/* "Título de cartão" de 5.2. */
-.wo-plataforma-titulo-cartao {
-  font-family: var(--wo-fonte-titulo);
-  font-size: var(--wo-h3-cartao);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  line-height: 1.55;
 }
 
 .wo-plataforma-kpis {
@@ -108,7 +128,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--wo-espaco-1);
-  padding: calc(var(--wo-espaco-1) / 2) var(--wo-espaco-1);
+  padding: var(--wo-espaco-miudo) var(--wo-espaco-1);
   border-radius: var(--wo-raio-pilula);
   background: var(--wo-fundo-2);
   color: var(--wo-texto-2);
@@ -118,8 +138,8 @@
 
 .wo-plataforma-estado::before {
   content: '';
-  width: calc(var(--wo-linha-forte) * 3);
-  height: calc(var(--wo-linha-forte) * 3);
+  width: var(--wo-situacao-ponto);
+  height: var(--wo-situacao-ponto);
   flex-shrink: 0;
   border-radius: 50%;
   background: currentColor;
@@ -154,9 +174,9 @@
 /* O menu lateral só cabe a partir de 768 px. */
 .wo-plataforma-workspace__menu {
   display: none;
-  flex: 0 0 calc(var(--wo-espaco-6) * 3);
+  flex: 0 0 var(--wo-plataforma-menu-largura);
   flex-direction: column;
-  gap: calc(var(--wo-espaco-1) / 2);
+  gap: var(--wo-espaco-miudo);
   padding: var(--wo-espaco-2);
   border-radius: var(--wo-raio);
   background: var(--wo-fundo-2);
@@ -310,16 +330,16 @@ ul.wo-plataforma-checks {
 .wo-plataforma-diagrama__marca {
   display: grid;
   place-items: center;
-  width: var(--wo-espaco-4);
-  height: var(--wo-espaco-4);
+  width: var(--wo-plataforma-marca-tamanho);
+  height: var(--wo-plataforma-marca-tamanho);
   flex-shrink: 0;
   border-radius: var(--wo-raio);
   background: var(--wo-violeta);
 }
 
 .wo-plataforma-diagrama__marca svg {
-  width: var(--wo-espaco-3);
-  height: var(--wo-espaco-3);
+  width: var(--wo-plataforma-simbolo-tamanho);
+  height: var(--wo-plataforma-simbolo-tamanho);
 }
 
 .wo-plataforma-diagrama__camada {
@@ -398,14 +418,14 @@ ul.wo-plataforma-checks {
 }
 
 .wo-plataforma-tela__opcoes {
-  flex-basis: calc(var(--wo-espaco-7) * 2);
+  flex-basis: var(--wo-plataforma-opcoes-largura);
 }
 
 .wo-plataforma-tela__opcao {
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  gap: calc(var(--wo-espaco-1) / 2);
+  gap: var(--wo-espaco-miudo);
   padding: var(--wo-espaco-2) var(--wo-espaco-3);
   background: var(--wo-superficie);
 }
@@ -425,7 +445,7 @@ ul.wo-plataforma-checks {
 }
 
 .wo-plataforma-tela {
-  flex: 2 1 calc(var(--wo-espaco-7) * 4);
+  flex: 2 1 var(--wo-plataforma-tela-largura);
   gap: var(--wo-espaco-3);
   padding: var(--wo-espaco-3);
   text-wrap: pretty;
@@ -531,7 +551,7 @@ ul.wo-plataforma-checks {
 .wo-plataforma-etiqueta {
   align-self: flex-start;
   margin-top: auto;
-  padding: calc(var(--wo-espaco-1) / 2) var(--wo-espaco-1);
+  padding: var(--wo-espaco-miudo) var(--wo-espaco-1);
   border-radius: var(--wo-raio-pilula);
   background: var(--wo-acento-fundo);
   color: var(--wo-acento-texto);
@@ -607,7 +627,7 @@ ul.wo-plataforma-checks {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: calc(var(--wo-espaco-1) / 2);
+  gap: var(--wo-espaco-miudo);
 }
 
 /* ---------- Plataforma ou projeto sob medida ----------
@@ -641,15 +661,11 @@ ul.wo-plataforma-checks {
 /* Colunas em "Título de cartão"; o canto em "Etiqueta em caixa alta". */
 .wo-plataforma-cmp thead th {
   width: 40%;
-  font-family: var(--wo-fonte-titulo);
-  font-size: var(--wo-h3-cartao);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  line-height: 1.55;
 }
 
 .wo-plataforma-cmp thead th:first-child {
   width: 20%;
+  font-weight: 500;
   font-family: var(--wo-fonte);
   font-size: var(--wo-etiqueta-tamanho);
   letter-spacing: var(--wo-etiqueta-entreletra);
@@ -676,7 +692,7 @@ ul.wo-plataforma-checks {
 }
 
 .wo-plataforma-aviso__texto {
-  flex: 1 1 calc(var(--wo-espaco-7) * 3);
+  flex: 1 1 var(--wo-plataforma-aviso-largura);
   min-width: 0;
 }
 

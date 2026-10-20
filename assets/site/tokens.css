@@ -66,7 +66,8 @@
   --wo-borda-forte: rgb(255 255 255 / 0.25);
   --wo-acento: var(--wo-violeta);
   --wo-acento-hover: var(--wo-violeta-forte);
-  --wo-acento-texto: #c2b2ff;
+  --wo-violeta-texto: #c2b2ff;
+  --wo-acento-texto: var(--wo-violeta-texto);
   --wo-sobre-acento: var(--wo-branco);
   /* Anel de foco (WCAG 1.4.11, 3:1): branco no escuro, porque o violeta cai a 1,07:1 no brilho da
      onda; o cartão claro volta ao violeta. */
@@ -77,6 +78,10 @@
   --wo-alerta: #fbbf24;
   --wo-erro: #f87171;
   --wo-info: #7dd3fc;
+  /* Fundos de situação, inclusive a pílula Em desenvolvimento. */
+  --wo-alerta-fundo: rgb(245 158 11 / 0.12);
+  --wo-info-fundo: rgb(56 189 248 / 0.12);
+  --wo-neutro-fundo: rgb(148 163 184 / 0.14);
   /* Nomes que os formulários já usam, com os valores escuros de hoje: o formulário continua igual
      sobre o fundo escuro. */
   --wo-superficie-2: #17181e;
@@ -110,6 +115,7 @@
   --wo-conteiner: 1280px;
   --wo-margem: 20px;
   --wo-secao: 96px;
+  --wo-secao-compacta: calc(var(--wo-secao) / 2);
   --wo-topo-altura: 66px;
   --wo-raio: 10px;
   --wo-raio-pilula: 999px;
@@ -169,6 +175,7 @@
   --wo-entrada-deslocamento: 16px;
 
   /* Ritmo das peças editoriais compartilhadas e do hero da Home. */
+  --wo-espaco-miudo: 4px;
   --wo-espaco-1: 8px;
   --wo-espaco-2: 16px;
   --wo-espaco-3: 24px;
@@ -185,6 +192,25 @@
   --wo-linha-fina: 1px;
   --wo-linha-forte: 2px;
   --wo-hero-frase-largura: 430px;
+  /* Plataforma: dimensões de interface, independentes de espaçamento e espessura. */
+  --wo-situacao-ponto: 6px;
+  --wo-plataforma-menu-largura: 192px;
+  --wo-plataforma-opcoes-largura: 256px;
+  --wo-plataforma-tela-largura: 512px;
+  --wo-plataforma-aviso-largura: 384px;
+  --wo-plataforma-marca-tamanho: 32px;
+  --wo-plataforma-simbolo-tamanho: 24px;
+  --wo-palco-aviso-tamanho: 11px;
+  /* Imagem de compartilhamento, 1200 x 630. Só dev/site/og.css usa estas medidas. */
+  --wo-og-largura: 1200px;
+  --wo-og-altura: 630px;
+  --wo-og-respiro-vertical: 56px;
+  --wo-og-respiro-horizontal: 64px;
+  --wo-og-titulo: 76px;
+  --wo-og-marca: 34px;
+  --wo-og-selo: 56px;
+  --wo-og-simbolo: 38px;
+  --wo-og-url: 18px;
   /* Nota de cenário simulado na abertura de Demonstrações técnicas. */
   --wo-demonstracoes-aviso-largura: 760px;
   /* Fundo do selo do hero da Home: o preto a 30% do botão de contorno. */
@@ -247,37 +273,4 @@
 /* Texto do menu do topo: branco a 85% (spec 5.5), um pouco acima dos 75% do texto secundário. */
 .wo-topo {
   --wo-texto-2: var(--wo-topo-texto-noite);
-}
-
-/* Legado: nomes do site anterior que o CSS de hoje ainda usa. Cada um aponta para o valor novo
-   mais próximo, então as páginas seguem renderizando até serem refeitas. Não use estes nomes em
-   CSS novo. A Tarefa 12 do plano apaga este bloco. */
-:root {
-  /* Fundos */
-  --wo-faixa: var(--wo-fundo-2);
-  /* Texto */
-  --wo-texto-4: var(--wo-texto-3);
-  /* Acento */
-  --wo-acento-marca: var(--wo-violeta);
-  /* Situação */
-  --wo-alerta-fundo: rgb(245 158 11 / 0.12);
-  --wo-info-fundo: rgb(56 189 248 / 0.12);
-  --wo-neutro-fundo: rgb(148 163 184 / 0.14);
-  /* Tipografia: o texto mono virou Inter e os títulos de seção ganharam um tamanho só */
-  --wo-mono: var(--wo-fonte);
-  --wo-h2-medio: var(--wo-h2);
-  --wo-h2-menor: var(--wo-h2);
-  --wo-h3-painel: var(--wo-h3-linha);
-  /* Raios: o novo visual usa um raio só */
-  --wo-raio-xs: var(--wo-raio);
-  --wo-raio-campo: var(--wo-raio);
-  --wo-raio-btn: var(--wo-raio);
-  --wo-raio-sm: var(--wo-raio);
-  --wo-raio-md: var(--wo-raio);
-  --wo-raio-painel: var(--wo-raio);
-  --wo-raio-lg: var(--wo-raio);
-  --wo-raio-xl: var(--wo-raio);
-  /* Sombras e espaço */
-  --wo-sombra-card: var(--wo-sombra-cartao);
-  --wo-secao-menor: calc(var(--wo-secao) / 2);
 }

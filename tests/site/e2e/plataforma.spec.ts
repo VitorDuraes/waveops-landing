@@ -4,6 +4,25 @@ import { varrerContraste } from './helpers/contraste';
 test.describe('Plataforma', () => {
   test.use({ reducedMotion: 'reduce' });
 
+  test('o cartão opaco separa rótulo, aceite, link e nota e mantém o erro junto ao campo', async ({ page }) => {
+    await page.goto('/plataforma/');
+    const cartao = page.locator('.wo-plataforma-interesse');
+    await expect(cartao.locator('.wo-rotulo')).toHaveCSS('color', 'rgba(255, 255, 255, 0.75)');
+    await expect(cartao.locator('.wo-marcar').first()).toHaveCSS('color', 'rgba(255, 255, 255, 0.75)');
+    await expect(cartao.locator('.wo-marcar a')).toHaveCSS('color', 'rgb(194, 178, 255)');
+    await expect(cartao.locator('.wo-form-interesse__nota')).toHaveCSS('color', 'rgb(163, 163, 175)');
+    await page.locator('#pl-email').fill('invalido');
+    await page.locator('#form-interesse [data-botao-enviar]').click();
+    await expect(page.locator('#e-pl-email')).toBeVisible();
+    const campo = await page.locator('#pl-email').boundingBox();
+    const erro = await page.locator('#e-pl-email').boundingBox();
+    const envio = await page.locator('#form-interesse [data-botao-enviar]').boundingBox();
+    expect(erro!.y - campo!.y - campo!.height).toBeGreaterThanOrEqual(0);
+    expect(erro!.y - campo!.y - campo!.height).toBeLessThanOrEqual(8);
+    expect(erro!.y + erro!.height).toBeLessThanOrEqual(envio!.y);
+    await expect(page.locator('#pl-email')).toBeFocused();
+  });
+
   for (const largura of [640, 700]) {
     test(`workspace em ${largura} px contém os indicadores e mantém os estados ao lado`, async ({ page }, info) => {
       await page.setViewportSize({ width: largura, height: 900 });

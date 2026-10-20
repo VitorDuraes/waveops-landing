@@ -7,19 +7,19 @@ const ROTA = '/demonstracoes-tecnicas/';
 
 /* As cinco frentes da base WaveOps (decisão de 15/10/2026). A triagem com IA conta em duas frentes. */
 const FRENTES = [
-  { botao: 'Atendimento', titulos: ['Triagem com IA e revisão humana.'] },
+  { botao: 'Automação de atendimento', titulos: ['Triagem com IA e revisão humana.'] },
   { botao: 'Agentes de IA', titulos: ['Triagem com IA e revisão humana.'] },
-  { botao: 'Dashboards', titulos: ['Da planilha ao painel com acesso por perfil.'] },
-  { botao: 'CRMs', titulos: ['Cobrança e relatório recorrentes, sem clique manual.', 'Um cadastro, vários sistemas atualizados.'] },
-  { botao: 'SaaS', titulos: ['Pedido, pagamento e estoque no mesmo fluxo.'] },
+  { botao: 'Painéis de gestão', titulos: ['Da planilha ao painel com acesso por perfil.'] },
+  { botao: 'CRMs sob medida', titulos: ['Cobrança e relatório recorrentes, sem clique manual.', 'Um cadastro, vários sistemas atualizados.'] },
+  { botao: 'Apps e sistemas', titulos: ['Pedido, pagamento e estoque no mesmo fluxo.'] },
 ] as const;
 const TOTAL = 5;
 const FICHAS = [
   ['CRMs sob medida', 'O pedido entra, a cobrança não sai e o relatório fica para depois.'],
   ['CRMs sob medida', 'Site, CRM, ERP e pagamento trabalham cada um por conta.'],
-  ['Dashboards', 'A planilha virou o sistema da empresa e parou de dar conta.'],
+  ['Painéis de gestão', 'A planilha virou o sistema da empresa e parou de dar conta.'],
   ['Automação de atendimento e Agentes de IA', 'Atender, fazer triagem e ler documento o dia todo trava o time.'],
-  ['SaaS', 'A loja vende, mas o financeiro e o estoque só ficam sabendo depois.'],
+  ['Apps e sistemas', 'A loja vende, mas o financeiro e o estoque só ficam sabendo depois.'],
 ] as const;
 
 /** Abre a página e espera o filtro ligar: o script marca data-pronto no grupo de botões. */
@@ -67,7 +67,7 @@ test.describe('Demonstrações técnicas: filtro por frente', () => {
 
   test('deve trocar de frente sem acumular fluxos quando duas frentes são escolhidas em seguida', async ({ page }) => {
     const filtro = await abrir(page);
-    await filtro.getByRole('button', { name: 'CRMs', exact: true }).click();
+    await filtro.getByRole('button', { name: 'CRMs sob medida', exact: true }).click();
     await filtro.getByRole('button', { name: 'Agentes de IA', exact: true }).click();
 
     await expect(page.getByRole('article')).toHaveCount(1);
@@ -81,8 +81,8 @@ test.describe('Demonstrações técnicas: filtro por frente', () => {
     await expect(regiao).toHaveAttribute('aria-live', 'polite');
     await expect(regiao).toBeEmpty();
 
-    await filtro.getByRole('button', { name: 'Atendimento', exact: true }).click();
-    await expect(regiao).toHaveText('Mostrando 1 de 5 demonstrações. Frente: Atendimento.');
+    await filtro.getByRole('button', { name: 'Automação de atendimento', exact: true }).click();
+    await expect(regiao).toHaveText('Mostrando 1 de 5 demonstrações. Frente: Automação de atendimento.');
 
     await filtro.getByRole('button', { name: 'Todas', exact: true }).click();
     await expect(regiao).toHaveText('Mostrando 5 de 5 demonstrações.');
@@ -90,11 +90,11 @@ test.describe('Demonstrações técnicas: filtro por frente', () => {
 
   test('deve filtrar pelo teclado quando o botão tem foco', async ({ page }) => {
     const filtro = await abrir(page);
-    await filtro.getByRole('button', { name: 'Dashboards', exact: true }).focus();
+    await filtro.getByRole('button', { name: 'Painéis de gestão', exact: true }).focus();
     await page.keyboard.press('Enter');
 
     await expect(page.getByRole('article')).toHaveCount(1);
-    await expect(filtro.getByRole('button', { name: 'Dashboards', exact: true, pressed: true })).toBeFocused();
+    await expect(filtro.getByRole('button', { name: 'Painéis de gestão', exact: true, pressed: true })).toBeFocused();
     await expect(page.locator('[data-filtro-status]')).toContainText('1 de 5');
   });
 });

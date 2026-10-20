@@ -12,6 +12,13 @@ const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '.
 const paginas = lerPaginas(raiz).paginas.filter((p) => fs.existsSync(path.join(raiz, p.arquivo)));
 const ler = (rel) => fs.readFileSync(path.join(raiz, rel), 'utf8');
 
+test('nenhuma página nem o llms.txt falam em quatro frentes', () => {
+  for (const p of paginas) assert.doesNotMatch(ler(p.arquivo), /quatro frentes/i, p.arquivo);
+  const llms = ler('llms.txt');
+  assert.doesNotMatch(llms, /quatro frentes/i);
+  assert.match(llms, /automação de atendimento, agentes de IA, painéis de gestão, CRMs sob medida e apps e sistemas/i);
+});
+
 test('o JSON-LD da Home traz a cidade', () => {
   const json = JSON.parse(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(ler('index.html'))[1]);
   const empresa = json['@graph'].find((item) => item['@type'] === 'Organization');
@@ -67,7 +74,7 @@ test('a Plataforma só aparece no rodapé, fora da própria página', () => {
 test('Projetos sob medida apresenta as cinco frentes da base WaveOps', () => {
   const html = ler('projetos-sob-medida/index.html');
   const nomes = [...html.matchAll(/<h3 class="wo-sobmedida-frente__nome">([^<]+)<\/h3>/g)].map((m) => m[1]);
-  assert.deepEqual(nomes, ['Automação de atendimento', 'Agentes de IA', 'Dashboards', 'CRMs sob medida', 'SaaS']);
+  assert.deepEqual(nomes, ['Automação de atendimento', 'Agentes de IA', 'Painéis de gestão', 'CRMs sob medida', 'Apps e sistemas']);
 });
 
 test('as âncoras das frentes existem, as novas e as de antes de 15/10/2026', () => {
@@ -86,7 +93,7 @@ test('o rodapé leva às cinco frentes', () => {
   const destinos = [...rodape.matchAll(/href="\/projetos-sob-medida\/#([a-z]+)"/g)].map((m) => m[1]);
   assert.deepEqual(destinos, ['atendimento', 'agentes', 'dashboards', 'crms', 'saas']);
   const nomes = [...rodape.matchAll(/href="\/projetos-sob-medida\/#[a-z]+">([^<]+)</g)].map((m) => m[1]);
-  assert.deepEqual(nomes, ['Automação de atendimento', 'Agentes de IA', 'Dashboards', 'CRMs sob medida', 'SaaS']);
+  assert.deepEqual(nomes, ['Automação de atendimento', 'Agentes de IA', 'Painéis de gestão', 'CRMs sob medida', 'Apps e sistemas']);
 });
 
 test('as perguntas do HTML e do JSON-LD batem, com a do freelancer por último', () => {
@@ -112,7 +119,7 @@ test('as perguntas do HTML e do JSON-LD batem, com a do freelancer por último',
 
 test('a descrição de Projetos sob medida é a de 8.3 na meta, no og e no twitter', () => {
   const html = ler('projetos-sob-medida/index.html');
-  const esperada = 'Automação de atendimento, agentes de IA com revisão humana, dashboards, CRMs sob medida e SaaS. Escopo escrito antes de começar.';
+  const esperada = 'Automação de atendimento, agentes de IA com revisão humana, painéis de gestão, CRMs sob medida e apps. Escopo escrito antes de começar.';
   for (const chave of ['name="description"', 'property="og:description"', 'name="twitter:description"']) {
     const meta = new RegExp(`<meta ${chave} content="([^"]*)"`).exec(html);
     assert.ok(meta, `meta ${chave} não encontrada`);
@@ -324,11 +331,11 @@ test('a chamada final oferece formulário e WhatsApp no cartão escuro', () => {
 test('Soluções indica as cinco frentes em Como contratar (spec 8.5)', () => {
   const html = ler('solucoes/index.html');
   const esperado = {
-    vender: [['atendimento', 'Automação de atendimento'], ['crms', 'CRMs sob medida'], ['dashboards', 'Dashboards']],
+    vender: [['atendimento', 'Automação de atendimento'], ['crms', 'CRMs sob medida'], ['dashboards', 'Painéis de gestão']],
     atender: [['atendimento', 'Automação de atendimento'], ['agentes', 'Agentes de IA']],
-    operar: [['crms', 'CRMs sob medida'], ['saas', 'SaaS'], ['agentes', 'Agentes de IA']],
-    decidir: [['dashboards', 'Dashboards'], ['crms', 'CRMs sob medida']],
-    crescer: [['saas', 'SaaS'], ['dashboards', 'Dashboards']],
+    operar: [['crms', 'CRMs sob medida'], ['saas', 'Apps e sistemas'], ['agentes', 'Agentes de IA']],
+    decidir: [['dashboards', 'Painéis de gestão'], ['crms', 'CRMs sob medida']],
+    crescer: [['saas', 'Apps e sistemas'], ['dashboards', 'Painéis de gestão']],
   };
   for (const [id, frentes] of Object.entries(esperado)) {
     const bloco = new RegExp(`<dd\\b[^>]*id="${id}-contratar"[^>]*>([\\s\\S]*?)</dd>`).exec(html)?.[1];

@@ -131,7 +131,7 @@ main:focus {
   align-items: center;
   min-height: var(--wo-alvo);
   padding: 0 16px;
-  border-radius: var(--wo-raio-btn);
+  border-radius: var(--wo-raio);
   background: var(--wo-acento);
   color: var(--wo-sobre-acento);
   font-weight: 600;
@@ -168,11 +168,11 @@ main:focus {
 }
 
 .wo-secao--menor {
-  padding: var(--wo-secao-menor) 0;
+  padding: var(--wo-secao-compacta) 0;
 }
 
 .wo-secao--faixa {
-  background: var(--wo-faixa);
+  background: var(--wo-fundo-2);
   border-top: 1px solid var(--wo-borda);
   border-bottom: 1px solid var(--wo-borda);
 }
@@ -242,12 +242,12 @@ h2,
 
 .wo-h2--medio {
   max-width: none;
-  font-size: var(--wo-h2-medio);
+  font-size: var(--wo-h2);
 }
 
 .wo-h2--menor {
   margin-top: 14px;
-  font-size: var(--wo-h2-menor);
+  font-size: var(--wo-h2);
 }
 
 .wo-linha {

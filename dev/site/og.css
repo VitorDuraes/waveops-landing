@@ -1,61 +1,69 @@
-/* Só para gerar a imagem de compartilhamento (dev/site/og.html). Não é publicado. */
+/* Fonte da imagem de compartilhamento. Não é CSS publicado nas páginas. */
 html,
 body {
-  width: 1200px;
-  height: 630px;
+  width: var(--wo-og-largura);
+  height: var(--wo-og-altura);
   overflow: hidden;
 }
 
 .og {
   position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  width: 1200px;
-  height: 630px;
-  padding: 64px 76px;
+  width: var(--wo-og-largura);
+  height: var(--wo-og-altura);
+  padding: var(--wo-og-respiro-vertical) var(--wo-og-respiro-horizontal);
   overflow: hidden;
-  background: var(--wo-fundo);
+  background: var(--wo-noite-hero);
 }
 
-.og__brilho {
+.og__onda {
   position: absolute;
-  top: -520px;
-  right: -300px;
-  width: 1100px;
-  height: 1100px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(162, 139, 249, 0.3), transparent 62%);
-  pointer-events: none;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(var(--wo-leitura-alto), var(--wo-leitura-baixo)), url('/assets/site/video/onda-poster.webp') center / cover;
 }
 
 .og__marca {
-  position: relative;
-  font-size: 34px;
+  font-size: var(--wo-og-marca);
 }
 
 .og__marca .wo-marca__selo {
-  width: 64px;
-  height: 64px;
+  width: var(--wo-og-selo);
+  height: var(--wo-og-selo);
+}
+
+.og__marca .wo-marca__selo svg {
+  width: var(--wo-og-simbolo);
+  height: var(--wo-og-simbolo);
 }
 
 .og__etiqueta {
-  position: relative;
-  font-size: 15px;
+  border: 0;
+  border-left: var(--wo-linha-forte) solid var(--wo-titulo-destaque);
+  border-radius: 0;
+  background: var(--wo-hero-controle);
+  color: var(--wo-hero-texto-secundario);
+  font-size: var(--wo-etiqueta-tamanho);
 }
+
+.og__etiqueta::before { display: none; }
 
 .og__titulo {
-  position: relative;
-  margin-top: 26px;
-  font-size: 76px;
-  font-weight: 500;
-  line-height: 1.04;
-  letter-spacing: -0.05em;
+  margin-top: var(--wo-espaco-3);
+  font-family: var(--wo-fonte-titulo);
+  font-size: var(--wo-og-titulo);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
 }
 
+.og__destaque { color: var(--wo-titulo-destaque); }
+
 .og__url {
-  position: relative;
-  color: var(--wo-acento-texto);
-  font-family: var(--wo-mono);
-  font-size: 22px;
+  color: var(--wo-hero-texto-secundario);
+  font-family: var(--wo-fonte);
+  font-size: var(--wo-og-url);
 }

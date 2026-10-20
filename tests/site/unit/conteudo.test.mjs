@@ -206,10 +206,12 @@ test('a folha creme saiu e o escuro não depende de classe (spec 15.2 e 15.4)', 
 });
 
 // Mapa da spec 15.2 sobre as tabelas de 7.1 e 7.3: hero transparente; "Papel" vira o véu e
-// "Papel 2" o véu forte.
+// "Papel 2" o véu forte. Na Plataforma (7.4) as seis seções depois da abertura alternam papel e
+// papel 2, começando pelo papel.
 const VEUS = {
   'index.html': [null, null, 'wo-veu', 'wo-veu-forte', 'wo-veu', 'wo-veu-forte'],
   'projetos-sob-medida/index.html': [null, 'wo-veu-forte', 'wo-veu', 'wo-veu-forte', 'wo-veu'],
+  'plataforma/index.html': [null, 'wo-veu', 'wo-veu-forte', 'wo-veu', 'wo-veu-forte', 'wo-veu', 'wo-veu-forte'],
 };
 for (const [arquivo, esperados] of Object.entries(VEUS)) {
   test(`${arquivo}: o hero é transparente e as seções seguem o mapa de véus`, () => {
@@ -243,6 +245,25 @@ test('na Home a cascata segue a lista de 15.3', () => {
     const tag = new RegExp(`<[a-z0-9]+\\s[^>]*${gancho}[^>]*>`).exec(html)?.[0] ?? '';
     assert.match(tag, new RegExp(`\\sdata-entrada="${n}"`), `${gancho} entra na posição ${n}`);
   }
+});
+
+// Na Plataforma o formulário de interesse é o cartão do hero (7.4): entra como cartão, depois do
+// título e da frase, e o workspace de exemplo entra por último.
+test('na Plataforma a cascata segue a lista de 15.3, com o formulário como cartão', () => {
+  const html = semParciais(ler('plataforma/index.html'));
+  const ordem = [
+    ['class="wo-etiqueta-hero"', 0], ['class="wo-plataforma-abertura__situacao"', 1], ['id="plataforma-titulo"', 2],
+    ['class="wo-abertura__lead"', 3], ['class="wo-cartao-noite wo-plataforma-interesse"', 4], ['class="wo-plataforma-abertura__workspace"', 5],
+  ];
+  for (const [gancho, n] of ordem) {
+    const tag = new RegExp(`<[a-z0-9]+\\s[^>]*${gancho}[^>]*>`).exec(html)?.[0] ?? '';
+    assert.match(tag, new RegExp(`\\sdata-entrada="${n}"`), `${gancho} entra na posição ${n}`);
+  }
+  // O parcial do formulário fica dentro do cartão que entra em cascata.
+  const pagina = ler('plataforma/index.html');
+  const cartao = pagina.indexOf('class="wo-cartao-noite wo-plataforma-interesse"');
+  assert.ok(cartao > 0 && cartao < pagina.indexOf('<!-- parcial:form-interesse -->'), 'o formulário fica dentro do cartão noite');
+  assert.ok(pagina.indexOf('<!-- /parcial:form-interesse -->') < pagina.indexOf('class="wo-plataforma-abertura__workspace"'), 'o cartão fecha antes do workspace');
 });
 
 test('botão flutuante de WhatsApp em toda página menos Contato', () => {

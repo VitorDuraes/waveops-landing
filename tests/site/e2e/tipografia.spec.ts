@@ -86,6 +86,29 @@ const PAPEIS_SOLUCOES: readonly Papel[] = [
   { nome: 'Link com seta', seletor: '.wo-link-seta', minimo: 5, familia: 'Inter', tamanho: [14, 14], peso: 500, entreletra: 0, altura: 1.43 },
 ];
 
+/* Plataforma (Tarefa 8): as duas maquetes (workspace e telas) seguem os papéis de 5.2 como o resto da
+   página. Nome de tela, de camada, de módulo, de execução e de coluna da tabela são "Título de cartão";
+   o número dos indicadores é "Título de linha"; rótulo, estado, pílula e detalhe são "Nota". A ação
+   desenhada na tela ("Ativar modelo") tem a forma de botão, então segue "Botão". O formulário mantém os
+   estilos de campo de hoje (5.4) e fica fora daqui, menos a nota do pé dele. A primeira célula de cada
+   linha da tabela muda de papel no celular (vira o título do bloco) e também fica de fora. */
+const PAPEIS_PLATAFORMA: readonly Papel[] = [
+  { nome: 'Título do hero', seletor: '#plataforma-titulo', minimo: 1, familia: 'Geist', tamanho: [44, 72], peso: 600, entreletra: -0.035, altura: 1.05 },
+  { nome: 'Título de seção', seletor: 'main h2', minimo: 7, familia: 'Geist', tamanho: [34, 48], peso: 600, entreletra: -0.035, altura: 1.05 },
+  { nome: 'Título de linha (números das maquetes)', seletor: '.wo-plataforma-kpis strong', minimo: 7, familia: 'Geist', tamanho: [24, 30], peso: 500, entreletra: -0.02, altura: 1.2 },
+  { nome: 'Termo das definições (título de etapa)', seletor: '.wo-definicoes dt', minimo: 5, familia: 'Geist', tamanho: [22, 24], peso: 500, entreletra: -0.02, altura: 1.33 },
+  { nome: 'Título de etapa', seletor: '.wo-colunas-numeradas__item h3', minimo: 4, familia: 'Geist', tamanho: [22, 24], peso: 500, entreletra: -0.02, altura: 1.33 },
+  { nome: 'Número de etapa', seletor: '.wo-colunas-numeradas__numero', minimo: 4, familia: 'Geist', tamanho: [24, 24], peso: 500, entreletra: 0, altura: 1.33, cor: 'rgb(194, 178, 255)' },
+  { nome: 'Título de cartão (telas, camadas, módulos e colunas da tabela)', seletor: '.wo-plataforma-titulo-cartao, .wo-plataforma-cmp thead th:not(:first-child)', minimo: 39, familia: 'Geist', tamanho: [18, 18], peso: 500, entreletra: -0.02, altura: 1.55 },
+  { nome: 'Texto', seletor: '.wo-lead, .wo-definicoes dd, .wo-plataforma-checks li, .wo-plataforma-modulo__texto, .wo-colunas-numeradas__item p, .wo-plataforma-vazio__texto, .wo-plataforma-aviso__lead, .wo-plataforma-cmp td', minimo: 41, familia: 'Inter', tamanho: [16, 16], peso: 400, entreletra: 0, altura: 1.625 },
+  { nome: 'Texto de apoio do hero', seletor: '.wo-abertura__lead', minimo: 1, familia: 'Inter', tamanho: [18, 20], peso: 400, entreletra: 0, altura: 1.6 },
+  { nome: 'Nota e etiqueta de tecnologia', seletor: '.wo-maquete__aviso, .wo-form-interesse__nota, .wo-plataforma-diagrama__descricao, .wo-plataforma-diagrama__conector span, .wo-plataforma-diagrama__sistemas-nota, .wo-plataforma-pilulas li, .wo-plataforma-governanca__texto, .wo-plataforma-tela__descricao, .wo-plataforma-kpis span, .wo-plataforma-execucoes__nome, .wo-plataforma-estado, .wo-plataforma-linha__detalhe, .wo-plataforma-cartao__texto, .wo-plataforma-etiqueta, .wo-plataforma-situacao__legenda, .wo-plataforma-modulo__area', minimo: 82, familia: 'Inter', tamanho: [14, 14], peso: 400, entreletra: 0, altura: 1.45 },
+  { nome: 'Etiqueta em caixa alta', seletor: '.wo-sobretitulo, .wo-etiqueta, .wo-maquete__titulo, .wo-plataforma-workspace__grupo, .wo-plataforma-cmp thead th:first-child', minimo: 13, familia: 'Inter', tamanho: [12, 12], peso: 500, entreletra: 0.15, altura: 1.35, caixaAlta: true },
+  { nome: 'Selo do hero', seletor: '.wo-abertura .wo-etiqueta-hero', minimo: 1, familia: 'Inter', tamanho: [11, 11], peso: 500, entreletra: 0.15, altura: 1.5, caixaAlta: true, bordaEsquerda: '2px solid' },
+  { nome: 'Botão (envio da lista, aviso final e ação desenhada na tela)', seletor: '.wo-abertura .wo-btn, .wo-plataforma-aviso .wo-btn, .wo-plataforma-acao', minimo: 5, familia: 'Inter', tamanho: [14, 14], peso: 500, entreletra: 0, altura: 1.43 },
+  { nome: 'Link com seta', seletor: '.wo-link-seta', minimo: 1, familia: 'Inter', tamanho: [14, 14], peso: 500, entreletra: 0, altura: 1.43 },
+];
+
 type Medida = {
   texto: string;
   familia: string;
@@ -156,10 +179,11 @@ function medirPapeis(titulo: string, url: string, papeis: readonly Papel[]): voi
 medirPapeis('tipografia da Home (spec 5.2)', '/', PAPEIS_HOME);
 medirPapeis('tipografia de Projetos sob medida (spec 5.2)', '/projetos-sob-medida/', PAPEIS_SOBMEDIDA);
 medirPapeis('tipografia de Soluções (spec 5.2)', '/solucoes/', PAPEIS_SOLUCOES);
+medirPapeis('tipografia da Plataforma (spec 5.2)', '/plataforma/', PAPEIS_PLATAFORMA);
 
 test.describe('destaque dos títulos sobre a onda', () => {
   test.use({ reducedMotion: 'reduce' });
-  for (const url of ['/solucoes/', '/projetos-sob-medida/', '/404.html']) {
+  for (const url of ['/solucoes/', '/projetos-sob-medida/', '/404.html', '/plataforma/']) {
     test(`${url}: só o título grande usa o lilás de 3:1`, async ({ page }) => {
       await page.goto(url);
       const destaque = page.locator('.wo-abertura h1 .wo-destaque');

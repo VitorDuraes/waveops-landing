@@ -102,7 +102,7 @@ export async function varrerContraste(page: Page, url: string, trechos: string[]
       const caixa = raiz.getBoundingClientRect();
       faixasDeRolagem.push([Math.max(0, Math.floor(caixa.top + scrollY - innerHeight)), Math.ceil(caixa.bottom + scrollY - topo)]);
       for (const elemento of [raiz, ...raiz.querySelectorAll('*')]) {
-        if (!(elemento instanceof HTMLElement) || elemento.closest('.wo-oculto')) continue;
+        if (!(elemento instanceof HTMLElement) || elemento.closest('.wo-oculto, .wo-isca')) continue;
         const temTexto = [...elemento.childNodes].some((no) => no.nodeType === Node.TEXT_NODE && (no.textContent ?? '').trim());
         if (!temTexto || getComputedStyle(elemento).visibility !== 'visible' || !elemento.getClientRects().length) continue;
         elemento.dataset.medir = String(lista.length);

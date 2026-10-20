@@ -12,6 +12,19 @@ const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '.
 const paginas = lerPaginas(raiz).paginas.filter((p) => fs.existsSync(path.join(raiz, p.arquivo)));
 const ler = (rel) => fs.readFileSync(path.join(raiz, rel), 'utf8');
 
+/** Texto visível de um trecho de HTML nosso: percorre os caracteres e guarda só o que fica fora de
+    `<...>`. Leitura de texto para comparar, não limpeza de HTML de terceiros. */
+function textoDoTrecho(trecho) {
+  let texto = '';
+  let dentroDaTag = false;
+  for (const c of trecho) {
+    if (c === '<') dentroDaTag = true;
+    else if (c === '>' && dentroDaTag) dentroDaTag = false;
+    else if (!dentroDaTag) texto += c;
+  }
+  return texto;
+}
+
 test('nenhuma página nem o llms.txt falam em quatro frentes', () => {
   for (const p of paginas) assert.doesNotMatch(ler(p.arquivo), /quatro frentes/i, p.arquivo);
   const llms = ler('llms.txt');
@@ -101,7 +114,7 @@ test('as perguntas do HTML e do JSON-LD batem, com a do freelancer por último',
   const inicio = html.indexOf('id="perguntas"');
   assert.ok(inicio > 0, 'seção #perguntas não encontrada');
   const secao = html.slice(inicio, html.indexOf('</section>', inicio));
-  const texto = (trecho) => trecho.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  const texto = (trecho) => textoDoTrecho(trecho).replace(/\s+/g, ' ').trim();
   const resumos = [...secao.matchAll(/<summary\b[^>]*>([\s\S]*?)<\/summary>/g)].map((m) => texto(m[1]));
   const respostas = [...secao.matchAll(/<p class="wo-sobmedida-faq__resposta">([\s\S]*?)<\/p>/g)].map((m) => texto(m[1]));
   const json = JSON.parse(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(html)[1]);
@@ -191,7 +204,7 @@ test('o botão de pausa mora no rodapé, com o texto fixo "Pausar animação", a
   assert.match(botao[0], /\saria-pressed="false"/);
   assert.match(botao[0], /\shidden(?=[\s>])/, 'o botão nasce escondido: só aparece quando há animação');
   assert.doesNotMatch(botao[0], /\saria-label=/, 'o nome acessível é o próprio texto visível');
-  assert.equal(botao[1].replace(/<[^>]+>/g, '').trim(), 'Pausar animação');
+  assert.equal(textoDoTrecho(botao[1]).trim(), 'Pausar animação');
   for (const p of paginas) assert.doesNotMatch(semParciais(ler(p.arquivo)), /data-video-pausa|data-fundo-pausa/, `${p.arquivo}: pausa fora do rodapé`);
 });
 

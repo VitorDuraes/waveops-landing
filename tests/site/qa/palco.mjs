@@ -95,6 +95,8 @@ try {
 
     // Uma captura por passo.
     const contexto = await navegador.newContext(opcoes);
+    // A entrada do site tem teste próprio (e2e/chegada.spec.ts): a captura abre a página como a seguinte da visita.
+    await contexto.addInitScript(() => sessionStorage.setItem('waveops:chegada', '1'));
     const aba = await contexto.newPage();
     await aba.goto(`${base}/`);
     await aba.evaluate(() => document.fonts.ready);
@@ -122,6 +124,7 @@ try {
       ...opcoes,
       recordVideo: { dir: saida, size: { width: janela.largura * janela.densidade, height: janela.altura * janela.densidade } },
     });
+    await gravacao.addInitScript(() => sessionStorage.setItem('waveops:chegada', '1'));
     const filme = await gravacao.newPage();
     await filme.goto(`${base}/#frentes`);
     await filme.evaluate(() => document.fonts.ready);

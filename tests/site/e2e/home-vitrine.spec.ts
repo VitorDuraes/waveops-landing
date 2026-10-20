@@ -15,6 +15,9 @@ const aba = (page: Page, n: number) => vitrine(page).getByRole('button', { name:
 const frenteNaTela = (page: Page) => vitrine(page).locator('[data-ativo] .wo-vitrine__nome');
 
 async function abrir(page: Page) {
+  // A vitrine é medida como na página seguinte da visita: na primeira, a entrada do site (Tarefa 13B,
+  // teste próprio em chegada.spec.ts) cobre a tela por 1,45 s enquanto a vitrine já troca por baixo.
+  await page.addInitScript(() => sessionStorage.setItem('waveops:chegada', '1'));
   await page.goto('/');
   await page.addStyleTag({ content: `.wo-vitrine__aba i::after { animation-duration: ${CURTA}ms !important; }` });
   await expect(vitrine(page)).toHaveAttribute('data-pronto', '');
@@ -34,6 +37,19 @@ async function ficaParada(page: Page, nome: string) {
     return [...lidas];
   }, CURTA * 2.5);
   expect(vistas).toEqual([nome]);
+}
+
+/** Confirma que o cartão está no estado pedido (`:hover` ou `:focus-within`) e que a barra da aba da
+    vez parou, e só então devolve a frente da tela. */
+async function frenteComPausa(page: Page, estado: string) {
+  await expect.poll(() => vitrine(page).evaluate((v, e) => v.matches(e), estado), `${estado} no cartão`).toBe(true);
+  await expect.poll(() => page.evaluate(() => {
+    const barras = document.getAnimations().filter((a) => a instanceof CSSAnimation && a.animationName === 'wo-vitrine-avanco');
+    return barras.length > 0 && barras.every((a) => a.playState === 'paused');
+  }), `barra parada com ${estado}`).toBe(true);
+  // Dois quadros: uma troca que já estava na fila (animationend) acontece antes da leitura.
+  return page.evaluate(() => new Promise<string>((pronto) => requestAnimationFrame(() => requestAnimationFrame(() =>
+    pronto(document.querySelector('[data-vitrine] [data-ativo] .wo-vitrine__nome')?.textContent ?? '')))));
 }
 
 test.describe('vitrine com movimento liberado', () => {
@@ -66,15 +82,20 @@ test.describe('vitrine com movimento liberado', () => {
     await expect(frenteNaTela(page)).not.toHaveText(nome, { timeout: CURTA * 4 });
   });
 
+  /* A frente esperada só é lida depois de a pausa valer: no runner lento do CI a barra encurtada pode
+     terminar entre abrir a página e o ponteiro chegar, e a frente já não é mais a primeira (falha do
+     PR #111, reproduzida com a CPU 6 vezes mais lenta). Se a pausa não vale, o poll estoura. */
   test('para com o ponteiro sobre o cartão e com o foco dentro dele', async ({ page }, info) => {
     test.skip(info.project.name !== 'desktop', 'ponteiro de mouse');
     await abrir(page);
     await vitrine(page).hover();
-    await ficaParada(page, FRENTES[0]!);
+    const comPonteiro = await frenteComPausa(page, ':hover');
+    await ficaParada(page, comPonteiro);
     await page.mouse.move(1, 1);
-    await expect(frenteNaTela(page)).toHaveText(FRENTES[1]!, { timeout: CURTA * 4 });
+    await expect(frenteNaTela(page), 'a troca volta quando o ponteiro sai').not.toHaveText(comPonteiro, { timeout: CURTA * 4 });
     await aba(page, 2).focus();
-    await ficaParada(page, FRENTES[1]!);
+    const comFoco = await frenteComPausa(page, ':focus-within');
+    await ficaParada(page, comFoco);
   });
 
   test('para com a aba do navegador oculta', async ({ page }) => {

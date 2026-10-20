@@ -87,6 +87,8 @@ try {
       // o Chrome consegue capturar de uma vez e a metade de baixo sai repetida. A altura em
       // px CSS não muda, e a folha reduz as duas imagens para a mesma largura de coluna.
       const contexto = await navegador.newContext({ viewport: { width: largura, height: 900 }, deviceScaleFactor: 1 });
+      // A entrada do site tem teste próprio (e2e/chegada.spec.ts): a captura abre a página como a seguinte da visita.
+      await contexto.addInitScript(() => sessionStorage.setItem('waveops:chegada', '1'));
       if (origemRemota) {
         // Nada sai da origem do preview, nem por engano.
         await contexto.route('**/*', (rota) => {

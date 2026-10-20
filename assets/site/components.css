@@ -1564,7 +1564,7 @@ textarea.wo-controle {
 }
 
 .wo-opcao-canal:has(input:focus-visible) {
-  outline: 2px solid var(--wo-acento-texto);
+  outline: 2px solid var(--wo-foco);
   outline-offset: 2px;
 }
 

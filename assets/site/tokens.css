@@ -24,6 +24,7 @@
   --wo-cartao-noite: #171717;
   --wo-clara: #f3f3f1;
   --wo-clara-2: rgb(255 255 255 / 0.75);
+  --wo-clara-3: #a3a3af;
   --wo-linha-noite: rgb(255 255 255 / 0.15);
   /* Véus das seções sobre o fundo vivo (spec 15.2): preto noite a 72% onde a seção 7 da spec diz
      "Papel" e a 84% onde diz "Papel 2" ou "Noite". A onda continua visível por trás, mais fraca. */
@@ -60,7 +61,7 @@
   --wo-superficie: var(--wo-cartao-noite);
   --wo-texto: var(--wo-clara);
   --wo-texto-2: var(--wo-clara-2);
-  --wo-texto-3: #a3a3af;
+  --wo-texto-3: var(--wo-clara-3);
   --wo-borda: var(--wo-linha-noite);
   --wo-borda-forte: rgb(255 255 255 / 0.25);
   --wo-acento: var(--wo-violeta);

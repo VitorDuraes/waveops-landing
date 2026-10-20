@@ -109,6 +109,23 @@ const PAPEIS_PLATAFORMA: readonly Papel[] = [
   { nome: 'Link com seta', seletor: '.wo-link-seta', minimo: 1, familia: 'Inter', tamanho: [14, 14], peso: 500, entreletra: 0, altura: 1.43 },
 ];
 
+/* Contato (Tarefa 9): campo, rótulo, validação e confirmação preservam os controles de 5.4.
+   Os títulos do formulário e da confirmação são títulos de cartão. Os dois canais são links
+   com seta (botão e menu), com uma nota embaixo. Garantias e próximas etapas são texto. */
+const PAPEIS_CONTATO: readonly Papel[] = [
+  { nome: 'Título do hero', seletor: '#contato-titulo', minimo: 1, familia: 'Geist', tamanho: [44, 72], peso: 600, entreletra: -0.035, altura: 1.05 },
+  { nome: 'Título de seção', seletor: '#depois-titulo', minimo: 1, familia: 'Geist', tamanho: [34, 48], peso: 600, entreletra: -0.035, altura: 1.05 },
+  { nome: 'Título de etapa', seletor: '.wo-colunas-numeradas__item h3', minimo: 3, familia: 'Geist', tamanho: [22, 24], peso: 500, entreletra: -0.02, altura: 1.33 },
+  { nome: 'Título de cartão (formulário e confirmação)', seletor: '.wo-form__titulo, .wo-confirmacao__titulo', minimo: 2, familia: 'Geist', tamanho: [18, 18], peso: 500, entreletra: -0.02, altura: 1.55 },
+  { nome: 'Número de etapa', seletor: '.wo-colunas-numeradas__numero', minimo: 3, familia: 'Geist', tamanho: [24, 24], peso: 500, entreletra: 0, altura: 1.33, cor: 'rgb(194, 178, 255)' },
+  { nome: 'Texto', seletor: '.wo-contato-garantias li, .wo-colunas-numeradas__item p, .wo-confirmacao__texto', minimo: 7, familia: 'Inter', tamanho: [16, 16], peso: 400, entreletra: 0, altura: 1.625 },
+  { nome: 'Texto de apoio do hero', seletor: '.wo-abertura__lead', minimo: 1, familia: 'Inter', tamanho: [18, 20], peso: 400, entreletra: 0, altura: 1.6 },
+  { nome: 'Nota', seletor: '.wo-contato-canal__detalhe, .wo-form__intro', minimo: 3, familia: 'Inter', tamanho: [14, 14], peso: 400, entreletra: 0, altura: 1.45 },
+  { nome: 'Etiqueta em caixa alta', seletor: '.wo-sobretitulo', minimo: 1, familia: 'Inter', tamanho: [12, 12], peso: 500, entreletra: 0.15, altura: 1.35, caixaAlta: true },
+  { nome: 'Selo do hero', seletor: '.wo-abertura .wo-etiqueta-hero', minimo: 1, familia: 'Inter', tamanho: [11, 11], peso: 500, entreletra: 0.15, altura: 1.5, caixaAlta: true, bordaEsquerda: '2px solid' },
+  { nome: 'Botão e canal com seta', seletor: '.wo-abertura .wo-btn, .wo-contato-canal__titulo, .wo-confirmacao .wo-link-seta', minimo: 6, familia: 'Inter', tamanho: [14, 14], peso: 500, entreletra: 0, altura: 1.43 },
+];
+
 type Medida = {
   texto: string;
   familia: string;
@@ -180,10 +197,11 @@ medirPapeis('tipografia da Home (spec 5.2)', '/', PAPEIS_HOME);
 medirPapeis('tipografia de Projetos sob medida (spec 5.2)', '/projetos-sob-medida/', PAPEIS_SOBMEDIDA);
 medirPapeis('tipografia de Soluções (spec 5.2)', '/solucoes/', PAPEIS_SOLUCOES);
 medirPapeis('tipografia da Plataforma (spec 5.2)', '/plataforma/', PAPEIS_PLATAFORMA);
+medirPapeis('tipografia de Contato (spec 5.2)', '/contato/', PAPEIS_CONTATO);
 
 test.describe('destaque dos títulos sobre a onda', () => {
   test.use({ reducedMotion: 'reduce' });
-  for (const url of ['/solucoes/', '/projetos-sob-medida/', '/404.html', '/plataforma/']) {
+  for (const url of ['/solucoes/', '/projetos-sob-medida/', '/404.html', '/plataforma/', '/contato/']) {
     test(`${url}: só o título grande usa o lilás de 3:1`, async ({ page }) => {
       await page.goto(url);
       const destaque = page.locator('.wo-abertura h1 .wo-destaque');

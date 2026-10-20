@@ -12,6 +12,9 @@ test.describe('vídeo do fundo', () => {
   const erros = new WeakMap<object, string[]>();
   test.beforeEach(async ({ page }, info) => {
     test.skip(info.project.name === 'tablet', 'mesmas regras no desktop e no celular');
+    // Página seguinte da visita: na primeira, a entrada do site (Tarefa 13B, teste próprio em
+    // chegada.spec.ts) cobre a tela por 1,45 s e esconderia o botão de pausa do rodapé.
+    await page.addInitScript(() => sessionStorage.setItem('waveops:chegada', '1'));
     const lista: string[] = [];
     erros.set(page, lista);
     page.on('console', (msg) => { if (msg.type() === 'error') lista.push(msg.text()); });

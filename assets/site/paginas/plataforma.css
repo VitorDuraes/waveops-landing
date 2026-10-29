@@ -1,318 +1,314 @@
-/* WaveOps · peças que só a página Plataforma usa: hero com o workspace de exemplo, diagrama
-   "Como se encaixa", responsabilidades do núcleo, telas de exemplo, módulos por situação,
-   tabela comparativa, princípios da assinatura e o aviso final. Tudo com o prefixo
-   wo-plataforma-. Depende de tokens.css, base.css e components.css. */
+/* WaveOps · peças que só a Plataforma usa (spec 7.4 e 15). Abertura, véus, grade editorial, definições,
+   colunas numeradas, seletor, cartões e formulário vêm de components.css. Aqui: a proporção da
+   abertura, as duas maquetes, o diagrama, os módulos por situação, a tabela e o aviso final. */
 
-/* Valor do design que ainda não tem token: o tracejado de "Sistemas do cliente" e da caixa
-   vazia de módulos. Candidato a --wo-borda-tracejada em tokens.css. */
-body[data-pagina='plataforma'] {
-  --wo-plataforma-tracejado: rgba(208, 200, 237, 0.32);
-}
-
-/* ---------- Colunas texto + painel (Como se encaixa, Núcleo, Assinatura) ----------
-   O design usa base de 400 px para o texto e 1,25 x 500 px para o painel. As folgas
-   verticais mudam de uma seção para outra (48, 40 e 36 px). */
-.wo-plataforma-colunas {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 40px 72px;
-}
-
-.wo-plataforma-colunas--centro {
-  align-items: center;
-  row-gap: 48px;
-}
-
-.wo-plataforma-colunas--assinatura {
-  row-gap: 36px;
-}
-
-.wo-plataforma-colunas__texto {
-  flex: 1 1 400px;
+/* ---------- Abertura ---------- */
+/* O cartão opaco recupera a hierarquia do contexto escuro, que o texto sobre a onda não usa. */
+.wo-plataforma-interesse {
   min-width: 0;
+  --wo-texto-2: var(--wo-clara-2);
+  --wo-texto-3: var(--wo-clara-3);
+  --wo-acento-texto: var(--wo-violeta-texto);
 }
 
-.wo-plataforma-colunas__lado {
-  flex: 1.25 1 500px;
-  min-width: 0;
-}
-
-/* Largura máxima do parágrafo de abertura em cada seção (o padrão do .wo-lead é 640 px). */
-.wo-plataforma-lead-520 {
-  max-width: 520px;
-}
-
-.wo-plataforma-lead-660 {
-  max-width: 660px;
-}
-
-.wo-plataforma-lead-700 {
-  max-width: 700px;
-}
-
-.wo-plataforma-checks {
-  margin-top: 26px;
-}
-
-/* ---------- Hero ----------
-   A Plataforma tem escala própria de título e pequenas diferenças de ritmo em relação ao
-   .wo-hero compartilhado (a Home usa 66 px no título, aqui são 58 px). */
-.wo-plataforma-hero {
-  padding-top: clamp(44px, 5.4vw, 84px);
-}
-
-.wo-plataforma-hero .wo-hero__brilho {
-  top: -620px;
-  opacity: 0.4;
-}
-
-.wo-plataforma-hero__grade {
-  gap: 44px 64px;
-}
-
-.wo-plataforma-hero__texto {
-  flex: 1.05 1 480px;
-}
-
-.wo-plataforma-hero__visual {
-  flex: 1.1 1 480px;
-}
-
-.wo-plataforma-hero .wo-h1 {
-  margin-top: 18px;
-  font-size: clamp(34px, 4vw, 58px);
-  line-height: 1.07;
-}
-
-.wo-plataforma-hero .wo-hero__lead {
-  margin-top: 22px;
-}
-
-/* ---------- Workspace de exemplo (hero) ---------- */
-.wo-plataforma-workspace {
-  gap: 12px;
-}
-
-.wo-plataforma-workspace .wo-maquete__cabeca {
-  margin-bottom: 0;
-}
-
-.wo-plataforma-workspace__corpo {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: stretch;
-  gap: 10px;
-}
-
-.wo-plataforma-workspace__menu {
-  display: flex;
-  flex: 1 1 150px;
-  flex-direction: column;
-  gap: 2px;
-  padding: 8px;
-  border: 1px solid var(--wo-borda);
-  border-radius: var(--wo-raio-sm);
-  background: var(--wo-faixa);
+.wo-plataforma-interesse .wo-rotulo {
   color: var(--wo-texto-2);
-  font-size: 13px;
 }
 
-.wo-plataforma-workspace__grupo {
-  padding: 6px 10px 4px;
-  color: var(--wo-texto-4);
-  font-family: var(--wo-mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+/* O erro continua no parcial, logo após a linha. A grade o apresenta junto ao campo e antes do envio. */
+.wo-plataforma-interesse .wo-campo:has(.wo-form-interesse__linha) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
 }
 
-.wo-plataforma-workspace__grupo--seguinte {
-  padding-top: 10px;
+.wo-plataforma-interesse .wo-form-interesse__linha {
+  display: contents;
 }
 
-.wo-plataforma-workspace__item {
-  padding: 8px 10px;
+.wo-plataforma-interesse .wo-form-interesse__linha .wo-btn {
+  grid-row: 4;
+  justify-self: start;
+  margin-top: var(--wo-espaco-2);
 }
 
-.wo-plataforma-workspace__item--ativo {
-  border-radius: var(--wo-raio-campo);
-  background: var(--wo-acento-fundo);
-  color: var(--wo-acento-texto);
-  font-weight: 600;
+.wo-plataforma-interesse .wo-erro-campo {
+  grid-row: 3;
 }
 
-.wo-plataforma-workspace__item--planejado {
-  color: var(--wo-texto-4);
+/* O selo é translúcido e, sobre a onda, o âmbar ficaria abaixo de 4,5:1: a pílula põe o cartão noite
+   por baixo. */
+.wo-plataforma-abertura__situacao {
+  display: inline-flex;
+  border-radius: var(--wo-raio-pilula);
+  background: var(--wo-cartao-noite);
 }
 
-.wo-plataforma-workspace__principal {
-  display: flex;
-  flex: 3 1 300px;
-  flex-direction: column;
-  gap: 8px;
+.wo-plataforma-abertura__workspace {
   min-width: 0;
 }
 
-/* Números de destaque: 24 px no hero, 26 px nas telas de exemplo. */
+/* No cartão, o formulário ocupa a largura toda. A grade mantém campo, erro e envio nessa ordem;
+   o botão tem a largura do texto e em 360 px fica fora da faixa do WhatsApp flutuante. */
+.wo-plataforma-interesse .wo-form-interesse {
+  max-width: none;
+  margin-top: 0;
+}
+
+/* Botão de 5.4 (40 px, 44 px abaixo de 768 px): os 52 px eram para dividir a linha com o campo. */
+.wo-plataforma-interesse .wo-btn--grande {
+  min-height: var(--wo-btn-altura);
+}
+
+/* "Nota" de 5.2. */
+.wo-plataforma-interesse .wo-form-interesse__nota {
+  font-size: var(--wo-texto-pequeno);
+  line-height: 1.45;
+}
+
+/* Depois do envio, a confirmação fica sozinha no cartão. */
+.wo-plataforma-interesse .wo-confirmacao-caixa {
+  margin-top: 0;
+}
+
+/* ---------- Maquetes (workspace e telas) ----------
+   Cartões de interface com o aviso de ilustração em "Nota" de 5.2, sem palavra sozinha na última linha. */
+.wo-plataforma-workspace {
+  gap: var(--wo-espaco-3);
+  padding: var(--wo-espaco-3);
+  text-wrap: pretty;
+}
+
+.wo-plataforma-workspace .wo-maquete__cabeca,
+.wo-plataforma-tela .wo-maquete__cabeca {
+  margin: 0;
+}
+
+.wo-plataforma-workspace .wo-maquete__aviso,
+.wo-plataforma-tela .wo-maquete__aviso {
+  text-wrap: balance;
+}
+
 .wo-plataforma-kpis {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(110px, 100%), 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--wo-espaco-1);
 }
 
 .wo-plataforma-kpis > div {
-  padding: 12px 14px;
-  border: 1px solid var(--wo-borda);
-  border-radius: var(--wo-raio-sm);
-  background: var(--wo-superficie);
+  padding: var(--wo-espaco-2);
+  border: var(--wo-linha-fina) solid var(--wo-borda);
+  border-radius: var(--wo-raio);
 }
 
 .wo-plataforma-kpis span {
   display: block;
   color: var(--wo-texto-3);
-  font-size: 12px;
+  font-size: var(--wo-texto-pequeno);
+  line-height: 1.45;
 }
 
+/* O número usa o "Título de linha" de 5.2. */
 .wo-plataforma-kpis strong {
   display: block;
-  margin-top: 5px;
-  font-size: 24px;
-  font-weight: 600;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
+  margin-top: var(--wo-espaco-1);
+  font-family: var(--wo-fonte-titulo);
+  font-size: var(--wo-h3-linha);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
 .wo-plataforma-kpis--tela {
-  grid-template-columns: repeat(auto-fit, minmax(min(130px, 100%), 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.wo-plataforma-kpis--tela > div {
-  padding: 14px 16px;
-}
-
-.wo-plataforma-kpis--tela span {
-  font-size: 12.5px;
-}
-
-.wo-plataforma-kpis--tela strong {
-  font-size: 26px;
-}
-
-.wo-plataforma-execucoes {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 9px;
-  padding: 14px;
-  border: 1px solid var(--wo-borda);
-  border-radius: var(--wo-raio-sm);
-  background: var(--wo-superficie);
-}
-
-.wo-plataforma-execucoes__titulo {
-  font-size: 13.5px;
-  font-weight: 600;
-}
-
-.wo-plataforma-execucoes__linha {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  font-size: 13px;
-}
-
-.wo-plataforma-execucoes__nome {
-  color: var(--wo-texto-2);
-}
-
-/* Estado de uma execução ou conexão. O marcador é redondo, menos em "alerta". */
+/* Estado de execução ou conexão: a forma do ponto acompanha a cor, quadrado no alerta. */
 .wo-plataforma-estado {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 3px 9px;
+  gap: var(--wo-espaco-1);
+  padding: var(--wo-espaco-miudo) var(--wo-espaco-1);
   border-radius: var(--wo-raio-pilula);
-  background: var(--wo-neutro-fundo);
+  background: var(--wo-fundo-2);
   color: var(--wo-texto-2);
-  font-size: 11.5px;
-  font-weight: 600;
+  font-size: var(--wo-texto-pequeno);
+  line-height: 1.45;
 }
 
 .wo-plataforma-estado::before {
   content: '';
-  width: 6px;
-  height: 6px;
+  width: var(--wo-situacao-ponto);
+  height: var(--wo-situacao-ponto);
   flex-shrink: 0;
   border-radius: 50%;
   background: currentColor;
 }
 
 .wo-plataforma-estado--ok {
-  background: var(--wo-sucesso-fundo);
   color: var(--wo-sucesso);
 }
 
 .wo-plataforma-estado--andamento {
-  background: var(--wo-info-fundo);
   color: var(--wo-info);
 }
 
 .wo-plataforma-estado--falha {
-  background: var(--wo-erro-fundo-forte);
   color: var(--wo-erro);
 }
 
 .wo-plataforma-estado--alerta {
-  background: var(--wo-alerta-fundo);
   color: var(--wo-alerta);
 }
 
 .wo-plataforma-estado--alerta::before {
-  border-radius: 2px;
+  border-radius: 0;
 }
 
-/* ---------- Diagrama "Como se encaixa" ---------- */
-.wo-plataforma-diagrama__usa {
+/* ---------- Workspace da abertura ---------- */
+.wo-plataforma-workspace__corpo {
+  display: flex;
+  gap: var(--wo-espaco-3);
+}
+
+/* O menu lateral só cabe a partir de 768 px. */
+.wo-plataforma-workspace__menu {
+  display: none;
+  flex: 0 0 var(--wo-plataforma-menu-largura);
+  flex-direction: column;
+  gap: var(--wo-espaco-miudo);
+  padding: var(--wo-espaco-2);
+  border-radius: var(--wo-raio);
+  background: var(--wo-fundo-2);
+  color: var(--wo-texto-2);
+  font-size: var(--wo-texto-pequeno);
+  line-height: 1.45;
+}
+
+/* "Etiqueta em caixa alta" de 5.2. */
+.wo-plataforma-workspace__grupo {
+  padding: var(--wo-espaco-1);
+  color: var(--wo-texto-3);
+  font-size: var(--wo-etiqueta-tamanho);
+  font-weight: 500;
+  letter-spacing: var(--wo-etiqueta-entreletra);
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.wo-plataforma-workspace__grupo--seguinte {
+  margin-top: var(--wo-espaco-1);
+}
+
+.wo-plataforma-workspace__item {
+  padding: var(--wo-espaco-1);
+}
+
+.wo-plataforma-workspace__item--ativo {
+  border-radius: var(--wo-raio);
+  background: var(--wo-acento-fundo);
+  color: var(--wo-acento-texto);
+  font-weight: 500;
+}
+
+.wo-plataforma-workspace__item--planejado {
+  color: var(--wo-texto-3);
+}
+
+.wo-plataforma-workspace__principal {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: var(--wo-espaco-2);
+}
+
+.wo-plataforma-execucoes {
+  padding: var(--wo-espaco-2);
+  border: var(--wo-linha-fina) solid var(--wo-borda);
+  border-radius: var(--wo-raio);
+}
+
+.wo-plataforma-execucoes__titulo {
+  display: block;
+  margin-bottom: var(--wo-espaco-1);
+}
+
+.wo-plataforma-execucoes__linha {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 10px 16px;
-  padding: 14px 16px;
-  border: 1px solid var(--wo-borda);
-  border-radius: 14px;
+  gap: var(--wo-espaco-1) var(--wo-espaco-2);
+  padding: var(--wo-espaco-1) 0;
+  border-top: var(--wo-linha-fina) solid var(--wo-borda);
+  font-size: var(--wo-texto-pequeno);
+  line-height: 1.45;
+}
+
+.wo-plataforma-execucoes__nome {
+  color: var(--wo-texto-2);
+}
+
+/* ---------- Como se encaixa ---------- */
+ul.wo-plataforma-checks {
+  gap: var(--wo-espaco-3);
+  margin-top: var(--wo-espaco-4);
+}
+
+/* "Texto" de 5.2. */
+.wo-plataforma-checks li {
+  font-size: var(--wo-texto-corpo);
+  line-height: 1.625;
+}
+
+/* Quem usa, a plataforma (borda de acento) e os sistemas do cliente (tracejado, ficam de fora). */
+.wo-plataforma-diagrama__usa {
+  padding: var(--wo-espaco-3);
+  border: var(--wo-linha-fina) solid var(--wo-borda);
+  border-radius: var(--wo-raio);
   background: var(--wo-superficie);
+}
+
+.wo-plataforma-diagrama__caixa {
+  padding: var(--wo-espaco-3);
+  border: var(--wo-linha-fina) solid var(--wo-acento-borda);
+  border-radius: var(--wo-raio);
+  background: var(--wo-superficie);
+}
+
+.wo-plataforma-diagrama__sistemas {
+  padding: var(--wo-espaco-3);
+  border: var(--wo-linha-fina) dashed var(--wo-borda-forte);
+  border-radius: var(--wo-raio);
+  background: var(--wo-superficie);
+}
+
+.wo-plataforma-diagrama__usa .wo-etiqueta {
+  display: block;
+  margin-bottom: var(--wo-espaco-2);
+  color: var(--wo-texto-3);
 }
 
 .wo-plataforma-pilulas {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--wo-espaco-1);
 }
 
 .wo-plataforma-pilulas li {
-  padding: 6px 12px;
-  border: 1px solid var(--wo-borda-forte);
+  padding: var(--wo-espaco-1) var(--wo-espaco-2);
+  border: var(--wo-linha-fina) solid var(--wo-borda-forte);
   border-radius: var(--wo-raio-pilula);
   color: var(--wo-texto-2);
-  font-size: 13px;
-  white-space: nowrap;
+  font-size: var(--wo-texto-pequeno);
+  line-height: 1.45;
 }
 
 .wo-plataforma-diagrama__fio {
-  width: 1px;
-  height: 20px;
+  width: var(--wo-linha-fina);
+  height: var(--wo-espaco-3);
   margin: 0 auto;
   background: var(--wo-borda-forte);
-}
-
-.wo-plataforma-diagrama__caixa {
-  padding: clamp(14px, 1.5vw, 20px);
-  border: 1px solid var(--wo-acento-borda);
-  border-radius: var(--wo-raio-painel);
-  background: rgba(162, 139, 249, 0.07);
 }
 
 .wo-plataforma-diagrama__cabeca {
@@ -320,76 +316,57 @@ body[data-pagina='plataforma'] {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 12px;
+  gap: var(--wo-espaco-2);
+  margin-bottom: var(--wo-espaco-3);
 }
 
 .wo-plataforma-diagrama__titulo {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  font-size: 16px;
-  font-weight: 600;
+  gap: var(--wo-espaco-2);
 }
 
+/* O símbolo da marca no quadrado violeta plano (D14), sem o brilho. */
 .wo-plataforma-diagrama__marca {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: var(--wo-plataforma-marca-tamanho);
+  height: var(--wo-plataforma-marca-tamanho);
   flex-shrink: 0;
-  border-radius: var(--wo-raio-btn);
-  background: var(--wo-acento-marca);
+  border-radius: var(--wo-raio);
+  background: var(--wo-violeta);
 }
 
 .wo-plataforma-diagrama__marca svg {
-  width: 23px;
-  height: 23px;
-}
-
-.wo-plataforma-diagrama__camadas {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  width: var(--wo-plataforma-simbolo-tamanho);
+  height: var(--wo-plataforma-simbolo-tamanho);
 }
 
 .wo-plataforma-diagrama__camada {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 2px 16px;
-  padding: 14px 16px;
-  border: 1px solid var(--wo-borda);
-  border-radius: var(--wo-raio-sm);
-  background: var(--wo-superficie);
-}
-
-.wo-plataforma-diagrama__nome {
-  flex: 0 0 118px;
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
-.wo-plataforma-diagrama__descricao {
-  flex: 1 1 220px;
-  min-width: 0;
-  color: var(--wo-texto-3);
-  font-size: 14px;
-  line-height: 1.55;
-}
-
-.wo-plataforma-diagrama__camada--nucleo {
-  border-color: var(--wo-borda-forte);
-  background: var(--wo-superficie-3);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: var(--wo-espaco-2);
+  padding: var(--wo-espaco-2) 0;
+  border-top: var(--wo-linha-fina) solid var(--wo-borda);
 }
 
 .wo-plataforma-diagrama__camada--nucleo .wo-plataforma-diagrama__nome {
   color: var(--wo-acento-texto);
 }
 
-.wo-plataforma-diagrama__camada--nucleo .wo-plataforma-diagrama__descricao {
+/* "Nota" de 5.2; a descrição da camada, um tom acima. */
+.wo-plataforma-diagrama__descricao {
   color: var(--wo-texto-2);
+  font-size: var(--wo-texto-pequeno);
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+
+.wo-plataforma-diagrama__conector span,
+.wo-plataforma-diagrama__sistemas-nota {
+  color: var(--wo-texto-3);
+  font-size: var(--wo-texto-pequeno);
+  line-height: 1.45;
 }
 
 .wo-plataforma-diagrama__conector {
@@ -401,24 +378,9 @@ body[data-pagina='plataforma'] {
 .wo-plataforma-diagrama__conector::before,
 .wo-plataforma-diagrama__conector::after {
   content: '';
-  width: 1px;
-  height: 12px;
+  width: var(--wo-linha-fina);
+  height: var(--wo-espaco-2);
   background: var(--wo-borda-forte);
-}
-
-.wo-plataforma-diagrama__conector span {
-  padding: 3px 10px;
-  border: 1px solid var(--wo-borda-forte);
-  border-radius: var(--wo-raio-pilula);
-  color: var(--wo-texto-3);
-  font-family: var(--wo-mono);
-  font-size: 10.5px;
-}
-
-.wo-plataforma-diagrama__sistemas {
-  padding: 16px;
-  border: 1px dashed var(--wo-plataforma-tracejado);
-  border-radius: 16px;
 }
 
 .wo-plataforma-diagrama__sistemas-cabeca {
@@ -426,143 +388,84 @@ body[data-pagina='plataforma'] {
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 4px 16px;
-  margin-bottom: 12px;
+  gap: var(--wo-espaco-1);
+  margin-bottom: var(--wo-espaco-2);
 }
 
-.wo-plataforma-diagrama__sistemas-titulo {
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.wo-plataforma-diagrama__sistemas-nota {
-  color: var(--wo-texto-3);
-  font-family: var(--wo-mono);
-  font-size: 11px;
-}
-
-/* ---------- Responsabilidades do núcleo ---------- */
+/* ---------- Núcleo ---------- */
 .wo-plataforma-responsabilidades {
-  margin-top: 14px;
-  border-bottom: 1px solid var(--wo-borda);
-}
-
-.wo-plataforma-responsabilidades > div {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 28px;
-  padding: 18px 0;
-  border-top: 1px solid var(--wo-borda);
-}
-
-.wo-plataforma-responsabilidades dt {
-  flex: 1 1 230px;
-  min-width: 0;
-  font-size: 16.5px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
-.wo-plataforma-responsabilidades dd {
-  flex: 1.5 1 280px;
-  min-width: 0;
-  color: var(--wo-texto-3);
-  font-size: 15px;
-  line-height: 1.65;
+  margin-top: var(--wo-espaco-3);
 }
 
 .wo-plataforma-governanca {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 12px;
-  margin-top: 18px;
-  color: var(--wo-texto-3);
-  font-size: 14.5px;
-  line-height: 1.6;
+  display: grid;
+  justify-items: start;
+  gap: var(--wo-espaco-2);
+  margin-top: var(--wo-espaco-3);
 }
 
 .wo-plataforma-governanca__texto {
-  flex: 1 1 260px;
-  min-width: 0;
+  color: var(--wo-texto-3);
+  font-size: var(--wo-texto-pequeno);
+  line-height: 1.45;
 }
 
-/* ---------- Telas de exemplo (seletor "Como vai ser usar no dia a dia") ----------
-   Os botões e o painel reaproveitam .wo-seletor. Aqui só mudam as medidas do design:
-   botão em duas linhas e painel com o mesmo degradê dos outros mocks. */
+/* ---------- Experiência de uso ----------
+   Opção do seletor: nome da tela em "Título de cartão" e frase em "Nota". */
+.wo-plataforma-seletor {
+  gap: var(--wo-espaco-4);
+  margin-top: var(--wo-espaco-5);
+}
+
 .wo-plataforma-tela__opcoes {
-  flex-basis: 300px;
+  flex-basis: var(--wo-plataforma-opcoes-largura);
 }
 
 .wo-plataforma-tela__opcao {
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  gap: 4px;
-  min-height: 0;
-  padding: 16px 18px;
-  color: var(--wo-texto);
+  gap: var(--wo-espaco-miudo);
+  padding: var(--wo-espaco-2) var(--wo-espaco-3);
+  background: var(--wo-superficie);
 }
 
-/* O botão do design não herda a altura de linha do corpo (line-height: normal), o que dá
-   80 px por botão em vez de 85. */
-.wo-plataforma-tela__titulo {
-  font-size: 16px;
-  font-weight: 600;
-  line-height: normal;
+/* A opção escolhida ganha o tom de acento por cima da superfície, opaca como as outras: a frase não
+   depende do brilho da onda atrás do véu. */
+.wo-plataforma-tela__opcao[aria-pressed='true'] {
+  background: linear-gradient(var(--wo-acento-fundo), var(--wo-acento-fundo)), var(--wo-superficie);
 }
 
 .wo-plataforma-tela__descricao {
   color: var(--wo-texto-3);
-  font-size: 14px;
+  font-size: var(--wo-texto-pequeno);
   font-weight: 400;
-  line-height: 1.55;
+  line-height: 1.45;
+  text-wrap: pretty;
 }
 
 .wo-plataforma-tela {
-  display: flex;
-  flex: 2.4 1 520px;
-  flex-direction: column;
-  gap: 12px;
-  padding: clamp(16px, 1.6vw, 22px);
-  border-radius: var(--wo-raio-lg);
-  background: linear-gradient(180deg, var(--wo-superficie-2), var(--wo-superficie));
-}
-
-.wo-plataforma-tela .wo-maquete__cabeca {
-  margin-bottom: 0;
+  flex: 2 1 var(--wo-plataforma-tela-largura);
+  gap: var(--wo-espaco-3);
+  padding: var(--wo-espaco-3);
+  text-wrap: pretty;
 }
 
 .wo-plataforma-tela__corpo {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-
-.wo-plataforma-tela__corpo--lista {
-  gap: 8px;
-}
-
-.wo-plataforma-tela__corpo--grade {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
-  gap: 8px;
+  gap: var(--wo-espaco-2);
 }
 
 .wo-plataforma-pendencias {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 14px 16px;
-  border: 1px solid var(--wo-borda);
-  border-radius: var(--wo-raio-sm);
-  background: var(--wo-superficie);
+  padding: var(--wo-espaco-2);
+  border: var(--wo-linha-fina) solid var(--wo-borda);
+  border-radius: var(--wo-raio);
 }
 
 .wo-plataforma-pendencias__titulo {
-  font-size: 14px;
-  font-weight: 600;
+  display: block;
+  margin-bottom: var(--wo-espaco-2);
 }
 
 .wo-plataforma-pendencia {
@@ -570,14 +473,11 @@ body[data-pagina='plataforma'] {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 8px 12px;
-  padding: 10px 0;
-  border-top: 1px solid var(--wo-borda);
-  font-size: 13.5px;
-}
-
-.wo-plataforma-pendencia:last-child {
-  padding-bottom: 2px;
+  gap: var(--wo-espaco-1);
+  padding: var(--wo-espaco-2) 0;
+  border-top: var(--wo-linha-fina) solid var(--wo-borda);
+  font-size: var(--wo-texto-pequeno);
+  line-height: 1.45;
 }
 
 .wo-plataforma-linha {
@@ -585,17 +485,25 @@ body[data-pagina='plataforma'] {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 8px 14px;
-  padding: 14px 16px;
-  border: 1px solid var(--wo-borda);
-  border-radius: var(--wo-raio-sm);
-  background: var(--wo-superficie);
+  gap: var(--wo-espaco-2);
+  padding: var(--wo-espaco-2);
+  border: var(--wo-linha-fina) solid var(--wo-borda);
+  border-radius: var(--wo-raio);
 }
 
-.wo-plataforma-linha--modelo {
+.wo-plataforma-cartao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wo-espaco-2);
+  padding: var(--wo-espaco-2);
+  border: var(--wo-linha-fina) solid var(--wo-borda);
+  border-radius: var(--wo-raio);
+}
+
+/* Tracejado: o que ainda não está ligado. */
+.wo-plataforma-linha--modelo,
+.wo-plataforma-cartao--planejado {
   border-style: dashed;
-  border-color: var(--wo-borda-forte);
-  background: none;
 }
 
 .wo-plataforma-linha--falha {
@@ -608,88 +516,65 @@ body[data-pagina='plataforma'] {
 
 .wo-plataforma-linha__nome {
   display: block;
-  font-size: 14.5px;
-  font-weight: 600;
 }
 
-.wo-plataforma-linha__detalhe {
+.wo-plataforma-linha__detalhe,
+.wo-plataforma-cartao__texto {
   display: block;
   color: var(--wo-texto-3);
-  font-size: 12.5px;
+  font-size: var(--wo-texto-pequeno);
+  line-height: 1.45;
 }
 
-/* Botão desenhado do mock: é só um span, nada nele recebe clique ou foco. */
+.wo-plataforma-tela__corpo--grade {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* A ação desenhada na tela: só a forma do botão de contorno. */
 .wo-plataforma-acao {
   display: inline-flex;
   align-items: center;
-  padding: 6px 12px;
-  border: 1px solid var(--wo-borda-forte);
-  border-radius: var(--wo-raio-campo);
-  font-size: 12.5px;
-  font-weight: 600;
+  padding: var(--wo-espaco-1) var(--wo-espaco-2);
+  border: var(--wo-linha-fina) solid var(--wo-borda);
+  border-radius: var(--wo-raio-pilula);
+  font-size: var(--wo-texto-pequeno);
+  font-weight: 500;
+  line-height: 1.43;
 }
 
 .wo-plataforma-acao--cartao {
   align-self: flex-start;
   margin-top: auto;
-  padding: 5px 10px;
-  font-size: 12px;
-}
-
-.wo-plataforma-cartao {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 14px 16px;
-  border: 1px solid var(--wo-borda);
-  border-radius: var(--wo-raio-sm);
-  background: var(--wo-superficie);
-}
-
-.wo-plataforma-cartao--planejado {
-  border-style: dashed;
-  border-color: var(--wo-borda-forte);
-  background: none;
-}
-
-.wo-plataforma-cartao__nome {
-  font-size: 14.5px;
-  font-weight: 600;
-}
-
-.wo-plataforma-cartao__texto {
-  color: var(--wo-texto-3);
-  font-size: 12.5px;
-  line-height: 1.55;
 }
 
 .wo-plataforma-etiqueta {
   align-self: flex-start;
   margin-top: auto;
-  padding: 3px 9px;
+  padding: var(--wo-espaco-miudo) var(--wo-espaco-1);
   border-radius: var(--wo-raio-pilula);
   background: var(--wo-acento-fundo);
   color: var(--wo-acento-texto);
-  font-size: 11.5px;
-  font-weight: 600;
+  font-size: var(--wo-texto-pequeno);
+  line-height: 1.45;
 }
 
 .wo-plataforma-etiqueta--planejado {
-  background: var(--wo-neutro-fundo);
+  background: var(--wo-fundo-2);
   color: var(--wo-texto-2);
 }
 
-/* ---------- Módulos por situação ---------- */
+/* ---------- Módulos ----------
+   Uma coluna por situação; a primeira fica vazia, com o encaminhamento para o sob medida. */
 .wo-plataforma-situacoes {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
-  gap: 36px 44px;
-  align-items: start;
-  margin-top: 44px;
+  gap: var(--wo-espaco-5);
+  margin-top: var(--wo-espaco-6);
 }
 
 .wo-plataforma-situacao {
   min-width: 0;
+  border-top: var(--wo-linha-forte) solid var(--wo-texto);
 }
 
 .wo-plataforma-situacao__cabeca {
@@ -697,254 +582,254 @@ body[data-pagina='plataforma'] {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 8px 12px;
-  padding-bottom: 14px;
+  gap: var(--wo-espaco-1);
+  padding: var(--wo-espaco-3) 0;
 }
 
-.wo-plataforma-situacao__legenda {
+/* "Nota" de 5.2. */
+.wo-plataforma-situacao__legenda,
+.wo-plataforma-modulo__area {
   color: var(--wo-texto-3);
-  font-size: 13.5px;
+  font-size: var(--wo-texto-pequeno);
+  line-height: 1.45;
 }
 
 .wo-plataforma-vazio {
-  padding: 20px;
-  border: 1px dashed var(--wo-plataforma-tracejado);
-  border-radius: 14px;
+  padding: var(--wo-espaco-3);
+  border: var(--wo-linha-fina) dashed var(--wo-borda-forte);
+  border-radius: var(--wo-raio);
 }
 
-.wo-plataforma-vazio__titulo {
-  font-size: 16.5px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
-.wo-plataforma-vazio__texto {
-  margin-top: 8px;
-  color: var(--wo-texto-3);
-  font-size: 14.5px;
-  line-height: 1.65;
+/* "Texto" de 5.2. */
+.wo-plataforma-vazio__texto,
+.wo-plataforma-modulo__texto {
+  margin-top: var(--wo-espaco-2);
+  color: var(--wo-texto-2);
+  font-size: var(--wo-texto-corpo);
+  line-height: 1.625;
+  text-wrap: pretty;
 }
 
 .wo-plataforma-vazio .wo-link-seta {
-  margin-top: 8px;
-}
-
-.wo-plataforma-modulos {
-  border-bottom: 1px solid var(--wo-borda);
+  margin-top: var(--wo-espaco-2);
 }
 
 .wo-plataforma-modulos li {
-  padding: 16px 0;
-  border-top: 1px solid var(--wo-borda);
+  padding: var(--wo-espaco-3) 0;
+  border-bottom: var(--wo-linha-fina) solid var(--wo-borda);
+}
+
+.wo-plataforma-modulos li:first-child {
+  border-top: var(--wo-linha-fina) solid var(--wo-borda);
 }
 
 .wo-plataforma-modulo__cabeca {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--wo-espaco-miudo);
 }
 
-.wo-plataforma-modulo__nome {
-  font-size: 16.5px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
-.wo-plataforma-modulo__area {
-  color: var(--wo-texto-3);
-  font-family: var(--wo-mono);
-  font-size: 10.5px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.wo-plataforma-modulo__texto {
-  margin-top: 4px;
-  color: var(--wo-texto-3);
-  font-size: 14.5px;
-  line-height: 1.6;
-}
-
-/* ---------- Tabela comparativa ----------
-   Sem min-width: no design a tabela rolava na horizontal entre 641 e 688 px. Aqui as
-   colunas encolhem, e abaixo de 640 px cada linha vira um bloco (regra .wo-cmp do design). */
+/* ---------- Plataforma ou projeto sob medida ----------
+   No celular cada linha vira um bloco, com o rótulo da coluna vindo do data-label. */
 .wo-plataforma-tabela {
-  margin-top: 40px;
-  border: 1px solid var(--wo-borda);
-  border-radius: var(--wo-raio-md);
-  background: var(--wo-superficie);
-  overflow-x: auto;
+  margin-top: var(--wo-espaco-5);
+  border-top: var(--wo-linha-forte) solid var(--wo-texto);
 }
 
+/* "Texto" de 5.2. */
 .wo-plataforma-cmp {
   width: 100%;
   border-collapse: collapse;
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: var(--wo-texto-corpo);
+  line-height: 1.625;
 }
 
-.wo-plataforma-cmp thead th {
-  padding: 18px 22px;
-  font-size: 16px;
-  font-weight: 600;
+.wo-plataforma-cmp th {
+  padding: var(--wo-espaco-3);
+  border-bottom: var(--wo-linha-fina) solid var(--wo-borda);
   text-align: left;
+}
+
+.wo-plataforma-cmp td {
+  padding: var(--wo-espaco-3);
+  border-bottom: var(--wo-linha-fina) solid var(--wo-borda);
+  color: var(--wo-texto-2);
+  text-align: left;
+}
+
+/* Colunas em "Título de cartão"; o canto em "Etiqueta em caixa alta". */
+.wo-plataforma-cmp thead th {
+  width: 40%;
 }
 
 .wo-plataforma-cmp thead th:first-child {
   width: 20%;
-  color: var(--wo-texto-3);
-  font-family: var(--wo-mono);
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0.1em;
+  font-weight: 500;
+  font-family: var(--wo-fonte);
+  font-size: var(--wo-etiqueta-tamanho);
+  letter-spacing: var(--wo-etiqueta-entreletra);
+  line-height: 1.35;
   text-transform: uppercase;
 }
 
-.wo-plataforma-cmp thead th:not(:first-child) {
-  width: 40%;
-}
-
 .wo-plataforma-cmp tbody th {
-  padding: 16px 22px;
-  border-top: 1px solid var(--wo-borda);
-  color: var(--wo-texto-3);
   font-weight: 400;
-  text-align: left;
 }
 
-.wo-plataforma-cmp tbody td {
-  padding: 16px 22px;
-  border-top: 1px solid var(--wo-borda);
-  color: var(--wo-texto-2);
+/* ---------- Assinatura e aviso final ---------- */
+.wo-plataforma-principio__texto {
+  margin-top: var(--wo-espaco-2);
 }
 
-/* ---------- Princípios da assinatura ---------- */
-.wo-plataforma-principios {
-  border-bottom: 1px solid var(--wo-borda);
-}
-
-.wo-plataforma-principios li {
-  display: flex;
-  gap: 18px;
-  padding: 20px 0;
-  border-top: 1px solid var(--wo-borda);
-}
-
-.wo-plataforma-principios__numero {
-  padding-top: 4px;
-  color: var(--wo-acento-texto);
-  font-family: var(--wo-mono);
-  font-size: 12px;
-}
-
-.wo-plataforma-principios__corpo {
-  min-width: 0;
-}
-
-.wo-plataforma-principios__titulo {
-  font-size: 17.5px;
-  font-weight: 600;
-  line-height: 1.3;
-  letter-spacing: -0.02em;
-}
-
-.wo-plataforma-principios__texto {
-  margin-top: 6px;
-  color: var(--wo-texto-3);
-  font-size: 15px;
-  line-height: 1.65;
-}
-
-/* ---------- Aviso final: lista de interesse ---------- */
 .wo-plataforma-aviso {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 28px 48px;
-  margin-top: clamp(48px, 5.6vw, 80px);
-  padding: clamp(28px, 4vw, 52px);
-  border: 1px solid rgba(162, 139, 249, 0.3);
-  border-radius: var(--wo-raio-lg);
-  background: radial-gradient(ellipse at 0 100%, rgba(162, 139, 249, 0.1), var(--wo-superficie) 65%);
+  gap: var(--wo-espaco-4) var(--wo-espaco-5);
+  margin-top: var(--wo-espaco-6);
 }
 
 .wo-plataforma-aviso__texto {
-  flex: 1 1 440px;
+  flex: 1 1 var(--wo-plataforma-aviso-largura);
   min-width: 0;
 }
 
 .wo-plataforma-aviso__titulo {
-  font-size: clamp(26px, 3vw, 42px);
-  font-weight: 500;
-  line-height: 1.1;
-  letter-spacing: -0.045em;
-  text-wrap: balance;
+  margin-top: 0;
 }
 
+/* "Texto" de 5.2. */
 .wo-plataforma-aviso__lead {
-  max-width: 520px;
-  margin-top: 14px;
-  color: var(--wo-texto-3);
-  font-size: 15.5px;
-  line-height: 1.75;
+  margin-top: var(--wo-espaco-3);
+  color: var(--wo-texto-2);
+  font-size: var(--wo-texto-corpo);
+  line-height: 1.625;
 }
 
-/* ---------- Telas pequenas ---------- */
-@media (max-width: 640px) {
-  .wo-plataforma-cmp {
+/* ---------- Larguras ---------- */
+@media (max-width: 639px) {
+  .wo-plataforma-workspace,
+  .wo-plataforma-tela {
+    padding: var(--wo-espaco-2);
+  }
+
+  /* O aviso pode quebrar em duas linhas: raio de cartão em vez de pílula. */
+  .wo-plataforma-workspace .wo-maquete__aviso,
+  .wo-plataforma-tela .wo-maquete__aviso {
+    border-radius: var(--wo-raio);
+  }
+
+  .wo-plataforma-kpis {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .wo-plataforma-kpis > div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--wo-espaco-2);
+  }
+
+  .wo-plataforma-kpis strong {
+    margin-top: 0;
+  }
+
+  /* Estado sempre embaixo do nome: com a quebra automática, ele mudava de lugar entre as linhas. */
+  .wo-plataforma-execucoes__linha,
+  .wo-plataforma-pendencia,
+  .wo-plataforma-linha {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .wo-plataforma-tela__corpo--grade,
+  .wo-plataforma-diagrama__camada {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .wo-plataforma-diagrama__camada {
+    gap: var(--wo-espaco-1);
+  }
+
+  .wo-plataforma-cmp,
+  .wo-plataforma-cmp tbody,
+  .wo-plataforma-cmp tr,
+  .wo-plataforma-cmp tbody th,
+  .wo-plataforma-cmp td {
     display: block;
+    width: auto;
+    border: 0;
   }
 
   .wo-plataforma-cmp thead {
     display: none;
   }
 
-  .wo-plataforma-cmp tbody,
-  .wo-plataforma-cmp tr,
-  .wo-plataforma-cmp tbody th,
-  .wo-plataforma-cmp tbody td {
-    display: block;
-    width: auto;
-    border: 0;
-  }
-
   .wo-plataforma-cmp tr {
-    padding: 12px 0;
-    border-top: 1px solid var(--wo-borda);
+    padding: var(--wo-espaco-3) 0;
+    border-bottom: var(--wo-linha-fina) solid var(--wo-borda);
   }
 
-  .wo-plataforma-cmp tr:first-child {
-    border-top: 0;
-  }
-
+  /* O critério vira o título do bloco, em "Título de cartão". */
   .wo-plataforma-cmp tbody th {
-    padding: 6px 18px 2px;
-    color: var(--wo-texto);
-    font-size: 16px;
-    font-weight: 600;
+    padding: 0 0 var(--wo-espaco-1);
+    font-family: var(--wo-fonte-titulo);
+    font-size: var(--wo-h3-cartao);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.55;
   }
 
-  .wo-plataforma-cmp tbody td {
-    padding: 6px 18px;
+  .wo-plataforma-cmp td {
+    padding: var(--wo-espaco-2) 0 0;
   }
 
-  .wo-plataforma-cmp tbody td::before {
+  .wo-plataforma-cmp td::before {
     content: attr(data-label);
     display: block;
-    margin-bottom: 2px;
     color: var(--wo-texto-3);
-    font-family: var(--wo-mono);
-    font-size: 10.5px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    font-size: var(--wo-texto-pequeno);
+    line-height: 1.45;
   }
 }
 
-@media (max-width: 560px) {
+@media (min-width: 640px) {
+  .wo-plataforma-situacoes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .wo-plataforma-situacao:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 768px) {
   .wo-plataforma-workspace__menu {
-    display: none;
+    display: flex;
+  }
+}
+
+@media (min-width: 1024px) {
+  .wo-plataforma-abertura__workspace {
+    grid-column: 1 / -1;
+  }
+
+  .wo-plataforma-situacoes {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--wo-espaco-4);
+  }
+
+  .wo-plataforma-situacao:first-child {
+    grid-column: auto;
+  }
+}
+
+/* Desde 1280 px, 8 partes para o texto: o título cai de cinco para quatro linhas e o cartão fica com
+   379 px. Abaixo, o 7/5 compartilhado mantém o cartão largo o bastante em 1024 px. */
+@media (min-width: 1280px) {
+  .wo-plataforma-abertura {
+    grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
   }
 }

@@ -2,15 +2,19 @@
    Cada bloco corresponde a uma peça do design aprovado. Componente que só uma página usa
    mora em assets/site/paginas/<pagina>.css. Depende de tokens.css e base.css. */
 
-/* ---------- Marca ---------- */
+/* ---------- Marca ----------
+   A logo de antes do selo 3D (spec D14 e 5.4): o símbolo Sine Nodes branco de 23 px num quadrado
+   de 34 px com degradê violeta. "Wave" no peso normal e "Ops" em 700, na cor de acento do contexto:
+   violeta forte no claro, lilás no escuro. A mesma peça serve ao topo e ao rodapé. */
 .wo-marca {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 11px;
   min-height: var(--wo-alvo);
   color: var(--wo-texto);
-  font-size: 23px;
-  font-weight: 700;
+  font-family: var(--wo-fonte-titulo);
+  font-size: 20px;
+  font-weight: 400;
   letter-spacing: -0.02em;
   text-decoration: none;
   white-space: nowrap;
@@ -21,61 +25,66 @@
 }
 
 .wo-marca__selo {
-  position: relative;
-  display: block;
-  width: 42px;
-  height: 42px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
   flex-shrink: 0;
-}
-
-.wo-marca__selo img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+  border-radius: var(--wo-raio);
+  background: linear-gradient(150deg, var(--wo-marca-claro), var(--wo-marca-escuro));
+  box-shadow: var(--wo-sombra-marca);
 }
 
 .wo-marca__selo svg {
-  position: absolute;
-  left: 19%;
-  top: 19%;
-  width: 62%;
-  height: 62%;
+  width: 23px;
+  height: 23px;
 }
 
 .wo-marca__ops {
-  font-weight: 400;
+  color: var(--wo-acento-texto);
+  font-weight: 700;
 }
 
-.wo-marca--rodape {
-  align-self: flex-start;
-  font-size: 21px;
-}
-
-.wo-marca--rodape .wo-marca__selo {
-  width: 38px;
-  height: 38px;
-}
-
-/* ---------- Topo ---------- */
+/* ---------- Topo (spec 5.5 e 15.2) ----------
+   66 px de altura, por cima da página, sempre no estado "sobre escuro": fundo transparente com
+   desfoque, texto branco a 85% (tokens.css) e botão de contorno. Nasce em position: absolute; o
+   site.js liga o modo fixo (data-topo="fixo" no <html>). Sem JavaScript, a regra do <noscript> do
+   head põe o topo no fluxo, com fundo escuro. */
 .wo-topo {
-  position: relative;
-  z-index: 5;
-  background: var(--wo-fundo);
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: var(--wo-z-topo);
   border-bottom: 1px solid var(--wo-borda);
+  background: var(--wo-veu-forte);
+  color: var(--wo-texto);
+  color-scheme: dark;
+  -webkit-backdrop-filter: blur(var(--wo-desfoque));
+  backdrop-filter: blur(var(--wo-desfoque));
+}
+
+html[data-topo='fixo'] .wo-topo {
+  position: fixed;
 }
 
 .wo-topo__barra {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   gap: 28px;
   width: 100%;
   max-width: var(--wo-conteiner);
-  height: var(--wo-topo-altura);
+  /* A linha de baixo do topo conta nos 66 px. */
+  height: calc(var(--wo-topo-altura) - 1px);
   margin: 0 auto;
   padding: 0 var(--wo-margem);
+}
+
+/* Na grade do topo o link da logo esticaria até o fim da coluna, e o anel de foco e a área de
+   clique acompanhariam. */
+.wo-topo__barra > .wo-marca {
+  justify-self: start;
 }
 
 .wo-topo__links {
@@ -89,16 +98,26 @@
   align-items: center;
   min-height: var(--wo-alvo);
   padding: 0 13px;
-  border-radius: var(--wo-raio-btn);
+  border-radius: var(--wo-raio-pilula);
   color: var(--wo-texto-2);
-  font-size: 13.5px;
+  font-size: 14px;
   text-decoration: none;
   white-space: nowrap;
   transition: color var(--wo-transicao);
 }
 
+.wo-topo__painel a:not(.wo-btn) {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  color: var(--wo-texto-2);
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
 .wo-topo__links a:hover,
-.wo-topo__painel a:hover {
+.wo-topo__painel a:not(.wo-btn):hover {
   color: var(--wo-texto);
 }
 
@@ -110,6 +129,7 @@
 .wo-topo__acoes {
   display: flex;
   align-items: center;
+  justify-self: end;
   gap: 12px;
 }
 
@@ -117,23 +137,15 @@
   display: inline-flex;
   align-items: center;
   min-height: var(--wo-alvo);
-  padding: 0 6px;
+  padding: 0 8px;
   color: var(--wo-texto);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
   text-decoration: none;
   white-space: nowrap;
 }
 
 .wo-topo__cliente:hover {
   color: var(--wo-acento-texto);
-}
-
-/* 0,2,0 de propósito: .wo-btn vem depois no arquivo e devolveria o tamanho padrão. */
-.wo-topo .wo-topo__cta {
-  min-height: var(--wo-alvo);
-  padding: 0 18px;
-  font-size: 13px;
 }
 
 .wo-topo__menu {
@@ -143,8 +155,8 @@
   height: var(--wo-alvo);
   padding: 0;
   border: 1px solid var(--wo-borda-forte);
-  border-radius: 10px;
-  background: var(--wo-superficie);
+  border-radius: var(--wo-raio-pilula);
+  background: var(--wo-contorno-fundo);
   color: var(--wo-texto);
   cursor: pointer;
 }
@@ -163,10 +175,15 @@
   display: block;
 }
 
+/* Com o topo fixo, o painel aberto não pode passar do fim da janela: em tela baixa ele rola por
+   dentro, porque a página não rola mais por baixo dele. */
 .wo-topo__painel {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  max-height: calc(100vh - var(--wo-topo-altura));
+  max-height: calc(100dvh - var(--wo-topo-altura));
+  overflow-y: auto;
   padding: 8px var(--wo-margem) 20px;
   border-top: 1px solid var(--wo-borda);
   background: var(--wo-fundo);
@@ -176,25 +193,16 @@
   display: none;
 }
 
-.wo-topo__painel a {
-  display: flex;
-  align-items: center;
-  min-height: 48px;
-  color: var(--wo-texto-2);
-  font-size: 16px;
-  font-weight: 500;
-  text-decoration: none;
-}
-
 .wo-topo__painel .wo-btn {
-  justify-content: center;
-  min-height: 50px;
   margin-top: 10px;
-  color: var(--wo-sobre-acento);
-  font-size: 14px;
 }
 
 @media (max-width: 1180px) {
+  .wo-topo__barra {
+    display: flex;
+    justify-content: space-between;
+  }
+
   .wo-topo__links {
     display: none;
   }
@@ -219,23 +227,25 @@
   }
 }
 
-/* ---------- Botões e links de ação ---------- */
+/* ---------- Botões e links de ação ----------
+   Pílula de 40 px de altura (44 px abaixo de 768 px, alvo de toque), Inter 14 px, peso 500 (spec
+   5.4). O principal é violeta e o hover escurece para o violeta forte. O de contorno usa a borda
+   forte do contexto e, no escuro, o fundo preto a 30% de --wo-contorno-fundo. */
 .wo-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 9px;
-  min-height: 50px;
+  min-height: var(--wo-btn-altura);
   padding: 0 20px;
   border: 1px solid transparent;
-  border-radius: var(--wo-raio-btn);
+  border-radius: var(--wo-raio-pilula);
   background: transparent;
   color: var(--wo-texto);
   font-family: inherit;
-  font-size: 13.5px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.43;
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
@@ -249,19 +259,18 @@
 }
 
 .wo-btn--primario {
-  border-width: 0;
   background: var(--wo-acento);
   color: var(--wo-sobre-acento);
-  box-shadow: var(--wo-sombra-btn);
 }
 
 .wo-btn--primario:hover {
-  background: #b29ffa;
+  background: var(--wo-acento-hover);
   color: var(--wo-sobre-acento);
 }
 
 .wo-btn--secundario {
   border-color: var(--wo-borda-forte);
+  background: var(--wo-contorno-fundo);
   color: var(--wo-texto);
 }
 
@@ -273,7 +282,6 @@
 .wo-btn--grande {
   min-height: 52px;
   padding: 0 22px;
-  font-size: 14px;
 }
 
 .wo-btn[aria-disabled='true'] {
@@ -288,6 +296,7 @@
   gap: 12px;
 }
 
+/* "Botão e menu" de 5.2, em peso 500. */
 .wo-link-seta {
   display: inline-flex;
   align-items: center;
@@ -295,7 +304,8 @@
   min-height: var(--wo-alvo);
   color: var(--wo-acento-texto);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
+  line-height: 1.43;
   text-decoration: none;
 }
 
@@ -311,14 +321,17 @@
 }
 
 /* ---------- Rótulos ---------- */
+/* "Etiqueta em caixa alta" de 5.2, com o traço na frente. */
 .wo-sobretitulo {
   display: inline-flex;
   align-items: center;
   gap: 9px;
   color: var(--wo-acento-texto);
-  font-family: var(--wo-mono);
-  font-size: 11px;
-  letter-spacing: 0.15em;
+  font-family: var(--wo-fonte);
+  font-size: var(--wo-etiqueta-tamanho);
+  font-weight: 500;
+  letter-spacing: var(--wo-etiqueta-entreletra);
+  line-height: 1.35;
   text-transform: uppercase;
 }
 
@@ -336,11 +349,13 @@
   gap: 9px;
   padding: 8px 12px;
   border: 1px solid var(--wo-borda-forte);
-  border-radius: var(--wo-raio-xs);
+  border-radius: var(--wo-raio);
   color: var(--wo-texto-2);
-  font-family: var(--wo-mono);
+  font-family: var(--wo-fonte);
   font-size: 11px;
-  letter-spacing: 0.1em;
+  font-weight: 500;
+  letter-spacing: var(--wo-etiqueta-entreletra);
+  line-height: 1.5;
   text-transform: uppercase;
 }
 
@@ -353,25 +368,12 @@
   background: var(--wo-acento);
 }
 
-.wo-rotulo-mono {
-  display: block;
-  color: var(--wo-texto-3);
-  font-family: var(--wo-mono);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.wo-rotulo-mono--acento {
-  color: var(--wo-acento-texto);
-}
-
 .wo-nota-mono {
   display: flex;
   align-items: center;
   gap: 8px;
   color: var(--wo-texto-3);
-  font-family: var(--wo-mono);
+  font-family: var(--wo-fonte);
   font-size: 11.5px;
 }
 
@@ -439,119 +441,181 @@
   border: 2px solid currentColor;
 }
 
-/* ---------- Chip de contratação (link em pílula com marcador de situação) ---------- */
-.wo-chips {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px 12px;
-}
-
-.wo-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: var(--wo-alvo);
-  padding: 0 14px;
-  border: 1px solid var(--wo-borda-forte);
-  border-radius: var(--wo-raio-pilula);
-  color: var(--wo-texto);
-  font-size: 13.5px;
-  font-weight: 500;
-  text-decoration: none;
-  transition: border-color var(--wo-transicao);
-}
-
-.wo-chip:hover {
-  border-color: var(--wo-acento-borda);
-  color: var(--wo-texto);
-}
-
-.wo-chip::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--wo-sucesso-ponto);
-}
-
-/* ---------- Hero de duas colunas ---------- */
-/* overflow: hidden prende o brilho de 1000 px dentro do hero. Sem isso ele vaza
-   340 px para a direita e a página rola na horizontal em qualquer largura. */
-.wo-hero {
-  position: relative;
+/* ---------- Fundo vivo (spec 15) ----------
+   O mesmo fundo em toda página, carimbado do parcial fundo como primeiro filho do <main>: o pôster da
+   onda e o vídeo por cima, com a camada de leitura, fixos atrás de tudo. O vídeo nasce transparente
+   e só aparece quando começa a tocar (data-tocando, escrito pelo fundo.js); com ele tocando, o pôster
+   sai de baixo. O fundo do <body> vai para a tela inteira, embaixo do z-index -1. */
+.wo-fundo {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
   overflow: hidden;
-  padding: clamp(40px, 5vw, 76px) 0 clamp(52px, 6vw, 92px);
+  background: var(--wo-noite-hero);
 }
 
-.wo-hero__brilho {
+.wo-fundo > * {
   position: absolute;
-  top: -560px;
-  right: -340px;
-  width: 1000px;
-  height: 1000px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(162, 139, 249, 0.22), transparent 62%);
-  opacity: 0.45;
-  pointer-events: none;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  transition: opacity var(--wo-palco-transicao) ease;
 }
 
-.wo-hero__grade {
+.wo-fundo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 45%, transparent 50%, var(--wo-leitura-alto) 100%),
+    linear-gradient(180deg, var(--wo-leitura-alto), var(--wo-leitura-baixo));
+}
+
+.wo-fundo__video {
+  opacity: 0;
+}
+
+.wo-fundo__video[data-tocando] {
+  opacity: 1;
+}
+
+.wo-fundo:has(> .wo-fundo__video[data-tocando]) > .wo-fundo__poster {
+  opacity: 0;
+}
+
+/* ---------- Entrada em cascata do hero (spec 15.3) ----------
+   Ao abrir a página, cada bloco do hero marcado com data-entrada sai de transparente e 16 px abaixo
+   para o lugar, em 500 ms, com 70 ms entre um bloco e o seguinte (o número diz a vez). Só CSS: não
+   espera o JavaScript e acontece uma vez. O preenchimento backwards segura o bloco invisível só
+   durante o atraso. Com menos movimento, nada anima e tudo nasce no lugar. */
+@keyframes wo-entrada {
+  from {
+    opacity: 0;
+    transform: translateY(var(--wo-entrada-deslocamento));
+  }
+}
+
+[data-entrada] {
+  animation: wo-entrada var(--wo-entrada-duracao) backwards;
+}
+
+[data-entrada='1'] { animation-delay: var(--wo-entrada-passo); }
+[data-entrada='2'] { animation-delay: calc(2 * var(--wo-entrada-passo)); }
+[data-entrada='3'] { animation-delay: calc(3 * var(--wo-entrada-passo)); }
+[data-entrada='4'] { animation-delay: calc(4 * var(--wo-entrada-passo)); }
+[data-entrada='5'] { animation-delay: calc(5 * var(--wo-entrada-passo)); }
+[data-entrada='6'] { animation-delay: calc(6 * var(--wo-entrada-passo)); }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-entrada] {
+    animation: none;
+  }
+}
+
+/* ---------- Entrada do site (Tarefa 13B) ----------
+   Camada do parcial chegada, nascida com hidden. Só aparece com <html data-chegada>, escrito por
+   chegada.js antes da primeira pintura: noite até o desenho começar, depois o canvas pinta tudo. A
+   trava tira a camada no tempo do token mesmo se o script parar; com menos movimento ela vale 0. */
+@keyframes wo-chegada-trava {
+  to {
+    visibility: hidden;
+  }
+}
+
+.wo-chegada {
+  position: fixed;
+  inset: 0;
+  z-index: var(--wo-z-chegada);
+}
+
+:root[data-chegada]:not([data-chegada='feita']) .wo-chegada {
+  display: block !important;
+  animation: wo-chegada-trava var(--wo-chegada-trava) step-end forwards;
+}
+
+:root[data-chegada='ligada'] .wo-chegada {
+  background: var(--wo-noite-hero);
+}
+
+/* Pulada, a camada some mas ainda recebe o ponteiro: o clique do toque que pulou cai nela. */
+:root[data-chegada='saindo'] .wo-chegada {
+  opacity: 0;
+  transition: opacity var(--wo-transicao);
+}
+
+.wo-chegada__tela {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---------- Abertura e cartão noite (spec 5.4, 7 e 15.2) ----------
+   A abertura é o hero das páginas internas: transparente, com a onda no brilho inteiro por trás. O
+   topo flutua sobre ela, então o respiro de cima é a altura do topo mais o ritmo da seção. O texto
+   secundário e o de acento pequeno usam o token de texto sobre o vídeo (4,5:1). O destaque dos
+   títulos grandes usa um lilás próprio, com 3:1 sobre o brilho da onda (15.2). */
+.wo-abertura {
   position: relative;
-  display: flex;
-  flex-wrap: wrap;
+  padding: calc(var(--wo-topo-altura) + var(--wo-secao) / 2) 0 var(--wo-secao);
+  --wo-texto-2: var(--wo-hero-texto-secundario);
+  --wo-texto-3: var(--wo-hero-texto-secundario);
+  --wo-acento-texto: var(--wo-hero-texto-secundario);
+}
+
+.wo-abertura :is(.wo-h1, .wo-h2) .wo-destaque {
+  color: var(--wo-titulo-destaque);
+}
+
+/* Abertura de duas colunas (7.2 a 7.4): abaixo de 1024 px o cartão desce para baixo do texto. O selo
+   fica só com a borda esquerda de 2 px (5.2). */
+.wo-abertura__grade {
+  display: grid;
   align-items: center;
-  gap: 48px 56px;
+  gap: var(--wo-espaco-5);
 }
 
-.wo-hero__texto {
-  flex: 1.15 1 520px;
-  min-width: 0;
+.wo-abertura__texto .wo-h1 {
+  margin-top: var(--wo-espaco-3);
 }
 
-.wo-hero__visual {
-  flex: 1 1 480px;
-  min-width: 0;
-}
-
-.wo-hero .wo-h1 {
-  margin-top: 26px;
-}
-
-.wo-hero__lead {
-  margin-top: 24px;
+.wo-abertura__lead {
   max-width: 560px;
+  margin-top: var(--wo-espaco-3);
   color: var(--wo-texto-2);
-  font-size: 17.5px;
-  line-height: 1.75;
+  font-size: var(--wo-lead-hero);
+  line-height: 1.6;
   text-wrap: pretty;
 }
 
-.wo-hero .wo-acoes {
-  margin-top: 30px;
+.wo-abertura__texto .wo-acoes {
+  margin-top: var(--wo-espaco-4);
 }
 
-.wo-hero .wo-nota-mono {
-  margin-top: 22px;
+.wo-abertura .wo-etiqueta-hero {
+  border: 0;
+  border-left: var(--wo-linha-forte) solid var(--wo-texto);
+  border-radius: 0;
 }
 
-/* ---------- Duas colunas genéricas (texto + painel) ---------- */
-.wo-duas-colunas {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 44px 64px;
+.wo-abertura .wo-etiqueta-hero::before {
+  display: none;
 }
 
-.wo-duas-colunas--topo {
-  align-items: flex-start;
-  gap: 48px 72px;
+@media (min-width: 1024px) {
+  .wo-abertura__grade {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  }
 }
 
-.wo-coluna {
-  flex: 1 1 440px;
-  min-width: 0;
+/* Cartão escuro (spec 5.4): cartão noite opaco sobre o véu da seção. */
+.wo-cartao-noite {
+  padding: 36px;
+  border: 1px solid var(--wo-linha-noite);
+  border-radius: var(--wo-raio);
+  background: var(--wo-cartao-noite);
+  color: var(--wo-clara);
 }
 
 /* ---------- Maquete ilustrativa (painel que imita interface) ---------- */
@@ -560,12 +624,8 @@
   flex-direction: column;
   padding: clamp(16px, 1.6vw, 22px);
   border: 1px solid var(--wo-borda-forte);
-  border-radius: var(--wo-raio-xl);
+  border-radius: var(--wo-raio);
   background: linear-gradient(180deg, var(--wo-superficie-2), var(--wo-superficie));
-}
-
-.wo-maquete--sombra {
-  box-shadow: var(--wo-sombra-card);
 }
 
 .wo-maquete__cabeca {
@@ -577,11 +637,14 @@
   margin-bottom: 14px;
 }
 
+/* "Etiqueta em caixa alta" de 5.2. */
 .wo-maquete__titulo {
   color: var(--wo-texto-3);
-  font-family: var(--wo-mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
+  font-family: var(--wo-fonte);
+  font-size: var(--wo-etiqueta-tamanho);
+  font-weight: 500;
+  letter-spacing: var(--wo-etiqueta-entreletra);
+  line-height: 1.35;
   text-transform: uppercase;
 }
 
@@ -590,90 +653,217 @@
   border: 1px solid var(--wo-borda-forte);
   border-radius: var(--wo-raio-pilula);
   color: var(--wo-texto-3);
-  font-family: var(--wo-mono);
-  font-size: 10.5px;
-}
-
-/* ---------- Entradas da Home (cartões-link separados por fio) ---------- */
-.wo-entradas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1px;
-  margin-top: 30px;
-  border: 1px solid var(--wo-borda-forte);
-  border-radius: var(--wo-raio-md);
-  background: var(--wo-borda-forte);
-  overflow: hidden;
-}
-
-.wo-entrada {
-  display: flex;
-  flex: 1 1 250px;
-  flex-direction: column;
-  gap: 12px;
-  min-width: 0;
-  padding: clamp(24px, 2.6vw, 34px);
-  background: var(--wo-faixa);
-  color: var(--wo-texto);
-  text-decoration: none;
-  transition: background-color var(--wo-transicao);
-}
-
-.wo-entrada:hover {
-  background: var(--wo-superficie);
-  color: var(--wo-texto);
-}
-
-.wo-entrada__topo {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  min-height: 26px;
-  color: var(--wo-acento-texto);
-  font-family: var(--wo-mono);
-  font-size: 11.5px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.wo-entrada__topo .wo-selo {
   font-family: var(--wo-fonte);
-  letter-spacing: normal;
-  text-transform: none;
-}
-
-.wo-entrada__titulo {
-  font-size: 23px;
-  font-weight: 500;
-  line-height: 1.22;
-  letter-spacing: -0.035em;
+  font-size: var(--wo-texto-pequeno);
+  line-height: 1.45;
   text-wrap: balance;
 }
 
-.wo-entrada__texto {
-  color: var(--wo-texto-3);
-  font-size: 14.5px;
-  line-height: 1.65;
+/* Título de cartão de 5.2. A classe de contexto continua responsável por layout e margens. */
+.wo-titulo-cartao {
+  font-family: var(--wo-fonte-titulo);
+  font-size: var(--wo-h3-cartao);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.55;
 }
 
-.wo-entrada__acao {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 28px;
-  margin-top: auto;
-  padding-top: 10px;
+/* ---------- Peças editoriais compartilhadas ----------
+   Usadas pela Home e pelas páginas de oferta. A semântica vem do HTML: ol para
+   etapas, dl para definições e lista de modelos com os destinos de contratação. */
+.wo-etiqueta {
+  font-family: var(--wo-fonte);
+  font-size: var(--wo-etiqueta-tamanho);
+  font-weight: 500;
+  letter-spacing: var(--wo-etiqueta-entreletra);
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+/* Cartão claro sobre o escuro (spec 5.4): o único lugar do contexto claro (15.2). Os semânticos do
+   claro estão em tokens.css, no bloco .wo-cartao-claro. */
+.wo-cartao-claro {
+  color: var(--wo-texto);
+  color-scheme: light;
+  background: var(--wo-fundo);
+  border: 0;
+  border-radius: var(--wo-raio);
+  box-shadow: var(--wo-sombra-cartao);
+}
+
+.wo-colunas-numeradas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--wo-espaco-4);
+  margin-top: var(--wo-espaco-6);
+}
+
+.wo-colunas-numeradas__item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--wo-espaco-2);
+  padding-top: var(--wo-espaco-3);
+  border-top: var(--wo-linha-forte) solid var(--wo-texto);
+}
+
+.wo-colunas-numeradas__numero {
   color: var(--wo-acento-texto);
-  font-size: 14px;
-  font-weight: 600;
+  font-family: var(--wo-fonte-titulo);
+  font-size: var(--wo-numero-etapa);
+  font-weight: 500;
+  line-height: 1.33;
 }
 
-.wo-entrada__acao svg {
-  width: 16px;
-  height: 16px;
+.wo-colunas-numeradas__item h3 {
+  font-family: var(--wo-fonte-titulo);
+  font-size: var(--wo-h3-etapa);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.33;
+}
+
+.wo-colunas-numeradas__item p {
+  color: var(--wo-texto-2);
+  font-size: var(--wo-texto-corpo);
+}
+
+.wo-colunas-numeradas__recebe {
+  padding-top: var(--wo-espaco-2);
+  margin-top: auto;
+}
+
+.wo-colunas-numeradas__recebe .wo-etiqueta {
+  display: block;
+  margin-bottom: var(--wo-espaco-1);
+  color: var(--wo-acento-texto);
+}
+
+.wo-definicoes {
+  border-top: var(--wo-linha-forte) solid var(--wo-texto);
+}
+
+.wo-definicoes__linha {
+  display: grid;
+  gap: var(--wo-espaco-2);
+  padding: var(--wo-espaco-3) 0;
+  border-bottom: var(--wo-linha-fina) solid var(--wo-borda);
+}
+
+.wo-definicoes dt {
+  font-family: var(--wo-fonte-titulo);
+  font-size: var(--wo-h3-etapa);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.33;
+}
+
+.wo-definicoes dt a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wo-espaco-2);
+  min-height: var(--wo-alvo);
+  color: var(--wo-texto);
+  text-decoration: none;
+}
+
+.wo-definicoes dt a:hover {
+  color: var(--wo-acento-texto);
+}
+
+.wo-definicoes dt svg {
   flex-shrink: 0;
+}
+
+.wo-definicoes dd {
+  color: var(--wo-texto-2);
+}
+
+/* Lista editorial (5.4): primeira linha em tinta, demais em linha fina. O h3 é o "Título de linha" de
+   5.2, o mesmo do nome do modelo. */
+.wo-lista-editorial {
+  border-top: var(--wo-linha-forte) solid var(--wo-texto);
+}
+
+.wo-lista-editorial__item {
+  display: grid;
+  gap: var(--wo-espaco-2);
+  padding: var(--wo-espaco-4) 0;
+  border-bottom: var(--wo-linha-fina) solid var(--wo-borda);
+}
+
+.wo-lista-editorial__item .wo-etiqueta {
+  color: var(--wo-acento-texto);
+}
+
+.wo-lista-editorial__item h3,
+.wo-modelo__nome h3 {
+  font-family: var(--wo-fonte-titulo);
+  font-size: var(--wo-h3-linha);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.wo-lista-editorial__item p {
+  color: var(--wo-texto-2);
+}
+
+/* "Nota" de 5.2. O ponto médio fica no fim da etiqueta e fora do leitor de tela. */
+.wo-lista-editorial__etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: var(--wo-espaco-1);
+  color: var(--wo-texto-3);
+  font-size: var(--wo-texto-pequeno);
+  line-height: 1.45;
+}
+
+.wo-lista-editorial__etiquetas li:not(:last-child)::after {
+  content: '·';
+  content: '·' / '';
+  margin: 0 var(--wo-espaco-1);
+}
+
+.wo-modelos.wo-tabela-modelos {
+  border-top: var(--wo-linha-forte) solid var(--wo-texto);
+}
+
+.wo-tabela-modelos .wo-modelo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--wo-espaco-3);
+  padding: var(--wo-espaco-4) 0;
+}
+
+.wo-tabela-modelos .wo-modelo__campo .wo-etiqueta {
+  display: block;
+  color: var(--wo-texto-3);
+}
+
+.wo-tabela-modelos .wo-modelo__campo p {
+  font-size: var(--wo-texto-corpo);
+  line-height: 1.625;
+}
+
+/* A seta é só desenho: svg com aria-hidden, fora de link, sem borda, sem cursor e sem hover que
+   sugiram um botão. */
+.wo-tabela-modelos__seta {
+  align-self: center;
+  color: var(--wo-acento-texto);
+}
+
+@media (min-width: 640px) {
+  .wo-colunas-numeradas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .wo-definicoes__linha { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--wo-espaco-4); }
+  /* Definições com listas longas: mais espaço para a descrição, mantendo o termo à esquerda. */
+  .wo-definicoes--descritivas .wo-definicoes__linha { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); }
+}
+
+@media (min-width: 1024px) {
+  .wo-colunas-numeradas { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .wo-tabela-modelos .wo-modelo { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) auto; gap: var(--wo-espaco-5); }
 }
 
 /* ---------- Seletor (botões à esquerda, um painel por vez) ----------
@@ -704,7 +894,7 @@
   min-height: 56px;
   padding: 0 18px;
   border: 1px solid var(--wo-borda);
-  border-radius: var(--wo-raio-sm);
+  border-radius: var(--wo-raio);
   background: transparent;
   color: var(--wo-texto-2);
   font-family: inherit;
@@ -744,7 +934,7 @@
   min-width: 0;
   padding: clamp(24px, 2.8vw, 38px);
   border: 1px solid var(--wo-borda-forte);
-  border-radius: var(--wo-raio-painel);
+  border-radius: var(--wo-raio);
   background: var(--wo-superficie);
 }
 
@@ -753,59 +943,7 @@
   display: none;
 }
 
-/* ---------- Resultado de negócio (painel do seletor e seções de Soluções) ---------- */
-.wo-resultado {
-  display: flex;
-  flex-direction: column;
-  gap: 26px;
-}
-
-.wo-resultado__titulo {
-  font-size: var(--wo-h3-painel);
-  font-weight: 500;
-  line-height: 1.15;
-  letter-spacing: -0.04em;
-}
-
-.wo-resultado__texto {
-  margin-top: 10px;
-  max-width: 620px;
-  color: var(--wo-texto-2);
-  font-size: 16.5px;
-  line-height: 1.7;
-}
-
-.wo-resultado__grade {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
-  gap: 26px 40px;
-}
-
-.wo-resultado__rodape {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px 24px;
-  padding-top: 20px;
-  border-top: 1px solid var(--wo-borda);
-}
-
-.wo-sinais {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 14px;
-  color: var(--wo-texto);
-  font-size: 15.5px;
-  line-height: 1.55;
-}
-
-.wo-sinais li {
-  padding-left: 14px;
-  border-left: 2px solid var(--wo-acento-borda);
-}
-
+/* ---------- Lista de marcação ---------- */
 .wo-lista-check {
   display: flex;
   flex-direction: column;
@@ -833,86 +971,6 @@
   gap: 12px;
 }
 
-/* ---------- Passos verticais (como trabalhamos) ---------- */
-.wo-passos {
-  display: flex;
-  flex-direction: column;
-  margin-top: 22px;
-}
-
-.wo-passo {
-  display: flex;
-  gap: 20px;
-}
-
-.wo-passo__trilho {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.wo-passo__numero {
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  border: 1px solid var(--wo-acento-borda);
-  border-radius: 50%;
-  background: var(--wo-acento-fundo);
-  color: var(--wo-acento-texto);
-  font-family: var(--wo-mono);
-  font-size: 13px;
-}
-
-.wo-passo__trilho::after {
-  content: '';
-  flex: 1;
-  width: 1px;
-  margin: 8px 0;
-  background: var(--wo-borda-forte);
-}
-
-.wo-passo:last-child .wo-passo__trilho::after {
-  display: none;
-}
-
-.wo-passo__corpo {
-  min-width: 0;
-  padding: 5px 0 30px;
-}
-
-.wo-passo:last-child .wo-passo__corpo {
-  padding-bottom: 0;
-}
-
-.wo-passo__titulo {
-  font-size: 20px;
-  font-weight: 600;
-  line-height: 1.3;
-  letter-spacing: -0.03em;
-}
-
-.wo-passo__texto {
-  margin-top: 6px;
-  color: var(--wo-texto-3);
-  font-size: 15px;
-  line-height: 1.7;
-}
-
-.wo-passo__recebe {
-  margin-top: 10px;
-  color: var(--wo-texto-2);
-  font-size: 14.5px;
-  line-height: 1.6;
-}
-
-.wo-passo__recebe .wo-rotulo-mono {
-  display: inline;
-  margin-right: 10px;
-  color: var(--wo-acento-texto);
-}
-
 /* ---------- Modelos de contratação ---------- */
 .wo-modelos {
   margin-top: 40px;
@@ -937,13 +995,6 @@
   min-width: 0;
 }
 
-.wo-modelo__nome h3 {
-  font-size: 22px;
-  font-weight: 500;
-  line-height: 1.25;
-  letter-spacing: -0.035em;
-}
-
 .wo-modelo__campo {
   flex: 1.5 1 210px;
   min-width: 0;
@@ -965,63 +1016,40 @@
   margin-top: 22px;
 }
 
+/* "Nota" de 5.2. */
 .wo-modelos__rodape p {
   color: var(--wo-texto-3);
-  font-size: 15.5px;
-  line-height: 1.7;
+  font-size: var(--wo-texto-pequeno);
+  line-height: 1.45;
 }
 
-/* ---------- Chamada final ---------- */
+/* ---------- Chamada final (spec 8.4 e 14.1) ----------
+   Seção sob o véu forte (a classe .wo-veu-forte vai no parcial, spec 15.2): o texto à esquerda e, à
+   direita, o cartão escuro com quem responde e as duas formas de começar. Usa a grade editorial de
+   base.css. */
 .wo-cta {
-  padding: clamp(56px, 6.6vw, 96px) 0 clamp(65px, 7.8vw, 112px);
-}
-
-.wo-cta__caixa {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 40px 64px;
-  padding: clamp(28px, 4vw, 56px);
-  border: 1px solid rgba(162, 139, 249, 0.3);
-  border-radius: var(--wo-raio-lg);
-  background: radial-gradient(ellipse at 0 100%, rgba(162, 139, 249, 0.1), var(--wo-superficie) 65%);
-}
-
-.wo-cta__texto {
-  flex: 1 1 440px;
-  min-width: 0;
+  padding: var(--wo-secao) 0;
 }
 
 .wo-cta__titulo {
   margin-top: 16px;
-  font-size: clamp(28px, 3.2vw, 46px);
-  font-weight: 500;
-  line-height: 1.08;
-  letter-spacing: -0.045em;
+  font-size: var(--wo-h2);
   text-wrap: balance;
 }
 
 .wo-cta__lead {
-  margin-top: 16px;
+  margin-top: 20px;
   max-width: 480px;
-  color: var(--wo-texto-3);
-  font-size: 15px;
-  line-height: 1.75;
+  color: var(--wo-texto-2);
+  line-height: 1.625;
   text-wrap: pretty;
-}
-
-.wo-cta__lado {
-  display: flex;
-  flex: 1 1 360px;
-  flex-direction: column;
-  gap: 26px;
-  min-width: 0;
 }
 
 .wo-cta__lista {
   display: flex;
   flex-direction: column;
   gap: 13px;
+  margin-top: 32px;
 }
 
 .wo-cta__lista li {
@@ -1031,37 +1059,149 @@
   font-size: 14px;
 }
 
-.wo-cta__lista svg {
+.wo-cta__lista svg,
+.wo-cta__promessa svg {
   width: 18px;
   height: 18px;
   flex-shrink: 0;
   color: var(--wo-acento-texto);
 }
 
-.wo-cta .wo-btn {
-  font-size: 13px;
+/* Quem responde (spec 14.1): avatar de 48 px, nome, cargo e a promessa da primeira conversa. O prazo
+   de resposta já está nas garantias da esquerda, então não se repete aqui. Sem foto até o Vitor
+   mandar: o avatar mostra as iniciais sobre o violeta da marca. */
+.wo-cta__quem {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
-/* ---------- Rodapé ---------- */
-.wo-rodape {
-  padding: 54px 0 36px;
+.wo-cta__avatar {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--wo-acento);
+  color: var(--wo-sobre-acento);
+  font-family: var(--wo-fonte-titulo);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.wo-cta__nome {
+  font-family: var(--wo-fonte-titulo);
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.wo-cta__cargo {
+  color: var(--wo-texto-3);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.wo-cta__promessa {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-top: 20px;
+  color: var(--wo-texto-2);
+  font-size: 14px;
+}
+
+.wo-cta__cartao-titulo {
+  margin-top: 28px;
+  padding-top: 28px;
   border-top: 1px solid var(--wo-borda);
-  background: var(--wo-faixa);
+  font-family: var(--wo-fonte-titulo);
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.wo-cta__opcoes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+/* Opção como botão largo: o contorno do escuro (spec 5.4), com o texto à esquerda e a seta à
+   direita. Raio de cartão, não de pílula, porque o texto pode quebrar em duas ou três linhas. */
+.wo-cta__opcao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 56px;
+  padding: 14px 18px;
+  border: 1px solid var(--wo-borda-forte);
+  border-radius: var(--wo-raio);
+  background: var(--wo-contorno-fundo);
+  color: var(--wo-texto);
+  font-size: 15px;
+  line-height: 1.45;
+  text-decoration: none;
+  transition: border-color var(--wo-transicao);
+}
+
+.wo-cta__opcao:hover {
+  border-color: var(--wo-acento-borda);
+  color: var(--wo-texto);
+}
+
+.wo-cta__opcao strong {
+  font-weight: 500;
+}
+
+.wo-cta__opcao-apoio {
+  color: var(--wo-texto-2);
+}
+
+.wo-cta__opcao svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--wo-acento-texto);
+}
+
+/* ---------- Rodapé (spec 7.8 e 8.7) ----------
+   Sob o véu forte (.wo-veu-forte no parcial, spec 15.2), com a linha de cima dele. Embaixo, 88 px
+   de respiro para o botão flutuante de WhatsApp nunca cobrir texto. */
+.wo-rodape {
+  padding: 56px 0 var(--wo-flutuante-respiro);
   font-size: 14.5px;
   line-height: 1.6;
+}
+
+.wo-rodape__topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 32px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--wo-borda);
 }
 
 .wo-rodape__grade {
   display: flex;
   flex-wrap: wrap;
   gap: 36px 32px;
+  padding-top: 40px;
 }
 
 .wo-rodape__marca {
   display: flex;
-  flex: 0 1 250px;
+  flex: 1.2 1 250px;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -1093,12 +1233,13 @@
 }
 
 .wo-rodape__titulo {
-  margin: 0 0 6px;
-  color: var(--wo-texto-4);
-  font-family: var(--wo-mono);
-  font-size: 11.5px;
-  font-weight: 400;
-  letter-spacing: 0.1em;
+  margin: 0 0 8px;
+  color: var(--wo-texto-3);
+  font-family: var(--wo-fonte);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  line-height: 1.35;
   text-transform: uppercase;
 }
 
@@ -1119,28 +1260,85 @@
   color: var(--wo-texto);
 }
 
-.wo-rodape__base {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-top: 44px;
-  padding-top: 24px;
-  border-top: 1px solid var(--wo-borda);
-  color: var(--wo-texto-4);
-  font-size: 13px;
+/* Alvo de toque de 44 px no celular. No desktop o espaçamento das colunas fica mais fechado. */
+@media (min-width: 768px) {
+  .wo-rodape a:not(.wo-marca) {
+    min-height: 36px;
+  }
 }
 
 .wo-rodape__legal {
   display: flex;
   flex-wrap: wrap;
-  gap: 18px;
+  gap: 0 24px;
 }
 
-.wo-rodape .wo-rodape__legal a {
+.wo-rodape__base {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 32px;
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid var(--wo-borda);
+  color: var(--wo-texto-3);
+  font-size: 13px;
+}
+
+/* Pausa das animações (15.3, adendo 2 da 13A): texto no rodapé, nome fixo e aria-pressed. Para o
+   fundo e a vitrine da Home; o fundo.js mostra quando há animação. */
+.wo-rodape__pausa {
   display: inline-flex;
-  color: var(--wo-texto-4);
+  align-items: center;
+  gap: var(--wo-espaco-1);
+  min-height: var(--wo-alvo);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.wo-rodape__pausa:hover,
+.wo-rodape__pausa[aria-pressed='true'] {
+  color: var(--wo-texto);
+}
+
+.wo-rodape__pausa[aria-pressed='true'] .wo-rodape__icone-pausa,
+.wo-rodape__pausa:not([aria-pressed='true']) .wo-rodape__icone-tocar {
+  display: none;
+}
+
+/* ---------- Botão flutuante de WhatsApp (spec 5.4) ----------
+   Círculo de 56 px no canto inferior direito, em toda página menos Contato. O respiro do rodapé e o
+   scroll-padding-bottom da página (base.css) o mantêm longe de texto, de foco e de âncora. */
+.wo-whatsapp-flutuante {
+  position: fixed;
+  right: var(--wo-flutuante-margem);
+  bottom: calc(var(--wo-flutuante-margem) + env(safe-area-inset-bottom));
+  z-index: var(--wo-z-flutuante);
+  display: grid;
+  place-items: center;
+  width: var(--wo-flutuante-tamanho);
+  height: var(--wo-flutuante-tamanho);
+  border-radius: 50%;
+  background: var(--wo-whatsapp);
+  color: var(--wo-branco);
+  box-shadow: var(--wo-sombra-flutuante);
+  text-decoration: none;
+  transition: transform var(--wo-transicao);
+}
+
+.wo-whatsapp-flutuante:hover {
+  color: var(--wo-branco);
+  transform: scale(1.06);
+}
+
+.wo-whatsapp-flutuante svg {
+  width: 28px;
+  height: 28px;
 }
 
 /* ---------- Formulário ---------- */
@@ -1191,7 +1389,7 @@
   min-height: 48px;
   padding: 12px 14px;
   border: 1px solid var(--wo-borda-campo);
-  border-radius: var(--wo-raio-campo);
+  border-radius: var(--wo-raio);
   background: var(--wo-superficie-2);
   color: var(--wo-texto);
   font-family: var(--wo-fonte);
@@ -1274,7 +1472,7 @@ textarea.wo-controle {
   min-height: 48px;
   padding: 0 8px;
   border: 1px solid var(--wo-borda-campo);
-  border-radius: var(--wo-raio-campo);
+  border-radius: var(--wo-raio);
   background: var(--wo-superficie-2);
   color: var(--wo-texto-2);
   font-size: 14.5px;
@@ -1303,7 +1501,7 @@ textarea.wo-controle {
 }
 
 .wo-opcao-canal:has(input:focus-visible) {
-  outline: 2px solid var(--wo-acento-texto);
+  outline: 2px solid var(--wo-foco);
   outline-offset: 2px;
 }
 
@@ -1334,7 +1532,7 @@ textarea.wo-controle {
   margin: 0;
   flex-shrink: 0;
   border: 1.5px solid var(--wo-borda-campo);
-  border-radius: var(--wo-raio-xs);
+  border-radius: var(--wo-raio);
   background: var(--wo-superficie-2);
   cursor: pointer;
 }
@@ -1386,7 +1584,7 @@ textarea.wo-controle {
   margin-bottom: 20px;
   padding: 14px 16px;
   border: 1px solid var(--wo-erro-borda);
-  border-radius: var(--wo-raio-sm);
+  border-radius: var(--wo-raio);
   background: var(--wo-erro-fundo);
   font-size: 14.5px;
   line-height: 1.55;
@@ -1534,7 +1732,7 @@ textarea.wo-controle {
 }
 
 .wo-confirmacao__dados .wo-confirmacao__contato {
-  font-family: var(--wo-mono);
+  font-family: var(--wo-fonte);
   font-size: 13px;
   font-weight: 400;
 }
@@ -1569,7 +1767,7 @@ textarea.wo-controle {
   flex: 1 1 240px;
   min-width: 0;
   min-height: 52px;
-  border-radius: var(--wo-raio-btn);
+  border-radius: var(--wo-raio);
   background: var(--wo-superficie);
 }
 
@@ -1577,7 +1775,7 @@ textarea.wo-controle {
   margin: 16px 0 0;
 }
 
-/* 0,2,0 para vencer .wo-hero .wo-nota-mono quando o formulário fica dentro de um hero. */
+/* A nota fica depois dos aceites, com o mesmo respiro em qualquer contexto. */
 .wo-form-interesse .wo-form-interesse__nota {
   margin-top: 12px;
 }
@@ -1631,7 +1829,7 @@ textarea.wo-controle {
 .wo-form__semjs {
   padding: 16px 18px;
   border: 1px solid var(--wo-borda-forte);
-  border-radius: var(--wo-raio-sm);
+  border-radius: var(--wo-raio);
   background: var(--wo-superficie);
   color: var(--wo-texto-2);
   font-size: 15px;

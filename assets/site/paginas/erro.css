@@ -1,6 +1,8 @@
-/* WaveOps · página 404. */
+/* WaveOps · página 404. A faixa é a .wo-abertura (components.css), o hero transparente sobre o fundo
+   vivo: o topo flutua sobre ela, então a altura mínima soma a altura do topo e o texto fica centrado
+   embaixo dele. */
 .wo-erro {
-  min-height: 56vh;
+  min-height: calc(56vh + var(--wo-topo-altura));
   display: flex;
   align-items: center;
 }

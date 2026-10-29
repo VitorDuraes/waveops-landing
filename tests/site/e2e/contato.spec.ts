@@ -204,6 +204,10 @@ test('falha do servidor não dispara lead_enviado', async ({ page }) => {
 });
 
 test('envio antes de 1,2 s é tratado como robô e não sai', async ({ page }) => {
+  // A entrada em cascata do hero (spec 15.3) move o cartão do formulário por até 850 ms, e o Playwright
+  // espera o campo parar antes de preencher. Com menos movimento o cartão nasce no lugar e o teste
+  // preenche na hora, como um robô que não espera nada.
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await abrir(page);
   const pedidos = await interceptar(page, ok);
   await preencherMinimo(page);

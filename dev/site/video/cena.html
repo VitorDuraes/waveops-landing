@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Cena do vídeo do hero · WaveOps</title>
+    <style>
+      html, body { margin: 0; background: #05010e; }
+      canvas { display: block; width: 100%; height: auto; }
+    </style>
+  </head>
+  <body>
+    <!-- Fonte do vídeo do hero (assets/site/video/, spec 6.2). Página de desenvolvimento: não vai
+         para o ar. Refaça os vídeos e o pôster com: cd tests/site && PW_CHANNEL=chrome node qa/video.mjs
+         Para ver a cena andando, abra esta página com ?animar no fim do endereço. -->
+    <canvas id="cena" width="1920" height="1080"></canvas>
+    <script src="/dev/site/video/cena.js"></script>
+  </body>
+</html>

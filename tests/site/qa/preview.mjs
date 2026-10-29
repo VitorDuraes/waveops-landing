@@ -79,6 +79,8 @@ const navegador = await chromium.launch({ channel: process.env.PW_CHANNEL || und
 /** Abre uma aba que registra erro de console e bloqueia (e registra) todo pedido para fora da origem do preview. */
 async function abrir(/** @type {typeof LARGURAS[number]} */ largura) {
   const contexto = await navegador.newContext({ viewport: largura.viewport, isMobile: largura.isMobile, hasTouch: largura.isMobile });
+  // A entrada do site tem teste próprio (e2e/chegada.spec.ts): a conferência abre a página como a seguinte da visita.
+  await contexto.addInitScript(() => sessionStorage.setItem('waveops:chegada', '1'));
   /** @type {string[]} */
   const erros = [];
   /** @type {string[]} */

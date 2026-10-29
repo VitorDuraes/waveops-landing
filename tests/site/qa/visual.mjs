@@ -87,6 +87,8 @@ try {
       // o Chrome consegue capturar de uma vez e a metade de baixo sai repetida. A altura em
       // px CSS não muda, e a folha reduz as duas imagens para a mesma largura de coluna.
       const contexto = await navegador.newContext({ viewport: { width: largura, height: 900 }, deviceScaleFactor: 1 });
+      // A entrada do site tem teste próprio (e2e/chegada.spec.ts): a captura abre a página como a seguinte da visita.
+      await contexto.addInitScript(() => sessionStorage.setItem('waveops:chegada', '1'));
       if (origemRemota) {
         // Nada sai da origem do preview, nem por engano.
         await contexto.route('**/*', (rota) => {
@@ -102,6 +104,16 @@ try {
         continue;
       }
       await aba.evaluate(() => document.fonts.ready);
+      // Só a entrada finita do hero. Vídeo e fundo contínuo não participam desta espera.
+      await aba.evaluate(async () => {
+        const entradas = document.getAnimations().filter((animacao) =>
+          animacao instanceof CSSAnimation && animacao.animationName === 'wo-entrada'
+          && Number.isFinite(animacao.effect?.getTiming().iterations));
+        await Promise.all(entradas.map((animacao) => animacao.finished));
+        for (const bloco of document.querySelectorAll('[data-entrada]')) {
+          if (getComputedStyle(bloco).opacity !== '1') throw new Error('captura incompleta: bloco do hero ainda transparente');
+        }
+      });
       const captura = path.join(saidaCapturas, `${nome}-${largura}.png`);
       await aba.screenshot({ path: captura, fullPage: true });
       await contexto.close();

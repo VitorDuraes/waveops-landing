@@ -2,7 +2,9 @@
 /* Servidor local do site institucional, sem dependência.
 
    Imita o que importa do Netlify: URL com barra final (/solucoes/ serve
-   solucoes/index.html), 301 de /solucoes para /solucoes/ e 404.html com status 404.
+   solucoes/index.html), 301 de /solucoes para /solucoes/, 404.html com status 404 e
+   Range de um intervalo (206, ou 416 fora do arquivo), sem o qual o navegador pode não
+   repetir o vídeo do hero em loop.
    Também responde os endpoints simulados que o site usa fora de produção, para
    nenhum teste local mandar lead de mentira para o n8n de verdade:
 
@@ -23,6 +25,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import { pipeline } from 'node:stream';
 import { fileURLToPath } from 'node:url';
 import { executadoDireto, lerNetlify } from './build.mjs';
 
@@ -37,6 +40,8 @@ const TIPOS = {
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
   '.webp': 'image/webp',
+  '.webm': 'video/webm',
+  '.mp4': 'video/mp4',
   '.ico': 'image/x-icon',
   '.woff2': 'font/woff2',
   '.txt': 'text/plain; charset=utf-8',
@@ -99,6 +104,33 @@ async function endpointSimulado(req, res, url, atrasoLentoMs) {
   return responderJson(res, 200, { ok: true, protocolo: String(dados.idEnvio ?? 'dev') });
 }
 
+/**
+ * Lê um cabeçalho Range de um intervalo só. Devolve null quando não há Range que valha
+ * (ausente, inválido ou com vários intervalos): aí a resposta é 200 com o arquivo
+ * inteiro, como a RFC 9110 permite. 'fora' quando o intervalo não cabe no arquivo.
+ * @param {string | undefined} cabecalho
+ * @param {number} tamanho
+ * @returns {{ inicio: number, fim: number } | 'fora' | null}
+ */
+function lerIntervalo(cabecalho, tamanho) {
+  const m = /^bytes=(\d*)-(\d*)$/i.exec(cabecalho ?? '');
+  if (!m || (m[1] === '' && m[2] === '')) return null;
+  let inicio;
+  let fim = tamanho - 1;
+  if (m[1] === '') {
+    // Sufixo: os últimos N bytes.
+    if (Number(m[2]) === 0) return 'fora';
+    inicio = Math.max(0, tamanho - Number(m[2]));
+  } else {
+    inicio = Number(m[1]);
+    if (m[2] !== '') {
+      if (Number(m[2]) < inicio) return null;
+      fim = Math.min(Number(m[2]), fim);
+    }
+  }
+  return inicio >= tamanho ? 'fora' : { inicio, fim };
+}
+
 /** @param {string} abs */
 function estado(abs) {
   try {
@@ -131,16 +163,35 @@ export function criarServidor({ raiz, atrasoLentoMs = 15000 }) {
     return permitidos.has(segmentos[0]);
   };
 
-  /** @param {http.ServerResponse} res @param {string} abs @param {number} status @param {boolean} cabeca */
-  const enviarArquivo = (res, abs, status, cabeca) => {
-    res.writeHead(status, {
+  /**
+   * @param {http.ServerResponse} res
+   * @param {string} abs
+   * @param {number} status
+   * @param {boolean} cabeca
+   * @param {string} [range] cabeçalho Range do pedido; só vale quando a resposta é 200
+   */
+  const enviarArquivo = (res, abs, status, cabeca, range) => {
+    const tamanho = fs.statSync(abs).size;
+    const intervalo = status === 200 ? lerIntervalo(range, tamanho) : null;
+    if (intervalo === 'fora') {
+      res.writeHead(416, { 'Content-Range': `bytes */${tamanho}`, 'Cache-Control': 'no-store' });
+      return res.end();
+    }
+    const { inicio, fim } = intervalo ?? { inicio: 0, fim: tamanho - 1 };
+    /** @type {http.OutgoingHttpHeaders} */
+    const cabecalhos = {
       'Content-Type': TIPOS[path.extname(abs).toLowerCase()] ?? 'application/octet-stream',
+      'Content-Length': fim - inicio + 1,
       'Cache-Control': 'no-store',
-    });
-    if (cabeca) return res.end();
-    fs.createReadStream(abs)
-      .on('error', () => res.destroy())
-      .pipe(res);
+    };
+    if (status === 200) cabecalhos['Accept-Ranges'] = 'bytes';
+    if (intervalo) cabecalhos['Content-Range'] = `bytes ${inicio}-${fim}/${tamanho}`;
+    res.writeHead(intervalo ? 206 : status, cabecalhos);
+    if (cabeca || tamanho === 0) return res.end();
+    // pipeline, não .pipe: quando o cliente desiste no meio (o navegador faz isso com vídeo),
+    // o stream do arquivo é destruído e solta o descritor; se a leitura falha, a resposta cai.
+    // O erro que chega ao callback é um desses dois, e os dois já foram tratados.
+    pipeline(fs.createReadStream(abs, { start: inicio, end: fim }), res, () => {});
   };
 
   /** @param {http.ServerResponse} res @param {boolean} cabeca */
@@ -186,9 +237,9 @@ export function criarServidor({ raiz, atrasoLentoMs = 15000 }) {
           return res.end();
         }
         const indice = path.join(alvo, 'index.html');
-        return estado(indice)?.isFile() ? enviarArquivo(res, indice, 200, cabeca) : naoEncontrado(res, cabeca);
+        return estado(indice)?.isFile() ? enviarArquivo(res, indice, 200, cabeca, req.headers.range) : naoEncontrado(res, cabeca);
       }
-      if (info?.isFile()) return enviarArquivo(res, alvo, 200, cabeca);
+      if (info?.isFile()) return enviarArquivo(res, alvo, 200, cabeca, req.headers.range);
       return naoEncontrado(res, cabeca);
     } catch (erro) {
       res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });

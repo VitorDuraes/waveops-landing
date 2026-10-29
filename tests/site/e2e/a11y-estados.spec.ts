@@ -6,6 +6,10 @@ import AxeBuilder from '@axe-core/playwright';
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 
 async function graves(page: Page) {
+  // A entrada em cascata do hero (spec 15.3) acaba antes de 1 s: o axe mede a página já no lugar.
+  await page.evaluate(() => Promise.all(document.getAnimations()
+    .filter((animacao) => (animacao as CSSAnimation).animationName === 'wo-entrada')
+    .map((animacao) => animacao.finished.catch(() => undefined))));
   const resultado = await new AxeBuilder({ page }).withTags(TAGS).analyze();
   return resultado.violations
     .filter((v) => v.impact === 'serious' || v.impact === 'critical')

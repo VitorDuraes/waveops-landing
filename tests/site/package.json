@@ -13,8 +13,8 @@
     "qa:visual": "node qa/visual.mjs"
   },
   "devDependencies": {
-    "@axe-core/playwright": "^4.10.2",
-    "@playwright/test": "^1.64.1",
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "^1.63.0",
     "@types/node": "^25.9.9",
     "typescript": "^7.0.2"
   }

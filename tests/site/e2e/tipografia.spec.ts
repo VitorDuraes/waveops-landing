@@ -237,49 +237,25 @@ test.describe('destaque dos títulos sobre a onda', () => {
   }
 });
 
-/* Spec 5.4, tabela de modelos: nome com subtítulo, descrição, três pontos e seta. A seta é só
-   desenho. Link para /contato/ com nome acessível inventado não está na spec nem no plano, e
-   somaria três paradas de Tab para o mesmo destino que a linha de baixo já oferece. */
-test.describe('setas da tabela de modelos', () => {
+/* Spec 5.4, tabela de modelos: nome, quando faz sentido e o que define a proposta. A linha não é
+   link (os três "Conversar sobre" levariam ao mesmo destino da linha de baixo), então nada nela
+   sugere clique: sem seta e sem selo repetido de "Disponível" (revisão de 02/11/2026). */
+test.describe('tabela de modelos', () => {
   test.use({ reducedMotion: 'reduce' });
   test.beforeEach(async ({}, info) => {
     test.skip(info.project.name === 'tablet', 'mesmas regras no desktop e no celular');
   });
 
-  test('são svg decorativos, fora de link, sem nome acessível', async ({ page }) => {
-    await page.goto('/');
-    const setas = page.locator('.wo-tabela-modelos__seta');
-    await expect(setas).toHaveCount(3);
-    const lidas = await setas.evaluateAll((elementos) => elementos.map((elemento) => ({
-      tag: elemento.tagName.toLowerCase(),
-      ariaHidden: elemento.getAttribute('aria-hidden'),
-      largura: elemento.getAttribute('width'),
-      altura: elemento.getAttribute('height'),
-      nome: elemento.getAttribute('aria-label') ?? elemento.getAttribute('aria-labelledby'),
-      dentroDeInterativo: elemento.closest('a, button, [role="link"], [role="button"]') !== null,
-      focalizavel: elemento.hasAttribute('tabindex') || elemento.getAttribute('focusable') !== 'false',
-    })));
-    expect(lidas).toEqual(Array.from({ length: 3 }, () => ({
-      tag: 'svg', ariaHidden: 'true', largura: expect.stringMatching(/^\d+$/), altura: expect.stringMatching(/^\d+$/),
-      nome: null, dentroDeInterativo: false, focalizavel: false,
-    })));
-    await expect(page.locator('.wo-tabela-modelos a')).toHaveCount(0);
-    await expect(page.getByRole('link', { name: /Conversar sobre/ })).toHaveCount(0);
-  });
-
-  test('não têm cursor nem hover que sugiram clique', async ({ page }, info) => {
-    await page.goto('/');
-    const seta = page.locator('.wo-tabela-modelos__seta').first();
-    await seta.evaluate((elemento) => elemento.scrollIntoView({ block: 'center', behavior: 'instant' }));
-    const ler = () => seta.evaluate((elemento) => {
-      const estilo = getComputedStyle(elemento);
-      return { cursor: estilo.cursor, cor: estilo.color, transformacao: estilo.transform, ponteiro: estilo.pointerEvents };
+  for (const url of ['/', '/projetos-sob-medida/']) {
+    test(`em ${url} a linha não tem seta, selo nem link`, async ({ page }) => {
+      await page.goto(url);
+      await expect(page.locator('.wo-tabela-modelos .wo-modelo')).toHaveCount(3);
+      await expect(page.locator('.wo-tabela-modelos svg')).toHaveCount(0);
+      await expect(page.locator('.wo-tabela-modelos .wo-selo')).toHaveCount(0);
+      await expect(page.locator('.wo-tabela-modelos a')).toHaveCount(0);
+      await expect(page.getByRole('link', { name: /Conversar sobre/ })).toHaveCount(0);
     });
-    const antes = await ler();
-    if (info.project.name === 'desktop') await seta.hover({ force: true });
-    expect(await ler()).toEqual(antes);
-    expect(antes.cursor).toBe('auto');
-  });
+  }
 
   test('os dois links da linha de baixo continuam', async ({ page }) => {
     await page.goto('/');

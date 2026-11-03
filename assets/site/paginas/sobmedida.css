@@ -63,7 +63,7 @@
    "Implementação" cabe na coluna dela. */
 @media (min-width: 1024px) {
   .wo-sobmedida-modelos .wo-modelo {
-    grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(0, 1fr)) auto;
+    grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(0, 1fr));
     gap: var(--wo-espaco-4);
   }
 }

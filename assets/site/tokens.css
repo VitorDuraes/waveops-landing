@@ -144,7 +144,10 @@
      cena e de peça, sombra dos cartões das cenas e fundo do painel de texto, que garante a
      leitura sobre a onda. */
   --wo-palco-abertura: 70vh;
-  --wo-palco-trecho: 130vh;
+  --wo-palco-trecho: 80vh;
+  /* O último capítulo é mais longo: depois dele vem uma seção que cobre o palco, e a cena final
+     precisa ficar inteira por um tempo antes do corte (revisão de 02/11/2026). */
+  --wo-palco-trecho-final: 130vh;
   --wo-palco-transicao: 240ms;
   --wo-sombra-palco: 0 24px 48px -24px rgb(22 19 15 / 0.25);
   --wo-palco-painel: rgb(10 10 10 / 0.72);
@@ -160,9 +163,6 @@
   --wo-cena-lead-alto: 68px;
   --wo-cena-lead-segundo: 136px;
   --wo-cena-metrica: 30px;
-  /* Vitrine do hero da Home: tempo de cada frente e troca. */
-  --wo-vitrine-tempo: 4.5s;
-  --wo-vitrine-troca: 480ms ease;
   /* Camada de leitura sobre o pôster e o vídeo da onda (spec 6.3): preto de 55% no alto a 70%
      embaixo, mais a vinheta nas bordas. */
   --wo-leitura-alto: rgb(0 0 0 / 0.55);

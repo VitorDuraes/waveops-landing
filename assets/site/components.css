@@ -847,13 +847,6 @@ html[data-topo='fixo'] .wo-topo {
   line-height: 1.625;
 }
 
-/* A seta é só desenho: svg com aria-hidden, fora de link, sem borda, sem cursor e sem hover que
-   sugiram um botão. */
-.wo-tabela-modelos__seta {
-  align-self: center;
-  color: var(--wo-acento-texto);
-}
-
 @media (min-width: 640px) {
   .wo-colunas-numeradas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .wo-definicoes__linha { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--wo-espaco-4); }
@@ -863,7 +856,7 @@ html[data-topo='fixo'] .wo-topo {
 
 @media (min-width: 1024px) {
   .wo-colunas-numeradas { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .wo-tabela-modelos .wo-modelo { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) auto; gap: var(--wo-espaco-5); }
+  .wo-tabela-modelos .wo-modelo { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--wo-espaco-5); }
 }
 
 /* ---------- Seletor (botões à esquerda, um painel por vez) ----------
@@ -1287,7 +1280,7 @@ html[data-topo='fixo'] .wo-topo {
 }
 
 /* Pausa das animações (15.3, adendo 2 da 13A): texto no rodapé, nome fixo e aria-pressed. Para o
-   fundo e a vitrine da Home; o fundo.js mostra quando há animação. */
+   fundo vivo; o fundo.js mostra quando há animação. */
 .wo-rodape__pausa {
   display: inline-flex;
   align-items: center;

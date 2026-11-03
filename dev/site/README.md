@@ -17,7 +17,6 @@ O site é estático, sem framework e sem dependência em produção. Cada págin
 | `assets/site/chegada.js` | Entrada do site, a decisão: script clássico no `head`, antes do CSS (ver "Entrada do site") |
 | `assets/site/chegada-cena.js` | Entrada do site, o desenho em canvas, pedido só quando a entrada roda |
 | `assets/site/paginas/home.js` | Cinco cenas montadas e desmontadas com a rolagem |
-| `assets/site/paginas/vitrine.js` | Vitrine do hero da Home: abas e troca automática das cinco frentes |
 | `assets/funil.js` | Medição de funil (SPEC-18) |
 
 ## Esqueleto de uma página

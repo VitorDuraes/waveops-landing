@@ -135,6 +135,38 @@ test.describe('palco no desktop', () => {
     expect((await lead.boundingBox())!.x).toBeCloseTo(antes!.x, 0);
   });
 
+  // Revisão de 02/11/2026: 720 vh de rolagem para cinco cenas cansava antes de "Como contratar".
+  test('o palco inteiro passa em até cinco telas e meia de rolagem', async ({ page }) => {
+    await page.goto('/');
+    const telas = await page.locator('[data-palco]').evaluate((secao) => secao.getBoundingClientRect().height / innerHeight);
+    expect(telas).toBeLessThanOrEqual(5.5);
+  });
+
+  /* Capítulos curtos não podem encurtar o fôlego da cena final: quando ela termina de montar, a seção
+     seguinte (que corta o palco ao subir) ainda está a mais de 100 px da base da cena. */
+  test('a última cena fica inteira por um tempo depois de montada', async ({ page }) => {
+    await page.goto('/');
+    await rolarProgresso(page, 'saas', 5.2 / 6);
+    await expect.poll(() => montadas(page, 'saas')).toBe(6);
+    const folga = await page.evaluate(() => {
+      const seguinte = document.querySelector('[data-palco] + section')!.getBoundingClientRect().top;
+      const cena = document.querySelector('[data-cena="saas"] .wo-home-cena__tela')!.getBoundingClientRect().bottom;
+      return seguinte - cena;
+    });
+    expect(folga).toBeGreaterThan(100);
+  });
+
+  test('quando o lead do site sai de Novo, o do WhatsApp sobe para o lugar dele', async ({ page }) => {
+    await page.goto('/');
+    await rolarProgresso(page, 'crms', 1.5 / 6);
+    await semTransicao(page);
+    const primeiraVaga = (await page.locator('.wo-home-demo__lead-movel').boundingBox())!.y;
+    expect((await page.locator('.wo-home-demo__lead-fixo').boundingBox())!.y).toBeGreaterThan(primeiraVaga + 8);
+    await rolarProgresso(page, 'crms', 1);
+    await semTransicao(page);
+    expect((await page.locator('.wo-home-demo__lead-fixo').boundingBox())!.y).toBeCloseTo(primeiraVaga, 0);
+  });
+
   test('o pedido do app chega ao sistema, volta atualizado e reverte ao subir', async ({ page }) => {
     await page.goto('/');
     const app = page.locator('.wo-apps__app');
@@ -596,6 +628,27 @@ test.describe('com menos movimento', () => {
     await expect(page.locator('[data-palco]')).not.toHaveAttribute('data-palco-modo');
     expect(await page.locator('[data-cena] [data-passo]').count()).toBeGreaterThanOrEqual(30);
     expect(await pecasApagadas(page)).toBe(0);
+  });
+
+  /* O estado final é o quadro que quem pede menos movimento vê: nada nele pode parecer pego no meio
+     da troca (revisão de 02/11/2026). */
+  test('o funil do CRM termina sem vaga vazia em Novo e diz qual venda foi ganha', async ({ page }) => {
+    await page.goto('/');
+    await quadro(page);
+    const movel = (await page.locator('.wo-home-demo__lead-movel').boundingBox())!;
+    const fixo = (await page.locator('.wo-home-demo__lead-fixo').boundingBox())!;
+    expect(fixo.y).toBeCloseTo(movel.y, 0);
+    await expect(page.locator('.wo-home-demo__ganho strong')).toHaveText('Lead do anúncio');
+  });
+
+  test('o painel de gestão destaca um número só', async ({ page }) => {
+    await page.goto('/');
+    await quadro(page);
+    const tamanhos = await page.locator('[data-cena="dashboards"] .wo-home-demo__indicadores strong')
+      .evaluateAll((numeros) => numeros.map((numero) => parseFloat(getComputedStyle(numero).fontSize)));
+    expect(tamanhos).toHaveLength(3);
+    const [destaque = 0, ...outros] = tamanhos;
+    for (const tamanho of outros) expect(destaque).toBeGreaterThanOrEqual(tamanho * 1.5);
   });
 
   test('os textos internos das quatro cenas mantêm contraste AA', async ({ page }, info) => {

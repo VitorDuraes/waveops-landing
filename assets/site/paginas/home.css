@@ -1,37 +1,16 @@
-/* WaveOps · peças que só a Home usa: a vitrine do hero, o hero, o palco das cinco frentes, o fundo
+/* WaveOps · peças que só a Home usa: o cartão do hero, o hero, o palco das cinco frentes, o fundo
    vivo escurecido durante os capítulos e as seções depois do palco. Depende de tokens.css e
    components.css. */
 
-/* ---------- Vitrine do hero (adendo 1 da 13A) ----------
-   Cinco mini interfaces empilhadas na mesma célula, com as peças das cenas do palco: o cartão tem a
-   altura da maior. A barra da aba da vez anima e, no fim, vitrine.js passa à próxima. Só corre com
-   a pausa do rodapé à mostra; para com ela apertada, ponteiro ou foco no cartão e aba oculta. */
-.wo-vitrine { padding: var(--wo-espaco-3); --wo-cena-grafico: var(--wo-espaco-6); }
-.wo-vitrine__abas { display: flex; gap: var(--wo-espaco-1); margin-bottom: var(--wo-espaco-1); }
-.wo-vitrine__aba { display: grid; flex: 1; align-content: center; gap: var(--wo-espaco-1); min-height: var(--wo-alvo); padding: 0; border: 0; background: none; color: var(--wo-tinta-3); font: 500 12px/1 var(--wo-fonte); font-variant-numeric: tabular-nums; text-align: left; cursor: pointer; }
-.wo-vitrine__aba:hover, .wo-vitrine__aba[aria-pressed='true'] { color: var(--wo-violeta-forte); }
-.wo-vitrine__aba i { height: 3px; overflow: hidden; border-radius: var(--wo-raio-pilula); background: var(--wo-linha); }
-.wo-vitrine__aba i::after { content: ''; display: block; height: 100%; background: var(--wo-violeta); transform: scaleX(0); transform-origin: left; }
-.wo-vitrine__aba:is([aria-pressed='true'], :has(~ [aria-pressed='true'])) i::after { transform: none; }
-:root:has([data-fundo-pausa]:not([hidden])) .wo-vitrine[data-pronto]:not([data-escolhida]) [aria-pressed='true'] i::after { animation: wo-vitrine-avanco var(--wo-vitrine-tempo) linear; animation-play-state: var(--wo-vitrine-estado, running); }
-:root:has([data-fundo-pausa][aria-pressed='true']) .wo-vitrine, .wo-vitrine:is(:hover, :focus-within, [data-oculta]) { --wo-vitrine-estado: paused; }
-@keyframes wo-vitrine-avanco { from { transform: scaleX(0); } }
-.wo-vitrine__paineis { display: grid; }
-.wo-vitrine__painel { display: flex; flex-direction: column; gap: var(--wo-espaco-2); grid-area: 1 / 1; transition: opacity var(--wo-vitrine-troca), transform var(--wo-vitrine-troca), visibility var(--wo-vitrine-troca); }
-.wo-vitrine__painel:not([data-ativo]) { visibility: hidden; opacity: 0; transform: translateY(var(--wo-espaco-1)); }
-.wo-vitrine__nome { font: 500 var(--wo-h3-cartao)/1.3 var(--wo-fonte-titulo); letter-spacing: -0.02em; }
-.wo-vitrine__tela { display: grid; flex: 1; align-content: start; gap: var(--wo-cena-respiro); padding: var(--wo-cena-respiro); border-radius: var(--wo-raio); background: var(--wo-papel-2); font-size: 13px; }
+/* ---------- Cartão do hero ----------
+   Um fluxo só, do lead à cobrança, com as peças das cenas do palco direto sobre o cartão claro.
+   Sem abas nem troca automática: as cinco frentes estão no palco logo abaixo, e o cartão não repete
+   nenhuma delas (revisão de 02/11/2026). As classes guardam o nome da antiga vitrine de abas. */
+.wo-vitrine { padding: var(--wo-espaco-3); }
+.wo-vitrine__tela { display: grid; gap: var(--wo-cena-respiro); font-size: 13px; }
 .wo-vitrine__tela .wo-home-cena__no-cabeca { flex-wrap: wrap; }
 .wo-vitrine__tela .wo-home-cena__no-cabeca + * { margin-top: var(--wo-espaco-1); }
 .wo-vitrine__tela > .wo-home-cena__cartao + .wo-home-cena__cartao::before { content: ''; position: absolute; bottom: 100%; left: 24px; height: var(--wo-cena-respiro); border-left: var(--wo-linha-forte) solid var(--wo-marca-claro); }
-.wo-vitrine__funil { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--wo-espaco-1); }
-.wo-vitrine__funil > div { display: grid; align-content: start; gap: var(--wo-espaco-1); min-height: 9em; padding: var(--wo-espaco-1); border-radius: var(--wo-raio); background: var(--wo-papel); }
-.wo-vitrine__funil .wo-home-cena__cartao { padding: var(--wo-espaco-1); }
-.wo-vitrine__funil .wo-home-demo__rotulo { margin: 0; }
-@media (max-width: 479.98px) { .wo-vitrine__funil { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-/* Celular: as abas deixam livre a coluna do botão de WhatsApp. */
-@media (max-width: 767.98px) { .wo-vitrine__abas { gap: var(--wo-espaco-miudo); margin-right: var(--wo-espaco-4); } }
-@media (prefers-reduced-motion: reduce) { .wo-vitrine i::after { animation: none !important; } }
 
 /* ---------- Fundo vivo durante o palco (spec 13.4 e 15.3) ----------
    O fundo (components.css) é o de toda página. Com um capítulo ativo, a onda escurece para 35%: o
@@ -566,6 +545,10 @@
   padding: 0;
 }
 
+[data-palco-modo='fundo'] .wo-home-capitulo:not(:has(~ .wo-home-capitulo)) {
+  min-height: var(--wo-palco-trecho-final);
+}
+
 /* justify-self volta a normal: centrada, a caixa fixa encolheria até a largura do conteúdo. */
 [data-palco-modo='fundo'] .wo-home-cena {
   position: fixed;
@@ -887,9 +870,7 @@
 .wo-home-demo__aprovado { background: var(--wo-papel); }
 .wo-home-demo__sucesso { color: var(--wo-sucesso-claro); background: var(--wo-palco-ok); border-color: transparent; }
 .wo-home-demo__sucesso::before { background: var(--wo-sucesso-claro); }
-.wo-home-demo__rascunho { display: grid; gap: var(--wo-espaco-1); margin-bottom: var(--wo-espaco-1); }
-.wo-home-demo__rascunho i { display: block; border-radius: var(--wo-raio); background: var(--wo-papel-2); height: var(--wo-espaco-1); }
-.wo-home-demo__rascunho i:last-child { width: 70%; }
+.wo-home-demo__rascunho { display: block; margin-bottom: var(--wo-espaco-1); font-weight: 600; }
 .wo-home-demo--agente .wo-home-cena__cartao { width: 80%; }
 .wo-home-demo--agente .wo-home-cena__cartao:nth-child(even) { justify-self: end; }
 .wo-home-demo--agente .wo-home-demo__aprovado { display: flex; align-items: center; justify-content: space-between; gap: var(--wo-espaco-1); }
@@ -906,8 +887,9 @@
 .wo-home-demo--painel > .wo-home-demo__indicadores,
 .wo-home-demo--painel > .wo-home-demo__origens { grid-column: 1 / -1; }
 .wo-home-demo__indicadores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--wo-cena-respiro); }
-.wo-home-demo__indicadores strong { font: 500 var(--wo-cena-metrica)/1 var(--wo-fonte-titulo); }
-.wo-home-demo__indicadores .wo-home-demo__rotulo { min-height: calc(2em * 1.4); }
+.wo-home-demo__indicadores strong { font: 500 calc(var(--wo-cena-metrica) * 0.6)/1 var(--wo-fonte-titulo); }
+.wo-home-demo__indicadores > :first-child strong { font-size: var(--wo-cena-metrica); }
+.wo-home-demo__indicadores > .wo-home-cena__cartao { display: flex; flex-direction: column; justify-content: space-between; }
 .wo-home-demo__barras { display: flex; align-items: end; gap: var(--wo-espaco-1); height: var(--wo-cena-grafico); border-bottom: var(--wo-linha-fina) solid var(--wo-linha); }
 .wo-home-demo__barras i { flex: 1; height: 45%; border-radius: var(--wo-raio) var(--wo-raio) 0 0; background: var(--wo-violeta); transform-origin: bottom; transition: transform var(--wo-palco-transicao) ease; }
 .wo-home-demo__barras i:nth-child(2n) { height: 70%; }
@@ -935,7 +917,7 @@
   left: var(--wo-cena-respiro); top: var(--wo-cena-lead-alto);
 }
 .wo-home-demo__lead-movel { z-index: 1; transform: translateX(calc(100% + var(--wo-cena-respiro) * 3)); transition: transform var(--wo-palco-transicao) ease; }
-.wo-home-demo__lead-fixo { top: var(--wo-cena-lead-segundo); }
+.wo-home-demo__lead-fixo { transition: transform var(--wo-palco-transicao) ease; }
 .wo-home-demo__qualificado { left: calc(50% + var(--wo-cena-respiro) / 2 + var(--wo-cena-respiro)); top: var(--wo-cena-lead-segundo); }
 .wo-home-demo__tarefa { top: calc(var(--wo-coluna-altura) + var(--wo-cena-respiro) + var(--wo-cena-lead-alto)); }
 .wo-home-demo__ganho { left: calc(50% + var(--wo-cena-respiro) / 2 + var(--wo-cena-respiro)); top: calc(var(--wo-coluna-altura) + var(--wo-cena-respiro) + var(--wo-cena-lead-alto)); }
@@ -943,6 +925,7 @@
 .wo-home-demo--crm .wo-home-demo__rotulo { margin-bottom: 0; }
 .wo-home-demo--crm .wo-home-cena__cartao { padding: var(--wo-espaco-1); }
 [data-palco-modo] .wo-home-demo--crm:not(:has([data-passo='3'][data-visivel])) .wo-home-demo__lead-movel { transform: none; }
+[data-palco-modo] .wo-home-demo--crm:not(:has([data-passo='3'][data-visivel])) .wo-home-demo__lead-fixo { transform: translateY(calc(var(--wo-cena-lead-segundo) - var(--wo-cena-lead-alto))); }
 
 /* Cena 5: um pedido, duas interfaces; sem o palco, o estado final. A letra compensa a escala do
    palco (--wo-palco-escala, de home.js) para ficar com 12 px ou mais na tela. Celular baixo: o app
@@ -1019,7 +1002,6 @@
   [data-palco-modo] .wo-home-demo--agente .wo-home-cena__cartao { width: 100%; padding: var(--wo-espaco-2); }
   [data-palco-modo] .wo-home-demo--agente .wo-home-cena__cartao:nth-child(even) { margin-top: var(--wo-espaco-4); }
   [data-palco-modo] .wo-home-demo--agente .wo-home-cena__cartao::before { display: none; }
-  [data-palco-modo] .wo-home-demo__indicadores .wo-home-demo__rotulo { min-height: 0; }
   [data-palco-modo] .wo-home-demo--crm { --wo-colunas: 4; --wo-coluna-altura: var(--wo-cena-coluna); --wo-cena-lead-alto: 68px; --wo-cena-lead-segundo: 136px; padding-top: var(--wo-espaco-4); }
   [data-palco-modo] .wo-home-demo--crm .wo-home-demo__leads { top: var(--wo-espaco-4); }
   [data-palco-modo] .wo-home-demo__qualificado { left: calc(25% + var(--wo-cena-respiro) * 1.25); top: calc(var(--wo-cena-lead-segundo) + var(--wo-espaco-4)); }

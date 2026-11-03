@@ -256,23 +256,35 @@ test('toda página entra em cascata: os blocos do hero numerados de 0 em diante,
   }
 });
 
-// Adendo 1 da 13A: o cartão do hero passa pelas cinco frentes. Tudo está no HTML; o JavaScript só troca
-// qual aparece. Sem aria-live: a troca automática não interrompe o leitor de tela.
-test('a vitrine do hero tem as cinco frentes no HTML, na ordem, com abas e o aviso', () => {
+// O cartão do hero conta a operação inteira, do lead à cobrança, num quadro só e parado. As cinco
+// frentes ficam no palco logo abaixo: o hero não repete nenhuma cena dele (revisão de 02/11/2026).
+test('o cartão do hero vai do lead à cobrança, sem abas e sem repetir o palco', () => {
   const html = ler('index.html');
-  const inicio = html.indexOf(' data-vitrine>');
+  const inicio = html.indexOf('class="wo-maquete wo-cartao-claro wo-vitrine"');
+  assert.ok(inicio > 0, 'a Home não tem o cartão do hero');
   const cartao = html.slice(inicio, html.indexOf('</figure>', inicio));
-  assert.ok(inicio > 0, 'a Home não tem a vitrine');
   assert.match(cartao, /class="wo-maquete__aviso">Fluxo ilustrativo</);
-  const nomes = [...cartao.matchAll(/class="wo-vitrine__nome">([^<]+)</g)].map((m) => m[1]);
-  assert.deepEqual(nomes, ['Automação de atendimento', 'Agentes de IA', 'Painéis de gestão', 'CRMs sob medida', 'Apps e sistemas']);
-  const abas = [...cartao.matchAll(/<button\b[^>]*aria-controls="([^"]+)"[^>]*>/g)];
-  assert.equal(abas.length, 5);
-  for (const [, id] of abas) assert.match(cartao, new RegExp(`id="${id}"`), `painel ${id}`);
-  assert.deepEqual(abas.map(([tag]) => /aria-pressed="true"/.test(tag)), [true, false, false, false, false]);
-  assert.equal((cartao.match(/\sdata-ativo\b/g) ?? []).length, 1, 'só o primeiro painel nasce ativo');
-  assert.match(cartao, /role="group"[^>]*data-sem-js-oculto/, 'as abas somem sem JavaScript');
-  assert.doesNotMatch(cartao, /aria-live/);
+  const nomes = [...cartao.matchAll(/class="wo-home-cena__nome">([^<]+)</g)].map((m) => m[1]);
+  assert.deepEqual(nomes, ['WhatsApp', 'CRM', 'Cobrança']);
+  assert.doesNotMatch(cartao, /<button\b/, 'o cartão não tem abas');
+  assert.doesNotMatch(html, /paginas\/vitrine\.js/, 'nenhum script troca o cartão sozinho');
+  const inicioPalco = html.indexOf(' data-palco>');
+  const palco = html.slice(inicioPalco, html.indexOf('</section>', inicioPalco));
+  const tela = cartao.slice(cartao.indexOf('class="wo-vitrine__tela"'));
+  const frases = [...tela.matchAll(/>([^<]+)</g)].map((m) => m[1].trim()).filter((frase) => frase.length >= 12);
+  assert.ok(frases.length >= 3, 'o cartão tem as frases do fluxo');
+  for (const frase of frases) assert.ok(!palco.includes(frase), `o palco já mostra "${frase}"`);
+});
+
+// Cena 2 do palco: o que o agente escreveu é o assunto da cena, então aparece em palavras, não em
+// barras de espera (revisão de 02/11/2026).
+test('o rascunho do agente de IA é texto de verdade', () => {
+  const html = ler('index.html');
+  const inicio = html.indexOf('data-cena="agentes"');
+  const cena = html.slice(inicio, html.indexOf('</figure>', inicio));
+  const cartao = /Rascunho do agente<\/span>([\s\S]*?)<span class="wo-home-cena__etiqueta/.exec(cena)?.[1] ?? '';
+  assert.doesNotMatch(cartao, /<i><\/i>/, 'barra de espera no lugar do texto');
+  assert.ok(textoDoTrecho(cartao).trim().length >= 20, 'o rascunho tem uma frase inteira');
 });
 
 test('na Home a cascata reúne selo, título, explicação e ações antes do visual', () => {

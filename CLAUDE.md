@@ -64,6 +64,7 @@ O build também põe `?v=<hash>` em todo CSS e JS de `/assets/`. O hash de um m�
 - Selo de situação muda de forma junto com a cor (círculo cheio, quadrado, círculo vazado), para não depender só de cor.
 - Fontes variáveis auto-hospedadas: Geist nos títulos e Inter no texto, pesos 400 a 700, recorte latino em `assets/fonts/*-variavel-latin.woff2`. Para refazer: `node dev/site/fontes.mjs`. Licenças OFL ao lado das fontes. Os arquivos antigos ficam preservados, sem carregar nas páginas.
 - Novo visual aprovado em 15/10/2026 e ampliado pela D20 em 16/10: contexto escuro na página inteira, onda fixa contínua, hero transparente, seções com `wo-veu` (72%) ou `wo-veu-forte` (84%). Creme só dentro de `wo-cartao-claro`. Texto comum exige 4,5:1 e grande 3:1, inclusive sobre o fundo.
+- Redesign de 05/11/2026 (skill Hallmark): o sistema travado está em `design.md` na raiz, e o carimbo fica no topo de `tokens.css`. h1 84 px e h2 52 px em 1440, botão de 48 px, contêiner de 1440 px. Nada de sobretítulo, selo de hero ou rótulo em caixa alta. Título tem uma cor só. Etapas numeradas por contador CSS. Cerca de 80 palavras por tela.
 - `wo-titulo-cartao` concentra Geist 18 px, peso 500, entreletra -0,02em e altura 1,55. O aviso de maquete usa Nota, Inter 14 px; o palco conserva o aviso compacto aprovado de 11 px.
 - Movimento: transições curtas e cascata finita do hero (500 ms, passo 70 ms), com a exceção da onda contínua. Menos movimento mostra o estado final de todas as cenas e o pôster, sem entrada nem vídeo.
 

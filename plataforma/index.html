@@ -11,15 +11,15 @@
     <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
     <script src="/assets/site/chegada.js?v=8069cdf9"></script>
     <link rel="preload" href="/assets/fonts/geist-variavel-latin.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="stylesheet" href="/assets/site/tokens.css?v=8bab5a4f" />
-    <link rel="stylesheet" href="/assets/site/base.css?v=801aee0a" />
-    <link rel="stylesheet" href="/assets/site/components.css?v=1c343ec5" />
+    <link rel="stylesheet" href="/assets/site/tokens.css?v=193a7990" />
+    <link rel="stylesheet" href="/assets/site/base.css?v=a4c378ee" />
+    <link rel="stylesheet" href="/assets/site/components.css?v=41ebe193" />
     <script defer src="/assets/funil.js?v=2842b2e3"></script>
     <script type="module" src="/assets/site/site.js?v=455a9806"></script>
     <script type="module" src="/assets/site/fundo.js?v=ded86ffb"></script>
     <noscript><style>.wo-topo{position:relative;background:var(--wo-noite)}[data-seletor] [data-painel]{display:block!important}[data-seletor] [data-opcoes],[data-sem-js-oculto]{display:none!important}@media (max-width:1180px){.wo-topo__painel[hidden]{display:flex!important}.wo-topo__menu{display:none!important}}</style></noscript>
     <!-- /parcial:head -->
-    <link rel="stylesheet" href="/assets/site/paginas/plataforma.css?v=dc5210d6" />
+    <link rel="stylesheet" href="/assets/site/paginas/plataforma.css?v=427a0f28" />
     <script type="module" src="/assets/site/interesse.js?v=cd4abeec"></script>
     <title>Plataforma em desenvolvimento · WaveOps</title>
     <meta name="description" content="Plataforma WaveOps: camada de integração, automação e gestão sobre os sistemas que a empresa já usa. Em desenvolvimento, sem contratação aberta." />
@@ -96,17 +96,27 @@
         <video class="wo-fundo__video" muted playsinline loop preload="none" disablepictureinpicture tabindex="-1" data-fundo-video></video>
       </div>
       <!-- /parcial:fundo -->
-      <section class="wo-abertura" id="lista" aria-labelledby="plataforma-titulo">
+      <section class="wo-abertura" aria-labelledby="plataforma-titulo">
         <div class="wo-conteiner wo-abertura__grade wo-plataforma-abertura">
           <div class="wo-abertura__texto">
             <div class="wo-cabeca-selo">
-              <span class="wo-etiqueta-hero" data-entrada="0">Plataforma WaveOps</span>
-              <span class="wo-plataforma-abertura__situacao" data-entrada="1"><span class="wo-selo wo-selo--desenvolvimento">Em desenvolvimento</span></span>
+              <span class="wo-plataforma-abertura__situacao" data-entrada="0"><span class="wo-selo wo-selo--desenvolvimento">Em desenvolvimento</span></span>
             </div>
-            <h1 class="wo-h1" id="plataforma-titulo" data-entrada="2"><span class="wo-linha">A operação inteira sob controle,</span> <span class="wo-linha wo-destaque">sem trocar os sistemas que você já usa.</span></h1>
-            <p class="wo-abertura__lead" data-entrada="3">Uma camada de inteligência, integração, automação e gestão que funciona sobre o que a sua empresa já tem. Cada organização recebe um workspace, com seus usuários e os módulos que contratar.</p>
+            <h1 class="wo-h1" id="plataforma-titulo" data-entrada="1"><span class="wo-linha">Operação sob controle,</span> <span class="wo-linha wo-destaque">sem trocar seus sistemas.</span></h1>
+            <p class="wo-abertura__lead" data-entrada="2">Uma camada de inteligência, integração, automação e gestão que funciona sobre o que a sua empresa já tem.</p>
+            <div class="wo-acoes" data-entrada="3">
+              <a class="wo-btn wo-btn--primario wo-btn--grande" href="#lista">Entrar na lista de interesse</a>
+            </div>
           </div>
-          <div class="wo-cartao-noite wo-plataforma-interesse" data-entrada="4">
+        </div>
+      </section>
+
+      <section class="wo-secao wo-veu-forte" id="lista" aria-label="Lista de interesse e workspace de exemplo">
+        <div class="wo-conteiner wo-abertura__grade wo-plataforma-abertura">
+          <div class="wo-plataforma-lista__texto">
+            <p class="wo-lead">Cada organização recebe um workspace, com seus usuários e os módulos que contratar.</p>
+          </div>
+          <div class="wo-cartao-noite wo-plataforma-interesse">
             <!-- parcial:form-interesse -->
             <div class="wo-form-interesse" data-form-interesse>
               <form class="wo-form" id="form-interesse" method="post" novalidate aria-label="Lista de interesse da Plataforma WaveOps" data-sem-js-oculto>
@@ -157,7 +167,7 @@
             </div>
             <!-- /parcial:form-interesse -->
           </div>
-          <div class="wo-plataforma-abertura__workspace" data-entrada="5">
+          <div class="wo-plataforma-abertura__workspace">
             <figure class="wo-maquete wo-cartao-claro wo-plataforma-workspace" aria-labelledby="plataforma-workspace-legenda">
               <figcaption class="wo-maquete__cabeca">
                 <span class="wo-maquete__titulo" id="plataforma-workspace-legenda">Workspace de exemplo</span>
@@ -201,8 +211,7 @@
       <section class="wo-secao wo-veu" aria-labelledby="encaixe-titulo">
         <div class="wo-conteiner wo-editorial">
           <div class="wo-editorial__cabeca">
-            <span class="wo-sobretitulo">Como se encaixa</span>
-            <h2 class="wo-h2" id="encaixe-titulo">Uma camada sobre o que a empresa já tem.</h2>
+            <h2 class="wo-h2" id="encaixe-titulo">Uma camada sobre seus sistemas.</h2>
             <p class="wo-lead">A plataforma não substitui ERP, CRM ou loja virtual. Ela se conecta a eles, executa as rotinas entre um e outro e mostra a operação em um lugar só.</p>
             <ul class="wo-lista-check wo-lista-check--espacada wo-plataforma-checks" role="list">
               <li><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5" /></svg><span>Você mantém os sistemas e os dados onde já estão</span></li>
@@ -260,10 +269,9 @@
         <div class="wo-conteiner wo-editorial">
           <div class="wo-editorial__cabeca">
             <div class="wo-cabeca-selo">
-              <span class="wo-sobretitulo">Núcleo da plataforma</span>
               <span class="wo-selo wo-selo--desenvolvimento">Em desenvolvimento</span>
             </div>
-            <h2 class="wo-h2" id="nucleo-titulo">Segurança e acesso vêm no núcleo, não em um módulo à parte.</h2>
+            <h2 class="wo-h2" id="nucleo-titulo">Segurança e acesso no núcleo.</h2>
             <p class="wo-lead">Toda organização recebe o núcleo, seja qual for o conjunto de módulos. Ele responde por separar as empresas, controlar quem entra e registrar o que acontece.</p>
           </div>
           <div class="wo-editorial__corpo">
@@ -282,15 +290,14 @@
 
       <section class="wo-secao wo-veu" aria-labelledby="experiencia-titulo">
         <div class="wo-conteiner">
-          <span class="wo-sobretitulo">Experiência de uso</span>
-          <h2 class="wo-h2" id="experiencia-titulo">Como vai ser usar no dia a dia.</h2>
+          <h2 class="wo-h2" id="experiencia-titulo">O uso no dia a dia.</h2>
           <p class="wo-lead">Quatro telas resumem a rotina. São conceitos de interface, com valores de exemplo, e podem mudar até a versão final.</p>
           <div class="wo-seletor wo-plataforma-seletor" data-seletor>
             <div class="wo-seletor__opcoes wo-plataforma-tela__opcoes" role="group" aria-label="Telas da plataforma" data-opcoes>
-              <button class="wo-seletor__opcao wo-plataforma-tela__opcao" type="button" data-opcao="0" aria-pressed="true" aria-controls="tela-visao-geral"><span class="wo-plataforma-tela__titulo wo-plataforma-titulo-cartao wo-titulo-cartao">Visão geral</span><span class="wo-plataforma-tela__descricao">O que rodou hoje e o que precisa de você.</span></button>
-              <button class="wo-seletor__opcao wo-plataforma-tela__opcao" type="button" data-opcao="1" aria-pressed="false" aria-controls="tela-automacoes"><span class="wo-plataforma-tela__titulo wo-plataforma-titulo-cartao wo-titulo-cartao">Automações</span><span class="wo-plataforma-tela__descricao">Ative um modelo pronto e acompanhe cada execução.</span></button>
-              <button class="wo-seletor__opcao wo-plataforma-tela__opcao" type="button" data-opcao="2" aria-pressed="false" aria-controls="tela-integracoes"><span class="wo-plataforma-tela__titulo wo-plataforma-titulo-cartao wo-titulo-cartao">Integrações</span><span class="wo-plataforma-tela__descricao">A saúde de cada conexão, com aviso quando algo cai.</span></button>
-              <button class="wo-seletor__opcao wo-plataforma-tela__opcao" type="button" data-opcao="3" aria-pressed="false" aria-controls="tela-modulos"><span class="wo-plataforma-tela__titulo wo-plataforma-titulo-cartao wo-titulo-cartao">Módulos</span><span class="wo-plataforma-tela__descricao">O que está contratado e o que ainda vem.</span></button>
+              <button class="wo-seletor__opcao wo-plataforma-tela__opcao" type="button" data-opcao="0" aria-pressed="true" aria-controls="tela-visao-geral"><span class="wo-plataforma-tela__titulo wo-plataforma-titulo-cartao wo-titulo-cartao">Visão geral</span></button>
+              <button class="wo-seletor__opcao wo-plataforma-tela__opcao" type="button" data-opcao="1" aria-pressed="false" aria-controls="tela-automacoes"><span class="wo-plataforma-tela__titulo wo-plataforma-titulo-cartao wo-titulo-cartao">Automações</span></button>
+              <button class="wo-seletor__opcao wo-plataforma-tela__opcao" type="button" data-opcao="2" aria-pressed="false" aria-controls="tela-integracoes"><span class="wo-plataforma-tela__titulo wo-plataforma-titulo-cartao wo-titulo-cartao">Integrações</span></button>
+              <button class="wo-seletor__opcao wo-plataforma-tela__opcao" type="button" data-opcao="3" aria-pressed="false" aria-controls="tela-modulos"><span class="wo-plataforma-tela__titulo wo-plataforma-titulo-cartao wo-titulo-cartao">Módulos</span></button>
             </div>
             <div class="wo-seletor__paineis wo-maquete wo-cartao-claro wo-plataforma-tela">
               <div class="wo-maquete__cabeca">
@@ -343,9 +350,8 @@
 
       <section class="wo-secao wo-veu-forte" id="modulos" aria-labelledby="modulos-titulo">
         <div class="wo-conteiner">
-          <span class="wo-sobretitulo">Módulos</span>
-          <h2 class="wo-h2" id="modulos-titulo"><span class="wo-linha">Módulos para cada área do negócio.</span> <span class="wo-linha">Cada um com a situação real.</span></h2>
-          <p class="wo-lead">A visão de longo prazo cobre a operação inteira, do comercial ao financeiro. Nenhum módulo está à venda ainda, e os planejados dependem do que os primeiros clientes validarem.</p>
+          <h2 class="wo-h2" id="modulos-titulo"><span class="wo-linha">Cada módulo com a situação real.</span></h2>
+          <p class="wo-lead">A visão cobre a operação inteira, do comercial ao financeiro. Nenhum módulo está à venda, e os planejados dependem da validação dos primeiros clientes.</p>
           <div class="wo-plataforma-situacoes">
             <div class="wo-plataforma-situacao">
               <div class="wo-plataforma-situacao__cabeca">
@@ -354,7 +360,7 @@
               </div>
               <div class="wo-plataforma-vazio">
                 <p class="wo-plataforma-vazio__titulo wo-plataforma-titulo-cartao wo-titulo-cartao">Nenhum módulo aberto para contratação ainda.</p>
-                <p class="wo-plataforma-vazio__texto">Precisa disso agora? As mesmas soluções podem ser construídas hoje como projeto sob medida.</p>
+                <p class="wo-plataforma-vazio__texto">As mesmas soluções podem ser construídas hoje como projeto sob medida.</p>
                 <a class="wo-link-seta" href="/projetos-sob-medida/">Ver projetos sob medida<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
               </div>
             </div>
@@ -366,23 +372,23 @@
               <ul class="wo-plataforma-modulos" role="list" aria-labelledby="modulos-desenvolvimento">
                 <li>
                   <div class="wo-plataforma-modulo__cabeca"><h3 class="wo-plataforma-modulo__nome wo-plataforma-titulo-cartao wo-titulo-cartao">Painel operacional</h3><span class="wo-plataforma-modulo__area">Gestão</span></div>
-                  <p class="wo-plataforma-modulo__texto">Indicadores, alertas, atividade recente e resumo dos processos.</p>
+                  <p class="wo-plataforma-modulo__texto">Indicadores, alertas e atividade recente.</p>
                 </li>
                 <li>
                   <div class="wo-plataforma-modulo__cabeca"><h3 class="wo-plataforma-modulo__nome wo-plataforma-titulo-cartao wo-titulo-cartao">Automações por modelo</h3><span class="wo-plataforma-modulo__area">Automação</span></div>
-                  <p class="wo-plataforma-modulo__texto">Catálogo de modelos prontos para ativar, com status e histórico.</p>
+                  <p class="wo-plataforma-modulo__texto">Modelos prontos para ativar, com status e histórico.</p>
                 </li>
                 <li>
                   <div class="wo-plataforma-modulo__cabeca"><h3 class="wo-plataforma-modulo__nome wo-plataforma-titulo-cartao wo-titulo-cartao">Execuções e alertas</h3><span class="wo-plataforma-modulo__area">Automação</span></div>
-                  <p class="wo-plataforma-modulo__texto">Histórico de cada execução, com diagnóstico quando algo falha.</p>
+                  <p class="wo-plataforma-modulo__texto">Histórico de cada execução e diagnóstico de falha.</p>
                 </li>
                 <li>
                   <div class="wo-plataforma-modulo__cabeca"><h3 class="wo-plataforma-modulo__nome wo-plataforma-titulo-cartao wo-titulo-cartao">Integrações</h3><span class="wo-plataforma-modulo__area">Integração</span></div>
-                  <p class="wo-plataforma-modulo__texto">Sistemas conectados, autenticação e saúde de cada conexão.</p>
+                  <p class="wo-plataforma-modulo__texto">Sistemas conectados e saúde de cada conexão.</p>
                 </li>
                 <li>
                   <div class="wo-plataforma-modulo__cabeca"><h3 class="wo-plataforma-modulo__nome wo-plataforma-titulo-cartao wo-titulo-cartao">Gestão comercial</h3><span class="wo-plataforma-modulo__area">Comercial</span></div>
-                  <p class="wo-plataforma-modulo__texto">Funil de vendas, clientes e atividades de acompanhamento.</p>
+                  <p class="wo-plataforma-modulo__texto">Funil de vendas, clientes e atividades.</p>
                 </li>
               </ul>
             </div>
@@ -393,23 +399,23 @@
               </div>
               <ul class="wo-plataforma-modulos" role="list" aria-labelledby="modulos-planejado">
                 <li>
-                  <div class="wo-plataforma-modulo__cabeca"><h3 class="wo-plataforma-modulo__nome wo-plataforma-titulo-cartao wo-titulo-cartao">Atendimento</h3><span class="wo-plataforma-modulo__area">Atendimento</span></div>
-                  <p class="wo-plataforma-modulo__texto">Chamados, histórico do cliente e prazos de resposta.</p>
+                  <div class="wo-plataforma-modulo__cabeca"><h3 class="wo-plataforma-modulo__nome wo-plataforma-titulo-cartao wo-titulo-cartao">Atendimento</h3></div>
+                  <p class="wo-plataforma-modulo__texto">Chamados, histórico do cliente e prazos.</p>
                 </li>
                 <li>
                   <div class="wo-plataforma-modulo__cabeca"><h3 class="wo-plataforma-modulo__nome wo-plataforma-titulo-cartao wo-titulo-cartao">Agentes de IA</h3><span class="wo-plataforma-modulo__area">Inteligência</span></div>
-                  <p class="wo-plataforma-modulo__texto">Agentes ativos, funções, permissões, revisões e consumo.</p>
+                  <p class="wo-plataforma-modulo__texto">Funções, permissões, revisões e consumo.</p>
                 </li>
                 <li>
                   <div class="wo-plataforma-modulo__cabeca"><h3 class="wo-plataforma-modulo__nome wo-plataforma-titulo-cartao wo-titulo-cartao">Processos e tarefas</h3><span class="wo-plataforma-modulo__area">Operações</span></div>
-                  <p class="wo-plataforma-modulo__texto">Fluxos internos com responsável, etapa e prazo.</p>
+                  <p class="wo-plataforma-modulo__texto">Fluxos com responsável, etapa e prazo.</p>
                 </li>
                 <li>
-                  <div class="wo-plataforma-modulo__cabeca"><h3 class="wo-plataforma-modulo__nome wo-plataforma-titulo-cartao wo-titulo-cartao">Financeiro</h3><span class="wo-plataforma-modulo__area">Financeiro</span></div>
+                  <div class="wo-plataforma-modulo__cabeca"><h3 class="wo-plataforma-modulo__nome wo-plataforma-titulo-cartao wo-titulo-cartao">Financeiro</h3></div>
                   <p class="wo-plataforma-modulo__texto">Cobranças, pagamentos e conciliação.</p>
                 </li>
                 <li>
-                  <div class="wo-plataforma-modulo__cabeca"><h3 class="wo-plataforma-modulo__nome wo-plataforma-titulo-cartao wo-titulo-cartao">Marketing</h3><span class="wo-plataforma-modulo__area">Marketing</span></div>
+                  <div class="wo-plataforma-modulo__cabeca"><h3 class="wo-plataforma-modulo__nome wo-plataforma-titulo-cartao wo-titulo-cartao">Marketing</h3></div>
                   <p class="wo-plataforma-modulo__texto">Campanhas, indicadores e origem dos resultados.</p>
                 </li>
                 <li>
@@ -424,7 +430,6 @@
 
       <section class="wo-secao wo-veu" aria-labelledby="caso-titulo">
         <div class="wo-conteiner">
-          <span class="wo-sobretitulo">Qual é o seu caso</span>
           <h2 class="wo-h2" id="caso-titulo">Plataforma ou projeto sob medida?</h2>
           <p class="wo-lead">A plataforma só incorpora o que serve a muitas empresas. O que é só seu continua sob medida.</p>
           <div class="wo-plataforma-tabela">
@@ -450,31 +455,26 @@
 
       <section class="wo-secao wo-veu-forte" aria-labelledby="assinatura-titulo">
         <div class="wo-conteiner">
-          <span class="wo-sobretitulo">Como será a assinatura</span>
           <h2 class="wo-h2" id="assinatura-titulo">Regras claras antes de existir preço.</h2>
-          <p class="wo-lead">Planos e valores ainda estão em definição. Estes são os princípios que orientam a oferta.</p>
+          <p class="wo-lead">Planos e valores ainda estão em definição.</p>
           <ol class="wo-colunas-numeradas" role="list" aria-labelledby="assinatura-titulo">
             <li class="wo-colunas-numeradas__item">
-              <span class="wo-colunas-numeradas__numero" aria-hidden="true">01</span>
               <div><h3>Limites descritos em cada plano</h3><p class="wo-plataforma-principio__texto">Usuários, execuções e integrações com número definido, visível antes de contratar.</p></div>
             </li>
             <li class="wo-colunas-numeradas__item">
-              <span class="wo-colunas-numeradas__numero" aria-hidden="true">02</span>
               <div><h3>Custo variável informado antes</h3><p class="wo-plataforma-principio__texto">Consumo de IA e de mensagens aparece no painel e na contratação, não só na fatura.</p></div>
             </li>
             <li class="wo-colunas-numeradas__item">
-              <span class="wo-colunas-numeradas__numero" aria-hidden="true">03</span>
               <div><h3>Confirmação antes de qualquer adicional</h3><p class="wo-plataforma-principio__texto">Um módulo novo mostra valor, dependências e se precisa de implantação.</p></div>
             </li>
             <li class="wo-colunas-numeradas__item">
-              <span class="wo-colunas-numeradas__numero" aria-hidden="true">04</span>
               <div><h3>Planejado não é pronto</h3><p class="wo-plataforma-principio__texto">Módulo em desenvolvimento aparece marcado assim, no site e dentro do produto.</p></div>
             </li>
           </ol>
           <div class="wo-cartao-noite wo-plataforma-aviso">
             <div class="wo-plataforma-aviso__texto">
               <h2 class="wo-h2 wo-plataforma-aviso__titulo">Quer ser avisado quando abrir?</h2>
-              <p class="wo-plataforma-aviso__lead">Entre na lista de interesse. Se o seu caso não pode esperar, a gente entrega sob medida agora.</p>
+              <p class="wo-plataforma-aviso__lead">Se o seu caso não pode esperar, a gente entrega sob medida agora.</p>
             </div>
             <div class="wo-acoes">
               <a class="wo-btn wo-btn--primario" href="#lista">Entrar na lista de interesse<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
@@ -504,17 +504,8 @@
         </div>
         <div class="wo-rodape__grade">
           <div class="wo-rodape__marca">
-            <p class="wo-rodape__descricao">Automação e sistemas para a operação de quem vende: atendimento, agentes de IA, painéis de gestão, CRMs sob medida e apps.</p>
             <a href="https://www.linkedin.com/company/waveops" rel="noopener">LinkedIn</a>
           </div>
-          <nav class="wo-rodape__coluna wo-rodape__coluna--solucoes" aria-labelledby="rodape-solucoes">
-            <h2 class="wo-rodape__titulo" id="rodape-solucoes">Soluções</h2>
-            <a href="/solucoes/#vender">Vender mais</a>
-            <a href="/solucoes/#atender">Atender melhor</a>
-            <a href="/solucoes/#operar">Operar com menos retrabalho</a>
-            <a href="/solucoes/#decidir">Decidir com dados</a>
-            <a href="/solucoes/#crescer">Crescer com segurança</a>
-          </nav>
           <nav class="wo-rodape__coluna wo-rodape__coluna--sobmedida" aria-labelledby="rodape-sobmedida">
             <h2 class="wo-rodape__titulo" id="rodape-sobmedida">Projetos sob medida</h2>
             <a href="/projetos-sob-medida/#atendimento">Automação de atendimento</a>
@@ -531,6 +522,7 @@
           </nav>
           <nav class="wo-rodape__coluna wo-rodape__coluna--empresa" aria-labelledby="rodape-empresa">
             <h2 class="wo-rodape__titulo" id="rodape-empresa">Empresa</h2>
+            <a href="/solucoes/">Soluções</a>
             <a href="/demonstracoes-tecnicas/">Demonstrações técnicas</a>
             <a href="/contato/">Falar com especialista</a>
             <a href="https://wa.me/5534991775784?text=Ol%C3%A1%2C%20WaveOps.%20Vim%20pelo%20site." data-whatsapp="rodape">WhatsApp</a>
@@ -538,7 +530,7 @@
           </nav>
         </div>
         <div class="wo-rodape__base">
-          <p>WaveOps · CNPJ 64.572.784/0001-05 · Uberlândia, MG</p>
+          <p>WaveOps, CNPJ 64.572.784/0001-05<br />Uberlândia, MG</p>
           <p>© 2026 WaveOps. Todos os direitos reservados.</p>
           <button class="wo-rodape__pausa" type="button" aria-pressed="false" hidden data-fundo-pausa><svg width="1em" height="1em" class="wo-rodape__icone-pausa" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M6 4h4v16H6zM14 4h4v16h-4z" /></svg><svg width="1em" height="1em" class="wo-rodape__icone-tocar" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="m7 4 13 8-13 8z" /></svg>Pausar animação</button>
         </div>

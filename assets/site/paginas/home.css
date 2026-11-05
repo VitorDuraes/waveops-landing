@@ -1,16 +1,6 @@
-/* WaveOps · peças que só a Home usa: o cartão do hero, o hero, o palco das cinco frentes, o fundo
+/* WaveOps · peças que só a Home usa: o hero, o palco das cinco frentes, o fundo
    vivo escurecido durante os capítulos e as seções depois do palco. Depende de tokens.css e
    components.css. */
-
-/* ---------- Cartão do hero ----------
-   Um fluxo só, do lead à cobrança, com as peças das cenas do palco direto sobre o cartão claro.
-   Sem abas nem troca automática: as cinco frentes estão no palco logo abaixo, e o cartão não repete
-   nenhuma delas (revisão de 02/11/2026). As classes guardam o nome da antiga vitrine de abas. */
-.wo-vitrine { padding: var(--wo-espaco-3); }
-.wo-vitrine__tela { display: grid; gap: var(--wo-cena-respiro); font-size: 13px; }
-.wo-vitrine__tela .wo-home-cena__no-cabeca { flex-wrap: wrap; }
-.wo-vitrine__tela .wo-home-cena__no-cabeca + * { margin-top: var(--wo-espaco-1); }
-.wo-vitrine__tela > .wo-home-cena__cartao + .wo-home-cena__cartao::before { content: ''; position: absolute; bottom: 100%; left: 24px; height: var(--wo-cena-respiro); border-left: var(--wo-linha-forte) solid var(--wo-marca-claro); }
 
 /* ---------- Fundo vivo durante o palco (spec 13.4 e 15.3) ----------
    O fundo (components.css) é o de toda página. Com um capítulo ativo, a onda escurece para 35%: o
@@ -21,68 +11,44 @@
   opacity: 0.35;
 }
 
-/* Hero transparente: a onda do fundo fixo aparece com o brilho inteiro entre as peças. O texto
-   secundário usa o token de texto sobre o vídeo; o cartão claro guarda o contexto de papel. */
+/* Hero em pôster (redesign de 05/11/2026): a onda do fundo fixo é a imagem inteira, e o texto
+   assenta embaixo e à esquerda, na parte calma dela. Sem cartão ao lado: as cinco cenas do produto
+   vêm logo abaixo, no palco. Título, uma frase e duas ações, nada mais. */
 .wo-home-hero {
   position: relative;
-  min-height: 100svh;
-  padding: calc(var(--wo-topo-altura) + var(--wo-espaco-5)) 0 var(--wo-espaco-6);
+  display: flex;
+  align-items: flex-end;
+  min-height: 92svh;
+  padding: calc(var(--wo-topo-altura) + var(--wo-espaco-6)) 0 var(--wo-espaco-6);
   --wo-texto-2: var(--wo-hero-texto-secundario);
   --wo-texto-3: var(--wo-hero-texto-secundario);
 }
 
-.wo-home-hero__frase {
-  max-width: var(--wo-hero-frase-largura);
-  font-size: var(--wo-lead-hero);
-  font-weight: 400;
-  line-height: 1.6;
+.wo-home-hero > .wo-conteiner {
+  flex: 1;
 }
 
-.wo-home-hero__grade {
+.wo-home-hero__texto {
   display: grid;
-  gap: var(--wo-espaco-5);
-  min-height: calc(100svh - var(--wo-topo-altura) - var(--wo-espaco-5) - var(--wo-espaco-6));
-  align-items: center;
+  justify-items: start;
+  gap: var(--wo-espaco-3);
+  max-width: 980px;
 }
 
 .wo-home-hero__texto h1 {
-  margin: var(--wo-espaco-3) 0 var(--wo-espaco-3);
+  max-width: 16ch;
+}
+
+.wo-home-hero__frase {
+  max-width: 44ch;
+  font-size: var(--wo-lead-hero);
+  font-weight: 400;
+  line-height: 1.5;
   text-wrap: pretty;
 }
 
 .wo-home-hero__texto .wo-acoes {
-  margin-top: var(--wo-espaco-4);
-}
-
-.wo-home-hero__texto .wo-etiqueta-hero {
-  border-radius: 0;
-  border: 0;
-  border-left: var(--wo-linha-forte) solid var(--wo-clara);
-  background: var(--wo-hero-controle);
-}
-
-.wo-home-hero__texto .wo-etiqueta-hero::before {
-  display: none;
-}
-
-.wo-home-hero__texto .wo-nota-mono {
   margin-top: var(--wo-espaco-2);
-  font-size: var(--wo-texto-pequeno);
-  line-height: 1.45;
-}
-
-@media (min-width: 1024px) {
-  .wo-home-hero__grade {
-    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-    gap: var(--wo-espaco-4);
-  }
-}
-
-/* A nota reserva o canto do WhatsApp mesmo quando coincide com o fim da janela. */
-@media (max-width: 1023.98px) {
-  .wo-home-hero__texto .wo-nota-mono {
-    max-width: calc(100% - var(--wo-flutuante-respiro));
-  }
 }
 
 /* No celular, o controlador oculta o WhatsApp enquanto seu canto está ocupado pelo painel. */
@@ -189,6 +155,7 @@
 .wo-home-painel__etiquetas {
   display: flex;
   flex-wrap: wrap;
+  gap: var(--wo-espaco-miudo) var(--wo-espaco-2);
   grid-column: 1 / -1;
   margin-top: 10px;
   color: var(--wo-clara-2);
@@ -196,13 +163,6 @@
   line-height: 1.45;
 }
 
-/* Ponto médio entre as etiquetas, fora do que o leitor de tela lê. Fica no fim da etiqueta,
-   para a linha que quebra no celular não começar com o ponto. */
-.wo-home-painel__etiquetas li:not(:last-child)::after {
-  content: '·';
-  content: '·' / '';
-  margin: 0 8px;
-}
 
 /* ---------- Cena ----------
    Um figure com o título e o aviso de ilustração no canto, em texto claro, e a tela desenhada:
@@ -240,9 +200,8 @@
   color: var(--wo-hero-texto-secundario);
   font-size: 12px;
   font-weight: 500;
-  letter-spacing: 0.15em;
   line-height: 1.35;
-  text-transform: uppercase;
+
 }
 
 .wo-home-cena__cabeca .wo-maquete__aviso {
@@ -411,9 +370,8 @@
   color: var(--wo-tinta-3);
   font-size: 12px;
   font-weight: 500;
-  letter-spacing: 0.15em;
   line-height: 1.35;
-  text-transform: uppercase;
+
 }
 
 .wo-home-cena__registro .wo-home-cena__itens {
@@ -980,7 +938,7 @@
 }
 @media (min-width: 1024px) {
   .wo-home-cena--saas { max-width: none; }
-  .wo-apps { --wo-apps-letra: 13px; grid-template-columns: 236px auto minmax(0, 1fr); align-items: center; margin-top: var(--wo-cena-inicio); }
+  .wo-apps { --wo-apps-letra: max(13px, calc(12.2px / var(--wo-palco-escala, 1))); grid-template-columns: 236px auto minmax(0, 1fr); align-items: center; margin-top: var(--wo-cena-inicio); }
   .wo-apps__app { padding: var(--wo-espaco-2); }
   .wo-apps__conexao svg { transform: rotate(180deg); }
   [data-palco-modo] .wo-apps:not(:has([data-passo='6'][data-visivel])) .wo-apps__conexao svg { transform: none; }

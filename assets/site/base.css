@@ -31,6 +31,7 @@
    a rolagem até a âncora acontece antes do JavaScript. Embaixo, o mesmo vale para o botão
    flutuante de WhatsApp (spec 5.4): rolar até um alvo o deixa acima do botão. */
 html {
+  overflow-x: clip;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   scroll-padding-top: calc(var(--wo-topo-altura) + 16px);
@@ -106,7 +107,7 @@ a:hover {
 }
 
 ::selection {
-  background: rgba(162, 139, 249, 0.35);
+  background: var(--wo-selecao);
   color: var(--wo-texto);
 }
 
@@ -226,6 +227,13 @@ h2,
   font-weight: 600;
   letter-spacing: -0.035em;
   line-height: 1.05;
+  overflow-wrap: break-word;
+  min-width: 0;
+  font-synthesis: none;
+}
+
+h3 {
+  text-wrap: balance;
 }
 
 .wo-h1 {
@@ -235,7 +243,7 @@ h2,
 
 .wo-h2 {
   margin-top: 16px;
-  max-width: 900px;
+  max-width: 24ch;
   font-size: var(--wo-h2);
   text-wrap: balance;
 }
@@ -246,7 +254,7 @@ h2,
 }
 
 .wo-h2--menor {
-  margin-top: 14px;
+  margin-top: 16px;
   font-size: var(--wo-h2);
 }
 
@@ -259,11 +267,12 @@ h2,
 }
 
 /* "Texto" de 5.2: Inter de 16 px, altura 1,625. */
+/* Linha de apoio sob o título de seção, a 21 px em 1440. */
 .wo-lead {
-  margin-top: 18px;
-  max-width: 640px;
-  font-size: var(--wo-texto-corpo);
-  line-height: 1.625;
+  margin-top: 24px;
+  max-width: 52ch;
+  font-size: var(--wo-lead-hero);
+  line-height: 1.5;
   color: var(--wo-texto-3);
   text-wrap: pretty;
 }

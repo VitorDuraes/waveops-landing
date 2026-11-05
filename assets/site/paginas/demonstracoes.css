@@ -1,13 +1,6 @@
 /* WaveOps · Demonstrações técnicas. Abertura, véus, definições e colunas numeradas
    reutilizam as peças compartilhadas. Aqui ficam a ficha D19 e o filtro por frente. */
 
-.wo-demonstracoes-abertura__rotulos {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--wo-espaco-2) var(--wo-espaco-3);
-}
-
 .wo-demonstracoes-aviso {
   max-width: var(--wo-demonstracoes-aviso-largura);
   margin-top: var(--wo-espaco-4);
@@ -54,26 +47,12 @@
   margin-top: var(--wo-espaco-5);
 }
 
-.wo-demonstracoes-selo {
-  display: inline-block;
-  padding: var(--wo-espaco-1) var(--wo-espaco-2);
-  border: var(--wo-linha-fina) solid var(--wo-borda-forte);
-  border-radius: var(--wo-raio-pilula);
-  color: var(--wo-texto-3);
-  font-size: var(--wo-texto-pequeno);
-  line-height: 1.45;
-}
-
-.wo-demonstracoes-titulo {
-  margin-top: var(--wo-espaco-3);
-}
-
 .wo-demonstracoes-passos {
   margin-top: 0;
 }
 
 .wo-demonstracoes-fecho {
-  padding: var(--wo-espaco-5) 0;
+  padding: var(--wo-secao) 0;
   color: var(--wo-texto-2);
 }
 

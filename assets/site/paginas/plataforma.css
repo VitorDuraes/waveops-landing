@@ -55,6 +55,14 @@
   margin-top: 0;
 }
 
+/* Em celular o botão de 48 px com texto de 15 px passou da faixa do WhatsApp flutuante (288 px em 360):
+   o cartão ganha um respiro menor e o envio termina antes dela. */
+@media (max-width: 767px) {
+  .wo-plataforma-interesse.wo-cartao-noite {
+    padding: var(--wo-espaco-3);
+  }
+}
+
 /* Botão de 5.4 (40 px, 44 px abaixo de 768 px): os 52 px eram para dividir a linha com o campo. */
 .wo-plataforma-interesse .wo-btn--grande {
   min-height: var(--wo-btn-altura);
@@ -191,9 +199,8 @@
   color: var(--wo-texto-3);
   font-size: var(--wo-etiqueta-tamanho);
   font-weight: 500;
-  letter-spacing: var(--wo-etiqueta-entreletra);
   line-height: 1.35;
-  text-transform: uppercase;
+
 }
 
 .wo-plataforma-workspace__grupo--seguinte {
@@ -421,12 +428,13 @@ ul.wo-plataforma-checks {
   flex-basis: var(--wo-plataforma-opcoes-largura);
 }
 
+/* Opção do seletor com só o nome da tela: um controle de 48 px (redesign de 05/11/2026). */
 .wo-plataforma-tela__opcao {
-  flex-direction: column;
-  align-items: flex-start;
+  flex-direction: row;
+  align-items: center;
   justify-content: flex-start;
-  gap: var(--wo-espaco-miudo);
-  padding: var(--wo-espaco-2) var(--wo-espaco-3);
+  min-height: var(--wo-btn-altura);
+  padding: 0 var(--wo-espaco-3);
   background: var(--wo-superficie);
 }
 
@@ -436,13 +444,6 @@ ul.wo-plataforma-checks {
   background: linear-gradient(var(--wo-acento-fundo), var(--wo-acento-fundo)), var(--wo-superficie);
 }
 
-.wo-plataforma-tela__descricao {
-  color: var(--wo-texto-3);
-  font-size: var(--wo-texto-pequeno);
-  font-weight: 400;
-  line-height: 1.45;
-  text-wrap: pretty;
-}
 
 .wo-plataforma-tela {
   flex: 2 1 var(--wo-plataforma-tela-largura);
@@ -668,9 +669,8 @@ ul.wo-plataforma-checks {
   font-weight: 500;
   font-family: var(--wo-fonte);
   font-size: var(--wo-etiqueta-tamanho);
-  letter-spacing: var(--wo-etiqueta-entreletra);
   line-height: 1.35;
-  text-transform: uppercase;
+
 }
 
 .wo-plataforma-cmp tbody th {
@@ -833,3 +833,10 @@ ul.wo-plataforma-checks {
     grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
   }
 }
+
+/* ---------- Lista de interesse (seção logo após a abertura) ----------
+   O texto e o cartão dividem a primeira linha. A maquete do workspace ocupa a linha de baixo inteira. */
+.wo-plataforma-lista__texto .wo-lead {
+  margin-top: 0;
+}
+

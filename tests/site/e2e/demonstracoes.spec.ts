@@ -115,13 +115,15 @@ test.describe('Demonstrações técnicas: aviso de cenário simulado', () => {
     }
   });
 
-  test('deve manter o aviso e a pílula de cenário simulado nos 5 fluxos quando a página abre', async ({ page }) => {
+  test('deve manter o aviso do topo e a linha Cenário simulado da ficha nos 5 fluxos quando a página abre', async ({ page }) => {
     await page.goto(ROTA);
     const aviso = page.getByRole('note');
     await expect(aviso).toBeVisible();
     await expect(aviso).toContainText('Cenários simulados.');
-    await expect(aviso).toContainText('Não são casos de clientes.');
-    await expect(page.getByText('Demonstração · cenário simulado', { exact: true })).toHaveCount(TOTAL);
+    await expect(aviso).toContainText('não são casos de clientes.');
+    // A pílula por fluxo saiu no redesign (05/11/2026): a divulgação fica no aviso e na ficha.
+    await expect(page.getByText('Demonstração · cenário simulado', { exact: true })).toHaveCount(0);
+    await expect(page.locator('article dl dd', { hasText: 'Simulado, sem dados de clientes' })).toHaveCount(TOTAL);
   });
 
   test('deve mostrar entrada, regra e saída em cada um dos 5 fluxos quando a página abre', async ({ page }) => {
@@ -147,7 +149,7 @@ test.describe('Demonstrações técnicas sem JavaScript', () => {
     await expect(page.getByRole('article')).toHaveCount(TOTAL);
     await expect(page.getByRole('group', { name: 'Filtrar por frente' })).toBeHidden();
     await expect(page.getByRole('note')).toContainText('Cenários simulados.');
-    await expect(page.getByText('Demonstração · cenário simulado', { exact: true })).toHaveCount(TOTAL);
+    await expect(page.locator('article dl dd', { hasText: 'Simulado, sem dados de clientes' })).toHaveCount(TOTAL);
     await expect(page.locator('article dl dd')).toHaveCount(TOTAL * 3);
   });
 });
@@ -158,8 +160,8 @@ test.describe('Demonstrações técnicas: novo visual', () => {
   test('hero transparente e cinco fluxos preservam a cascata e alternam os véus', async ({ page }) => {
     await abrir(page);
     await expect(page.locator('.wo-abertura')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
-    await expect(page.locator('.wo-abertura [data-entrada]')).toHaveCount(7);
-    expect(await page.locator('.wo-abertura [data-entrada]').evaluateAll(elementos => elementos.map(el => el.getAttribute('data-entrada')))).toEqual(['0', '1', '2', '3', '4', '5', '6']);
+    await expect(page.locator('.wo-abertura [data-entrada]')).toHaveCount(5);
+    expect(await page.locator('.wo-abertura [data-entrada]').evaluateAll(elementos => elementos.map(el => el.getAttribute('data-entrada')))).toEqual(['0', '1', '2', '3', '4']);
     for (const [indice, fluxo] of (await page.locator('article').all()).entries()) {
       await expect(fluxo).toHaveClass(new RegExp(indice % 2 === 0 ? 'wo-veu(?: |$)' : 'wo-veu-forte'));
     }

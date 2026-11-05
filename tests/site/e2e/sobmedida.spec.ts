@@ -93,16 +93,11 @@ test.describe('peças compartilhadas na página', () => {
     expect(selo).toBe('rgb(146, 64, 14)');
   });
 
-  test('o selo da abertura leva só a borda esquerda e diz projeto sob medida disponível', async ({ page }) => {
+  test('a abertura não tem selo nem sobretítulo: começa pelo título', async ({ page }) => {
+    // O selo "Projetos sob medida · Disponível" saiu no redesign (05/11/2026, design.md: nada acima do título).
     await page.goto(URL);
-    const selo = page.locator('.wo-abertura .wo-etiqueta-hero');
-    await expect(selo).toHaveText('Projetos sob medida · Disponível');
-    const bordas = await selo.evaluate((el) => {
-      const estilo = getComputedStyle(el);
-      return [estilo.borderTopWidth, estilo.borderRightWidth, estilo.borderBottomWidth, estilo.borderLeftWidth, estilo.borderRadius];
-    });
-    expect(bordas).toEqual(['0px', '0px', '0px', '2px', '0px']);
-    expect(await selo.evaluate((el) => getComputedStyle(el, '::before').display)).toBe('none');
+    await expect(page.locator('.wo-abertura .wo-etiqueta-hero, .wo-abertura .wo-sobretitulo')).toHaveCount(0);
+    await expect(page.locator('.wo-abertura h1')).toBeVisible();
   });
 });
 

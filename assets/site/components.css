@@ -237,19 +237,19 @@ html[data-topo='fixo'] .wo-topo {
   justify-content: center;
   gap: 9px;
   min-height: var(--wo-btn-altura);
-  padding: 0 20px;
+  padding: 0 24px;
   border: 1px solid transparent;
   border-radius: var(--wo-raio-pilula);
   background: transparent;
   color: var(--wo-texto);
   font-family: inherit;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   line-height: 1.43;
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
-  transition: background-color var(--wo-transicao), border-color var(--wo-transicao), color var(--wo-transicao);
+  transition: background-color var(--wo-transicao), border-color var(--wo-transicao), color var(--wo-transicao), transform var(--wo-transicao);
 }
 
 .wo-btn svg {
@@ -263,9 +263,14 @@ html[data-topo='fixo'] .wo-topo {
   color: var(--wo-sobre-acento);
 }
 
-.wo-btn--primario:hover {
+.wo-btn--primario:hover,
+.wo-btn--primario:active {
   background: var(--wo-acento-hover);
   color: var(--wo-sobre-acento);
+}
+
+.wo-btn:active {
+  transform: translateY(1px);
 }
 
 .wo-btn--secundario {
@@ -320,53 +325,10 @@ html[data-topo='fixo'] .wo-topo {
   transform: translateX(2px);
 }
 
-/* ---------- Rótulos ---------- */
-/* "Etiqueta em caixa alta" de 5.2, com o traço na frente. */
-.wo-sobretitulo {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  color: var(--wo-acento-texto);
-  font-family: var(--wo-fonte);
-  font-size: var(--wo-etiqueta-tamanho);
-  font-weight: 500;
-  letter-spacing: var(--wo-etiqueta-entreletra);
-  line-height: 1.35;
-  text-transform: uppercase;
-}
-
-.wo-sobretitulo::before {
-  content: '';
-  width: 15px;
-  height: 1px;
-  background: currentColor;
-  opacity: 0.7;
-}
-
-.wo-etiqueta-hero {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  padding: 8px 12px;
-  border: 1px solid var(--wo-borda-forte);
-  border-radius: var(--wo-raio);
-  color: var(--wo-texto-2);
-  font-family: var(--wo-fonte);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: var(--wo-etiqueta-entreletra);
-  line-height: 1.5;
-  text-transform: uppercase;
-}
-
-.wo-etiqueta-hero::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--wo-acento);
-}
+/* ---------- Rótulos ----------
+   Desde o redesign de 05/11/2026 não há sobretítulo nem selo acima de título: a seção abre pelo
+   próprio título. Rótulo que sobra (campo de modelo, "Você recebe", título de maquete, coluna de
+   rodapé) é o Inter do texto um passo menor, em caixa normal e sem entreletra. */
 
 .wo-nota-mono {
   display: flex;
@@ -374,16 +336,7 @@ html[data-topo='fixo'] .wo-topo {
   gap: 8px;
   color: var(--wo-texto-3);
   font-family: var(--wo-fonte);
-  font-size: 11.5px;
-}
-
-.wo-nota-mono--ponto::before {
-  content: '';
-  width: 4px;
-  height: 4px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: currentColor;
+  font-size: var(--wo-texto-pequeno);
 }
 
 .wo-cabeca-selo {
@@ -558,14 +511,16 @@ html[data-topo='fixo'] .wo-topo {
    títulos grandes usa um lilás próprio, com 3:1 sobre o brilho da onda (15.2). */
 .wo-abertura {
   position: relative;
-  padding: calc(var(--wo-topo-altura) + var(--wo-secao) / 2) 0 var(--wo-secao);
+  padding: calc(var(--wo-topo-altura) + var(--wo-espaco-6)) 0 var(--wo-secao);
   --wo-texto-2: var(--wo-hero-texto-secundario);
   --wo-texto-3: var(--wo-hero-texto-secundario);
   --wo-acento-texto: var(--wo-hero-texto-secundario);
 }
 
-.wo-abertura :is(.wo-h1, .wo-h2) .wo-destaque {
-  color: var(--wo-titulo-destaque);
+/* Título é uma cor só (redesign de 05/11/2026): a segunda linha não ganha outra cor. A ênfase vem da
+   quebra de linha. */
+:is(h1, h2, h3) .wo-destaque {
+  color: inherit;
 }
 
 /* Abertura de duas colunas (7.2 a 7.4): abaixo de 1024 px o cartão desce para baixo do texto. O selo
@@ -581,26 +536,16 @@ html[data-topo='fixo'] .wo-topo {
 }
 
 .wo-abertura__lead {
-  max-width: 560px;
+  max-width: 44ch;
   margin-top: var(--wo-espaco-3);
   color: var(--wo-texto-2);
   font-size: var(--wo-lead-hero);
-  line-height: 1.6;
+  line-height: 1.5;
   text-wrap: pretty;
 }
 
 .wo-abertura__texto .wo-acoes {
   margin-top: var(--wo-espaco-4);
-}
-
-.wo-abertura .wo-etiqueta-hero {
-  border: 0;
-  border-left: var(--wo-linha-forte) solid var(--wo-texto);
-  border-radius: 0;
-}
-
-.wo-abertura .wo-etiqueta-hero::before {
-  display: none;
 }
 
 @media (min-width: 1024px) {
@@ -643,9 +588,7 @@ html[data-topo='fixo'] .wo-topo {
   font-family: var(--wo-fonte);
   font-size: var(--wo-etiqueta-tamanho);
   font-weight: 500;
-  letter-spacing: var(--wo-etiqueta-entreletra);
   line-height: 1.35;
-  text-transform: uppercase;
 }
 
 .wo-maquete__aviso {
@@ -675,9 +618,7 @@ html[data-topo='fixo'] .wo-topo {
   font-family: var(--wo-fonte);
   font-size: var(--wo-etiqueta-tamanho);
   font-weight: 500;
-  letter-spacing: var(--wo-etiqueta-entreletra);
   line-height: 1.35;
-  text-transform: uppercase;
 }
 
 /* Cartão claro sobre o escuro (spec 5.4): o único lugar do contexto claro (15.2). Os semânticos do
@@ -692,6 +633,7 @@ html[data-topo='fixo'] .wo-topo {
 }
 
 .wo-colunas-numeradas {
+  counter-reset: wo-etapa;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--wo-espaco-4);
@@ -699,6 +641,7 @@ html[data-topo='fixo'] .wo-topo {
 }
 
 .wo-colunas-numeradas__item {
+  counter-increment: wo-etapa;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -707,17 +650,20 @@ html[data-topo='fixo'] .wo-topo {
   border-top: var(--wo-linha-forte) solid var(--wo-texto);
 }
 
-.wo-colunas-numeradas__numero {
+/* O número da etapa vem do próprio <ol>, por contador: nada de "01" escrito sobre o título. */
+.wo-colunas-numeradas__item::before {
+  content: counter(wo-etapa);
   color: var(--wo-acento-texto);
   font-family: var(--wo-fonte-titulo);
   font-size: var(--wo-numero-etapa);
+  font-variant-numeric: tabular-nums;
   font-weight: 500;
   line-height: 1.33;
 }
 
 .wo-colunas-numeradas__item h3 {
   font-family: var(--wo-fonte-titulo);
-  font-size: var(--wo-h3-etapa);
+  font-size: var(--wo-h3-linha);
   font-weight: 500;
   letter-spacing: -0.02em;
   line-height: 1.33;
@@ -811,19 +757,14 @@ html[data-topo='fixo'] .wo-topo {
 }
 
 /* "Nota" de 5.2. O ponto médio fica no fim da etiqueta e fora do leitor de tela. */
+/* Etiquetas de tecnologia em linha, separadas por espaço: sem ponto médio entre elas. */
 .wo-lista-editorial__etiquetas {
   display: flex;
   flex-wrap: wrap;
-  row-gap: var(--wo-espaco-1);
+  gap: var(--wo-espaco-1) var(--wo-espaco-3);
   color: var(--wo-texto-3);
   font-size: var(--wo-texto-pequeno);
   line-height: 1.45;
-}
-
-.wo-lista-editorial__etiquetas li:not(:last-child)::after {
-  content: '·';
-  content: '·' / '';
-  margin: 0 var(--wo-espaco-1);
 }
 
 .wo-modelos.wo-tabela-modelos {
@@ -1132,8 +1073,8 @@ html[data-topo='fixo'] .wo-topo {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  min-height: 56px;
-  padding: 14px 18px;
+  min-height: 48px;
+  padding: 12px 18px;
   border: 1px solid var(--wo-borda-forte);
   border-radius: var(--wo-raio);
   background: var(--wo-contorno-fundo);
@@ -1153,9 +1094,6 @@ html[data-topo='fixo'] .wo-topo {
   font-weight: 500;
 }
 
-.wo-cta__opcao-apoio {
-  color: var(--wo-texto-2);
-}
 
 .wo-cta__opcao svg {
   width: 18px;
@@ -1198,10 +1136,6 @@ html[data-topo='fixo'] .wo-topo {
   min-width: 0;
 }
 
-.wo-rodape__descricao {
-  max-width: 320px;
-  color: var(--wo-texto-3);
-}
 
 .wo-rodape__coluna {
   display: flex;
@@ -1209,9 +1143,6 @@ html[data-topo='fixo'] .wo-topo {
   min-width: 0;
 }
 
-.wo-rodape__coluna--solucoes {
-  flex: 1 1 210px;
-}
 
 .wo-rodape__coluna--plataforma {
   flex: 0 1 140px;
@@ -1229,11 +1160,9 @@ html[data-topo='fixo'] .wo-topo {
   margin: 0 0 8px;
   color: var(--wo-texto-3);
   font-family: var(--wo-fonte);
-  font-size: 12px;
+  font-size: var(--wo-texto-pequeno);
   font-weight: 500;
-  letter-spacing: 0.15em;
   line-height: 1.35;
-  text-transform: uppercase;
 }
 
 .wo-rodape a:not(.wo-marca) {
@@ -1392,7 +1321,7 @@ html[data-topo='fixo'] .wo-topo {
 }
 
 .wo-controle:hover {
-  border-color: rgba(208, 200, 237, 0.6);
+  border-color: var(--wo-borda-campo-hover);
 }
 
 .wo-controle:focus-visible {
@@ -1784,9 +1713,9 @@ textarea.wo-controle {
   max-width: 520px;
   margin-top: 30px;
   padding: 18px 20px;
-  border: 1px solid rgba(34, 197, 94, 0.35);
+  border: 1px solid var(--wo-sucesso-borda);
   border-radius: 14px;
-  background: rgba(34, 197, 94, 0.08);
+  background: var(--wo-sucesso-fundo-suave);
 }
 
 .wo-confirmacao-caixa[hidden] {

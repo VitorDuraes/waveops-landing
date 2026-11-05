@@ -2,7 +2,8 @@
    vivo: o topo flutua sobre ela, então a altura mínima soma a altura do topo e o texto fica centrado
    embaixo dele. */
 .wo-erro {
-  min-height: calc(56vh + var(--wo-topo-altura));
+  box-sizing: border-box;
+  min-height: 100svh;
   display: flex;
   align-items: center;
 }

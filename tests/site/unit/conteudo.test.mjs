@@ -234,7 +234,7 @@ test('a folha creme saiu e o escuro não depende de classe (spec 15.2 e 15.4)', 
 const VEUS = {
   'index.html': [null, null, 'wo-veu', 'wo-veu-forte', 'wo-veu', 'wo-veu-forte'],
   'projetos-sob-medida/index.html': [null, 'wo-veu-forte', 'wo-veu', 'wo-veu-forte', 'wo-veu'],
-  'plataforma/index.html': [null, 'wo-veu', 'wo-veu-forte', 'wo-veu', 'wo-veu-forte', 'wo-veu', 'wo-veu-forte'],
+  'plataforma/index.html': [null, 'wo-veu-forte', 'wo-veu', 'wo-veu-forte', 'wo-veu', 'wo-veu-forte', 'wo-veu', 'wo-veu-forte'],
 };
 for (const [arquivo, esperados] of Object.entries(VEUS)) {
   test(`${arquivo}: o hero é transparente e as seções seguem o mapa de véus`, () => {
@@ -256,24 +256,15 @@ test('toda página entra em cascata: os blocos do hero numerados de 0 em diante,
   }
 });
 
-// O cartão do hero conta a operação inteira, do lead à cobrança, num quadro só e parado. As cinco
-// frentes ficam no palco logo abaixo: o hero não repete nenhuma cena dele (revisão de 02/11/2026).
-test('o cartão do hero vai do lead à cobrança, sem abas e sem repetir o palco', () => {
+// Hero em pôster (redesign de 05/11/2026): a onda é a imagem, e o hero leva só o título, uma frase e
+// as ações. As cinco frentes ficam no palco logo abaixo, então o hero não tem cartão ao lado.
+test('o hero da Home é título, uma frase e ações, sem cartão ao lado', () => {
   const html = ler('index.html');
-  const inicio = html.indexOf('class="wo-maquete wo-cartao-claro wo-vitrine"');
-  assert.ok(inicio > 0, 'a Home não tem o cartão do hero');
-  const cartao = html.slice(inicio, html.indexOf('</figure>', inicio));
-  assert.match(cartao, /class="wo-maquete__aviso">Fluxo ilustrativo</);
-  const nomes = [...cartao.matchAll(/class="wo-home-cena__nome">([^<]+)</g)].map((m) => m[1]);
-  assert.deepEqual(nomes, ['WhatsApp', 'CRM', 'Cobrança']);
-  assert.doesNotMatch(cartao, /<button\b/, 'o cartão não tem abas');
-  assert.doesNotMatch(html, /paginas\/vitrine\.js/, 'nenhum script troca o cartão sozinho');
-  const inicioPalco = html.indexOf(' data-palco>');
-  const palco = html.slice(inicioPalco, html.indexOf('</section>', inicioPalco));
-  const tela = cartao.slice(cartao.indexOf('class="wo-vitrine__tela"'));
-  const frases = [...tela.matchAll(/>([^<]+)</g)].map((m) => m[1].trim()).filter((frase) => frase.length >= 12);
-  assert.ok(frases.length >= 3, 'o cartão tem as frases do fluxo');
-  for (const frase of frases) assert.ok(!palco.includes(frase), `o palco já mostra "${frase}"`);
+  const inicio = html.indexOf('<section class="wo-home-hero"');
+  const hero = html.slice(inicio, html.indexOf('</section>', inicio));
+  assert.doesNotMatch(hero, /wo-maquete|<figure[\s>]/, 'o hero não tem maquete');
+  assert.equal([...hero.matchAll(/<p[\s>]/g)].length, 1, 'uma frase só');
+  assert.equal([...hero.matchAll(/class="wo-btn /g)].length, 2, 'duas ações');
 });
 
 // Cena 2 do palco: o que o agente escreveu é o assunto da cena, então aparece em palavras, não em
@@ -287,12 +278,11 @@ test('o rascunho do agente de IA é texto de verdade', () => {
   assert.ok(textoDoTrecho(cartao).trim().length >= 20, 'o rascunho tem uma frase inteira');
 });
 
-test('na Home a cascata reúne selo, título, explicação e ações antes do visual', () => {
+test('na Home a cascata segue título, explicação e ações', () => {
   const html = ler('index.html');
   // O primeiro elemento da página com cada atributo: todos estão no hero.
   const ordem = [
-    ['class="wo-etiqueta-hero"', 0], ['id="home-titulo"', 1], ['class="wo-home-hero__frase"', 2],
-    ['class="wo-acoes"', 3], ['class="wo-nota-mono', 4], ['class="wo-home-hero__visual"', 5],
+    ['id="home-titulo"', 0], ['class="wo-home-hero__frase"', 1], ['class="wo-acoes"', 2],
   ];
   for (const [gancho, n] of ordem) {
     const tag = new RegExp(`<[a-z0-9]+\\s[^>]*${gancho}[^>]*>`).exec(html)?.[0] ?? '';
@@ -300,22 +290,22 @@ test('na Home a cascata reúne selo, título, explicação e ações antes do vi
   }
 });
 
-// Na Plataforma o formulário de interesse é o cartão do hero (7.4): entra como cartão, depois do
-// título e da frase, e o workspace de exemplo entra por último.
-test('na Plataforma a cascata segue a lista de 15.3, com o formulário como cartão', () => {
+// Na Plataforma (redesign de 05/11/2026) o hero é situação, título, frase e a ação que leva à lista.
+// O formulário de interesse e o workspace de exemplo ficam na seção #lista, logo abaixo.
+test('na Plataforma a cascata segue situação, título, frase e ação, e o formulário fica em #lista', () => {
   const html = semParciais(ler('plataforma/index.html'));
   const ordem = [
-    ['class="wo-etiqueta-hero"', 0], ['class="wo-plataforma-abertura__situacao"', 1], ['id="plataforma-titulo"', 2],
-    ['class="wo-abertura__lead"', 3], ['class="wo-cartao-noite wo-plataforma-interesse"', 4], ['class="wo-plataforma-abertura__workspace"', 5],
+    ['class="wo-plataforma-abertura__situacao"', 0], ['id="plataforma-titulo"', 1], ['class="wo-abertura__lead"', 2],
   ];
   for (const [gancho, n] of ordem) {
     const tag = new RegExp(`<[a-z0-9]+\\s[^>]*${gancho}[^>]*>`).exec(html)?.[0] ?? '';
     assert.match(tag, new RegExp(`\\sdata-entrada="${n}"`), `${gancho} entra na posição ${n}`);
   }
-  // O parcial do formulário fica dentro do cartão que entra em cascata.
   const pagina = ler('plataforma/index.html');
+  const lista = pagina.indexOf('id="lista"');
   const cartao = pagina.indexOf('class="wo-cartao-noite wo-plataforma-interesse"');
-  assert.ok(cartao > 0 && cartao < pagina.indexOf('<!-- parcial:form-interesse -->'), 'o formulário fica dentro do cartão noite');
+  assert.ok(lista > 0 && cartao > lista, 'o cartão do formulário fica na seção #lista');
+  assert.ok(cartao < pagina.indexOf('<!-- parcial:form-interesse -->'), 'o formulário fica dentro do cartão noite');
   assert.ok(pagina.indexOf('<!-- /parcial:form-interesse -->') < pagina.indexOf('class="wo-plataforma-abertura__workspace"'), 'o cartão fecha antes do workspace');
 });
 
@@ -367,7 +357,7 @@ test('a chamada final oferece formulário e WhatsApp no cartão escuro', () => {
   const texto = parcial.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
   assert.match(parcial, /class="wo-cartao-noite/);
   assert.ok(texto.includes('Como prefere começar?'));
-  assert.ok(texto.includes('Contar o problema pelo formulário. Você escolhe como quer o retorno.'));
+  assert.ok(texto.includes('Contar o problema pelo formulário.'));
   assert.ok(texto.includes('Falar agora no WhatsApp.'));
   assert.match(parcial, /href="\/contato\/"/);
   assert.match(parcial, /data-whatsapp="cta-final"/);

@@ -29,7 +29,9 @@ test.describe('Soluções', () => {
   test('hero e cada seção mantêm contraste AA durante a rolagem', async ({ page }, info) => {
     test.skip(info.project.name === 'tablet', '1440 × 900 e 390 × 844 cobrem as duas grades');
     test.setTimeout(240_000);
-    const trechos = ['.wo-abertura', '#vender', '#atender', '#operar', '#decidir', '#crescer', '#publicos', '.wo-cta'];
+    // "Para quem" (#publicos) foi fundido em #crescer no redesign de 05/11/2026 e está dentro dele, sob o mesmo véu.
+    // Medir os dois seletores faria o helper marcar cada texto duas vezes e perder a primeira medida.
+    const trechos = ['.wo-abertura', '#vender', '#atender', '#operar', '#decidir', '#crescer', '.wo-cta'];
     const medidos = await varrerContraste(page, '/solucoes/', trechos);
     await info.attach('contraste-solucoes.json', { body: JSON.stringify(medidos, null, 2), contentType: 'application/json' });
     for (const trecho of trechos) {
@@ -51,7 +53,7 @@ test.describe('Soluções sem JavaScript', () => {
     await page.getByRole('navigation', { name: 'Resultados', exact: true }).getByRole('link', { name: 'Decidir com dados' }).click();
     await expect(page.locator('#decidir-titulo')).toBeInViewport();
     await expect(page.locator('#decidir-contratar').getByRole('link', { name: 'Painéis de gestão', exact: true })).toHaveAttribute('href', '/projetos-sob-medida/#dashboards');
-    await expect(page.locator('main > section')).toHaveCount(8);
+    await expect(page.locator('main > section')).toHaveCount(7);
     await expect(page.locator('[data-fundo-video]')).not.toHaveAttribute('src');
   });
 });

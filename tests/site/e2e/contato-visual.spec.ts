@@ -39,7 +39,8 @@ test('opções e estados do formulário cabem em 360, 390, 768 e 1440 px', async
     await conferirEncaixe(page);
     await expect(page.locator('[data-whatsapp="flutuante"]')).toHaveCount(0);
     const cartao = (await page.locator('.wo-contato-cartao').boundingBox())!;
-    const texto = (await page.locator('.wo-abertura__texto').boundingBox())!;
+    // O formulário saiu do hero no redesign (05/11/2026): fica na seção logo abaixo, ao lado das garantias.
+    const texto = (await page.locator('.wo-contato-lado').boundingBox())!;
     if (width >= 1024) expect(cartao.x).toBeGreaterThan(texto.x + texto.width);
     else expect(cartao.y).toBeGreaterThan(texto.y + texto.height);
     await page.getByRole('button', {name: 'Enviar pedido'}).click();

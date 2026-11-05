@@ -63,18 +63,20 @@ test.describe('Plataforma', () => {
     });
   }
 
-  test('a lista fica no cartão da abertura e as âncoras preservam o acesso', async ({ page }) => {
+  test('a lista fica na seção logo abaixo da abertura e as âncoras preservam o acesso', async ({ page }) => {
     await page.goto('/plataforma/#modulos');
     await expect(page.locator('#modulos-titulo')).toBeInViewport();
     const titulo = await page.locator('#modulos-titulo').boundingBox();
     const topo = await page.locator('.wo-topo').boundingBox();
     expect(titulo!.y).toBeGreaterThanOrEqual(topo!.y + topo!.height);
-    await page.locator('main a[href="#lista"]').click();
+    // O botão da abertura e o aviso final apontam para #lista. O formulário saiu do hero (redesign de 05/11/2026).
+    await expect(page.locator('main a[href="#lista"]')).toHaveCount(2);
+    await page.locator('.wo-abertura a[href="#lista"]').click();
     await expect(page).toHaveURL(/#lista$/);
-    await expect(page.locator('#plataforma-titulo')).toBeInViewport();
-    await expect(page.locator('.wo-abertura .wo-cartao-noite[data-entrada] #form-interesse')).toHaveCount(1);
+    await expect(page.locator('#lista .wo-cartao-noite #form-interesse')).toHaveCount(1);
+    await expect(page.locator('#form-interesse')).toBeInViewport();
     await expect(page.locator('header a[href^="/plataforma/"]')).toHaveCount(0);
-    await expect(page.locator('.wo-abertura .wo-cartao-claro .wo-maquete__aviso')).toBeVisible();
+    await expect(page.locator('#lista .wo-cartao-claro .wo-maquete__aviso')).toBeVisible();
   });
 
   test('em 360 px o WhatsApp não cobre o envio durante a rolagem manual', async ({ page }) => {

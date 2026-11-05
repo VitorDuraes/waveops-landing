@@ -5,6 +5,18 @@
    para teste e não tem regra própria: o estilo vem de .wo-lista-editorial__item h3.
    Depende de tokens.css, base.css e components.css. */
 
+/* ---------- Abertura centrada na primeira tela ---------- */
+.wo-sobmedida-abertura {
+  display: flex;
+  align-items: center;
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+.wo-sobmedida-abertura > .wo-conteiner {
+  width: 100%;
+}
+
 /* ---------- Cartão "Proposta" (modelo ilustrativo) ---------- */
 .wo-sobmedida-proposta {
   padding: var(--wo-espaco-3);
@@ -138,4 +150,27 @@
   max-width: 680px;
   padding: 0 var(--wo-espaco-5) var(--wo-espaco-3) 0;
   color: var(--wo-texto-2);
+}
+
+/* Resposta fechada não ocupa a tela: só o texto da pergunta aberta é lido. */
+.wo-sobmedida-faq__item:not([open]) .wo-sobmedida-faq__resposta {
+  display: none;
+}
+
+
+/* Tabela de modelos: os rótulos dos campos aparecem uma vez, na primeira linha, como cabeçalho de coluna.
+   Nas outras linhas seguem no HTML para o leitor de tela. */
+@media (min-width: 1024px) {
+  .wo-sobmedida-modelos .wo-modelo {
+    align-content: center;
+  }
+
+  .wo-sobmedida-modelos .wo-modelo:not(:first-child) .wo-etiqueta {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 }

@@ -1,3 +1,10 @@
+/* Hallmark · shape: Workbench · genre: modern-minimal · theme: brand · redesign: full · draw: 83bc6d
+ * paper: oklch(14.5% 0 0) · accent: oklch(54% 0.25 293) · display: Geist · body: Inter · hero: Poster (/), Stage (internas) · nav: kept · footer: index columns · signature: a onda carregando as cinco cenas do produto, uma por frente
+ * axes: dark/grotesk-sans/chromatic-violet · posture: Restrained · contrast: pass · fold: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P3 H4 E4 S4 R4 V3 · weakest: V, a composição abaixo do hero é a mesma de antes; troquei sistema, escala e texto e mantive a ordem que o palco exige */
+/* Hallmark · dropped "Automação e sistemas · para quem vende", hero card "Operação conectada", note "Primeira conversa sem custo e sem compromisso." from the hero · 58 limits the hero to the head, one sentence and the actions; the promise stays in the closing card */
+/* Hallmark · dropped footer column /solucoes/#vender, #atender, #operar, #decidir, #crescer · o rodapé passava de 80 palavras na última tela; a Home e a página Soluções seguem linkando os cinco resultados, e o rodapé leva a /solucoes/ */
+/* Hallmark · dismissed 62 · o estado escondido do palco só existe sob [data-palco-modo], que home.js escreve; sem JavaScript todas as cenas ficam montadas, e tests/site/e2e/sem-js.spec.ts confere */
 /* WaveOps · tokens do site institucional (novo visual).
    Duas camadas. Primitivos: a paleta da spec 5.1, um valor por nome, igual em qualquer contexto.
    Semânticos: o papel que a cor cumpre (fundo, texto, borda, acento). Desde a D20 (spec 15) a página
@@ -91,6 +98,11 @@
   --wo-acento-fundo-forte: rgba(162, 139, 249, 0.16);
   --wo-acento-borda: rgba(162, 139, 249, 0.5);
   --wo-acento-borda-forte: rgba(162, 139, 249, 0.6);
+  /* Seleção de texto, campo em hover e caixa de sucesso: antes eram literais fora daqui. */
+  --wo-selecao: rgba(162, 139, 249, 0.35);
+  --wo-borda-campo-hover: rgba(208, 200, 237, 0.6);
+  --wo-sucesso-borda: rgba(34, 197, 94, 0.35);
+  --wo-sucesso-fundo-suave: rgba(34, 197, 94, 0.08);
   --wo-sucesso-fundo: rgba(34, 197, 94, 0.12);
   --wo-erro-fundo: rgba(239, 68, 68, 0.08);
   --wo-erro-borda: rgba(239, 68, 68, 0.4);
@@ -98,17 +110,21 @@
   /* Tipografia: Geist nos títulos e Inter no texto (spec 5.2) */
   --wo-fonte-titulo: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --wo-fonte: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --wo-h1: clamp(44px, 33.6px + 2.667vw, 72px);
-  --wo-h2: clamp(34px, 28.8px + 1.333vw, 48px);
-  --wo-h3-linha: clamp(24px, 21.77px + 0.571vw, 30px);
+  /* Escala do redesign de 05/11/2026: hero a 84 px e seção a 52 px em 1440, item a 25 px. O título de
+     seção abaixo de 40 px em 1440 era o motivo mais comum de a página parecer inacabada. */
+  --wo-h1: clamp(2.75rem, 5vw + 1rem, 5.25rem);
+  --wo-h2: clamp(2.25rem, 2.5vw + 1rem, 3.25rem);
+  --wo-h3-linha: clamp(1.25rem, 0.75vw + 0.875rem, 1.5625rem);
   --wo-h3-etapa: clamp(22px, 21.26px + 0.19vw, 24px);
   --wo-h3-cartao: 18px;
-  --wo-lead-hero: clamp(18px, 17.26px + 0.19vw, 20px);
+  --wo-lead-hero: clamp(1.125rem, 0.35vw + 1rem, 1.3125rem);
   /* Número de etapa: Geist de 24 px fixos, peso 500, altura de linha 1,33 (5.2). */
   --wo-numero-etapa: 24px;
 
   /* Layout e efeitos (spec 5.3). Margem e respiro de seção crescem nos @media abaixo. */
-  --wo-conteiner: 1280px;
+  /* Contêiner de 1440 px com margem de 64 px: 1312 px de conteúdo em 1440 e em 1920, onde só a
+     margem cresce. */
+  --wo-conteiner: 1440px;
   --wo-margem: 20px;
   --wo-secao: 96px;
   --wo-secao-compacta: calc(var(--wo-secao) / 2);
@@ -119,7 +135,7 @@
   --wo-alvo: 44px;
   /* Botão (spec 5.4): 40 px de altura no desktop. Abaixo de 768 px vale o alvo de toque de
      44 px, e o @media abaixo troca o valor. A pausa do fundo, no topo, usa a mesma medida (15.3). */
-  --wo-btn-altura: var(--wo-alvo);
+  --wo-btn-altura: 48px;
   /* Desfoque do fundo do topo (spec 5.5), o mesmo valor do painel de texto do palco. */
   --wo-desfoque: 12px;
 
@@ -183,15 +199,12 @@
   --wo-espaco-5: 48px;
   --wo-espaco-6: 64px;
   --wo-espaco-7: 128px;
-  --wo-etiqueta-tamanho: 12px;
-  /* Etiqueta em caixa alta e selo do hero (5.2): 0,15em nos dois. */
-  --wo-etiqueta-entreletra: 0.15em;
+  --wo-etiqueta-tamanho: 14px;
   --wo-texto-pequeno: 14px;
   --wo-texto-corpo: 16px;
   --wo-texto-destaque: 20px;
   --wo-linha-fina: 1px;
   --wo-linha-forte: 2px;
-  --wo-hero-frase-largura: 430px;
   /* Plataforma: dimensões de interface, independentes de espaçamento e espessura. */
   --wo-situacao-ponto: 6px;
   --wo-plataforma-menu-largura: 192px;
@@ -240,7 +253,13 @@
 @media (min-width: 768px) {
   :root {
     --wo-margem: 48px;
-    --wo-btn-altura: 40px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --wo-margem: 64px;
+    --wo-secao: 144px;
   }
 }
 
